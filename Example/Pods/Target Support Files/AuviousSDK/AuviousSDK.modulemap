@@ -1,0 +1,6 @@
+framework module AuviousSDK {
+  umbrella header "AuviousSDK-umbrella.h"
+
+  export *
+  module * { export * }
+}

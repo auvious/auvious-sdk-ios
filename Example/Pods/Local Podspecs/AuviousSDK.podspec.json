@@ -1,0 +1,43 @@
+{
+  "name": "AuviousSDK",
+  "version": "0.1.0",
+  "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
+  "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
+  "homepage": "https://gitlab.auvious.com/pimenas/AuviousSDK",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Epi Vou": "pimenas@gmail.com"
+  },
+  "source": {
+    "git": "https://gitlab.auvious.com/pimenas/AuviousSDK.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "10.0"
+  },
+  "source_files": "AuviousSDK/Classes/**/*",
+  "resource_bundles": {
+    "AuviousSDK": [
+      "AuviousSDK/Assets/*.png"
+    ]
+  },
+  "dependencies": {
+    "Alamofire": [
+      "~> 4.7"
+    ],
+    "SwiftyJSON": [
+      "~> 5.0"
+    ],
+    "GoogleWebRTC": [
+      "~> 1.1.29400"
+    ],
+    "MQTTClient/Websocket": [
+      "~> 0.15"
+    ]
+  },
+  "swift_versions": "4.2",
+  "swift_version": "4.2"
+}
