@@ -33,7 +33,7 @@ class LoginVC: UIViewController, UITextFieldDelegate {
         organizationTextfield.text = "boomar"
         
         baseEndpoint = "https://staging-rtc.auvious.com"
-        mqttEndpoint = "wss://staging-rtc.auvious.com/ws"
+        mqttEndpoint = "wss://staging-mqtt.auvious.com/ws"
         //baseEndpoint = "https://test-rtc.auvious.com"
         //mqttEndpoint = "wss://test-rtc.auvious.com/ws"
         //let baseEndpoint: String = "https://prxbauviousvideo.praxiabank.com/"
