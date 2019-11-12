@@ -1,65 +1,71 @@
 PODS:
   - Alamofire (4.9.1)
-  - AuviousSDK (0.1.0):
+  - AuviousSDK (1.0.0):
     - Alamofire (~> 4.7)
     - GoogleWebRTC (~> 1.1.29400)
     - MQTTClient/Websocket (~> 0.15)
     - SwiftyJSON (~> 5.0)
-  - FBSnapshotTestCase (2.1.4):
-    - FBSnapshotTestCase/SwiftSupport (= 2.1.4)
-  - FBSnapshotTestCase/Core (2.1.4)
-  - FBSnapshotTestCase/SwiftSupport (2.1.4):
-    - FBSnapshotTestCase/Core
+  - BEMCheckBox (1.4.1)
   - GoogleWebRTC (1.1.29400)
   - MQTTClient/Min (0.15.3)
   - MQTTClient/Websocket (0.15.3):
     - MQTTClient/Min
     - SocketRocket
-  - Nimble (7.3.4)
-  - Nimble-Snapshots (6.3.0):
-    - Nimble-Snapshots/Core (= 6.3.0)
-  - Nimble-Snapshots/Core (6.3.0):
-    - FBSnapshotTestCase (~> 2.0)
-    - Nimble (~> 7.0)
-  - Quick (1.2.0)
+  - Sentry (4.4.1):
+    - Sentry/Core (= 4.4.1)
+  - Sentry/Core (4.4.1)
   - SocketRocket (0.5.1)
+  - SPPermissions/Camera (4.1.4):
+    - SPPermissions/Core
+  - SPPermissions/Core (4.1.4)
+  - SPPermissions/Microphone (4.1.4):
+    - SPPermissions/Core
+  - SVProgressHUD (2.2.5)
   - SwiftyJSON (5.0.0)
 
 DEPENDENCIES:
   - AuviousSDK (from `../`)
-  - FBSnapshotTestCase (~> 2.1.4)
-  - Nimble (~> 7.0)
-  - Nimble-Snapshots (~> 6.3.0)
-  - Quick (~> 1.2.0)
+  - BEMCheckBox (~> 1.4)
+  - Sentry (~> 4.4)
+  - SPPermissions/Camera (~> 4.1)
+  - SPPermissions/Microphone (~> 4.1)
+  - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
 
 SPEC REPOS:
   trunk:
     - Alamofire
-    - FBSnapshotTestCase
+    - BEMCheckBox
     - GoogleWebRTC
     - MQTTClient
-    - Nimble
-    - Nimble-Snapshots
-    - Quick
+    - Sentry
     - SocketRocket
+    - SPPermissions
     - SwiftyJSON
 
 EXTERNAL SOURCES:
   AuviousSDK:
     :path: "../"
+  SVProgressHUD:
+    :branch: patch-1
+    :git: https://github.com/mmdock/SVProgressHUD.git
+
+CHECKOUT OPTIONS:
+  SVProgressHUD:
+    :commit: 41afba447103c44c55482db1174569172607c1e6
+    :git: https://github.com/mmdock/SVProgressHUD.git
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AuviousSDK: 0a13029266be0251204017cbca66954c6192bca2
-  FBSnapshotTestCase: 094f9f314decbabe373b87cc339bea235a63e07a
+  AuviousSDK: e48b9f12bf11a998376fa86e0955ced5c86d6f7b
+  BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
-  Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
-  Nimble-Snapshots: f5459b5b091678dc942d03ec4741cacb58ba4a52
-  Quick: 58d203b1c5e27fff7229c4c1ae445ad7069a7a08
+  Sentry: 5d312a04e369154aeac616214f4dfc3cbcc8b296
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
+  SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 5328850799c0c71606612cb20c3c1f954acd14c6
+PODFILE CHECKSUM: bfb3960dcb059fa11a965c6732a413e08059ccfb
 
 COCOAPODS: 1.8.4

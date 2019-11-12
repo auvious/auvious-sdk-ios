@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ConferenceSelectionVC" customModule="AuviousSDK_Foundation" customModuleProvider="target">
+            <connections>
+                <outlet property="conferenceTextfield" destination="zOF-06-xuq" id="n7N-t6-ynf"/>
+                <outlet property="createConfBtn" destination="Cdx-Tz-Y9p" id="fQP-8L-s3j"/>
+                <outlet property="joinConfBtn" destination="7jy-rh-W3G" id="w2S-Qi-tcf"/>
+                <outlet property="statusLabel" destination="2KL-v1-tgr" id="oMB-4p-OC7"/>
+                <outlet property="tableView" destination="E0U-Ky-PB9" id="1pc-i2-eIE"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="E0U-Ky-PB9">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="separatorColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="calibratedRGB"/>
+                    <inset key="separatorInset" minX="20" minY="0.0" maxX="20" maxY="0.0"/>
+                    <view key="tableHeaderView" contentMode="scaleToFill" id="li0-Fk-3pC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="300"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zOF-06-xuq">
+                                <rect key="frame" x="42" y="44" width="291" height="30"/>
+                                <color key="backgroundColor" red="0.98028594260000002" green="0.9804533124" blue="0.98027533290000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="textColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="Cay-Xk-47R"/>
+                                </connections>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cdx-Tz-Y9p">
+                                <rect key="frame" x="42" y="126" width="135" height="40"/>
+                                <color key="backgroundColor" red="0.88235294117647056" green="0.88235294117647056" blue="0.88235294117647056" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="Xgg-57-qNQ"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                <state key="normal" title="Create Conference">
+                                    <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="createConferenceButtonPressed:" destination="-1" eventType="touchUpInside" id="G73-Kx-VTf"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Idle" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2KL-v1-tgr">
+                                <rect key="frame" x="100" y="88" width="233" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <color key="textColor" red="0.4756349325" green="0.47564673419999998" blue="0.47564041610000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Conference to Create/Join" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w2e-SX-5VO">
+                                <rect key="frame" x="42" y="20" width="184.5" height="18"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                <color key="textColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A2E-EI-TKo">
+                                <rect key="frame" x="42" y="88" width="50" height="18"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                <color key="textColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7jy-rh-W3G">
+                                <rect key="frame" x="198" y="126" width="135" height="40"/>
+                                <color key="backgroundColor" red="0.88235294117647056" green="0.88235294117647056" blue="0.88235294117647056" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="EiF-Ka-hIc"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                <state key="normal" title="Join Conference">
+                                    <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="joinConferenceButtonPressed:" destination="-1" eventType="touchUpInside" id="9eb-AP-GWY"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="zOF-06-xuq" secondAttribute="trailing" constant="42" id="57y-3e-gWY"/>
+                            <constraint firstItem="2KL-v1-tgr" firstAttribute="leading" secondItem="A2E-EI-TKo" secondAttribute="trailing" constant="8" id="AUY-PB-CKc"/>
+                            <constraint firstItem="7jy-rh-W3G" firstAttribute="leading" secondItem="Cdx-Tz-Y9p" secondAttribute="trailing" constant="21" id="BYf-6w-g0e"/>
+                            <constraint firstItem="Cdx-Tz-Y9p" firstAttribute="top" secondItem="2KL-v1-tgr" secondAttribute="bottom" constant="20" id="BZf-zk-1Wd"/>
+                            <constraint firstItem="7jy-rh-W3G" firstAttribute="trailing" secondItem="zOF-06-xuq" secondAttribute="trailing" id="FWK-Ue-tzr"/>
+                            <constraint firstAttribute="trailing" secondItem="2KL-v1-tgr" secondAttribute="trailing" constant="42" id="Hcj-9d-V6C"/>
+                            <constraint firstItem="w2e-SX-5VO" firstAttribute="top" secondItem="li0-Fk-3pC" secondAttribute="top" constant="20" id="TrX-yY-WzT"/>
+                            <constraint firstItem="A2E-EI-TKo" firstAttribute="leading" secondItem="li0-Fk-3pC" secondAttribute="leading" constant="42" id="UUr-oT-HBE"/>
+                            <constraint firstItem="7jy-rh-W3G" firstAttribute="centerY" secondItem="Cdx-Tz-Y9p" secondAttribute="centerY" id="WYc-a1-N28"/>
+                            <constraint firstItem="7jy-rh-W3G" firstAttribute="width" secondItem="Cdx-Tz-Y9p" secondAttribute="width" id="eq6-81-vB0"/>
+                            <constraint firstItem="w2e-SX-5VO" firstAttribute="leading" secondItem="li0-Fk-3pC" secondAttribute="leading" constant="42" id="ffP-ii-3Nu"/>
+                            <constraint firstItem="Cdx-Tz-Y9p" firstAttribute="leading" secondItem="A2E-EI-TKo" secondAttribute="leading" id="fpc-cm-B5r"/>
+                            <constraint firstItem="A2E-EI-TKo" firstAttribute="top" secondItem="zOF-06-xuq" secondAttribute="bottom" constant="14" id="jo2-d4-oHz"/>
+                            <constraint firstItem="zOF-06-xuq" firstAttribute="top" secondItem="w2e-SX-5VO" secondAttribute="bottom" constant="6" id="m8c-Eg-RAK"/>
+                            <constraint firstItem="2KL-v1-tgr" firstAttribute="top" secondItem="zOF-06-xuq" secondAttribute="bottom" constant="14" id="niV-qX-4Wr"/>
+                            <constraint firstItem="zOF-06-xuq" firstAttribute="leading" secondItem="li0-Fk-3pC" secondAttribute="leading" constant="42" id="tuE-S2-yl0"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="AMp-Lb-3Pd"/>
+                        <outlet property="delegate" destination="-1" id="Sbb-OC-MNB"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <color key="backgroundColor" red="0.98028594260000002" green="0.9804533124" blue="0.98027533290000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="E0U-Ky-PB9" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="58F-cE-Rtf"/>
+                <constraint firstItem="E0U-Ky-PB9" firstAttribute="trailing" secondItem="i5M-Pr-FkT" secondAttribute="trailing" id="b1b-ES-2Jf"/>
+                <constraint firstItem="E0U-Ky-PB9" firstAttribute="bottom" secondItem="i5M-Pr-FkT" secondAttribute="bottom" id="l65-Dh-pG4"/>
+                <constraint firstItem="E0U-Ky-PB9" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="srZ-If-X8u"/>
+            </constraints>
+            <point key="canvasLocation" x="130.40000000000001" y="152.47376311844079"/>
+        </view>
+    </objects>
+</document>
