@@ -45,4 +45,9 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.dependency 'GoogleWebRTC', '~> 1.1.29400'
   s.dependency 'MQTTClient/Websocket', '~> 0.15'
   s.swift_versions = '4.2'
+  s.pod_target_xcconfig = {
+    'ENABLE_BITCODE' => 'NO',
+    'GCC_PREPROCESSOR_DEFINITIONS' => 'AUVIOUSSDK',
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) AUVIOUSSDK'
+  }
 end
