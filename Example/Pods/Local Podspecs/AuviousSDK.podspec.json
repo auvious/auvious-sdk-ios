@@ -1,9 +1,9 @@
 {
   "name": "AuviousSDK",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
   "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
-  "homepage": "https://gitlab.auvious.com/pimenas/auvious-sdk-ios",
+  "homepage": "https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,8 +12,8 @@
     "Epi Vou": "pimenas@gmail.com"
   },
   "source": {
-    "git": "https://gitlab.auvious.com/pimenas/auvious-sdk-ios.git",
-    "tag": "1.0.0"
+    "git": "https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git",
+    "tag": "1.0.6"
   },
   "platforms": {
     "ios": "10.0"
@@ -39,5 +39,10 @@
     ]
   },
   "swift_versions": "4.2",
+  "pod_target_xcconfig": {
+    "ENABLE_BITCODE": "NO",
+    "GCC_PREPROCESSOR_DEFINITIONS": "AUVIOUSSDK",
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "$(inherited) AUVIOUSSDK"
+  },
   "swift_version": "4.2"
 }
