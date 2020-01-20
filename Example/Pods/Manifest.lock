@@ -1,6 +1,6 @@
 PODS:
   - Alamofire (4.9.1)
-  - AuviousSDK (1.0.6):
+  - AuviousSDK (1.0.7):
     - Alamofire (~> 4.7)
     - GoogleWebRTC (~> 1.1.29400)
     - MQTTClient/Websocket (~> 0.15)
@@ -56,7 +56,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AuviousSDK: 45da5840fc168445bab9813901827a2b5a232826
+  AuviousSDK: b9de287f13084195d2d03d853782c9f0714d3d02
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
@@ -66,6 +66,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 5156bd0d4e51e20e18748e8a4ef8adb1b69a180e
+PODFILE CHECKSUM: f55c0caa0b8a687af599ebc0dd9850829ff6547c
 
 COCOAPODS: 1.8.4
