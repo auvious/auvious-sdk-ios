@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Alamofire
+import SwiftyJSON
 
 internal class AuthenticationModule {
     
@@ -46,14 +48,19 @@ internal class AuthenticationModule {
                         
                         //Obtain RTC server configuration
                         API.sharedInstance.getIceServers(onSuccess: {json in
-                            if let data = json {
-                                ServerConfiguration.stunServer = data["stun"].stringValue
-                                ServerConfiguration.turnServer = data["turn"].stringValue
-                                ServerConfiguration.turnUsername = data["turnUsername"].stringValue
-                                ServerConfiguration.turnPassword = data["turnPassword"].stringValue
-                                
-                                onSuccess(newEndpointId)
+                            for iceServer in json!["iceServers"].array! {
+                                let urlStrings = iceServer["urls"].array?.map({ (url) -> String in
+                                    url.stringValue
+                                }) ?? []
+                                let username = iceServer["username"].stringValue
+                                let credential = iceServer["credential"].stringValue
+                                ServerConfiguration.iceServers.append(
+                                    RTCIceServer(urlStrings: urlStrings,
+                                                 username: username,
+                                                 credential: credential)
+                                )
                             }
+                            onSuccess(newEndpointId)
                         }, onFailure: {error in
                             print("error getting ice servers")
                             onFailure(error)

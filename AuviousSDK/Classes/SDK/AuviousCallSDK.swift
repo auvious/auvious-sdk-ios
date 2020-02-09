@@ -38,19 +38,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
     
     /// Optional SIP headers to be used
     private var sipHeaders: [String : String]?
-    
-    /// The URI of the STUN server
-    internal var stunUri: String!
-    
-    /// The URI of the TURN server
-    internal var turnUri: String!
-    
-    /// The username for the TURN server
-    internal var turnUsername: String!
-    
-    /// The password for the TURN server
-    internal var turnPassword: String!
-    
+
     /// ARTCClient handles all things streams related
     internal var rtcClient: RTCModule!
     
@@ -196,11 +184,8 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             rtcClient = RTCModule()
         }
         
-        rtcClient.kARDDefaultSTUNServerUrl = ServerConfiguration.stunServer
-        rtcClient.kARDDefaultTURNServerUrl = ServerConfiguration.turnServer
-        rtcClient.kARDDefaultTURNUsername = ServerConfiguration.turnUsername
-        rtcClient.kARDDefaultTURNPassword = ServerConfiguration.turnPassword
-        
+        rtcClient.iceServers = ServerConfiguration.iceServers
+
         rtcClient.publishVideoResolution = publishVideoResolution
         rtcClient.delegate = self
         rtcClient.initialisePeerConnectionFactory()

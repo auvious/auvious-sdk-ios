@@ -106,7 +106,7 @@ internal struct APIRequest {
             
             //IceSupport
             case .getIceServers():
-                query = "rtc-api/iceServers/v2"
+                query = "rtc-api/iceServers"
                 
             //Calls
             case .call(let object):
