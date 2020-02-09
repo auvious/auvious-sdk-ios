@@ -21,8 +21,5 @@ public struct ServerConfiguration {
     static var mqttUser = ""
     static let mqttPass = ""
     //RTC
-    static var turnServer = ""
-    static var turnUsername = ""
-    static var turnPassword = ""
-    static var stunServer = ""
+    static var iceServers : [RTCIceServer] = []
 }

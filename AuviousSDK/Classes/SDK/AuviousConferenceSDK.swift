@@ -29,19 +29,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     public var userEndpointId: String? {
         return UserEndpointModule.sharedInstance.userEndpointId
     }
-    
-    /// The URI of the STUN server
-    internal var stunUri: String!
-    
-    /// The URI of the TURN server
-    internal var turnUri: String!
-    
-    /// The username for the TURN server
-    internal var turnUsername: String!
-    
-    /// The password for the TURN server
-    internal var turnPassword: String!
-    
+
     /// ARTCClient handles all things streams related
     internal var rtcClient: RTCModule!
     
@@ -185,10 +173,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     private func initializeARTCClient(){
         rtcClient = RTCModule()
         
-        rtcClient.kARDDefaultSTUNServerUrl = ServerConfiguration.stunServer
-        rtcClient.kARDDefaultTURNServerUrl = ServerConfiguration.turnServer
-        rtcClient.kARDDefaultTURNUsername = ServerConfiguration.turnUsername
-        rtcClient.kARDDefaultTURNPassword = ServerConfiguration.turnPassword
+        rtcClient.iceServers = ServerConfiguration.iceServers
         
         rtcClient.publishVideoResolution = publishVideoResolution
         rtcClient.delegate = self

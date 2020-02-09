@@ -97,16 +97,12 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
     
-    private var iceServers: [RTCIceServer] = []
-    
     private var usingFrontCamera: Bool = true
     private var switchCamStreamId: String = ""
     private var switchCameStreamType: StreamType! = .unknown
     
-    var kARDDefaultSTUNServerUrl: String = ""
-    var kARDDefaultTURNServerUrl: String = ""
-    var kARDDefaultTURNUsername: String! = ""
-    var kARDDefaultTURNPassword: String! = ""
+    var iceServers: [RTCIceServer] = []
+
     var publishVideoResolution: PublishVideoResolution = .min
     
     var delegate: RTCDelegate?
@@ -136,9 +132,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         
         factory = RTCPeerConnectionFactory(encoderFactory: encoderFactory, decoderFactory: decoderFactory)
         
-        let stunIceServer: RTCIceServer = RTCIceServer(urlStrings: [kARDDefaultSTUNServerUrl], username: "", credential: "")
-        let turnIceServer: RTCIceServer = RTCIceServer(urlStrings: [kARDDefaultTURNServerUrl], username: kARDDefaultTURNUsername, credential: kARDDefaultTURNPassword)
-        iceServers = [stunIceServer, turnIceServer]
+        iceServers = ServerConfiguration.iceServers
     }
     
     //Configures a stream for publishing in a call (create call)
