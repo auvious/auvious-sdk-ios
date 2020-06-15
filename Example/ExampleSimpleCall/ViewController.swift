@@ -77,8 +77,8 @@ class ViewController: UIViewController, AuviousSimpleCallDelegate {
         // var baseEndpoint: String = "https://prxbauviousvideo.praxiabank.com"
         // var mqttEndpoint: String = "wss://prxbauviousvideo.praxiabank.com/ws"
         
-        var baseEndpoint: String = "https://test-rtc.auvious.com"
-        var mqttEndpoint: String = "wss://test-rtc.auvious.com/ws"
+        var baseEndpoint: String = "https://test-rtc.stg.auvious.com/"
+        var mqttEndpoint: String = "wss://events.test-rtc.stg.auvious.com/ws"
 
         if (uatSwitchField.isOn) {
             baseEndpoint = "https://prxbauviousvideo-uat.praxiabank.com"
