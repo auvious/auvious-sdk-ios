@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import AuviousSDK
 
-class StreamView: UIView {
+public class StreamView: UIView, RTCVideoViewDelegate {
     
     //UI components
     @IBOutlet weak var statusLabel: UILabel!
@@ -19,17 +19,19 @@ class StreamView: UIView {
     
     //Switch from OpenGL to Metal if we can
     #if arch(i386) || arch(x86_64) || arch(arm)
-    let supportsMetal:Bool = false
-    var videoView:RTCEAGLVideoView = RTCEAGLVideoView(frame: CGRect.zero)
+    let supportsMetal: Bool = false
+    var videoView: RTCEAGLVideoView = RTCEAGLVideoView(frame: CGRect.zero)
     #else
-    let supportsMetal:Bool = true
+    let supportsMetal: Bool = true
     var videoView:RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
     #endif
     
     private var hasAudioStream:Bool = false
     private var hasVideoStream:Bool = false
     
-    override init(frame: CGRect) {
+    var size: CGSize = .zero
+    
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         
         nibSetup()
@@ -41,17 +43,42 @@ class StreamView: UIView {
         nibSetup()
     }
     
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
+    }
+    
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        
+        if (self.size.width > 0 && self.size.height > 0) {
+            var videoFrame = AVMakeRect(aspectRatio: CGSize(width: bounds.width, height: bounds.height), insideRect: bounds)
+            var scale: CGFloat = 1.0
+            if (videoFrame.size.width > videoFrame.size.height) {
+                scale = bounds.size.height / videoFrame.size.height
+            } else {
+                scale = bounds.size.width / videoFrame.size.width
+            }
+            videoFrame.size.width = videoFrame.size.width * scale
+            videoFrame.size.height = videoFrame.size.height * scale
+            self.videoView.frame = videoFrame
+            self.videoView.center = CGPoint(x: bounds.midX, y: bounds.midY)
+        } else {
+            self.videoView.frame = bounds
+        }
     }
     
     private func nibSetup() {
         backgroundColor = .clear
         
         videoView.frame = bounds
+        //prevent hickup when switching camera
+        videoView.clipsToBounds = true
+        
+        videoView.delegate = self
         
         let view = loadViewFromNib()
         view.frame = bounds
+        view.clipsToBounds = true
         view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.translatesAutoresizingMaskIntoConstraints = true
         view.layer.borderColor = UIColor.black.cgColor
@@ -76,7 +103,7 @@ class StreamView: UIView {
         return nibView
     }
     
-    func audioStreamAdded(){
+    public func audioStreamAdded(){
         hasAudioStream = true
         
         if !hasVideoStream {
@@ -85,7 +112,7 @@ class StreamView: UIView {
         }
     }
     
-    func audioStreamRemoved(){
+    public func audioStreamRemoved(){
         hasAudioStream = false
         
         if !hasVideoStream {
@@ -93,7 +120,7 @@ class StreamView: UIView {
         }
     }
     
-    func videoStreamAdded(_ videoTrack:RTCVideoTrack){
+    public func videoStreamAdded(_ videoTrack:RTCVideoTrack){
         hasVideoStream = true
         
         statusLabel.alpha = 0.0
@@ -103,7 +130,7 @@ class StreamView: UIView {
         videoView.alpha = 1.0
     }
     
-    func videoStreamRemoved(){
+    public func videoStreamRemoved(){
         hasVideoStream = false
         
         videoView.alpha = 0.0
@@ -118,16 +145,16 @@ class StreamView: UIView {
         }
     }
     
-    func avStreamAdded(_ videoTrack:RTCVideoTrack){
+    public func avStreamAdded(_ videoTrack:RTCVideoTrack){
         videoStreamAdded(videoTrack)
         hasAudioStream = true
     }
     
-    func avStreamRemoved(){
+    public func avStreamRemoved(){
         resetStreamView()
     }
     
-    func resetStreamView(){
+    public func resetStreamView(){
         hasAudioStream = false
         hasVideoStream = false
         
@@ -137,5 +164,11 @@ class StreamView: UIView {
         if videoTrack != nil {
             videoTrack.remove(videoView)
         }
+    }
+    
+    //MARK: RTCVideoViewDelegate
+    
+    public func videoView(_ videoView: RTCVideoRenderer, didChangeVideoSize size: CGSize) {
+        self.size = size
     }
 }

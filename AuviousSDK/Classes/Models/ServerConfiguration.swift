@@ -13,11 +13,11 @@ import Foundation
  */
 public struct ServerConfiguration {
     //REST
-    static var baseRTC = "https://rtc-demo.stg.auvious.com/"
-    static var baseMeeting = "https://staging-meeting.auvious.com"
+    static var baseRTC = "https://test-rtc.stg.auvious.com"
+    static var baseMeeting = "https://test-rtc.stg.auvious.com"
     static let httpClientId = "staging-meeting"
     //MQTT
-    static var mqttHost = "wss://events.stg.auvious.com/ws"
+    static var mqttHost = "wss://events.test-rtc.stg.auvious.com/ws"
     static var mqttUser = ""
     static let mqttPass = ""
     //RTC

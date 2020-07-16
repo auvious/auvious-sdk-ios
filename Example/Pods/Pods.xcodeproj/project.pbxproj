@@ -15,6 +15,7 @@
 			dependencies = (
 			);
 			name = GoogleWebRTC;
+			productName = GoogleWebRTC;
 		};
 /* End PBXAggregateTarget section */
 
@@ -23,6 +24,10 @@
 		01606EE81DA770D12551F299BF617399 /* SPPermissionDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E1FB843EE1484FE2CC7DA816928A6D /* SPPermissionDialog.swift */; };
 		0209DDCD42030B001D217426D202C46D /* SentryCrashStackCursor_SelfThread.c in Sources */ = {isa = PBXBuildFile; fileRef = A26EDFB653252048E323960B022AEC8B /* SentryCrashStackCursor_SelfThread.c */; };
 		028FD3D72F025D4500AE5CD5A057E22E /* SentryCrashVarArgs.h in Headers */ = {isa = PBXBuildFile; fileRef = BF7D33958828EAA4E1F04D469F85F202 /* SentryCrashVarArgs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		033A62F724A220AE00D4C6F7 /* AuviousConferenceVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 033A62F524A220AE00D4C6F7 /* AuviousConferenceVC.swift */; };
+		033A62F824A220AE00D4C6F7 /* AuviousConferenceVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 033A62F624A220AE00D4C6F7 /* AuviousConferenceVC.xib */; };
+		0359DFCE24A374DC005BD6A2 /* ConferenceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0359DFCC24A374DC005BD6A2 /* ConferenceCell.xib */; };
+		0359DFCF24A374DC005BD6A2 /* ConferenceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0359DFCD24A374DC005BD6A2 /* ConferenceCell.swift */; };
 		03C7D895BDE24EDD92794DA72D4D6B70 /* MQTTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA2A55145ACC2E5A7B07EF10EF6A84A /* MQTTLog.m */; };
 		044264E132E43F1CB83FA8E4F536F9D8 /* SentryException.m in Sources */ = {isa = PBXBuildFile; fileRef = 6560C0877D80379D215EAFFB8E309C3E /* SentryException.m */; };
 		04599354A45B5E2020EA1FBE90B7687B /* MQTTSSLSecurityPolicyDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 648DEA9FD1C2B3298CF75D721841D33F /* MQTTSSLSecurityPolicyDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -45,11 +50,13 @@
 		12DC5114BB4A1F8E5251CB43C5A9E3F5 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C3D038A63D664E40CA39004630F39CA /* SwiftyJSON.framework */; };
 		132E0F619E4338E5D1B27E4C72076B3F /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF36576B1CF1EAA8AC136179DC175AE /* Notifications.swift */; };
 		139CF7A11C53BC166B8B3B4264054CFA /* SentryCrashMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = CD8DA6E08E1D18C4B6FCECE5FBDC1138 /* SentryCrashMemory.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1464BE0837726C6E279B469A21289DA1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CF9ACE64FC505C213817D82424BD2BF /* Foundation.framework */; };
 		14B7EE1EBE564A7DD4A0A6DF93366859 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CF9ACE64FC505C213817D82424BD2BF /* Foundation.framework */; };
 		14D20EE0AB55D130C013BAB36908A748 /* MQTTWebsocketTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B0E02901931063CCE9DB960FC78C70 /* MQTTWebsocketTransport.m */; };
 		153E90906181E9C3049E5718BB611C93 /* SentryDsn.h in Headers */ = {isa = PBXBuildFile; fileRef = B8E141BF1408867D2E695E86ECD963E3 /* SentryDsn.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		15608A7E43BA5F9AE4A95F57154C443C /* phone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A4443BC075401185393CD43FB7D582A8 /* phone@2x.png */; };
 		163B718317833732EC25FE52B28B4EF2 /* NSError+SentrySimpleConstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = E6AF3370C82562D4A583CF4D28571D95 /* NSError+SentrySimpleConstructor.m */; };
+		16BFC6C179C2F645E0F043B527364254 /* Pods-ExampleSimpleConference-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 35E7D8C271D7E7BBBB1E9278611A70A6 /* Pods-ExampleSimpleConference-dummy.m */; };
 		1741DE16F7AEDDCAC4584A6FFAF20E45 /* SnapshotEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D28492FD2C6BB1F922D956539FA72E /* SnapshotEvent.swift */; };
 		17973A06C250F114F141D51D5414EE44 /* SentryJavaScriptBridgeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 876A1E432A77E08412BE3288740B8F4C /* SentryJavaScriptBridgeHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		180721442385CC4B911466581A435FCD /* ViewStreamRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3DDCBEEBCA767A4C002EC62051B200 /* ViewStreamRequest.swift */; };
@@ -63,11 +70,12 @@
 		1A832304D0A18C101F3B082184BEDD6A /* MQTTSSLSecurityPolicyTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEE1DB54B40F8CC1192741E270D2 /* MQTTSSLSecurityPolicyTransport.m */; };
 		1B16AB774B9532E7DCF4FA30A2B5B17F /* SentryContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 10AF3B6FC82DC805EFFD9F3C59897585 /* SentryContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1B8E990B60B8ABE9C7C221CC0A0256FE /* SPPermissionMediaLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D711C82C9FC7686951182BA7E5FDBF3 /* SPPermissionMediaLibrary.swift */; };
+		1C70FE0BDC47561BF491E97F8E208114 /* Pods-ExampleSimpleConference-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 9819B99E9E1ACA0631289F1D9F7A118C /* Pods-ExampleSimpleConference-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1C906279364EB3F0FE59664BB043CC88 /* SentryCrashMonitorType.h in Headers */ = {isa = PBXBuildFile; fileRef = C1F6DE4CEF6A87265F8B1CE556C32C1E /* SentryCrashMonitorType.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D04F5FF36F79EA6372833A737BA957B /* MQTTMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 41BCD47FD94EDDA1A1814857B85327C5 /* MQTTMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D62320ED2DCC581DCAF25AAF57B7A48 /* BEMCheckBoxGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 648196F504D77C0E81D831632CA7FFA2 /* BEMCheckBoxGroup.m */; };
 		1DD52D6622983FE73B8BB93157330A16 /* SentryThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 30C7461B00E8B51B421C30C045209D40 /* SentryThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		20438851BBF9FCDE78A21782CBA4B9EE /* Pods-ExampleCall-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 19DE6CAAF2E4684AC8F773FE5946E91E /* Pods-ExampleCall-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		20438851BBF9FCDE78A21782CBA4B9EE /* Pods-ExampleCall-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C43C9804A0278B41E666A52EA08157E /* Pods-ExampleCall-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		212C0ECA1C39A904B2BC38116D7F2036 /* CallRejectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67383ADAF97A70E964C72AF48876C29E /* CallRejectedEvent.swift */; };
 		22AE18000DE92967BD3E4B299ACE2760 /* MQTTCFSocketDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = C478794D46FCE4089F59862D7556D877 /* MQTTCFSocketDecoder.m */; };
 		23181471C51CCF38412B06074BD20E4C /* SentryCrashInstallation.h in Headers */ = {isa = PBXBuildFile; fileRef = BA05B96AA6EEFE64488024251BF9B191 /* SentryCrashInstallation.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -77,7 +85,7 @@
 		24435178874EECC5813AF32512B902EF /* SentryBreadcrumb.h in Headers */ = {isa = PBXBuildFile; fileRef = AB6559B5DB348EFDABF66BF14524DF7A /* SentryBreadcrumb.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		247B83584C1175BEDB421E867231A4F7 /* CallHangupRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051DA39FD5F54B34FF8966456CBAAC95 /* CallHangupRequest.swift */; };
 		248F8B1D18AFE2B4EB013F659B1AABF8 /* SentryAsynchronousOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F0B1A378648E985C54DC176BB358884B /* SentryAsynchronousOperation.m */; };
-		259A9E7705014696C5FD75D072AC2870 /* Pods-ExampleConference-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 08785981DC830801687F8BD6C616E2CD /* Pods-ExampleConference-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		259A9E7705014696C5FD75D072AC2870 /* Pods-ExampleConference-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = CAD68B64A3DE3110B4FC71201322CC25 /* Pods-ExampleConference-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2644E39067A095168C9902C4BE3B0E69 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CF9ACE64FC505C213817D82424BD2BF /* Foundation.framework */; };
 		264E1A478BDFA31DA6842749C72EA535 /* SVProgressHUD.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 40CBDA49548530AB94E2B2706979370C /* SVProgressHUD.bundle */; };
 		2653CB041D8C06524F78EB3AC4F9A5F0 /* SPRequestPermissionLocationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39047ED941844D4A9AD1509C99B48E41 /* SPRequestPermissionLocationHandler.swift */; };
@@ -124,7 +132,7 @@
 		415AE88C166FAC5317DB409F8EA03125 /* SentryFileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A89136FB8DB5D5105C73D2155373D0F /* SentryFileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4394304EA076C1149DA9F79A7EA92CCC /* MQTTTransport.h in Headers */ = {isa = PBXBuildFile; fileRef = 82C7CE507D0CEE1FFB2D0941CE579675 /* MQTTTransport.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		440B789CADC85F8B042259A57E746116 /* BEMCheckBoxGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = A975F2C9F4212A649E953279FA236300 /* BEMCheckBoxGroup.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		44B3A16D79E0AC6222871CD150403240 /* Pods-ExampleSimpleCall-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = E9CE42FDD558FA94AC6E13A6BFDCC1A7 /* Pods-ExampleSimpleCall-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		44B3A16D79E0AC6222871CD150403240 /* Pods-ExampleSimpleCall-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 05EFC976E46742592C7237B6898C3A17 /* Pods-ExampleSimpleCall-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4574BE4DDE26C3E7293C227AFACC119B /* SentryCrashReportFixer.h in Headers */ = {isa = PBXBuildFile; fileRef = 177718B2C11D53E28CBBCF6ACB44A235 /* SentryCrashReportFixer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		45DE3733A62E2154C746E5416CF64CCC /* SRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 74EBE5CFC6E17373CA2FE236AC1F9CFA /* SRWebSocket.m */; };
 		468451993E6F08E3BA432FEB146B9E00 /* SentryFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E925690F654247F2B0F356896E604E1 /* SentryFrame.m */; };
@@ -238,7 +246,7 @@
 		8A3F103AD56585112D5BB6FCA5D508E6 /* SentryCrashJSONCodecObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = D9C84308EB2A079EE9A11F9E05AD9B07 /* SentryCrashJSONCodecObjC.m */; };
 		8D2ACFF2784884818E7271114BBC8D7E /* SentryLog.m in Sources */ = {isa = PBXBuildFile; fileRef = CE287C3DD795F929F19F36E7D0D943ED /* SentryLog.m */; };
 		8DD6778262E8D48DD574DC7159CD0887 /* SentryCrashString.c in Sources */ = {isa = PBXBuildFile; fileRef = 6AC30B919A76D01900579DD9F24D7DE8 /* SentryCrashString.c */; };
-		8E53FD236D4F944C9FE9F8448B25033B /* Pods-ExampleConference-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 407BD39A48520897E633FC8B8521485A /* Pods-ExampleConference-dummy.m */; };
+		8E53FD236D4F944C9FE9F8448B25033B /* Pods-ExampleConference-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E14922FF75540D9ECCE4D30A11886FAE /* Pods-ExampleConference-dummy.m */; };
 		8FCDE3AD04C16C0C34742C340402414F /* SentryFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BBCFA410E2BFAEACF6ED88849CF6906 /* SentryFrame.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9070711C120A19D430320C9460E4C09B /* SentryDebugMeta.m in Sources */ = {isa = PBXBuildFile; fileRef = 019319ACC2A9876B920A51E7E147A15F /* SentryDebugMeta.m */; };
 		90778B254541CFEB7FBF968E7B10128A /* SentryCrashSignalInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 8527537BE5170A79D8C7863C548A64B4 /* SentryCrashSignalInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -323,7 +331,7 @@
 		C00EF43D98BABDE22F600C4AF1FB42A4 /* ConferenceLeftEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF9005090DC60A15021A8B3A0AF03DE /* ConferenceLeftEvent.swift */; };
 		C0B2983AD79BA9D9A35A4F9DE18EAC5E /* SentryCrashFileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0244ADF40EA57E62697298302CF544B3 /* SentryCrashFileUtils.c */; };
 		C0FA7B4158F9CB5478D13DB704EEC834 /* SentryBreadcrumbTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = B24876FDE53D5A60DFDD6C77DB44459A /* SentryBreadcrumbTracker.m */; };
-		C1744B01654F387F12C669DC324F67C3 /* Pods-ExampleCall-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E1B4D5881D882E8CD7E766B8E2C08689 /* Pods-ExampleCall-dummy.m */; };
+		C1744B01654F387F12C669DC324F67C3 /* Pods-ExampleCall-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = A708B3EEC89FAD01B0E997CDA1682A4B /* Pods-ExampleCall-dummy.m */; };
 		C24510CA5C891F4E236166E92BEE399F /* SPPermissionDrawPermissionPack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54FB2159D8206CAD54E3491A5E1B6C1 /* SPPermissionDrawPermissionPack.swift */; };
 		C2A270311C08F3042C6C0ACF348C6A2F /* PublishStreamRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A379662AC7F95E55EAF9A14411E2D6B /* PublishStreamRequest.swift */; };
 		C30FCE4FED9B7799B3406763A587B396 /* MQTTStrict.h in Headers */ = {isa = PBXBuildFile; fileRef = F893FFBF63C84488556C4A43C2B4F82D /* MQTTStrict.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -407,7 +415,7 @@
 		F11EB4B32325A79D7BBFC8786B07074B /* SocketRocket-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B52270AEF875468F9E874E611CF4FFF /* SocketRocket-dummy.m */; };
 		F13F2AA7F2E6D95A181CAB99B900D531 /* ServerTrustPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FBD74FE561929C59AE6397D8E55C3E /* ServerTrustPolicy.swift */; };
 		F2E49E36B3274B9BCFF48776F7AB389F /* SentryCrashReportConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 15BC18B560882D476475022F2EA0FD43 /* SentryCrashReportConverter.m */; };
-		F484C2E3ABBACE3A96BFF94A7D2674B1 /* Pods-ExampleSimpleCall-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 41FED86145C1166A6552928084C0E1C8 /* Pods-ExampleSimpleCall-dummy.m */; };
+		F484C2E3ABBACE3A96BFF94A7D2674B1 /* Pods-ExampleSimpleCall-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DB470BEE2827609F5C3BF1ECAED0F1A /* Pods-ExampleSimpleCall-dummy.m */; };
 		F4A3F926ECC7322C4E44A81077DA4C97 /* ViewStreamIceCandidatesRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A000CD9921F6B2E782203B21007C37 /* ViewStreamIceCandidatesRequest.swift */; };
 		F4A3FE96F04D432721B7FA68267DFF70 /* MQTTSSLSecurityPolicyTransport.h in Headers */ = {isa = PBXBuildFile; fileRef = A16BEE287A5A62C92957F5FF51927A31 /* MQTTSSLSecurityPolicyTransport.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F4D67EAE7E8BBE32BC38A85CD108D17C /* AuviousSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C520D59761C6697194019835A373095 /* AuviousSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -460,6 +468,13 @@
 			remoteGlobalIDString = 46887A2B3EC5EA71E0B560973C79F7A6;
 			remoteInfo = SPPermissions;
 		};
+		1F1C20763DB8838BEF8AC79BB04F4580 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5DFC4AB0D3BCF770CD8ED04AC057C82;
+			remoteInfo = AuviousSDK;
+		};
 		2003DAEF42819E8E546C11993D11F020 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -473,6 +488,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A5DFC4AB0D3BCF770CD8ED04AC057C82;
 			remoteInfo = AuviousSDK;
+		};
+		2AB155663FF684EA87F59BDCD372F561 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1948D0B63D2CF6A48E18B0B292BC6091;
+			remoteInfo = SocketRocket;
 		};
 		46695E02DC6B24A605F3B4C2AED001EF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -523,12 +545,26 @@
 			remoteGlobalIDString = 46887A2B3EC5EA71E0B560973C79F7A6;
 			remoteInfo = SPPermissions;
 		};
+		5F81387B697D46BA1C73B509BC0F5164 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D118A6A04828FD3CDA8640CD2B6796D2;
+			remoteInfo = SwiftyJSON;
+		};
 		62158CCBA19507B56074F6DBE552B5E9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1948D0B63D2CF6A48E18B0B292BC6091;
 			remoteInfo = SocketRocket;
+		};
+		6F181C68F78259920AED4980520D2044 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EAAA1AD3A8A1B59AB91319EE40752C6D;
+			remoteInfo = Alamofire;
 		};
 		6FB35E358EB29125319168C5E3E57D76 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -579,6 +615,13 @@
 			remoteGlobalIDString = 18D5937A1FF4E1064BDE592E5E9532EA;
 			remoteInfo = MQTTClient;
 		};
+		993FF54AE731A7F1D795C201504D2AC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 94BDCD90B52278D1FB244A66E8B95A4A;
+			remoteInfo = Sentry;
+		};
 		A13D360379A06D1A466811857C3A9A21 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -600,12 +643,26 @@
 			remoteGlobalIDString = 1948D0B63D2CF6A48E18B0B292BC6091;
 			remoteInfo = SocketRocket;
 		};
+		B59DA23F62FBBD0D48A51F0C5AAE589A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 18D5937A1FF4E1064BDE592E5E9532EA;
+			remoteInfo = MQTTClient;
+		};
 		B8502241EFCB6C012B90B0857BCB6EC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 18D5937A1FF4E1064BDE592E5E9532EA;
 			remoteInfo = MQTTClient;
+		};
+		C3D1A32F34A5BB70995C214A265E3B7C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC23BFCFC44D9224C054485B54824B8E;
+			remoteInfo = GoogleWebRTC;
 		};
 		C9BEF3E9935C4713C4709D6B14813F47 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -667,39 +724,44 @@
 
 /* Begin PBXFileReference section */
 		009E3A7F5E0104AA35A50293610A548D /* SentryCrashCString.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashCString.h; path = Sources/SentryCrash/Reporting/Tools/SentryCrashCString.h; sourceTree = "<group>"; };
-		0115C3C00C175D77422084DD0542CE6F /* Sentry.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Sentry.framework; path = Sentry.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0115C3C00C175D77422084DD0542CE6F /* Sentry.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sentry.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0138D81853AB001BC2BF655BABC07958 /* SentryBreadcrumb.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryBreadcrumb.m; path = Sources/Sentry/SentryBreadcrumb.m; sourceTree = "<group>"; };
 		019319ACC2A9876B920A51E7E147A15F /* SentryDebugMeta.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryDebugMeta.m; path = Sources/Sentry/SentryDebugMeta.m; sourceTree = "<group>"; };
-		0244ADF40EA57E62697298302CF544B3 /* SentryCrashFileUtils.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashFileUtils.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashFileUtils.c; sourceTree = "<group>"; };
+		0244ADF40EA57E62697298302CF544B3 /* SentryCrashFileUtils.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashFileUtils.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashFileUtils.c; sourceTree = "<group>"; };
 		03093C5F8C4F2203978290DB41D1248D /* UnregisterEndpointRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnregisterEndpointRequest.swift; sourceTree = "<group>"; };
+		033A62F524A220AE00D4C6F7 /* AuviousConferenceVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuviousConferenceVC.swift; sourceTree = "<group>"; };
+		033A62F624A220AE00D4C6F7 /* AuviousConferenceVC.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AuviousConferenceVC.xib; sourceTree = "<group>"; };
+		0359DFCC24A374DC005BD6A2 /* ConferenceCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ConferenceCell.xib; sourceTree = "<group>"; };
+		0359DFCD24A374DC005BD6A2 /* ConferenceCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConferenceCell.swift; sourceTree = "<group>"; };
 		03EBA15482296BD8DE32E16A9AA194D8 /* AuviousConferenceSDK.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousConferenceSDK.swift; sourceTree = "<group>"; };
-		0454C040325130C121EE9F94BCB325EA /* Pods-ExampleCall.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleCall.release.xcconfig"; sourceTree = "<group>"; };
+		044EF4AD7C711272C93D5858BB04731B /* Pods-ExampleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
+		04F3A43B8102B2F06AF56B26DDF3671C /* Pods-ExampleCall-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleCall-Info.plist"; sourceTree = "<group>"; };
 		051DA39FD5F54B34FF8966456CBAAC95 /* CallHangupRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallHangupRequest.swift; sourceTree = "<group>"; };
 		05E83F20E2D40F9BBA2F84541850E317 /* SwiftyJSON-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SwiftyJSON-dummy.m"; sourceTree = "<group>"; };
+		05EFC976E46742592C7237B6898C3A17 /* Pods-ExampleSimpleCall-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleSimpleCall-umbrella.h"; sourceTree = "<group>"; };
 		0669D297574084BB03C923D307E6FBC1 /* BEMCheckBox.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = BEMCheckBox.xcconfig; sourceTree = "<group>"; };
-		06DD028ED02FA0C1C4DB08519177900D /* Pods-ExampleSimpleCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleCall.debug.xcconfig"; sourceTree = "<group>"; };
-		07976030E5041936D1EAE65643FE415C /* SentryCrashMonitor.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor.c; sourceTree = "<group>"; };
+		07976030E5041936D1EAE65643FE415C /* SentryCrashMonitor.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor.c; sourceTree = "<group>"; };
 		07A17ED6C83E5608ABED5C658239DFF5 /* SentryCrashMonitor_Zombie.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_Zombie.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Zombie.h; sourceTree = "<group>"; };
 		07B0E02901931063CCE9DB960FC78C70 /* MQTTWebsocketTransport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTWebsocketTransport.m; path = MQTTClient/MQTTClient/MQTTWebsocketTransport/MQTTWebsocketTransport.m; sourceTree = "<group>"; };
 		084BAC7C234F9067EF431265C916AC2C /* ConferenceParticipant.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceParticipant.swift; sourceTree = "<group>"; };
-		08785981DC830801687F8BD6C616E2CD /* Pods-ExampleConference-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleConference-umbrella.h"; sourceTree = "<group>"; };
 		08DB51053DA9CEC7B886F614B192D5FD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
 		09365676704A406D10306F3278BA8509 /* SentryCrashC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashC.h; path = Sources/SentryCrash/Recording/SentryCrashC.h; sourceTree = "<group>"; };
-		0A68A016D074059C0DF047F51A4A52EC /* Pods-ExampleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
 		0BBCFA410E2BFAEACF6ED88849CF6906 /* SentryFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryFrame.h; path = Sources/Sentry/include/SentryFrame.h; sourceTree = "<group>"; };
 		0BD33FC1BAB46E2DA568DE84EA8E752F /* StopViewStreamRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StopViewStreamRequest.swift; sourceTree = "<group>"; };
 		0C431FEC708F63A4CA3B8A3743E667A4 /* SnapshotRequestedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotRequestedEvent.swift; sourceTree = "<group>"; };
-		0C7F630611BA8B11383713C3D52C9AF0 /* SentryCrashMonitor_Zombie.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_Zombie.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Zombie.c; sourceTree = "<group>"; };
+		0C7F630611BA8B11383713C3D52C9AF0 /* SentryCrashMonitor_Zombie.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor_Zombie.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Zombie.c; sourceTree = "<group>"; };
 		0D8C035EC1C466F06E171FB4C79150A3 /* SVProgressHUD-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SVProgressHUD-prefix.pch"; sourceTree = "<group>"; };
 		0DC2EE7FF872E9891EDED75C8E33C721 /* AFError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AFError.swift; path = Source/AFError.swift; sourceTree = "<group>"; };
 		0E4438B2E541A9FB01CC7BFD43A3008B /* SnapshotCameraRequestedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotCameraRequestedEvent.swift; sourceTree = "<group>"; };
 		0E7AFFEF6A855D459DE1C69AF3C9B41E /* SentryCrashMonitor_Deadlock.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashMonitor_Deadlock.m; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Deadlock.m; sourceTree = "<group>"; };
+		0EF2BE0D1E10F93A42CC1329F00DD707 /* Pods-ExampleCall.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleCall.release.xcconfig"; sourceTree = "<group>"; };
 		0F960D975D7141E73E9F78BC07D70EB0 /* SentryCrashReportFilterBasic.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportFilterBasic.h; path = Sources/SentryCrash/Reporting/Filters/SentryCrashReportFilterBasic.h; sourceTree = "<group>"; };
 		108E338E21B9B839B80FA837D6EEB2A7 /* AuviousSDKCallDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousSDKCallDelegate.swift; sourceTree = "<group>"; };
 		10AF3B6FC82DC805EFFD9F3C59897585 /* SentryContext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryContext.h; path = Sources/Sentry/include/SentryContext.h; sourceTree = "<group>"; };
 		10FBD74FE561929C59AE6397D8E55C3E /* ServerTrustPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ServerTrustPolicy.swift; path = Source/ServerTrustPolicy.swift; sourceTree = "<group>"; };
 		111F721857258D2AD24A2AF0D305981A /* MultipartFormData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MultipartFormData.swift; path = Source/MultipartFormData.swift; sourceTree = "<group>"; };
 		119F8E53A4267FAB3941DDEA2B27BF6A /* SentryCrashDoctor.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashDoctor.h; path = Sources/SentryCrash/Recording/SentryCrashDoctor.h; sourceTree = "<group>"; };
+		124287FA488860476BB8096132DC9A48 /* Pods-ExampleCall-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleCall-frameworks.sh"; sourceTree = "<group>"; };
 		124903E1495EF16DB5D53B96466F8C3F /* SPPermissionDialogController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionDialogController.swift; path = Source/SPPermission/Dialog/Controllers/SPPermissionDialogController.swift; sourceTree = "<group>"; };
 		12A963E3667D4786CF16CE493BDB6422 /* ConferenceStreamUnpublishedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceStreamUnpublishedEvent.swift; sourceTree = "<group>"; };
 		12C610356EB1473C328C848A41F81DD0 /* MQTTLog.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTLog.h; path = MQTTClient/MQTTClient/MQTTLog.h; sourceTree = "<group>"; };
@@ -711,36 +773,37 @@
 		17398F08FEB7CD3046594FC37DF7CD53 /* MQTTMessage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTMessage.m; path = MQTTClient/MQTTClient/MQTTMessage.m; sourceTree = "<group>"; };
 		175B46D6F2E8F2459391A3F839168BDE /* SentryError.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryError.h; path = Sources/Sentry/include/SentryError.h; sourceTree = "<group>"; };
 		177718B2C11D53E28CBBCF6ACB44A235 /* SentryCrashReportFixer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportFixer.h; path = Sources/SentryCrash/Recording/SentryCrashReportFixer.h; sourceTree = "<group>"; };
-		1838F8B3CFB5D4284C6F2AB48AB9D496 /* SentryCrashMonitor_CPPException.cpp */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_CPPException.cpp; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_CPPException.cpp; sourceTree = "<group>"; };
+		1838F8B3CFB5D4284C6F2AB48AB9D496 /* SentryCrashMonitor_CPPException.cpp */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.cpp; name = SentryCrashMonitor_CPPException.cpp; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_CPPException.cpp; sourceTree = "<group>"; };
 		191B93EA7E52B88ECD1ACAF71EBC283F /* Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		19DE6CAAF2E4684AC8F773FE5946E91E /* Pods-ExampleCall-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleCall-umbrella.h"; sourceTree = "<group>"; };
 		1A5C3D94673F766B8EA8FA69F61CD9F3 /* SentryCrashJSONCodec.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashJSONCodec.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashJSONCodec.h; sourceTree = "<group>"; };
-		1B37E383A2EFD14A3D4051C4975EEBC0 /* SentryCrashMonitor_MachException.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_MachException.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_MachException.c; sourceTree = "<group>"; };
+		1B37E383A2EFD14A3D4051C4975EEBC0 /* SentryCrashMonitor_MachException.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor_MachException.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_MachException.c; sourceTree = "<group>"; };
 		1B61A68A5AA5362E4C6EF437E14A2017 /* BEMCheckBox-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "BEMCheckBox-dummy.m"; sourceTree = "<group>"; };
 		1B93FA13E7C06B6C52CEC3C3E6673C94 /* SentryCrashCString.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashCString.m; path = Sources/SentryCrash/Reporting/Tools/SentryCrashCString.m; sourceTree = "<group>"; };
 		1BA893DF50D9D542D9F90FBB9BA64001 /* SPPermissions-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SPPermissions-Info.plist"; sourceTree = "<group>"; };
-		1BBA678882539FE0A2AD6F86B3876EDA /* SentryCrashMonitor_Signal.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_Signal.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Signal.c; sourceTree = "<group>"; };
+		1BBA678882539FE0A2AD6F86B3876EDA /* SentryCrashMonitor_Signal.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor_Signal.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Signal.c; sourceTree = "<group>"; };
 		1BC007ED2F5BF03AFB19580D2110612C /* CallCreatedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallCreatedEvent.swift; sourceTree = "<group>"; };
 		1BF6A3B94D133443D7838B69B656509D /* Sentry-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Sentry-prefix.pch"; sourceTree = "<group>"; };
 		1C334FF0D3046CBF0A557CCB4B7E56C2 /* SentryCrashMonitor_CPPException.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_CPPException.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_CPPException.h; sourceTree = "<group>"; };
+		1DF7015106265D35861B3B4313B34C3F /* Pods-ExampleConference-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleConference-Info.plist"; sourceTree = "<group>"; };
 		1F310EE4E9923D423E729D37AFB26B16 /* SVProgressHUD-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SVProgressHUD-Info.plist"; sourceTree = "<group>"; };
 		1F5A0BB12617F4B629E4EDF3AA662C7B /* Result.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Result.swift; path = Source/Result.swift; sourceTree = "<group>"; };
+		1FD5C48FEDDABFF8091B41EBF9F44283 /* Pods-ExampleSimpleConference.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleConference.release.xcconfig"; sourceTree = "<group>"; };
 		209F780E2A8FF21459E682120121C653 /* SnapshotCameraRQRPRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotCameraRQRPRequest.swift; sourceTree = "<group>"; };
 		211705A8899F8270E1FFD0923063CEA4 /* TaskDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TaskDelegate.swift; path = Source/TaskDelegate.swift; sourceTree = "<group>"; };
+		21C406E98CB09132BF723CB4C2691F77 /* Pods-ExampleSimpleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleSimpleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
 		222232A9CBF617DB2A139ED67F6437BE /* Container+SentryDeepSearch.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "Container+SentryDeepSearch.h"; path = "Sources/SentryCrash/Reporting/Filters/Tools/Container+SentryDeepSearch.h"; sourceTree = "<group>"; };
 		22E6C3E9D6BA69122CA76616448EFF42 /* AuviousSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "AuviousSDK-dummy.m"; sourceTree = "<group>"; };
 		23C7C0938400C0E19416972885C5EB16 /* PublishStreamResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PublishStreamResponse.swift; sourceTree = "<group>"; };
 		23D28DAD12F2C308BF6A75CCA3D553C8 /* SentryCrashJSONCodecObjC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashJSONCodecObjC.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashJSONCodecObjC.h; sourceTree = "<group>"; };
 		23EF16781B2330081D48B7985E9B619D /* SPPermissionCalendar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionCalendar.swift; path = Source/SPPermission/Permissions/SPPermissionCalendar.swift; sourceTree = "<group>"; };
 		256D7ECA69B1553A3FF236F88203B74F /* SentryCrashStackCursor_MachineContext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashStackCursor_MachineContext.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_MachineContext.h; sourceTree = "<group>"; };
-		257DCAFBA69E39F4115C3AC88E7FF6B4 /* Pods-ExampleSimpleCall.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleCall.release.xcconfig"; sourceTree = "<group>"; };
 		26B48F07A1D220A8023D3AAFCB238560 /* CallEndedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallEndedEvent.swift; sourceTree = "<group>"; };
 		27A76A2D3D5C8872442FBFE92560C913 /* MQTTClient-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "MQTTClient-Info.plist"; sourceTree = "<group>"; };
 		27EB5444BEDED27ED9EA2D0375D4DC72 /* Validation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Validation.swift; path = Source/Validation.swift; sourceTree = "<group>"; };
-		283906DAB0E6C67CC5E4EBC1F0D22369 /* SentryCrashCPU_x86_32.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCPU_x86_32.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_x86_32.c; sourceTree = "<group>"; };
+		283906DAB0E6C67CC5E4EBC1F0D22369 /* SentryCrashCPU_x86_32.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCPU_x86_32.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_x86_32.c; sourceTree = "<group>"; };
 		28AC5F8712B10757EA7EDA4FB6E23EBF /* SentryClient.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryClient.m; path = Sources/Sentry/SentryClient.m; sourceTree = "<group>"; };
-		29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = AuviousSDK.framework; path = AuviousSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		29ADABD58163A0C29CC8BD378EDE3657 /* SentryCrashReport.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashReport.c; path = Sources/SentryCrash/Recording/SentryCrashReport.c; sourceTree = "<group>"; };
+		29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AuviousSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		29ADABD58163A0C29CC8BD378EDE3657 /* SentryCrashReport.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashReport.c; path = Sources/SentryCrash/Recording/SentryCrashReport.c; sourceTree = "<group>"; };
 		29D338CA9DA93A471DB4F2E4E394D5FD /* MQTTTransport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTTransport.m; path = MQTTClient/MQTTClient/MQTTTransport.m; sourceTree = "<group>"; };
 		2AE9DEF7A7A17C00A696DF53B3822A1B /* CallObserver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallObserver.swift; sourceTree = "<group>"; };
 		2B1B58F23F4849719FD275F7672F585F /* StreamView.xib */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.xib; path = StreamView.xib; sourceTree = "<group>"; };
@@ -748,7 +811,7 @@
 		2B84EBB46A66E5CC7748A357BC768665 /* SentryCrashMonitor_Signal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_Signal.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Signal.h; sourceTree = "<group>"; };
 		2BAF625069D4A4F8DB945F4A09F8416A /* AuviousCallVC.xib */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.xib; path = AuviousCallVC.xib; sourceTree = "<group>"; };
 		2C3996BBDB8FDB1E4CA2AB56DA47C186 /* SentryStacktrace.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryStacktrace.m; path = Sources/Sentry/SentryStacktrace.m; sourceTree = "<group>"; };
-		2C4E5FCD8372DB9FDC5514ADAABD93DD /* Pods_ExampleSimpleCall.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_ExampleSimpleCall.framework; path = "Pods-ExampleSimpleCall.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C4E5FCD8372DB9FDC5514ADAABD93DD /* Pods_ExampleSimpleCall.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleCall.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C746528B2AEBF527F2FE065B33DA8DA /* SentryCrashMachineContext_Apple.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMachineContext_Apple.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashMachineContext_Apple.h; sourceTree = "<group>"; };
 		2D5FDAFAB214ED64C0B5D030AD2629D1 /* SentryCrashLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashLogger.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashLogger.h; sourceTree = "<group>"; };
 		2DD734F4A19118B4843440CCFF488BA5 /* SVProgressHUD.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SVProgressHUD.m; path = SVProgressHUD/SVProgressHUD.m; sourceTree = "<group>"; };
@@ -766,9 +829,12 @@
 		323B4516212191D4DAB209C01AE4AEEC /* SentryQueueableRequestManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryQueueableRequestManager.h; path = Sources/Sentry/include/SentryQueueableRequestManager.h; sourceTree = "<group>"; };
 		32B3C7F5352A5CFAAA3D11FDE2E1786A /* SVProgressAnimatedView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SVProgressAnimatedView.h; path = SVProgressHUD/SVProgressAnimatedView.h; sourceTree = "<group>"; };
 		3352714EBA20A75583C11C979793A1CE /* SocketRocket.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SocketRocket.h; path = SocketRocket/SocketRocket.h; sourceTree = "<group>"; };
+		3389315E7D927A7F6681BF8C89B06EC7 /* Pods-ExampleSimpleCall-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleSimpleCall-frameworks.sh"; sourceTree = "<group>"; };
 		34F4ACB0397C0807C5E99605C97F8878 /* phone@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "phone@3x.png"; path = "AuviousSDK/Assets/phone@3x.png"; sourceTree = "<group>"; };
+		35E7D8C271D7E7BBBB1E9278611A70A6 /* Pods-ExampleSimpleConference-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleSimpleConference-dummy.m"; sourceTree = "<group>"; };
 		35F694B817DCCB773B2691B8196313B6 /* SessionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SessionManager.swift; path = Source/SessionManager.swift; sourceTree = "<group>"; };
 		35FC921C60745D65B95E98A4F25E88AE /* SentryUser.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryUser.m; path = Sources/Sentry/SentryUser.m; sourceTree = "<group>"; };
+		37189B50145A65694FD01A3CAB0DD7BB /* Pods-ExampleConference-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleConference-acknowledgements.plist"; sourceTree = "<group>"; };
 		37350D7D2CC64FE37F668F7BDBD5F52E /* SentryCrashReportSink.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashReportSink.m; path = Sources/Sentry/SentryCrashReportSink.m; sourceTree = "<group>"; };
 		37583B51C5C492E0CD2CCD90D9797715 /* SentryCrashCPU_Apple.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashCPU_Apple.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_Apple.h; sourceTree = "<group>"; };
 		377490807CE241759BD54B4DDEE47E8D /* ConferenceSimpleView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceSimpleView.swift; sourceTree = "<group>"; };
@@ -778,26 +844,25 @@
 		37D3DC39AD650117B079F440B617F5E5 /* SentryCrashMonitor.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor.h; sourceTree = "<group>"; };
 		3874F27FAA04E0BF84798B4222089A0B /* Sentry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Sentry.h; path = Sources/Sentry/include/Sentry.h; sourceTree = "<group>"; };
 		39047ED941844D4A9AD1509C99B48E41 /* SPRequestPermissionLocationHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPRequestPermissionLocationHandler.swift; path = Source/SPPermission/Handlers/SPRequestPermissionLocationHandler.swift; sourceTree = "<group>"; };
-		39331958527DF93550119EB318C46902 /* SentryCrashReportFixer.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashReportFixer.c; path = Sources/SentryCrash/Recording/SentryCrashReportFixer.c; sourceTree = "<group>"; };
+		39331958527DF93550119EB318C46902 /* SentryCrashReportFixer.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashReportFixer.c; path = Sources/SentryCrash/Recording/SentryCrashReportFixer.c; sourceTree = "<group>"; };
+		3A38D8BEDDC7AA09BA730510D39D99C8 /* Pods-ExampleSimpleCall-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleCall-acknowledgements.plist"; sourceTree = "<group>"; };
 		3A51781EE3CFF2E832F713DDC9194D8C /* NSData+SentryCompression.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSData+SentryCompression.m"; path = "Sources/Sentry/NSData+SentryCompression.m"; sourceTree = "<group>"; };
 		3A9698D86F6E2AD7A7088F92C01AC9B4 /* MQTTClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTClient.h; path = MQTTClient/MQTTClient/MQTTClient.h; sourceTree = "<group>"; };
-		3B70E58BB055EE4B47B4B3185602C0A4 /* SentryCrashMach.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMach.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMach.c; sourceTree = "<group>"; };
+		3B70E58BB055EE4B47B4B3185602C0A4 /* SentryCrashMach.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMach.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMach.c; sourceTree = "<group>"; };
 		3BE6E0B15EC814507D9AB6D32B5FE2C9 /* SPPermissionNotification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionNotification.swift; path = Source/SPPermission/Permissions/SPPermissionNotification.swift; sourceTree = "<group>"; };
 		3C56CA8ED5E212B808FE9B2C4E5C83BC /* MQTTSession.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSession.m; path = MQTTClient/MQTTClient/MQTTSession.m; sourceTree = "<group>"; };
 		3C5D8E0A261E2BB151A23D9B1567021E /* SPPermissions.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SPPermissions.xcconfig; sourceTree = "<group>"; };
 		3C92093AF1468863CA187EA6A1CFF24C /* LeaveConferenceRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeaveConferenceRequest.swift; sourceTree = "<group>"; };
 		3E1F7CD700A4329AB2ABD78214DBC98F /* AuthenticationModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthenticationModule.swift; sourceTree = "<group>"; };
-		3F282D213AB9D1ECA1228C986CC9D2BA /* BEMCheckBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = BEMCheckBox.framework; path = BEMCheckBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F282D213AB9D1ECA1228C986CC9D2BA /* BEMCheckBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BEMCheckBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F3858C638355CD42A8AA9EE6865410B /* SentryThread.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryThread.m; path = Sources/Sentry/SentryThread.m; sourceTree = "<group>"; };
 		3F3D814ADBC940643F168A2F8C089279 /* NSData+SentryCompression.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSData+SentryCompression.h"; path = "Sources/Sentry/include/NSData+SentryCompression.h"; sourceTree = "<group>"; };
 		3F46ABF51BEE592E9928D7D4262813CB /* SentryCrashMonitor_System.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_System.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_System.h; sourceTree = "<group>"; };
 		3F920CDFACCAFBC0EC78FC544B27AD81 /* SentryInstallation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryInstallation.h; path = Sources/Sentry/include/SentryInstallation.h; sourceTree = "<group>"; };
-		3FBEF40AC67432DA7B94FAF4A2BC091D /* SentryCrashCPU_x86_64.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCPU_x86_64.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_x86_64.c; sourceTree = "<group>"; };
-		407BD39A48520897E633FC8B8521485A /* Pods-ExampleConference-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleConference-dummy.m"; sourceTree = "<group>"; };
+		3FBEF40AC67432DA7B94FAF4A2BC091D /* SentryCrashCPU_x86_64.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCPU_x86_64.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_x86_64.c; sourceTree = "<group>"; };
 		40A9E060F210983627642716E38AC6FC /* MQTTSession.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSession.h; path = MQTTClient/MQTTClient/MQTTSession.h; sourceTree = "<group>"; };
 		40CBDA49548530AB94E2B2706979370C /* SVProgressHUD.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = SVProgressHUD.bundle; path = SVProgressHUD/SVProgressHUD.bundle; sourceTree = "<group>"; };
 		41BCD47FD94EDDA1A1814857B85327C5 /* MQTTMessage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTMessage.h; path = MQTTClient/MQTTClient/MQTTMessage.h; sourceTree = "<group>"; };
-		41FED86145C1166A6552928084C0E1C8 /* Pods-ExampleSimpleCall-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleSimpleCall-dummy.m"; sourceTree = "<group>"; };
 		42DB02C947A6B1A5FCDF1505B36502DF /* MQTTClient.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MQTTClient.xcconfig; sourceTree = "<group>"; };
 		43459F1A77CC022DEFAB49ADEC268E51 /* ErrorMessages.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ErrorMessages.swift; sourceTree = "<group>"; };
 		435C9640358ABA168C38B47F4D450328 /* SentryAsynchronousOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryAsynchronousOperation.h; path = Sources/Sentry/include/SentryAsynchronousOperation.h; sourceTree = "<group>"; };
@@ -812,24 +877,26 @@
 		47C8B67E09149DB7CAA7F5B0465CDEDC /* Container+SentryDeepSearch.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "Container+SentryDeepSearch.m"; path = "Sources/SentryCrash/Reporting/Filters/Tools/Container+SentryDeepSearch.m"; sourceTree = "<group>"; };
 		496183DD3298CD249F050D806C38B73B /* IceCandidatesFoundEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IceCandidatesFoundEvent.swift; sourceTree = "<group>"; };
 		4BC2DF5E11F1825D291382CD6F68EDCB /* LoginRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginRequest.swift; sourceTree = "<group>"; };
+		4C43C9804A0278B41E666A52EA08157E /* Pods-ExampleCall-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleCall-umbrella.h"; sourceTree = "<group>"; };
 		4C6DC901DFE272F746A4D5A14722C2F5 /* CallEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallEvent.swift; sourceTree = "<group>"; };
 		4CF1FD9FC4416F2C7D6CEBA66D5F3484 /* CallCancelRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallCancelRequest.swift; sourceTree = "<group>"; };
 		4D118276EC7257A74BF482BAACED7940 /* MQTTWebsocketTransport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTWebsocketTransport.h; path = MQTTClient/MQTTClient/MQTTWebsocketTransport/MQTTWebsocketTransport.h; sourceTree = "<group>"; };
 		4DEF13ABC6DB37750FD40FF74B9A6B86 /* MQTTSessionLegacy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSessionLegacy.m; path = MQTTClient/MQTTClient/MQTTSessionLegacy.m; sourceTree = "<group>"; };
 		4F0E991A39378F998E5CC2A728C42EF3 /* KeepAliveRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeepAliveRequest.swift; sourceTree = "<group>"; };
+		4F6E143597194B8F816160116C78A309 /* Pods-ExampleConference-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleConference-acknowledgements.markdown"; sourceTree = "<group>"; };
 		50127E6256498569E49143017B1CC620 /* Sentry.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Sentry.xcconfig; sourceTree = "<group>"; };
-		5128AA31A930F9355F7C549A65F169E4 /* AuviousSDK.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = AuviousSDK.bundle; path = "AuviousSDK-AuviousSDK.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
-		518543827D9678F9D406185149BEC244 /* Pods_ExampleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_ExampleConference.framework; path = "Pods-ExampleConference.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5128AA31A930F9355F7C549A65F169E4 /* AuviousSDK.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AuviousSDK.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		518543827D9678F9D406185149BEC244 /* Pods_ExampleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52A96595E71A396B8758F68619F58785 /* SentryUser.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryUser.h; path = Sources/Sentry/include/SentryUser.h; sourceTree = "<group>"; };
 		536318CE99AC9CE190163EC6C40DE560 /* MQTTSessionSynchron.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSessionSynchron.h; path = MQTTClient/MQTTClient/MQTTSessionSynchron.h; sourceTree = "<group>"; };
 		53BEA3AD9ED29C2EA6998A2EB085E1BA /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		55096CD7FAFAEB7AE00C0A8A80AA7634 /* MQTTDecoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTDecoder.m; path = MQTTClient/MQTTClient/MQTTDecoder.m; sourceTree = "<group>"; };
 		555BD8F9D777A5655F0F73D7CF78A927 /* SwiftyJSON-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SwiftyJSON-prefix.pch"; sourceTree = "<group>"; };
 		55D28492FD2C6BB1F922D956539FA72E /* SnapshotEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotEvent.swift; sourceTree = "<group>"; };
-		562E0A640DE701B0C155C6CCE204E135 /* SentryCrashCPU_arm64.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCPU_arm64.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_arm64.c; sourceTree = "<group>"; };
+		562E0A640DE701B0C155C6CCE204E135 /* SentryCrashCPU_arm64.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCPU_arm64.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_arm64.c; sourceTree = "<group>"; };
 		5666A5F4D5D21FC7E361B7400ABE8122 /* SentryClient.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryClient.h; path = Sources/Sentry/include/SentryClient.h; sourceTree = "<group>"; };
-		572D34C13B1570E9340EA5AD70430DAC /* Pods-ExampleConference-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleConference-frameworks.sh"; sourceTree = "<group>"; };
 		578B5AA508270C6E8CD4D31C365BBB51 /* SentryContext.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryContext.m; path = Sources/Sentry/SentryContext.m; sourceTree = "<group>"; };
+		57FC713F141ECA22C8FE17EC9AE68715 /* Pods_ExampleSimpleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5815A8592F98C0A2071EC4AE2B4F01F6 /* SwiftyJSON.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwiftyJSON.swift; path = Source/SwiftyJSON/SwiftyJSON.swift; sourceTree = "<group>"; };
 		594DBFAD0E3FD0F69E374351AF271C06 /* SwiftyJSON.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SwiftyJSON.xcconfig; sourceTree = "<group>"; };
 		5991B71E271F9B1B3EF2F846BA3ECFF0 /* SentryCrashDynamicLinker.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashDynamicLinker.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashDynamicLinker.h; sourceTree = "<group>"; };
@@ -837,17 +904,18 @@
 		5A049E305261F45F00175CDF22E87B4B /* SentryDebugMeta.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryDebugMeta.h; path = Sources/Sentry/include/SentryDebugMeta.h; sourceTree = "<group>"; };
 		5A18F62C49DA2F8470739A70F8F5F150 /* SentryCrashSysCtl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashSysCtl.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashSysCtl.h; sourceTree = "<group>"; };
 		5AA2A55145ACC2E5A7B07EF10EF6A84A /* MQTTLog.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTLog.m; path = MQTTClient/MQTTClient/MQTTLog.m; sourceTree = "<group>"; };
-		5AC0242A458274B048ABF00ECB04CE48 /* SentryCrashCPU.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCPU.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU.c; sourceTree = "<group>"; };
-		5B88B8FF941ADE2CCCD049C5FF0D725C /* SentryCrashThread.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashThread.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashThread.c; sourceTree = "<group>"; };
+		5AC0242A458274B048ABF00ECB04CE48 /* SentryCrashCPU.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCPU.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU.c; sourceTree = "<group>"; };
+		5B88B8FF941ADE2CCCD049C5FF0D725C /* SentryCrashThread.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashThread.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashThread.c; sourceTree = "<group>"; };
+		5C336F89E7CD22E8337060E149649925 /* Pods-ExampleSimpleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		5CC466FC37CACC3A5943BED4AF4490FD /* SentryCrashReportStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportStore.h; path = Sources/SentryCrash/Recording/SentryCrashReportStore.h; sourceTree = "<group>"; };
 		5CDF15334129D89BF378842B2B503D27 /* SentryCrashReportSink.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportSink.h; path = Sources/Sentry/include/SentryCrashReportSink.h; sourceTree = "<group>"; };
-		5D797E9A5C5782CE845840781FA1CC81 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Alamofire.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5D797E9A5C5782CE845840781FA1CC81 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D90824BD89CFC2E2309EBA1A696CEFC /* SVIndefiniteAnimatedView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SVIndefiniteAnimatedView.h; path = SVProgressHUD/SVIndefiniteAnimatedView.h; sourceTree = "<group>"; };
+		5DB470BEE2827609F5C3BF1ECAED0F1A /* Pods-ExampleSimpleCall-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleSimpleCall-dummy.m"; sourceTree = "<group>"; };
 		5E042C7D9E185576B90815D193993096 /* SentryQueueableRequestManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryQueueableRequestManager.m; path = Sources/Sentry/SentryQueueableRequestManager.m; sourceTree = "<group>"; };
 		5EB9206887CB48A9CCF4756E4C93A3F3 /* SocketRocket-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SocketRocket-umbrella.h"; sourceTree = "<group>"; };
 		5F1C55227A4338F9223114705D99B437 /* UserEndpointModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserEndpointModule.swift; sourceTree = "<group>"; };
-		5FD8E4EBA830B51FA0871FEAA75E4DF8 /* SPPermissions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SPPermissions.framework; path = SPPermissions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		60C9EA0DB67F7DC2AFE4CA89D0A0525E /* Pods-ExampleSimpleCall-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleCall-acknowledgements.plist"; sourceTree = "<group>"; };
+		5FD8E4EBA830B51FA0871FEAA75E4DF8 /* SPPermissions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPPermissions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		618D7F5A81B19627F2F58853433DCE37 /* Alamofire-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-umbrella.h"; sourceTree = "<group>"; };
 		61A000CD9921F6B2E782203B21007C37 /* ViewStreamIceCandidatesRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewStreamIceCandidatesRequest.swift; sourceTree = "<group>"; };
 		61B711E06A26C40560FC7D9AF6514C8D /* MQTTSSLSecurityPolicyDecoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSSLSecurityPolicyDecoder.m; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicyDecoder.m; sourceTree = "<group>"; };
@@ -860,15 +928,15 @@
 		65430CECD56340F164C6869236878B70 /* SentryCrashMonitor_Deadlock.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_Deadlock.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_Deadlock.h; sourceTree = "<group>"; };
 		6560C0877D80379D215EAFFB8E309C3E /* SentryException.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryException.m; path = Sources/Sentry/SentryException.m; sourceTree = "<group>"; };
 		65627CD94DC03813C7985C5AC020E706 /* SPPermissionReminders.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionReminders.swift; path = Source/SPPermission/Permissions/SPPermissionReminders.swift; sourceTree = "<group>"; };
+		65893087C46755CD4A1596A5064E4ACB /* Pods-ExampleSimpleConference-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleConference-Info.plist"; sourceTree = "<group>"; };
 		65A413586BE4DCE1E5C5B65C4D48A6B1 /* MQTTInMemoryPersistence.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTInMemoryPersistence.m; path = MQTTClient/MQTTClient/MQTTInMemoryPersistence.m; sourceTree = "<group>"; };
 		67383ADAF97A70E964C72AF48876C29E /* CallRejectedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallRejectedEvent.swift; sourceTree = "<group>"; };
 		678DD0C62F72B17214C46A342FE3DDCA /* SentryDsn.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryDsn.m; path = Sources/Sentry/SentryDsn.m; sourceTree = "<group>"; };
 		694D71933708DAB32424E0C8086AC843 /* MQTTSSLSecurityPolicy.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSSLSecurityPolicy.h; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicy.h; sourceTree = "<group>"; };
 		69886DDA40DC41FEF90E79EC2999BBF3 /* AuviousSDKBaseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousSDKBaseProtocol.swift; sourceTree = "<group>"; };
 		69980CC463A9C640349F527EFA80DD2C /* AuviousCallVC.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousCallVC.swift; sourceTree = "<group>"; };
-		69EF29CC9C31426EA747E7497B0B6E9A /* SentryCrashID.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashID.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashID.c; sourceTree = "<group>"; };
-		6AAFDE05399580F796B08E9B114406E1 /* Pods-ExampleSimpleCall-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleCall-Info.plist"; sourceTree = "<group>"; };
-		6AC30B919A76D01900579DD9F24D7DE8 /* SentryCrashString.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashString.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashString.c; sourceTree = "<group>"; };
+		69EF29CC9C31426EA747E7497B0B6E9A /* SentryCrashID.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashID.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashID.c; sourceTree = "<group>"; };
+		6AC30B919A76D01900579DD9F24D7DE8 /* SentryCrashString.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashString.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashString.c; sourceTree = "<group>"; };
 		6B52270AEF875468F9E874E611CF4FFF /* SocketRocket-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SocketRocket-dummy.m"; sourceTree = "<group>"; };
 		6B768BEB225D10F543AFAD00769DED31 /* CreateEndpointRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateEndpointRequest.swift; sourceTree = "<group>"; };
 		6CECED049BA9C401B16447795B46B4D8 /* BEMCheckBox-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "BEMCheckBox-prefix.pch"; sourceTree = "<group>"; };
@@ -878,27 +946,29 @@
 		6DF5346931D809EB41216C7427CD1484 /* CallIceCandidatesRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallIceCandidatesRequest.swift; sourceTree = "<group>"; };
 		6DFB05F1220DB2CD301BEE14F8D095EA /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebRTC.framework; path = Frameworks/frameworks/WebRTC.framework; sourceTree = "<group>"; };
 		6E1E188F6417B4018DA72E6F743702E7 /* SPPermissionStyleColors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionStyleColors.swift; path = Source/SPPermission/Dialog/Style/SPPermissionStyleColors.swift; sourceTree = "<group>"; };
-		6E2728378E81E9F235EEB4688708378D /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		6E2728378E81E9F235EEB4688708378D /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6E2AD312ED6044195DD937FEBFA9697B /* EndConferenceRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EndConferenceRequest.swift; sourceTree = "<group>"; };
 		6E8D53C7BB4B0ABAB448BC86D006DB13 /* SPPermissionBlurView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionBlurView.swift; path = Source/SPPermission/Dialog/Views/SPPermissionBlurView.swift; sourceTree = "<group>"; };
 		6EF36576B1CF1EAA8AC136179DC175AE /* Notifications.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Notifications.swift; path = Source/Notifications.swift; sourceTree = "<group>"; };
 		6F0055A1C38C4BB132BDFEC127DE1B07 /* SentryCrashReportVersion.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportVersion.h; path = Sources/SentryCrash/Recording/SentryCrashReportVersion.h; sourceTree = "<group>"; };
 		6F3B5A671A67986B3458CF7DBED1F5A8 /* SentryCrashObjC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashObjC.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjC.h; sourceTree = "<group>"; };
+		6F5CD9D81B711EE4825CE333504EDA96 /* Pods-ExampleSimpleCall.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleCall.release.xcconfig"; sourceTree = "<group>"; };
 		70AFE5FF4512FA214F3D79925742DA28 /* MQTTClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MQTTClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		710C9A2AEA49027A3625446821D52D74 /* MQTTCFSocketTransport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTCFSocketTransport.h; path = MQTTClient/MQTTClient/MQTTCFSocketTransport.h; sourceTree = "<group>"; };
 		711900103966E770603291D60A07E0DC /* ConferenceStreamPublishedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceStreamPublishedEvent.swift; sourceTree = "<group>"; };
 		717C70374397F61E8221B1BC6235725C /* SVProgressHUD.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SVProgressHUD.h; path = SVProgressHUD/SVProgressHUD.h; sourceTree = "<group>"; };
-		71B26F79B91826227ED9B98C4A67C4F6 /* SentryCrashSignalInfo.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashSignalInfo.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSignalInfo.c; sourceTree = "<group>"; };
+		71B26F79B91826227ED9B98C4A67C4F6 /* SentryCrashSignalInfo.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashSignalInfo.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSignalInfo.c; sourceTree = "<group>"; };
 		720E67C5200B5BDDAF47C003F6845297 /* SentryCrashSymbolicator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashSymbolicator.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashSymbolicator.h; sourceTree = "<group>"; };
 		72AC87A5FEB3967CB3590D4D37C4A405 /* Alamofire-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Alamofire-Info.plist"; sourceTree = "<group>"; };
 		739A6CF25A8C7C1C419EA69EBA5EB630 /* SentryCrashMonitor_NSException.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_NSException.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_NSException.h; sourceTree = "<group>"; };
 		74C6D30231A48A7643EA678071353825 /* ResourceBundle-AuviousSDK-AuviousSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-AuviousSDK-AuviousSDK-Info.plist"; sourceTree = "<group>"; };
 		74EBE5CFC6E17373CA2FE236AC1F9CFA /* SRWebSocket.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SRWebSocket.m; path = SocketRocket/SRWebSocket.m; sourceTree = "<group>"; };
-		74F88A1410C7F0D0C07A8360524E24BF /* SentryCrashDebug.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashDebug.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDebug.c; sourceTree = "<group>"; };
+		74F88A1410C7F0D0C07A8360524E24BF /* SentryCrashDebug.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashDebug.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDebug.c; sourceTree = "<group>"; };
+		754CD8A9A7DA8F7B3D5CFFA1793A05A7 /* Pods-ExampleCall-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleCall-acknowledgements.plist"; sourceTree = "<group>"; };
 		760C01F858143741D5B7DAB4D378C6B7 /* SPPermissionStyleDelay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionStyleDelay.swift; path = Source/SPPermission/Dialog/Style/SPPermissionStyleDelay.swift; sourceTree = "<group>"; };
 		766E9DDE42C7EEC3038A1BF9692D18F4 /* SVProgressHUD-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SVProgressHUD-umbrella.h"; sourceTree = "<group>"; };
 		770A2EA53C66E0BA88A26B15FF03DAB1 /* SPPermissionSpeech.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionSpeech.swift; path = Source/SPPermission/Permissions/SPPermissionSpeech.swift; sourceTree = "<group>"; };
-		779185649A2B12258818F2ABA0A97FF3 /* SentryCrashMonitorType.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitorType.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitorType.c; sourceTree = "<group>"; };
+		779185649A2B12258818F2ABA0A97FF3 /* SentryCrashMonitorType.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitorType.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitorType.c; sourceTree = "<group>"; };
 		7890A98AB1B218238F5061231847AF84 /* BEMCheckBox.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = BEMCheckBox.m; path = Classes/BEMCheckBox.m; sourceTree = "<group>"; };
 		791BB97E25A2AEE4DDA5EBE9FF7CC53C /* SentryException.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryException.h; path = Sources/Sentry/include/SentryException.h; sourceTree = "<group>"; };
 		7940A93C4CA4B9FC42FFDA16B52AE04B /* SentryCrashMonitor_NSException.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashMonitor_NSException.m; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_NSException.m; sourceTree = "<group>"; };
@@ -911,8 +981,7 @@
 		7D3D7E8FF8C0BFABFC5C1BC80F48E0DD /* Alamofire-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-prefix.pch"; sourceTree = "<group>"; };
 		7D49CF4A79B243ED61582A0C71CA0824 /* RTCModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RTCModule.swift; sourceTree = "<group>"; };
 		7D711C82C9FC7686951182BA7E5FDBF3 /* SPPermissionMediaLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionMediaLibrary.swift; path = Source/SPPermission/Permissions/SPPermissionMediaLibrary.swift; sourceTree = "<group>"; };
-		7D81B069796FC26F43D8A3BF6C6AEF79 /* Pods_ExampleCall.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_ExampleCall.framework; path = "Pods-ExampleCall.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7DAC271EDFB7FFD836053FAF12DEA409 /* Pods-ExampleCall.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleCall.modulemap"; sourceTree = "<group>"; };
+		7D81B069796FC26F43D8A3BF6C6AEF79 /* Pods_ExampleCall.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleCall.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DC363FB88D98B6CBF9C321C954A81A5 /* SVProgressHUD.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SVProgressHUD.modulemap; sourceTree = "<group>"; };
 		7E925690F654247F2B0F356896E604E1 /* SentryFrame.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryFrame.m; path = Sources/Sentry/SentryFrame.m; sourceTree = "<group>"; };
 		801A01C2E147B6D80CDF7F4A20BE176E /* MQTTCFSocketEncoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTCFSocketEncoder.m; path = MQTTClient/MQTTClient/MQTTCFSocketEncoder.m; sourceTree = "<group>"; };
@@ -922,14 +991,15 @@
 		82A9871AF667C235CB1356107202FD5F /* RTCPeerConnectionContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionContainer.swift; sourceTree = "<group>"; };
 		82C7CE507D0CEE1FFB2D0941CE579675 /* MQTTTransport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTTransport.h; path = MQTTClient/MQTTClient/MQTTTransport.h; sourceTree = "<group>"; };
 		82FA125E4B35F2B8C9A0FDA5D1FC95E7 /* AuviousCallSDK.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousCallSDK.swift; sourceTree = "<group>"; };
-		83238236A52902438345BE79500720F0 /* Pods-ExampleConference.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleConference.modulemap"; sourceTree = "<group>"; };
 		83A12E6D29B1ED6F8889DF649695FCA5 /* SentryBreadcrumbStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumbStore.h; path = Sources/Sentry/include/SentryBreadcrumbStore.h; sourceTree = "<group>"; };
 		83BA7F5AA3EED7E79BE98C9196FA9971 /* SentryStacktrace.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryStacktrace.h; path = Sources/Sentry/include/SentryStacktrace.h; sourceTree = "<group>"; };
 		846A2CDF3AB3036D91C5DB02607015FF /* SPPermissionCloseButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionCloseButton.swift; path = Source/SPPermission/Dialog/Views/SPPermissionCloseButton.swift; sourceTree = "<group>"; };
+		84DC9C5FB24B2FA80E3C2B7EB91B36BD /* Pods-ExampleConference.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleConference.modulemap"; sourceTree = "<group>"; };
 		84E7CFF0DE3B8986026D503B02A7E239 /* BEMAnimationManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = BEMAnimationManager.h; path = Classes/BEMAnimationManager.h; sourceTree = "<group>"; };
 		8527537BE5170A79D8C7863C548A64B4 /* SentryCrashSignalInfo.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashSignalInfo.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashSignalInfo.h; sourceTree = "<group>"; };
 		854A6D8A119AF2F211DD5FB10F6C0D67 /* AuviousSDK.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AuviousSDK.h; path = AuviousSDK/Classes/AuviousSDK.h; sourceTree = "<group>"; };
-		85A01882ED06DFEA2E0CE78BCDB204A7 /* SocketRocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SocketRocket.framework; path = SocketRocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		85A01882ED06DFEA2E0CE78BCDB204A7 /* SocketRocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketRocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		85CB6AA967CAD4DBAEE2F69B53E0241B /* Pods-ExampleSimpleCall-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleCall-Info.plist"; sourceTree = "<group>"; };
 		86C7F06CAC6B2FD89E639796C1BEF599 /* NSDictionary+SentrySanitize.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+SentrySanitize.h"; path = "Sources/Sentry/include/NSDictionary+SentrySanitize.h"; sourceTree = "<group>"; };
 		871A9E19EE8633656A8D8AC79B6608DA /* MQTTProperties.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTProperties.h; path = MQTTClient/MQTTClient/MQTTProperties.h; sourceTree = "<group>"; };
 		873BAF9D9DC3711DE03743FD61726E69 /* SnapshotApprovedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotApprovedEvent.swift; sourceTree = "<group>"; };
@@ -940,21 +1010,22 @@
 		8A1E1B78CA063FC38D6AD147FD37C737 /* AuviousSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = AuviousSDK.modulemap; sourceTree = "<group>"; };
 		8BB135D474D874BBA9A58DACFA0288EF /* SocketRocket.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SocketRocket.modulemap; sourceTree = "<group>"; };
 		8C520D59761C6697194019835A373095 /* AuviousSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AuviousSDK-umbrella.h"; sourceTree = "<group>"; };
-		8C7165C8819DC7D08EBBE4FC931A2D05 /* SentryCrashStackCursor_Backtrace.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashStackCursor_Backtrace.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_Backtrace.c; sourceTree = "<group>"; };
+		8C7165C8819DC7D08EBBE4FC931A2D05 /* SentryCrashStackCursor_Backtrace.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor_Backtrace.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_Backtrace.c; sourceTree = "<group>"; };
 		8CD6F6AD1952B33D28FDEB9BDFDCF677 /* AuviousSDK-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AuviousSDK-prefix.pch"; sourceTree = "<group>"; };
 		8D48BE030B1B2A2D62B10AAE7E787FF7 /* ServerConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServerConfiguration.swift; sourceTree = "<group>"; };
 		8D8CC7748225780CB14A5858C1C17A73 /* SVProgressHUD.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SVProgressHUD.xcconfig; sourceTree = "<group>"; };
 		8D94CEC1D8F7B875575472885162C33E /* ParticipantEndpoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ParticipantEndpoint.swift; sourceTree = "<group>"; };
 		9066548CCD854F107D76C57770410288 /* PublishStreamIceCandidatesRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PublishStreamIceCandidatesRequest.swift; sourceTree = "<group>"; };
 		918B1BCB085EDF2C727AA8B87C89578A /* SPPermissions-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SPPermissions-umbrella.h"; sourceTree = "<group>"; };
-		92F2DEC002A72901078206784F608F63 /* SentryCrashLogger.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashLogger.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashLogger.c; sourceTree = "<group>"; };
+		92F2DEC002A72901078206784F608F63 /* SentryCrashLogger.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashLogger.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashLogger.c; sourceTree = "<group>"; };
 		937C1DA2D61989C65912000D5CBEB0F1 /* SPPermissionActionButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionActionButton.swift; path = Source/SPPermission/Dialog/Views/SPPermissionActionButton.swift; sourceTree = "<group>"; };
 		944D0538E2776C0CAD1C3503F034D629 /* SPPermissionLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionLocation.swift; path = Source/SPPermission/Permissions/SPPermissionLocation.swift; sourceTree = "<group>"; };
 		9488CDDB98D2F73DA87C733FEEC8BCE5 /* SPPermissionStyleAnimation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionStyleAnimation.swift; path = Source/SPPermission/Dialog/Style/SPPermissionStyleAnimation.swift; sourceTree = "<group>"; };
 		961C883606AED7CCD2D04FABA6476817 /* SPPermissionMotion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionMotion.swift; path = Source/SPPermission/Permissions/SPPermissionMotion.swift; sourceTree = "<group>"; };
-		965B743AC778328D30DC36C5C23D268F /* SentryCrashDate.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashDate.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDate.c; sourceTree = "<group>"; };
+		965B743AC778328D30DC36C5C23D268F /* SentryCrashDate.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashDate.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDate.c; sourceTree = "<group>"; };
 		976C6912C19F8CD2099EDF214009F689 /* SentryCrashReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReport.h; path = Sources/SentryCrash/Recording/SentryCrashReport.h; sourceTree = "<group>"; };
 		97A14825D957D0C4AB1FAA7432EB5A8A /* ResponseSerialization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ResponseSerialization.swift; path = Source/ResponseSerialization.swift; sourceTree = "<group>"; };
+		9819B99E9E1ACA0631289F1D9F7A118C /* Pods-ExampleSimpleConference-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleSimpleConference-umbrella.h"; sourceTree = "<group>"; };
 		9850D95BFD05201C579C57AE02BD8116 /* Sentry-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Sentry-Info.plist"; sourceTree = "<group>"; };
 		9904C3A08EDC6CA18648B27CE0D83278 /* SentryCrashInstallation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashInstallation.m; path = Sources/SentryCrash/Installations/SentryCrashInstallation.m; sourceTree = "<group>"; };
 		99440C8DA10D1C327620C06339F2DF82 /* SwiftyJSON.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SwiftyJSON.modulemap; sourceTree = "<group>"; };
@@ -963,29 +1034,28 @@
 		9A49D0E27AC815AC52F369EAEBFC6E84 /* SVRadialGradientLayer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SVRadialGradientLayer.h; path = SVProgressHUD/SVRadialGradientLayer.h; sourceTree = "<group>"; };
 		9A89136FB8DB5D5105C73D2155373D0F /* SentryFileManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryFileManager.h; path = Sources/Sentry/include/SentryFileManager.h; sourceTree = "<group>"; };
 		9A9491BE1B21E506AADB209AF898DAC6 /* StreamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
-		9ADFE7A0703EDEAE4857101B82C371E7 /* SentryCrashStackCursor_MachineContext.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashStackCursor_MachineContext.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_MachineContext.c; sourceTree = "<group>"; };
+		9ADFE7A0703EDEAE4857101B82C371E7 /* SentryCrashStackCursor_MachineContext.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor_MachineContext.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_MachineContext.c; sourceTree = "<group>"; };
+		9B06D3B4C37D2FD3B8A6331F4FDCB0A7 /* Pods-ExampleSimpleConference-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleSimpleConference-frameworks.sh"; sourceTree = "<group>"; };
 		9BCC4F242FFF1A7C123934E24F7994C3 /* SentryCrashStackCursor_SelfThread.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashStackCursor_SelfThread.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_SelfThread.h; sourceTree = "<group>"; };
 		9CF9ACE64FC505C213817D82424BD2BF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		9D7D97CA88BC9BCDB894786FAEAA77F9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		9F1B78FBD7AF4C37923AB91E3849F5B2 /* SessionDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SessionDelegate.swift; path = Source/SessionDelegate.swift; sourceTree = "<group>"; };
-		9F37153B82D76206AD89EE0F70A20C15 /* SentryCrashMachineContext.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMachineContext.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMachineContext.c; sourceTree = "<group>"; };
+		9F37153B82D76206AD89EE0F70A20C15 /* SentryCrashMachineContext.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMachineContext.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMachineContext.c; sourceTree = "<group>"; };
 		9F67E6E3C2EA35F4EB7188F08C72903F /* LoginResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
 		A06C6044BFE5A0E2BC272F658451472D /* ConferenceEndedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceEndedEvent.swift; sourceTree = "<group>"; };
 		A16BEE287A5A62C92957F5FF51927A31 /* MQTTSSLSecurityPolicyTransport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSSLSecurityPolicyTransport.h; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicyTransport.h; sourceTree = "<group>"; };
 		A1DCC2DCB42B0641ECC21ABAAC23DA74 /* SentrySwizzle.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentrySwizzle.m; path = Sources/Sentry/SentrySwizzle.m; sourceTree = "<group>"; };
 		A231E13E35D5C5EAEC5F4983E407D523 /* SPPermissions-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SPPermissions-prefix.pch"; sourceTree = "<group>"; };
-		A26EDFB653252048E323960B022AEC8B /* SentryCrashStackCursor_SelfThread.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashStackCursor_SelfThread.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_SelfThread.c; sourceTree = "<group>"; };
-		A2BE0507AE341001BA2AA4E61F11E128 /* SentryCrashMonitor_User.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_User.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_User.c; sourceTree = "<group>"; };
+		A26EDFB653252048E323960B022AEC8B /* SentryCrashStackCursor_SelfThread.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor_SelfThread.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_SelfThread.c; sourceTree = "<group>"; };
+		A2BE0507AE341001BA2AA4E61F11E128 /* SentryCrashMonitor_User.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor_User.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_User.c; sourceTree = "<group>"; };
 		A2CA953ED133FCED18188126BC673C2F /* SVProgressHUD-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SVProgressHUD-dummy.m"; sourceTree = "<group>"; };
 		A373EECE169B19B10981AC982CA90ADD /* BEMPathManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = BEMPathManager.h; path = Classes/BEMPathManager.h; sourceTree = "<group>"; };
-		A3BBBD304D88AEF04753DDF9813DAD8C /* Pods-ExampleSimpleCall-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleSimpleCall-frameworks.sh"; sourceTree = "<group>"; };
-		A3BEBC71CB2E120C3E81108A6A3D53F0 /* SentryCrashDynamicLinker.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashDynamicLinker.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDynamicLinker.c; sourceTree = "<group>"; };
-		A3D916C1BA0AA52A6FA10578811E0982 /* SentryCrashObjC.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashObjC.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjC.c; sourceTree = "<group>"; };
+		A3BEBC71CB2E120C3E81108A6A3D53F0 /* SentryCrashDynamicLinker.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashDynamicLinker.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashDynamicLinker.c; sourceTree = "<group>"; };
+		A3D916C1BA0AA52A6FA10578811E0982 /* SentryCrashObjC.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashObjC.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjC.c; sourceTree = "<group>"; };
 		A40747F745081FD45605D8B602769B46 /* SocketRocket-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SocketRocket-prefix.pch"; sourceTree = "<group>"; };
 		A4443BC075401185393CD43FB7D582A8 /* phone@2x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "phone@2x.png"; path = "AuviousSDK/Assets/phone@2x.png"; sourceTree = "<group>"; };
-		A450471E80D2F5AEA1D07E9369B2EBB1 /* Pods-ExampleCall-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleCall-Info.plist"; sourceTree = "<group>"; };
-		A5CA4241CE56462683DE11C932C78BC8 /* Pods-ExampleSimpleCall.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleSimpleCall.modulemap"; sourceTree = "<group>"; };
+		A708B3EEC89FAD01B0E997CDA1682A4B /* Pods-ExampleCall-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleCall-dummy.m"; sourceTree = "<group>"; };
 		A72883C3BC1D016778B3C01FAC1B8B04 /* NSString+SentryNSUIntegerValue.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSString+SentryNSUIntegerValue.h"; path = "Sources/Sentry/include/NSString+SentryNSUIntegerValue.h"; sourceTree = "<group>"; };
 		A73967A4C873D36D532E3FC964EA6CC4 /* MQTTClient.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = MQTTClient.modulemap; sourceTree = "<group>"; };
 		A76FEEAEE2A0CEEA6F9D4DB5B7A99CB1 /* MQTTClient-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MQTTClient-umbrella.h"; sourceTree = "<group>"; };
@@ -1000,7 +1070,6 @@
 		AB3DA4C0779EA55959A56EED88CF9ED9 /* SocketRocket-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SocketRocket-Info.plist"; sourceTree = "<group>"; };
 		AB6559B5DB348EFDABF66BF14524DF7A /* SentryBreadcrumb.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumb.h; path = Sources/Sentry/include/SentryBreadcrumb.h; sourceTree = "<group>"; };
 		AC0B21D99DAC35411237A595421EA1C9 /* SentryInstallation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryInstallation.m; path = Sources/Sentry/SentryInstallation.m; sourceTree = "<group>"; };
-		AD15DA73F3C57FEF7A7BB15C3E73602A /* Pods-ExampleCall-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleCall-acknowledgements.plist"; sourceTree = "<group>"; };
 		B05FFC00031F086609788E3E71B312B5 /* SentryCrashString.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashString.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashString.h; sourceTree = "<group>"; };
 		B161AE701968936D8F18107016AF394C /* MQTTPersistence.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTPersistence.h; path = MQTTClient/MQTTClient/MQTTPersistence.h; sourceTree = "<group>"; };
 		B1C82E9E420673D747B6FC582C70A1E1 /* SentryCrashMonitor_User.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_User.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_User.h; sourceTree = "<group>"; };
@@ -1012,7 +1081,6 @@
 		B4436A5353A451537FE0E9ACBF969931 /* SentryCrashSystemCapabilities.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashSystemCapabilities.h; path = Sources/SentryCrash/Recording/SentryCrashSystemCapabilities.h; sourceTree = "<group>"; };
 		B463163E8820C230E535143D2ABDA5B1 /* NSDictionary+SentrySanitize.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSDictionary+SentrySanitize.m"; path = "Sources/Sentry/NSDictionary+SentrySanitize.m"; sourceTree = "<group>"; };
 		B4AAE4984933485DA5EC40DC327937B9 /* MQTTSSLSecurityPolicy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSSLSecurityPolicy.m; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicy.m; sourceTree = "<group>"; };
-		B4BDFCEAC348F9FD0DA1AA2DDA194BEF /* Pods-ExampleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		B54FB2159D8206CAD54E3491A5E1B6C1 /* SPPermissionDrawPermissionPack.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionDrawPermissionPack.swift; path = Source/SPPermission/Dialog/Draw/SPPermissionDrawPermissionPack.swift; sourceTree = "<group>"; };
 		B55E662341A5BF422DD582FC5004782D /* SentryRequestOperation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryRequestOperation.m; path = Sources/Sentry/SentryRequestOperation.m; sourceTree = "<group>"; };
 		B5CEA5F5105134C9FCC14776DBB25EC0 /* Sentry.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = Sentry.modulemap; sourceTree = "<group>"; };
@@ -1020,7 +1088,7 @@
 		B77013BBEC781D0F7B85C89FE14E6B52 /* SPPermissions.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SPPermissions.modulemap; sourceTree = "<group>"; };
 		B7868B516877A91269A28F8E4CF82705 /* NSString+SentryNSUIntegerValue.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+SentryNSUIntegerValue.m"; path = "Sources/Sentry/NSString+SentryNSUIntegerValue.m"; sourceTree = "<group>"; };
 		B7E13B9209969A29D499B5913F2460F0 /* SentryCrashMonitor_System.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashMonitor_System.m; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_System.m; sourceTree = "<group>"; };
-		B86241B2E705D4BEAAA707C9CB71A585 /* AuviousSDK.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = AuviousSDK.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		B86241B2E705D4BEAAA707C9CB71A585 /* AuviousSDK.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = AuviousSDK.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B8E141BF1408867D2E695E86ECD963E3 /* SentryDsn.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryDsn.h; path = Sources/Sentry/include/SentryDsn.h; sourceTree = "<group>"; };
 		B9224B68054F991EE2738CC128BFEFEC /* SocketRocket.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SocketRocket.xcconfig; sourceTree = "<group>"; };
 		B92460D9ADA1EC7495A02753A3A14B5D /* SentryCrashMonitor_AppState.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_AppState.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_AppState.h; sourceTree = "<group>"; };
@@ -1028,8 +1096,9 @@
 		B9569C9914625C60BFE956EFB4F4723F /* MQTTCFSocketEncoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTCFSocketEncoder.h; path = MQTTClient/MQTTClient/MQTTCFSocketEncoder.h; sourceTree = "<group>"; };
 		B95738F8AF16D60C9A0328E31A45BCBB /* SPPermissionCamera.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionCamera.swift; path = Source/SPPermission/Permissions/SPPermissionCamera.swift; sourceTree = "<group>"; };
 		BA05B96AA6EEFE64488024251BF9B191 /* SentryCrashInstallation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashInstallation.h; path = Sources/SentryCrash/Installations/SentryCrashInstallation.h; sourceTree = "<group>"; };
-		BB09089B5DE6E62954667B684A76E17E /* SentryCrashMonitor_AppState.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_AppState.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_AppState.c; sourceTree = "<group>"; };
+		BB09089B5DE6E62954667B684A76E17E /* SentryCrashMonitor_AppState.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMonitor_AppState.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_AppState.c; sourceTree = "<group>"; };
 		BB25A1B3E20F2FD344167996282AA906 /* IceCandidate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IceCandidate.swift; sourceTree = "<group>"; };
+		BB4F1112259B5825DA6B73DD121D38C4 /* Pods-ExampleCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleCall.debug.xcconfig"; sourceTree = "<group>"; };
 		BB8C501DEF0102463212200A6F896238 /* SVIndefiniteAnimatedView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SVIndefiniteAnimatedView.m; path = SVProgressHUD/SVIndefiniteAnimatedView.m; sourceTree = "<group>"; };
 		BBAF8C17B911A66D652373382C3D1CB7 /* SVRadialGradientLayer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SVRadialGradientLayer.m; path = SVProgressHUD/SVRadialGradientLayer.m; sourceTree = "<group>"; };
 		BC5990239D7789ABA8B58F918A147805 /* SPPermissionDrawIconPack.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionDrawIconPack.swift; path = Source/SPPermission/Dialog/Draw/SPPermissionDrawIconPack.swift; sourceTree = "<group>"; };
@@ -1037,25 +1106,28 @@
 		BEFCF075D67D11026B1BCF3C8B222F09 /* SentryCrash.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrash.m; path = Sources/SentryCrash/Recording/SentryCrash.m; sourceTree = "<group>"; };
 		BF3DDCBEEBCA767A4C002EC62051B200 /* ViewStreamRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewStreamRequest.swift; sourceTree = "<group>"; };
 		BF7D33958828EAA4E1F04D469F85F202 /* SentryCrashVarArgs.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashVarArgs.h; path = Sources/SentryCrash/Reporting/Filters/Tools/SentryCrashVarArgs.h; sourceTree = "<group>"; };
-		C06EF1FBE494336550218D3965FAB9C9 /* Pods-ExampleConference-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleConference-acknowledgements.markdown"; sourceTree = "<group>"; };
+		BFD6CFB0F336853E12AAEDD5B515E938 /* Pods-ExampleSimpleCall.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleSimpleCall.modulemap"; sourceTree = "<group>"; };
 		C0C1569670F9B7A0346F902C714D3DF3 /* StreamButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamButton.swift; sourceTree = "<group>"; };
-		C0E79AD53820186F5DE86726D150F447 /* MQTTClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MQTTClient.framework; path = MQTTClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0E79AD53820186F5DE86726D150F447 /* MQTTClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MQTTClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0F97D5C010C35228C235DE567323004 /* SPPermissionStyle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionStyle.swift; path = Source/SPPermission/Dialog/Style/SPPermissionStyle.swift; sourceTree = "<group>"; };
 		C0FEF90BE5301E80A218AED8FA277FD7 /* MQTTCFSocketTransport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTCFSocketTransport.m; path = MQTTClient/MQTTClient/MQTTCFSocketTransport.m; sourceTree = "<group>"; };
 		C1F6DE4CEF6A87265F8B1CE556C32C1E /* SentryCrashMonitorType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitorType.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitorType.h; sourceTree = "<group>"; };
 		C2301B4C3581212A392543BD53E9B447 /* SentryRequestOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryRequestOperation.h; path = Sources/Sentry/include/SentryRequestOperation.h; sourceTree = "<group>"; };
 		C303B8FEB44A99A1F0382EBBDA07E4B4 /* DispatchQueue+Alamofire.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "DispatchQueue+Alamofire.swift"; path = "Source/DispatchQueue+Alamofire.swift"; sourceTree = "<group>"; };
+		C367A88EA16481EB9C7A4B3FD666B9ED /* Pods-ExampleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		C399C512700D486D7C26CC4CB6D4EE68 /* MQTTCoreDataPersistence.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTCoreDataPersistence.h; path = MQTTClient/MQTTClient/MQTTCoreDataPersistence.h; sourceTree = "<group>"; };
 		C3BF96D854190D379FE5CA69EC3A73EE /* SentryCrashMonitor_MachException.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitor_MachException.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_MachException.h; sourceTree = "<group>"; };
 		C42F224C39CF9A2F8FDA260BF4B3CEDF /* SPPermissionContacts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionContacts.swift; path = Source/SPPermission/Permissions/SPPermissionContacts.swift; sourceTree = "<group>"; };
 		C478794D46FCE4089F59862D7556D877 /* MQTTCFSocketDecoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTCFSocketDecoder.m; path = MQTTClient/MQTTClient/MQTTCFSocketDecoder.m; sourceTree = "<group>"; };
 		C479B0E5150BDCD43FF57A4FACE16B7F /* SPPermissions-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SPPermissions-dummy.m"; sourceTree = "<group>"; };
+		C4B60C3263DC560B985FF071AA12BB2C /* Pods-ExampleConference.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleConference.release.xcconfig"; sourceTree = "<group>"; };
 		C52123EB20DE8529EE4A507FC64BEFCF /* ConferenceSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceSummary.swift; sourceTree = "<group>"; };
 		C523B88C0BF0E995D4DB4C13B22197CB /* SentryCrashReportFields.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportFields.h; path = Sources/SentryCrash/Recording/SentryCrashReportFields.h; sourceTree = "<group>"; };
-		C548587E20B70260249294EB714447F3 /* Pods-ExampleSimpleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleSimpleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
+		C585328A18826E63FFD11A91D9E4B71E /* Pods-ExampleCall.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleCall.modulemap"; sourceTree = "<group>"; };
 		C75F83320D184945FD8C47D79689BE3E /* SwiftyJSON-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SwiftyJSON-Info.plist"; sourceTree = "<group>"; };
 		C8F2DCDAE079A86ACDFE0231505D7667 /* Alamofire.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Alamofire.xcconfig; sourceTree = "<group>"; };
-		C9EF5A4E0677CB54B2235150493FEC89 /* SentryCrashMemory.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMemory.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMemory.c; sourceTree = "<group>"; };
+		C9EF5A4E0677CB54B2235150493FEC89 /* SentryCrashMemory.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashMemory.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashMemory.c; sourceTree = "<group>"; };
+		CAD68B64A3DE3110B4FC71201322CC25 /* Pods-ExampleConference-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleConference-umbrella.h"; sourceTree = "<group>"; };
 		CAF9005090DC60A15021A8B3A0AF03DE /* ConferenceLeftEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceLeftEvent.swift; sourceTree = "<group>"; };
 		CB03687872B630FAEDA1D7225BDA6142 /* MQTTCoreDataPersistence.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTCoreDataPersistence.m; path = MQTTClient/MQTTClient/MQTTCoreDataPersistence.m; sourceTree = "<group>"; };
 		CBBB5930BB50EB2487EB1C0A9DFF1425 /* NSDate+SentryExtras.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDate+SentryExtras.h"; path = "Sources/Sentry/include/NSDate+SentryExtras.h"; sourceTree = "<group>"; };
@@ -1068,65 +1140,65 @@
 		CF4CAD5CC447F4981D079B56F735ED88 /* Utilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		CF949A1985E075C2E2EFBD9A09288D9E /* BEMCheckBox-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "BEMCheckBox-Info.plist"; sourceTree = "<group>"; };
 		CF96F461B02B42A7CB59D46B08D7C144 /* SentryOptions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryOptions.h; path = Sources/Sentry/include/SentryOptions.h; sourceTree = "<group>"; };
-		D03B6E7C4E6F963E73123E37B6ACAF2F /* SentryCrashJSONCodec.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashJSONCodec.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashJSONCodec.c; sourceTree = "<group>"; };
+		D03B6E7C4E6F963E73123E37B6ACAF2F /* SentryCrashJSONCodec.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashJSONCodec.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashJSONCodec.c; sourceTree = "<group>"; };
 		D09C74CC91958D0161D6A61B57A165E6 /* SentryBreadcrumbStore.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryBreadcrumbStore.m; path = Sources/Sentry/SentryBreadcrumbStore.m; sourceTree = "<group>"; };
 		D1254E0AC01907C9B33D484605973F32 /* Request.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Request.swift; path = Source/Request.swift; sourceTree = "<group>"; };
-		D1A3D4822ECF28C867AFCBB0D911878E /* SentryCrashC.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashC.c; path = Sources/SentryCrash/Recording/SentryCrashC.c; sourceTree = "<group>"; };
+		D1A3D4822ECF28C867AFCBB0D911878E /* SentryCrashC.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashC.c; path = Sources/SentryCrash/Recording/SentryCrashC.c; sourceTree = "<group>"; };
 		D3F0B2F3E2E4DEF5E7E14FACF4920399 /* APIRequestHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIRequestHandler.swift; sourceTree = "<group>"; };
 		D470BCE27D1CDF6F790E1B929E6FC79F /* SentryJavaScriptBridgeHelper.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryJavaScriptBridgeHelper.m; path = Sources/Sentry/SentryJavaScriptBridgeHelper.m; sourceTree = "<group>"; };
 		D55411B4105A8558E18A58C0C9745416 /* SentryCrashFileUtils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashFileUtils.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashFileUtils.h; sourceTree = "<group>"; };
 		D55643B06C4202117214CC4D8761C3EC /* SPPermissionStyleShadow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionStyleShadow.swift; path = Source/SPPermission/Dialog/Style/SPPermissionStyleShadow.swift; sourceTree = "<group>"; };
 		D5E3FEE1DB54B40F8CC1192741E270D2 /* MQTTSSLSecurityPolicyTransport.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSSLSecurityPolicyTransport.m; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicyTransport.m; sourceTree = "<group>"; };
 		D6954D2031205AFCC608D0DFB9308B13 /* SPPermissionType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionType.swift; path = Source/SPPermission/SPPermissionType.swift; sourceTree = "<group>"; };
-		D816A9B7315F6EE1E191ADFE906297DD /* SentryCrashCachedData.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCachedData.c; path = Sources/SentryCrash/Recording/SentryCrashCachedData.c; sourceTree = "<group>"; };
+		D816A9B7315F6EE1E191ADFE906297DD /* SentryCrashCachedData.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCachedData.c; path = Sources/SentryCrash/Recording/SentryCrashCachedData.c; sourceTree = "<group>"; };
 		D81D7BCD38847CB3BC5D9B8EDB22E590 /* MQTTModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MQTTModule.swift; sourceTree = "<group>"; };
+		D98FD7813222B781052266757A3D5478 /* Pods-ExampleSimpleConference-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleSimpleConference-acknowledgements.plist"; sourceTree = "<group>"; };
 		D9C84308EB2A079EE9A11F9E05AD9B07 /* SentryCrashJSONCodecObjC.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryCrashJSONCodecObjC.m; path = Sources/SentryCrash/Recording/Tools/SentryCrashJSONCodecObjC.m; sourceTree = "<group>"; };
 		DDB756D4E420F27173F54735A2E5D6BA /* MQTTClient-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MQTTClient-prefix.pch"; sourceTree = "<group>"; };
 		DE0B571F2FC159C6732980022D114994 /* SentryBreadcrumbTracker.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumbTracker.h; path = Sources/Sentry/include/SentryBreadcrumbTracker.h; sourceTree = "<group>"; };
 		DEE32ACA5C74D6E212DB748F91291722 /* SentryOptions.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryOptions.m; path = Sources/Sentry/SentryOptions.m; sourceTree = "<group>"; };
+		DF0AF19396855D12D6229D4711E2237B /* Pods-ExampleSimpleConference.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleSimpleConference.modulemap"; sourceTree = "<group>"; };
 		DF39FD17F38810127AA0C3DF69420A55 /* MQTTClient-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MQTTClient-dummy.m"; sourceTree = "<group>"; };
 		DFDC496FCFAA155E9705C9A3217C1961 /* SentryCrashReportFilter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportFilter.h; path = Sources/SentryCrash/Reporting/Filters/SentryCrashReportFilter.h; sourceTree = "<group>"; };
 		E04113743404C9DC36D65BCDFE9542E4 /* APIRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+		E14922FF75540D9ECCE4D30A11886FAE /* Pods-ExampleConference-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleConference-dummy.m"; sourceTree = "<group>"; };
 		E1688F27A35A0303FED682870EBFA563 /* Alamofire.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Alamofire.swift; path = Source/Alamofire.swift; sourceTree = "<group>"; };
 		E188D5D4DC839F1AC18C14C881FCB119 /* MQTTSessionLegacy.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSessionLegacy.h; path = MQTTClient/MQTTClient/MQTTSessionLegacy.h; sourceTree = "<group>"; };
-		E1B4D5881D882E8CD7E766B8E2C08689 /* Pods-ExampleCall-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ExampleCall-dummy.m"; sourceTree = "<group>"; };
 		E23310A7C7E1D93FCCA51E8B62D021A6 /* NetworkReachabilityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NetworkReachabilityManager.swift; path = Source/NetworkReachabilityManager.swift; sourceTree = "<group>"; };
-		E23C076BA70925415F490FEDB215DA92 /* SwiftyJSON.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SwiftyJSON.framework; path = SwiftyJSON.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2331ADC153C746073568C519C1E12AE /* Pods-ExampleConference-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleConference-frameworks.sh"; sourceTree = "<group>"; };
+		E23C076BA70925415F490FEDB215DA92 /* SwiftyJSON.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyJSON.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2677E8719A766FBC4E7A0348424EF08 /* SentryMechanism.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryMechanism.h; path = Sources/Sentry/include/SentryMechanism.h; sourceTree = "<group>"; };
 		E286E9EA0E768762448CA425ADCFEF4C /* BEMCheckBox.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = BEMCheckBox.modulemap; sourceTree = "<group>"; };
 		E332D8BAC8C31DF9C21B7B3C43C9EBF4 /* SentryCrashReportConverter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportConverter.h; path = Sources/Sentry/include/SentryCrashReportConverter.h; sourceTree = "<group>"; };
 		E3DD5449430918ABBB4DFD854A5F906B /* ConferenceJoinedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferenceJoinedEvent.swift; sourceTree = "<group>"; };
 		E58A17839AE1C43B9FF38611E177F8E1 /* MQTTSessionSynchron.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTSessionSynchron.m; path = MQTTClient/MQTTClient/MQTTSessionSynchron.m; sourceTree = "<group>"; };
 		E6AF3370C82562D4A583CF4D28571D95 /* NSError+SentrySimpleConstructor.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSError+SentrySimpleConstructor.m"; path = "Sources/SentryCrash/Recording/Tools/NSError+SentrySimpleConstructor.m"; sourceTree = "<group>"; };
+		E7D3B334AB4EED567614C8F41C5748C6 /* Pods-ExampleSimpleConference-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleSimpleConference-acknowledgements.markdown"; sourceTree = "<group>"; };
 		E8257A5C6625D2AE428D6E4FB6C6CFBC /* AuviousSDKConferenceDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuviousSDKConferenceDelegate.swift; sourceTree = "<group>"; };
 		E8EA7A16CF3504B76EF97E5ACD0EA1DE /* SentryCrashCachedData.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashCachedData.h; path = Sources/SentryCrash/Recording/SentryCrashCachedData.h; sourceTree = "<group>"; };
 		E94C2BD1E13F16993B085BD4CC899E8F /* SentryLog.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryLog.h; path = Sources/Sentry/include/SentryLog.h; sourceTree = "<group>"; };
-		E97D43C46A45EE515A4DA3AF94398441 /* SVProgressHUD.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SVProgressHUD.framework; path = SVProgressHUD.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E9CE42FDD558FA94AC6E13A6BFDCC1A7 /* Pods-ExampleSimpleCall-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleSimpleCall-umbrella.h"; sourceTree = "<group>"; };
-		EA61B62A07CBC6370E377923A70C9CBC /* Pods-ExampleCall-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-ExampleCall-frameworks.sh"; sourceTree = "<group>"; };
+		E97D43C46A45EE515A4DA3AF94398441 /* SVProgressHUD.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SVProgressHUD.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAAE2B09230F9EA2F018025D84E87667 /* ViewStreamResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewStreamResponse.swift; sourceTree = "<group>"; };
-		EAFB4AC11EE280DBB9782B0FB1DB2986 /* SentryCrashStackCursor.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashStackCursor.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor.c; sourceTree = "<group>"; };
+		EAFB4AC11EE280DBB9782B0FB1DB2986 /* SentryCrashStackCursor.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor.c; sourceTree = "<group>"; };
 		EB5D2DE2BB7861F5BEFF51FBAD307150 /* APIErrorHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIErrorHelper.swift; sourceTree = "<group>"; };
-		EB7A442516AB4A329FCEE2AD9C35E840 /* Pods-ExampleCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleCall.debug.xcconfig"; sourceTree = "<group>"; };
 		ECAE79A7D4390904BDBB7CEE36863163 /* SnapshotCameraRequestProcessedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotCameraRequestProcessedEvent.swift; sourceTree = "<group>"; };
-		ECBC9C97DC6B739693A60F98813C54ED /* SentryCrashReportStore.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashReportStore.c; path = Sources/SentryCrash/Recording/SentryCrashReportStore.c; sourceTree = "<group>"; };
+		ECBC9C97DC6B739693A60F98813C54ED /* SentryCrashReportStore.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashReportStore.c; path = Sources/SentryCrash/Recording/SentryCrashReportStore.c; sourceTree = "<group>"; };
 		EE07DA70284253AECEA4F352393E29A6 /* SentryCrashDate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashDate.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashDate.h; sourceTree = "<group>"; };
 		EE1D725D439F151A51CC4A84F01BCA37 /* MQTTSSLSecurityPolicyEncoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MQTTSSLSecurityPolicyEncoder.h; path = MQTTClient/MQTTClient/MQTTSSLSecurityPolicyEncoder.h; sourceTree = "<group>"; };
-		EFD68C931FE97DCCBE8C2B583C4866DA /* SentryCrashSysCtl.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashSysCtl.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSysCtl.c; sourceTree = "<group>"; };
+		EFD68C931FE97DCCBE8C2B583C4866DA /* SentryCrashSysCtl.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashSysCtl.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSysCtl.c; sourceTree = "<group>"; };
 		EFF5379FB2A72FE944CF174AFFCA7339 /* SPPermissionDraw.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionDraw.swift; path = Source/SPPermission/Dialog/Draw/SPPermissionDraw.swift; sourceTree = "<group>"; };
-		F06B34B3DB2E06612C5492439552CDAE /* Pods-ExampleConference-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleConference-acknowledgements.plist"; sourceTree = "<group>"; };
 		F0B1A378648E985C54DC176BB358884B /* SentryAsynchronousOperation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryAsynchronousOperation.m; path = Sources/Sentry/SentryAsynchronousOperation.m; sourceTree = "<group>"; };
 		F1C3F9ED94025B623E7F38364C29C75A /* Sentry-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Sentry-dummy.m"; sourceTree = "<group>"; };
-		F22E13A3278C9B6A6B26147E30C4516B /* Pods-ExampleConference.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleConference.release.xcconfig"; sourceTree = "<group>"; };
 		F303AC88D6C6E1300B826E0F13001167 /* SPPermissionCloseIconView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionCloseIconView.swift; path = Source/SPPermission/Dialog/Views/SPPermissionCloseIconView.swift; sourceTree = "<group>"; };
 		F347A3CA3A222CD3DD09AB0847B892EE /* SocketRocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketRocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F355A0238E564D81712D2D3814CCE7A6 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		F355A0238E564D81712D2D3814CCE7A6 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		F3B0D5A4B8569441652D11D1FED2D8A5 /* SRWebSocket.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SRWebSocket.h; path = SocketRocket/SRWebSocket.h; sourceTree = "<group>"; };
 		F4181752C6C0F9EB2B33E8CDADE14BF6 /* Alamofire-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Alamofire-dummy.m"; sourceTree = "<group>"; };
 		F4C99A3A711C84F3E5310AF1BCFB1B5E /* phone.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = phone.png; path = AuviousSDK/Assets/phone.png; sourceTree = "<group>"; };
 		F4E3A1BB43F79A4BF208DD82CA71CE45 /* BEMCheckBox-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "BEMCheckBox-umbrella.h"; sourceTree = "<group>"; };
+		F6291026C1B655E585B820C36A8F4716 /* Pods-ExampleSimpleCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ExampleSimpleCall.debug.xcconfig"; sourceTree = "<group>"; };
 		F6C1E76185348F57B3D73B8970EF83C2 /* SPPermissionPhotoLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionPhotoLibrary.swift; path = Source/SPPermission/Permissions/SPPermissionPhotoLibrary.swift; sourceTree = "<group>"; };
-		F75B97C592881193107021F539B63755 /* SentryCrashCPU_arm.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashCPU_arm.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_arm.c; sourceTree = "<group>"; };
+		F75B97C592881193107021F539B63755 /* SentryCrashCPU_arm.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashCPU_arm.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashCPU_arm.c; sourceTree = "<group>"; };
 		F82162028AA3FE83F80082528814F250 /* SentryCrash.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrash.h; path = Sources/SentryCrash/Recording/SentryCrash.h; sourceTree = "<group>"; };
 		F8314B98030E46CB091CEFDAE5090AC8 /* NSDate+SentryExtras.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSDate+SentryExtras.m"; path = "Sources/Sentry/NSDate+SentryExtras.m"; sourceTree = "<group>"; };
 		F8518FD5AEAB8F1A208CE90A2A5034F5 /* SentryCrashObjCApple.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashObjCApple.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjCApple.h; sourceTree = "<group>"; };
@@ -1135,12 +1207,11 @@
 		FA08E76AD8C9D7C0C6A7AEC34DA1A89D /* ParticipantEndpointStream.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ParticipantEndpointStream.swift; sourceTree = "<group>"; };
 		FB8B620E9B6E02EE3110871BA93185D6 /* Response.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Response.swift; path = Source/Response.swift; sourceTree = "<group>"; };
 		FBB42459515B02979F2D56E55F560602 /* SentryCrashInstallation+Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SentryCrashInstallation+Private.h"; path = "Sources/SentryCrash/Installations/SentryCrashInstallation+Private.h"; sourceTree = "<group>"; };
-		FD16FBD873455EA2A73C332BFAA7FBDF /* SentryCrashSymbolicator.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashSymbolicator.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSymbolicator.c; sourceTree = "<group>"; };
+		FD16FBD873455EA2A73C332BFAA7FBDF /* SentryCrashSymbolicator.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashSymbolicator.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashSymbolicator.c; sourceTree = "<group>"; };
 		FD482921A4D1823A77B7FF1BCE651AEA /* API.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		FE8991EB4C28589BB05E2A81AF0D1D90 /* SentrySwizzle.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentrySwizzle.h; path = Sources/Sentry/include/SentrySwizzle.h; sourceTree = "<group>"; };
 		FEBA80E6FF4AFCC3FC619BF52B0F1B67 /* CallRingingEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallRingingEvent.swift; sourceTree = "<group>"; };
 		FF17D0F6298277E7501707FF9D2B84DC /* CallRingingRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallRingingRequest.swift; sourceTree = "<group>"; };
-		FF4136B1088AF91A317595342CE925EC /* Pods-ExampleConference-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleConference-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1174,6 +1245,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				8815E740C003144E65984C96BB39C59A /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD8A7717556151DDBFD99AF386E9F147 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1464BE0837726C6E279B469A21289DA1 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1267,43 +1346,6 @@
 			path = "../Target Support Files/GoogleWebRTC";
 			sourceTree = "<group>";
 		};
-		09C8F7C05038568915B19AA6AD6DBE5B /* Pods-ExampleSimpleCall */ = {
-			isa = PBXGroup;
-			children = (
-				A5CA4241CE56462683DE11C932C78BC8 /* Pods-ExampleSimpleCall.modulemap */,
-				C548587E20B70260249294EB714447F3 /* Pods-ExampleSimpleCall-acknowledgements.markdown */,
-				60C9EA0DB67F7DC2AFE4CA89D0A0525E /* Pods-ExampleSimpleCall-acknowledgements.plist */,
-				41FED86145C1166A6552928084C0E1C8 /* Pods-ExampleSimpleCall-dummy.m */,
-				A3BBBD304D88AEF04753DDF9813DAD8C /* Pods-ExampleSimpleCall-frameworks.sh */,
-				6AAFDE05399580F796B08E9B114406E1 /* Pods-ExampleSimpleCall-Info.plist */,
-				E9CE42FDD558FA94AC6E13A6BFDCC1A7 /* Pods-ExampleSimpleCall-umbrella.h */,
-				06DD028ED02FA0C1C4DB08519177900D /* Pods-ExampleSimpleCall.debug.xcconfig */,
-				257DCAFBA69E39F4115C3AC88E7FF6B4 /* Pods-ExampleSimpleCall.release.xcconfig */,
-			);
-			name = "Pods-ExampleSimpleCall";
-			path = "Target Support Files/Pods-ExampleSimpleCall";
-			sourceTree = "<group>";
-		};
-		0A0AEDB6B6159FE02448784C9EBC7B82 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				5D797E9A5C5782CE845840781FA1CC81 /* Alamofire.framework */,
-				5128AA31A930F9355F7C549A65F169E4 /* AuviousSDK.bundle */,
-				29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */,
-				3F282D213AB9D1ECA1228C986CC9D2BA /* BEMCheckBox.framework */,
-				C0E79AD53820186F5DE86726D150F447 /* MQTTClient.framework */,
-				7D81B069796FC26F43D8A3BF6C6AEF79 /* Pods_ExampleCall.framework */,
-				518543827D9678F9D406185149BEC244 /* Pods_ExampleConference.framework */,
-				2C4E5FCD8372DB9FDC5514ADAABD93DD /* Pods_ExampleSimpleCall.framework */,
-				0115C3C00C175D77422084DD0542CE6F /* Sentry.framework */,
-				85A01882ED06DFEA2E0CE78BCDB204A7 /* SocketRocket.framework */,
-				5FD8E4EBA830B51FA0871FEAA75E4DF8 /* SPPermissions.framework */,
-				E97D43C46A45EE515A4DA3AF94398441 /* SVProgressHUD.framework */,
-				E23C076BA70925415F490FEDB215DA92 /* SwiftyJSON.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		0D2C546B5ED3B5F2ED11E7C6791365B6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -1343,25 +1385,7 @@
 				E04113743404C9DC36D65BCDFE9542E4 /* APIRequest.swift */,
 				D3F0B2F3E2E4DEF5E7E14FACF4920399 /* APIRequestHandler.swift */,
 			);
-			name = API;
 			path = API;
-			sourceTree = "<group>";
-		};
-		151529AF3E5A04E949B1A46F8C0F3F2B /* Pods-ExampleConference */ = {
-			isa = PBXGroup;
-			children = (
-				83238236A52902438345BE79500720F0 /* Pods-ExampleConference.modulemap */,
-				C06EF1FBE494336550218D3965FAB9C9 /* Pods-ExampleConference-acknowledgements.markdown */,
-				F06B34B3DB2E06612C5492439552CDAE /* Pods-ExampleConference-acknowledgements.plist */,
-				407BD39A48520897E633FC8B8521485A /* Pods-ExampleConference-dummy.m */,
-				572D34C13B1570E9340EA5AD70430DAC /* Pods-ExampleConference-frameworks.sh */,
-				FF4136B1088AF91A317595342CE925EC /* Pods-ExampleConference-Info.plist */,
-				08785981DC830801687F8BD6C616E2CD /* Pods-ExampleConference-umbrella.h */,
-				B4BDFCEAC348F9FD0DA1AA2DDA194BEF /* Pods-ExampleConference.debug.xcconfig */,
-				F22E13A3278C9B6A6B26147E30C4516B /* Pods-ExampleConference.release.xcconfig */,
-			);
-			name = "Pods-ExampleConference";
-			path = "Target Support Files/Pods-ExampleConference";
 			sourceTree = "<group>";
 		};
 		15871AE46443C1652AC23C4D08F71680 /* Conferences */ = {
@@ -1378,7 +1402,6 @@
 				61A000CD9921F6B2E782203B21007C37 /* ViewStreamIceCandidatesRequest.swift */,
 				BF3DDCBEEBCA767A4C002EC62051B200 /* ViewStreamRequest.swift */,
 			);
-			name = Conferences;
 			path = Conferences;
 			sourceTree = "<group>";
 		};
@@ -1392,7 +1415,6 @@
 				55D28492FD2C6BB1F922D956539FA72E /* SnapshotEvent.swift */,
 				0C431FEC708F63A4CA3B8A3743E667A4 /* SnapshotRequestedEvent.swift */,
 			);
-			name = Snapshots;
 			path = Snapshots;
 			sourceTree = "<group>";
 		};
@@ -1417,7 +1439,6 @@
 				CB0F18AC56F57867753A114D9342AC20 /* Support Files */,
 				DD7DC6A383402C127505FF7D8569AB14 /* Websocket */,
 			);
-			name = MQTTClient;
 			path = MQTTClient;
 			sourceTree = "<group>";
 		};
@@ -1429,8 +1450,24 @@
 				4BC2DF5E11F1825D291382CD6F68EDCB /* LoginRequest.swift */,
 				03093C5F8C4F2203978290DB41D1248D /* UnregisterEndpointRequest.swift */,
 			);
-			name = Common;
 			path = Common;
+			sourceTree = "<group>";
+		};
+		3566DFEAEC99C7004298563130420910 /* Pods-ExampleSimpleConference */ = {
+			isa = PBXGroup;
+			children = (
+				DF0AF19396855D12D6229D4711E2237B /* Pods-ExampleSimpleConference.modulemap */,
+				E7D3B334AB4EED567614C8F41C5748C6 /* Pods-ExampleSimpleConference-acknowledgements.markdown */,
+				D98FD7813222B781052266757A3D5478 /* Pods-ExampleSimpleConference-acknowledgements.plist */,
+				35E7D8C271D7E7BBBB1E9278611A70A6 /* Pods-ExampleSimpleConference-dummy.m */,
+				9B06D3B4C37D2FD3B8A6331F4FDCB0A7 /* Pods-ExampleSimpleConference-frameworks.sh */,
+				65893087C46755CD4A1596A5064E4ACB /* Pods-ExampleSimpleConference-Info.plist */,
+				9819B99E9E1ACA0631289F1D9F7A118C /* Pods-ExampleSimpleConference-umbrella.h */,
+				5C336F89E7CD22E8337060E149649925 /* Pods-ExampleSimpleConference.debug.xcconfig */,
+				1FD5C48FEDDABFF8091B41EBF9F44283 /* Pods-ExampleSimpleConference.release.xcconfig */,
+			);
+			name = "Pods-ExampleSimpleConference";
+			path = "Target Support Files/Pods-ExampleSimpleConference";
 			sourceTree = "<group>";
 		};
 		3C8561A017111124FE206034F644028D /* GoogleWebRTC */ = {
@@ -1439,25 +1476,7 @@
 				78469F86FFB69C28A24642ED2C8B630C /* Frameworks */,
 				03151CAF03FB5322BA07E9F8CC4BAD41 /* Support Files */,
 			);
-			name = GoogleWebRTC;
 			path = GoogleWebRTC;
-			sourceTree = "<group>";
-		};
-		3FE0A25CDD01FED1647531F49F72EE51 /* Pods-ExampleCall */ = {
-			isa = PBXGroup;
-			children = (
-				7DAC271EDFB7FFD836053FAF12DEA409 /* Pods-ExampleCall.modulemap */,
-				0A68A016D074059C0DF047F51A4A52EC /* Pods-ExampleCall-acknowledgements.markdown */,
-				AD15DA73F3C57FEF7A7BB15C3E73602A /* Pods-ExampleCall-acknowledgements.plist */,
-				E1B4D5881D882E8CD7E766B8E2C08689 /* Pods-ExampleCall-dummy.m */,
-				EA61B62A07CBC6370E377923A70C9CBC /* Pods-ExampleCall-frameworks.sh */,
-				A450471E80D2F5AEA1D07E9369B2EBB1 /* Pods-ExampleCall-Info.plist */,
-				19DE6CAAF2E4684AC8F773FE5946E91E /* Pods-ExampleCall-umbrella.h */,
-				EB7A442516AB4A329FCEE2AD9C35E840 /* Pods-ExampleCall.debug.xcconfig */,
-				0454C040325130C121EE9F94BCB325EA /* Pods-ExampleCall.release.xcconfig */,
-			);
-			name = "Pods-ExampleCall";
-			path = "Target Support Files/Pods-ExampleCall";
 			sourceTree = "<group>";
 		};
 		40D8351FF00E6CB087F02BE8ADBD805C /* Protocols */ = {
@@ -1673,8 +1692,28 @@
 				15871AE46443C1652AC23C4D08F71680 /* Conferences */,
 				DCD063E5BF75DBB5D7D8BD633E022D4C /* Snapshots */,
 			);
-			name = Requests;
 			path = Requests;
+			sourceTree = "<group>";
+		};
+		486FD555A0A25AA52F3BC69D922DDABA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5D797E9A5C5782CE845840781FA1CC81 /* Alamofire.framework */,
+				5128AA31A930F9355F7C549A65F169E4 /* AuviousSDK.bundle */,
+				29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */,
+				3F282D213AB9D1ECA1228C986CC9D2BA /* BEMCheckBox.framework */,
+				C0E79AD53820186F5DE86726D150F447 /* MQTTClient.framework */,
+				7D81B069796FC26F43D8A3BF6C6AEF79 /* Pods_ExampleCall.framework */,
+				518543827D9678F9D406185149BEC244 /* Pods_ExampleConference.framework */,
+				2C4E5FCD8372DB9FDC5514ADAABD93DD /* Pods_ExampleSimpleCall.framework */,
+				57FC713F141ECA22C8FE17EC9AE68715 /* Pods_ExampleSimpleConference.framework */,
+				0115C3C00C175D77422084DD0542CE6F /* Sentry.framework */,
+				85A01882ED06DFEA2E0CE78BCDB204A7 /* SocketRocket.framework */,
+				5FD8E4EBA830B51FA0871FEAA75E4DF8 /* SPPermissions.framework */,
+				E97D43C46A45EE515A4DA3AF94398441 /* SVProgressHUD.framework */,
+				E23C076BA70925415F490FEDB215DA92 /* SwiftyJSON.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		4883A560BC3F2395EB9C97831140359F /* Sentry */ = {
@@ -1683,7 +1722,6 @@
 				464C29F92A81E8912AB65DB30A2480B0 /* Core */,
 				56DCEC3B786CF69C6C126D1B73FC3A78 /* Support Files */,
 			);
-			name = Sentry;
 			path = Sentry;
 			sourceTree = "<group>";
 		};
@@ -1699,7 +1737,6 @@
 				23C7C0938400C0E19416972885C5EB16 /* PublishStreamResponse.swift */,
 				EAAE2B09230F9EA2F018025D84E87667 /* ViewStreamResponse.swift */,
 			);
-			name = Responses;
 			path = Responses;
 			sourceTree = "<group>";
 		};
@@ -1715,7 +1752,6 @@
 				FEBA80E6FF4AFCC3FC619BF52B0F1B67 /* CallRingingEvent.swift */,
 				496183DD3298CD249F050D806C38B73B /* IceCandidatesFoundEvent.swift */,
 			);
-			name = Calls;
 			path = Calls;
 			sourceTree = "<group>";
 		};
@@ -1733,6 +1769,17 @@
 			path = "../Target Support Files/Sentry";
 			sourceTree = "<group>";
 		};
+		62E6A17FC0763FED98B93E5ADEA36A42 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				6BC4F875076B6FE8408B0C43ED4E6DA2 /* Pods-ExampleCall */,
+				D935402DA33C1EE29BCFFB79EAFCEF3E /* Pods-ExampleConference */,
+				F4B447E48982C4D334D618752656860E /* Pods-ExampleSimpleCall */,
+				3566DFEAEC99C7004298563130420910 /* Pods-ExampleSimpleConference */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
 		6966C2F9CFD7C564E63A57CDBA7628A0 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -1741,6 +1788,10 @@
 				C0C1569670F9B7A0346F902C714D3DF3 /* StreamButton.swift */,
 				9A9491BE1B21E506AADB209AF898DAC6 /* StreamView.swift */,
 				2B1B58F23F4849719FD275F7672F585F /* StreamView.xib */,
+				0359DFCD24A374DC005BD6A2 /* ConferenceCell.swift */,
+				0359DFCC24A374DC005BD6A2 /* ConferenceCell.xib */,
+				033A62F524A220AE00D4C6F7 /* AuviousConferenceVC.swift */,
+				033A62F624A220AE00D4C6F7 /* AuviousConferenceVC.xib */,
 			);
 			name = Views;
 			path = AuviousSDK/Classes/Views;
@@ -1768,8 +1819,24 @@
 				5815A8592F98C0A2071EC4AE2B4F01F6 /* SwiftyJSON.swift */,
 				88741EF8667EA42D8C8327BBD5D37A3A /* Support Files */,
 			);
-			name = SwiftyJSON;
 			path = SwiftyJSON;
+			sourceTree = "<group>";
+		};
+		6BC4F875076B6FE8408B0C43ED4E6DA2 /* Pods-ExampleCall */ = {
+			isa = PBXGroup;
+			children = (
+				C585328A18826E63FFD11A91D9E4B71E /* Pods-ExampleCall.modulemap */,
+				044EF4AD7C711272C93D5858BB04731B /* Pods-ExampleCall-acknowledgements.markdown */,
+				754CD8A9A7DA8F7B3D5CFFA1793A05A7 /* Pods-ExampleCall-acknowledgements.plist */,
+				A708B3EEC89FAD01B0E997CDA1682A4B /* Pods-ExampleCall-dummy.m */,
+				124287FA488860476BB8096132DC9A48 /* Pods-ExampleCall-frameworks.sh */,
+				04F3A43B8102B2F06AF56B26DDF3671C /* Pods-ExampleCall-Info.plist */,
+				4C43C9804A0278B41E666A52EA08157E /* Pods-ExampleCall-umbrella.h */,
+				BB4F1112259B5825DA6B73DD121D38C4 /* Pods-ExampleCall.debug.xcconfig */,
+				0EF2BE0D1E10F93A42CC1329F00DD707 /* Pods-ExampleCall.release.xcconfig */,
+			);
+			name = "Pods-ExampleCall";
+			path = "Target Support Files/Pods-ExampleCall";
 			sourceTree = "<group>";
 		};
 		6C4E82064CAA57D864FE1D23080F316D /* Modules */ = {
@@ -1807,7 +1874,6 @@
 				0FF53CEEE18184D5E8E1D9D0BC146B54 /* Resources */,
 				19341F86F5BB8E37F558095C8FB08651 /* Support Files */,
 			);
-			name = SVProgressHUD;
 			path = SVProgressHUD;
 			sourceTree = "<group>";
 		};
@@ -1824,7 +1890,6 @@
 				A7D00FE23A0E2BD7D700780EE9C6E0B0 /* BEMPathManager.m */,
 				E70FB32DD3601A7E7351CF4F51EEAF5F /* Support Files */,
 			);
-			name = BEMCheckBox;
 			path = BEMCheckBox;
 			sourceTree = "<group>";
 		};
@@ -1859,7 +1924,6 @@
 				9D9C12151C26E800B09B9ABD76CF1F7A /* Conferences */,
 				181A9B80EC07148963F4C329564BFB3E /* Snapshots */,
 			);
-			name = Events;
 			path = Events;
 			sourceTree = "<group>";
 		};
@@ -1932,7 +1996,6 @@
 				27EB5444BEDED27ED9EA2D0375D4DC72 /* Validation.swift */,
 				E2B3D58B8680EC098D7D38CC7FF48B81 /* Support Files */,
 			);
-			name = Alamofire;
 			path = Alamofire;
 			sourceTree = "<group>";
 		};
@@ -1956,18 +2019,7 @@
 				711900103966E770603291D60A07E0DC /* ConferenceStreamPublishedEvent.swift */,
 				12A963E3667D4786CF16CE493BDB6422 /* ConferenceStreamUnpublishedEvent.swift */,
 			);
-			name = Conferences;
 			path = Conferences;
-			sourceTree = "<group>";
-		};
-		AAF13E2B3E436C28F508B527F4B8B71A /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				3FE0A25CDD01FED1647531F49F72EE51 /* Pods-ExampleCall */,
-				151529AF3E5A04E949B1A46F8C0F3F2B /* Pods-ExampleConference */,
-				09C8F7C05038568915B19AA6AD6DBE5B /* Pods-ExampleSimpleCall */,
-			);
-			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
 		AB5855B93F6ED3DED33656A53EB650FF /* Support Files */ = {
@@ -1990,7 +2042,6 @@
 				FE6AEB48DD0017A44156E29FB4809D30 /* Core */,
 				47AB165333C07C5122CBD270F6033BCF /* Support Files */,
 			);
-			name = SPPermissions;
 			path = SPPermissions;
 			sourceTree = "<group>";
 		};
@@ -2056,8 +2107,8 @@
 				C7BC7276DA2844E0BF66BF26EDC48505 /* Development Pods */,
 				0D2C546B5ED3B5F2ED11E7C6791365B6 /* Frameworks */,
 				69EA05ECA6A664DAAAA3770D4738ED28 /* Pods */,
-				0A0AEDB6B6159FE02448784C9EBC7B82 /* Products */,
-				AAF13E2B3E436C28F508B527F4B8B71A /* Targets Support Files */,
+				486FD555A0A25AA52F3BC69D922DDABA /* Products */,
+				62E6A17FC0763FED98B93E5ADEA36A42 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2069,8 +2120,24 @@
 				74EBE5CFC6E17373CA2FE236AC1F9CFA /* SRWebSocket.m */,
 				AB5855B93F6ED3DED33656A53EB650FF /* Support Files */,
 			);
-			name = SocketRocket;
 			path = SocketRocket;
+			sourceTree = "<group>";
+		};
+		D935402DA33C1EE29BCFFB79EAFCEF3E /* Pods-ExampleConference */ = {
+			isa = PBXGroup;
+			children = (
+				84DC9C5FB24B2FA80E3C2B7EB91B36BD /* Pods-ExampleConference.modulemap */,
+				4F6E143597194B8F816160116C78A309 /* Pods-ExampleConference-acknowledgements.markdown */,
+				37189B50145A65694FD01A3CAB0DD7BB /* Pods-ExampleConference-acknowledgements.plist */,
+				E14922FF75540D9ECCE4D30A11886FAE /* Pods-ExampleConference-dummy.m */,
+				E2331ADC153C746073568C519C1E12AE /* Pods-ExampleConference-frameworks.sh */,
+				1DF7015106265D35861B3B4313B34C3F /* Pods-ExampleConference-Info.plist */,
+				CAD68B64A3DE3110B4FC71201322CC25 /* Pods-ExampleConference-umbrella.h */,
+				C367A88EA16481EB9C7A4B3FD666B9ED /* Pods-ExampleConference.debug.xcconfig */,
+				C4B60C3263DC560B985FF071AA12BB2C /* Pods-ExampleConference.release.xcconfig */,
+			);
+			name = "Pods-ExampleConference";
+			path = "Target Support Files/Pods-ExampleConference";
 			sourceTree = "<group>";
 		};
 		DCD063E5BF75DBB5D7D8BD633E022D4C /* Snapshots */ = {
@@ -2079,7 +2146,6 @@
 				209F780E2A8FF21459E682120121C653 /* SnapshotCameraRQRPRequest.swift */,
 				15E64B6CCFE448E3F0B4E908B93E430A /* SnapshotUploadRequest.swift */,
 			);
-			name = Snapshots;
 			path = Snapshots;
 			sourceTree = "<group>";
 		};
@@ -2153,8 +2219,24 @@
 				A9BB9B2AB4298ED0384B8D0A0A05045B /* CallRequest.swift */,
 				FF17D0F6298277E7501707FF9D2B84DC /* CallRingingRequest.swift */,
 			);
-			name = Calls;
 			path = Calls;
+			sourceTree = "<group>";
+		};
+		F4B447E48982C4D334D618752656860E /* Pods-ExampleSimpleCall */ = {
+			isa = PBXGroup;
+			children = (
+				BFD6CFB0F336853E12AAEDD5B515E938 /* Pods-ExampleSimpleCall.modulemap */,
+				21C406E98CB09132BF723CB4C2691F77 /* Pods-ExampleSimpleCall-acknowledgements.markdown */,
+				3A38D8BEDDC7AA09BA730510D39D99C8 /* Pods-ExampleSimpleCall-acknowledgements.plist */,
+				5DB470BEE2827609F5C3BF1ECAED0F1A /* Pods-ExampleSimpleCall-dummy.m */,
+				3389315E7D927A7F6681BF8C89B06EC7 /* Pods-ExampleSimpleCall-frameworks.sh */,
+				85CB6AA967CAD4DBAEE2F69B53E0241B /* Pods-ExampleSimpleCall-Info.plist */,
+				05EFC976E46742592C7237B6898C3A17 /* Pods-ExampleSimpleCall-umbrella.h */,
+				F6291026C1B655E585B820C36A8F4716 /* Pods-ExampleSimpleCall.debug.xcconfig */,
+				6F5CD9D81B711EE4825CE333504EDA96 /* Pods-ExampleSimpleCall.release.xcconfig */,
+			);
+			name = "Pods-ExampleSimpleCall";
+			path = "Target Support Files/Pods-ExampleSimpleCall";
 			sourceTree = "<group>";
 		};
 		F5A323A401AA47ABC8C60D76B208781D /* Models */ = {
@@ -2385,6 +2467,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5E1AD239252F52F7280C664FCA105E0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C70FE0BDC47561BF491E97F8E208114 /* Pods-ExampleSimpleConference-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E187464BFEBAD7A3CAE1BBA35A9845B6 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -2597,6 +2687,31 @@
 			productReference = 29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		B259D511CCFC6944EDF81015107E75AB /* Pods-ExampleSimpleConference */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B161CB4F12490C61ED1D61ECDBEAFD55 /* Build configuration list for PBXNativeTarget "Pods-ExampleSimpleConference" */;
+			buildPhases = (
+				D5E1AD239252F52F7280C664FCA105E0 /* Headers */,
+				840D8135105D19BD51EB8EED46D8FDC3 /* Sources */,
+				AD8A7717556151DDBFD99AF386E9F147 /* Frameworks */,
+				572792926C6B904511C8F6C532A821A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DAC8A2BCE03BF5D8BB6F6F3FE2C9DA47 /* PBXTargetDependency */,
+				5BAA4B8E76565F2CD0B36B1B6C1B2314 /* PBXTargetDependency */,
+				57F4E6B13EE2ED0E40EF075AF23CA89E /* PBXTargetDependency */,
+				F2235361A3E3D2E43BCD8C129B9FB7A1 /* PBXTargetDependency */,
+				71E877EC48493465743B9853891C3222 /* PBXTargetDependency */,
+				BC05915C7A4FC9F630F7CB6350759637 /* PBXTargetDependency */,
+				4257F12E42C4E4A7475DEA9631B86F03 /* PBXTargetDependency */,
+			);
+			name = "Pods-ExampleSimpleConference";
+			productName = "Pods-ExampleSimpleConference";
+			productReference = 57FC713F141ECA22C8FE17EC9AE68715 /* Pods_ExampleSimpleConference.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		B4315C804D18AF023D6D89A8281BF589 /* BEMCheckBox */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BE39F7342AB06BF9CCDA02C04B9917DB /* Build configuration list for PBXNativeTarget "BEMCheckBox" */;
@@ -2722,7 +2837,7 @@
 				Base,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = 0A0AEDB6B6159FE02448784C9EBC7B82 /* Products */;
+			productRefGroup = 486FD555A0A25AA52F3BC69D922DDABA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -2735,6 +2850,7 @@
 				6258B61BC5A1FA6D56F0F315C54EEE50 /* Pods-ExampleCall */,
 				FBA84DB4B3B4B7266533583CD2BD1006 /* Pods-ExampleConference */,
 				D688FDB8FB69F7E00898E1D1C14FCADD /* Pods-ExampleSimpleCall */,
+				B259D511CCFC6944EDF81015107E75AB /* Pods-ExampleSimpleConference */,
 				94BDCD90B52278D1FB244A66E8B95A4A /* Sentry */,
 				1948D0B63D2CF6A48E18B0B292BC6091 /* SocketRocket */,
 				46887A2B3EC5EA71E0B560973C79F7A6 /* SPPermissions */,
@@ -2767,6 +2883,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		473D3E892ABB6C798CFF290644259B34 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		572792926C6B904511C8F6C532A821A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2838,6 +2961,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1094DAE851D8B04D2E2C0F7CD9E05563 /* AuviousSDK.bundle in Resources */,
+				0359DFCE24A374DC005BD6A2 /* ConferenceCell.xib in Resources */,
+				033A62F824A220AE00D4C6F7 /* AuviousConferenceVC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2939,6 +3064,7 @@
 				C7963349F9301D60FD7CF7F7FF5EC96A /* AuviousCallVC.swift in Sources */,
 				79F03B19A2A11FB6CE351479D8D56C82 /* AuviousCallVC.xib in Sources */,
 				57737B157D2626175C0E19C1E1F38AAD /* AuviousConferenceSDK.swift in Sources */,
+				033A62F724A220AE00D4C6F7 /* AuviousConferenceVC.swift in Sources */,
 				9868733B652DD478BFD6D00C0D7B80DF /* AuviousSDK-dummy.m in Sources */,
 				EE9D3DF4C2B8AEB36E042F5EBEFFB791 /* AuviousSDKBaseProtocol.swift in Sources */,
 				2340BC332985E6699829D9757AE560CB /* AuviousSDKCallDelegate.swift in Sources */,
@@ -3000,6 +3126,7 @@
 				67AC74B6E73B82B64FFA3F7130078BBE /* StopViewStreamRequest.swift in Sources */,
 				2D75CC45D65155F2CCB0FA143FAD533D /* StreamButton.swift in Sources */,
 				CD1E0795C337BD211B1EE9F6F26B1D3A /* StreamView.swift in Sources */,
+				0359DFCF24A374DC005BD6A2 /* ConferenceCell.swift in Sources */,
 				3515C635ADF51F2A2BF492391977DE05 /* StreamView.xib in Sources */,
 				9AADBC4BF54D2F5F3221257AFE97C61D /* UnpublishStreamRequest.swift in Sources */,
 				A7A8A5D9788FFFC4440007DF5832FA7A /* UnregisterEndpointRequest.swift in Sources */,
@@ -3051,6 +3178,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E53FD236D4F944C9FE9F8448B25033B /* Pods-ExampleConference-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		840D8135105D19BD51EB8EED46D8FDC3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16BFC6C179C2F645E0F043B527364254 /* Pods-ExampleSimpleConference-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3258,6 +3393,12 @@
 			target = 94BDCD90B52278D1FB244A66E8B95A4A /* Sentry */;
 			targetProxy = 0945EDE89FDA709B0A2779627B9902AC /* PBXContainerItemProxy */;
 		};
+		4257F12E42C4E4A7475DEA9631B86F03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SwiftyJSON;
+			target = D118A6A04828FD3CDA8640CD2B6796D2 /* SwiftyJSON */;
+			targetProxy = 5F81387B697D46BA1C73B509BC0F5164 /* PBXContainerItemProxy */;
+		};
 		4A17BDDC9F858D521301544E87A6E8AD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SocketRocket;
@@ -3270,11 +3411,23 @@
 			target = 18D5937A1FF4E1064BDE592E5E9532EA /* MQTTClient */;
 			targetProxy = B8502241EFCB6C012B90B0857BCB6EC5 /* PBXContainerItemProxy */;
 		};
+		57F4E6B13EE2ED0E40EF075AF23CA89E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GoogleWebRTC;
+			target = EC23BFCFC44D9224C054485B54824B8E /* GoogleWebRTC */;
+			targetProxy = C3D1A32F34A5BB70995C214A265E3B7C /* PBXContainerItemProxy */;
+		};
 		58FC5112498E5642591889B68168F64D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Sentry;
 			target = 94BDCD90B52278D1FB244A66E8B95A4A /* Sentry */;
 			targetProxy = C9BEF3E9935C4713C4709D6B14813F47 /* PBXContainerItemProxy */;
+		};
+		5BAA4B8E76565F2CD0B36B1B6C1B2314 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AuviousSDK;
+			target = A5DFC4AB0D3BCF770CD8ED04AC057C82 /* AuviousSDK */;
+			targetProxy = 1F1C20763DB8838BEF8AC79BB04F4580 /* PBXContainerItemProxy */;
 		};
 		606AAD8AA53665A4B517191D8CF23C02 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3299,6 +3452,12 @@
 			name = SwiftyJSON;
 			target = D118A6A04828FD3CDA8640CD2B6796D2 /* SwiftyJSON */;
 			targetProxy = 0DB8D2D48F2A22FB6A2C01BA147E5EFA /* PBXContainerItemProxy */;
+		};
+		71E877EC48493465743B9853891C3222 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Sentry;
+			target = 94BDCD90B52278D1FB244A66E8B95A4A /* Sentry */;
+			targetProxy = 993FF54AE731A7F1D795C201504D2AC6 /* PBXContainerItemProxy */;
 		};
 		752492717A2B2EF327A94307F5696B9D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3348,6 +3507,12 @@
 			target = 46887A2B3EC5EA71E0B560973C79F7A6 /* SPPermissions */;
 			targetProxy = 1D4DBD28C274C07F87E7BBFDAC4C4546 /* PBXContainerItemProxy */;
 		};
+		BC05915C7A4FC9F630F7CB6350759637 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SocketRocket;
+			target = 1948D0B63D2CF6A48E18B0B292BC6091 /* SocketRocket */;
+			targetProxy = 2AB155663FF684EA87F59BDCD372F561 /* PBXContainerItemProxy */;
+		};
 		C2E3E2C776FB32DFDEA6E14899DE3A7D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SocketRocket;
@@ -3372,6 +3537,18 @@
 			target = 1948D0B63D2CF6A48E18B0B292BC6091 /* SocketRocket */;
 			targetProxy = AE8EC0A0EDBC1A0ED63D75D5ECE76B47 /* PBXContainerItemProxy */;
 		};
+		DAC8A2BCE03BF5D8BB6F6F3FE2C9DA47 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Alamofire;
+			target = EAAA1AD3A8A1B59AB91319EE40752C6D /* Alamofire */;
+			targetProxy = 6F181C68F78259920AED4980520D2044 /* PBXContainerItemProxy */;
+		};
+		F2235361A3E3D2E43BCD8C129B9FB7A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MQTTClient;
+			target = 18D5937A1FF4E1064BDE592E5E9532EA /* MQTTClient */;
+			targetProxy = B59DA23F62FBBD0D48A51F0C5AAE589A /* PBXContainerItemProxy */;
+		};
 		F85108A966A592B98A543E2D99407C44 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SPPermissions;
@@ -3389,7 +3566,7 @@
 /* Begin XCBuildConfiguration section */
 		13437745541C15889B52A133B8F6480C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 06DD028ED02FA0C1C4DB08519177900D /* Pods-ExampleSimpleCall.debug.xcconfig */;
+			baseConfigurationReference = F6291026C1B655E585B820C36A8F4716 /* Pods-ExampleSimpleCall.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -3549,7 +3726,7 @@
 		};
 		3751F2B7D89F7563A9F5ED17F8FE6466 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B4BDFCEAC348F9FD0DA1AA2DDA194BEF /* Pods-ExampleConference.debug.xcconfig */;
+			baseConfigurationReference = C367A88EA16481EB9C7A4B3FD666B9ED /* Pods-ExampleConference.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -3598,6 +3775,41 @@
 			};
 			name = Debug;
 		};
+		43267E549A206BC44DD43DCD241A737C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FD5C48FEDDABFF8091B41EBF9F44283 /* Pods-ExampleSimpleConference.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		43A06B4E477B18D61F37982B8FCE90C8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3C5D8E0A261E2BB151A23D9B1567021E /* SPPermissions.xcconfig */;
@@ -3622,7 +3834,7 @@
 				PRODUCT_NAME = SPPermissions;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -3851,6 +4063,40 @@
 			};
 			name = Release;
 		};
+		85881DC32A50CA4C88694F62BB71B8CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5C336F89E7CD22E8337060E149649925 /* Pods-ExampleSimpleConference.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
 		9771BD6F9CBA2014DBD48EA763148EBC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 31CF69DB5395FDC6C9BD7456463D5953 /* AuviousSDK.xcconfig */;
@@ -3915,7 +4161,7 @@
 		};
 		A4FB297953C7A8724A74F9D303FF0E08 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 257DCAFBA69E39F4115C3AC88E7FF6B4 /* Pods-ExampleSimpleCall.release.xcconfig */;
+			baseConfigurationReference = 6F5CD9D81B711EE4825CE333504EDA96 /* Pods-ExampleSimpleCall.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -4001,8 +4247,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 			};
@@ -4010,7 +4255,7 @@
 		};
 		B3E7C8FA2188F2C8D40FD2756CA6417F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB7A442516AB4A329FCEE2AD9C35E840 /* Pods-ExampleCall.debug.xcconfig */;
+			baseConfigurationReference = BB4F1112259B5825DA6B73DD121D38C4 /* Pods-ExampleCall.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -4066,7 +4311,7 @@
 				PRODUCT_NAME = SPPermissions;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4171,7 +4416,7 @@
 		};
 		D934102D5ECED1640C1F8DFB00A246E4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F22E13A3278C9B6A6B26147E30C4516B /* Pods-ExampleConference.release.xcconfig */;
+			baseConfigurationReference = C4B60C3263DC560B985FF071AA12BB2C /* Pods-ExampleConference.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -4206,7 +4451,7 @@
 		};
 		DDE3065E288A42A9E0F212CA92F3BC5B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0454C040325130C121EE9F94BCB325EA /* Pods-ExampleCall.release.xcconfig */;
+			baseConfigurationReference = 0EF2BE0D1E10F93A42CC1329F00DD707 /* Pods-ExampleCall.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -4437,6 +4682,15 @@
 			buildConfigurations = (
 				9771BD6F9CBA2014DBD48EA763148EBC /* Debug */,
 				CFA28C3ECFCA339ED0CE30D9903FB2AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B161CB4F12490C61ED1D61ECDBEAFD55 /* Build configuration list for PBXNativeTarget "Pods-ExampleSimpleConference" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85881DC32A50CA4C88694F62BB71B8CE /* Debug */,
+				43267E549A206BC44DD43DCD241A737C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -57,7 +57,7 @@
                                 <constraint firstAttribute="width" constant="60" id="l26-yc-F8x"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <state key="normal" image="video_icon">
+                            <state key="normal" title="SV">
                                 <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </state>
                             <state key="selected" image="video_icon"/>
@@ -73,7 +73,7 @@
                                 <constraint firstAttribute="height" constant="45" id="Wnw-mK-g0K"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <state key="normal" image="cam_icon">
+                            <state key="normal" title="SC">
                                 <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </state>
                             <state key="selected" title="Stop Cam" image="cam_icon">
@@ -91,7 +91,7 @@
                                 <constraint firstAttribute="height" constant="45" id="oIb-eN-QrC"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <state key="normal" image="mic_icon">
+                            <state key="normal" title="SM">
                                 <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </state>
                             <state key="selected" image="mic_icon">
@@ -109,7 +109,7 @@
                                 <constraint firstAttribute="width" constant="45" id="TAe-XH-GpJ"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <state key="normal" image="speaker_icon">
+                            <state key="normal" title="AUDIO">
                                 <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </state>
                             <state key="selected" image="leave_icon"/>
@@ -125,7 +125,7 @@
                                 <constraint firstAttribute="height" constant="45" id="5zY-go-nyg"/>
                             </constraints>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <state key="normal" image="switchCam_icon">
+                            <state key="normal" title="SWI">
                                 <color key="titleColor" red="0.26051741839999998" green="0.2605243921" blue="0.260520637" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </state>
                             <state key="selected" image="end_icon"/>
@@ -318,8 +318,6 @@
         <image name="end_icon" width="65" height="65"/>
         <image name="leave_icon" width="65" height="65"/>
         <image name="mic_icon" width="65" height="65"/>
-        <image name="speaker_icon" width="65" height="65"/>
-        <image name="switchCam_icon" width="65" height="65"/>
         <image name="video_icon" width="65" height="65"/>
     </resources>
 </document>

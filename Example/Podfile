@@ -25,6 +25,11 @@ target 'ExampleSimpleCall' do
   pod 'Sentry', '~> 4.4'
 end
 
+target 'ExampleSimpleConference' do
+  pod 'AuviousSDK', :path => '../'
+  pod 'Sentry', '~> 4.4'
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     if ['Alamofire', 'SwiftyJSON'].include? target.name
