@@ -374,8 +374,8 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
         }
         
         UIView.transition(with: sender, duration: 0.5, options: .transitionCrossDissolve, animations: {
-            sender.setImage(UIImage(named: imageName), for: .normal)
-            sender.setImage(UIImage(named: imageName), for: .selected)
+            //sender.setImage(UIImage(named: imageName), for: .normal)
+            //sender.setImage(UIImage(named: imageName), for: .selected)
             label.text = labelText
         }, completion: nil)
     }

@@ -62,6 +62,7 @@ public enum AuviousSDKGenericError: Error {
     case AUTHENTICATION_FAILURE
     case NETWORK_ERROR
     case UNKNOWN_FAILURE
+    case CONFERENCE_MISSING
 }
 
 extension AuviousSDKGenericError: LocalizedError {
@@ -77,6 +78,8 @@ extension AuviousSDKGenericError: LocalizedError {
             return NSLocalizedString("Network connection error", comment: "Error description")
         case .UNKNOWN_FAILURE:
             return NSLocalizedString("An error has occurred during your call", comment: "Error description")
+        case .CONFERENCE_MISSING:
+            return NSLocalizedString("Conference name not specified", comment: "Error description")
         }
     }
 }

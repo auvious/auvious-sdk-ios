@@ -45,6 +45,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// List of MQTT messages flagged for delayed processing
     private var mqttDelayedMessages: [ConferenceEvent] = [ConferenceEvent]()
     
+    /// List of MQTT messages cached for future processing
+    private var mqttCachedMessages: [ConferenceEvent] = [ConferenceEvent]()
+    
     /// Configuration setting for the interval between the processing of delayed messages
     private let delayedMessageWaitTime: Double = 0.7
     
@@ -489,6 +492,17 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                         
                         //Notify the user of successfully joining
                         onSuccess(self.currentConference)
+                        
+                        //Process any messages we might have received before joining was complete
+                        if !self.mqttCachedMessages.isEmpty {
+                            for m in self.mqttCachedMessages {
+                                print("Processing cached MQTT msg")
+                                self.delegateConferenceMessage(msg: m)
+                            }
+                            
+                            print("Finished processing of \(self.mqttCachedMessages.count) cached messages")
+                            self.mqttCachedMessages.removeAll()
+                        }
                     }
                 }, onFailure: {(error) in
                     onFailure(error)
@@ -618,26 +632,32 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /**
      Performs a login, using the configuration settings already provided.
      
+     - Parameter oAuth: Determines the type of authentication to be used internally
      - Parameter onLoginSuccess: Called after a successful login, returning your endpoint
      - Parameter onLoginFailure: Called in case of failure with the designated Error
      */
-    public func login(onLoginSuccess: @escaping (String?)->(), onLoginFailure: @escaping (Error)->()) {
+    public func login(oAuth: Bool, onLoginSuccess: @escaping (String?)->(), onLoginFailure: @escaping (Error)->()) {
         guard let username = self.username, let password = self.password, let organization = self.organization else {
             onLoginFailure(AuviousSDKError.missingSDKCredentials)
             return
         }
         
-        AuthenticationModule.sharedInstance.login(username: username, password: password, organization: organization, onSuccess: {endpointId in
+        AuthenticationModule.sharedInstance.login(oAuth: oAuth, username: username, password: password, organization: organization, onSuccess: { endpointId in
             
             if let endpoint = endpointId {
                 //Server configuration has already been retrieved
                 AuviousConferenceSDK.sharedInstance.initializeARTCClient()
+                
                 MQTTModule.sharedInstance.configure(endpointId: endpoint)
                 MQTTModule.sharedInstance.conferenceDelegate = self
-                MQTTModule.sharedInstance.connect()
+                MQTTModule.sharedInstance.connect(onSubscription: {
+                    print("$$$ MQTT says we subscribed")
+                    
+                    onLoginSuccess(endpointId)
+                    //We no longer want the closure to be called
+                    MQTTModule.sharedInstance.clearSubscriptionCallback()
+                })
             }
-            
-            onLoginSuccess(endpointId)
         }, onFailure: {error in
             onLoginFailure(error)
         })
@@ -724,6 +744,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     internal func conferenceMessageReceived(_ object: ConferenceEvent) {
         //Ensure we're in a conference
         guard let conference = currentConference else {
+            mqttCachedMessages.append(object)
+            
+            print("WARNING: Ignoring conference msg received because we're not in a conference")
             return
         }
         
@@ -744,6 +767,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         mqttMessages.append(object)
         if !isProcessingMessages {
             processMessages()
+        } else {
+            print("WARNING: Ignoring conference msg processing because we're already processing")
         }
     }
     
@@ -788,6 +813,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         
         //Increase conference version number
         currentConference?.version += 1
+        print("Conference msg processed, our version is now \(currentConference?.version)")
     }
     
     //Schedules the delayed message processor timer

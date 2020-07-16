@@ -25,7 +25,7 @@ class LoginVC: UIViewController, UITextFieldDelegate {
         title = "Login"
         
         usernameTextfield.text = "panos.lapousis@gmail.com"
-        passwordTextfield.text = "123456q!"
+        passwordTextfield.text = "ss"
         organizationTextfield.text = "boomar"
         
         loginBtn.layer.cornerRadius = 5.0
@@ -66,7 +66,8 @@ class LoginVC: UIViewController, UITextFieldDelegate {
             
             SVProgressHUD.show(withStatus: NSLocalizedString("Please wait...", comment: "General"))
             
-            AuviousConferenceSDK.sharedInstance.login(onLoginSuccess: {(userId) in
+            #warning("TODO: oAuth flag is hardcoded")
+            AuviousConferenceSDK.sharedInstance.login(oAuth: true, onLoginSuccess: {(userId) in
                 SVProgressHUD.dismiss()
                 
                 if let _ = userId {
