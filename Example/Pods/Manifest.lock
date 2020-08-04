@@ -1,19 +1,19 @@
 PODS:
   - Alamofire (4.9.1)
+  - AuviousGoogleWebRTC (84.4147.0)
   - AuviousSDK (1.0.7):
     - Alamofire (~> 4.7)
-    - GoogleWebRTC (~> 1.1.29400)
+    - AuviousGoogleWebRTC (~> 84.4147.0)
     - MQTTClient/Websocket (~> 0.15)
     - SwiftyJSON (~> 5.0)
   - BEMCheckBox (1.4.1)
-  - GoogleWebRTC (1.1.29400)
   - MQTTClient/Min (0.15.3)
   - MQTTClient/Websocket (0.15.3):
     - MQTTClient/Min
     - SocketRocket
-  - Sentry (4.4.3):
-    - Sentry/Core (= 4.4.3)
-  - Sentry/Core (4.4.3)
+  - Sentry (4.5.0):
+    - Sentry/Core (= 4.5.0)
+  - Sentry/Core (4.5.0)
   - SocketRocket (0.5.1)
   - SPPermissions/Camera (4.1.4):
     - SPPermissions/Core
@@ -32,15 +32,16 @@ DEPENDENCIES:
   - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - Alamofire
     - BEMCheckBox
-    - GoogleWebRTC
     - MQTTClient
     - Sentry
     - SocketRocket
     - SPPermissions
     - SwiftyJSON
+  https://gitlab.auvious.com/auvious/api/CocoaPodSpecs.git:
+    - AuviousGoogleWebRTC
 
 EXTERNAL SOURCES:
   AuviousSDK:
@@ -56,16 +57,16 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AuviousSDK: b9de287f13084195d2d03d853782c9f0714d3d02
+  AuviousGoogleWebRTC: 29ff40c6486cdc2b7dd5ef7f36308909e986b3ee
+  AuviousSDK: 227665e40c640f05556ffe1a8267de818f65fb54
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
-  GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
-  Sentry: 14bdd673870e8cf64932b149fad5bbbf39a9b390
+  Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 00f02ddd87050ae8c62dc35427e7a5696f725f9f
+PODFILE CHECKSUM: 0278370586f2bb09b7148b64f4e9780e584ec788
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.3

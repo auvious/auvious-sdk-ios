@@ -31,8 +31,8 @@
     "SwiftyJSON": [
       "~> 5.0"
     ],
-    "GoogleWebRTC": [
-      "~> 1.1.29400"
+    "AuviousGoogleWebRTC": [
+      "~> 84.4147.0"
     ],
     "MQTTClient/Websocket": [
       "~> 0.15"
