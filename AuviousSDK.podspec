@@ -44,7 +44,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   # s.dependency 'AFNetworking', '~> 2.3'
   s.dependency 'Alamofire', '~> 4.7'
   s.dependency 'SwiftyJSON', '~> 5.0'
-  s.dependency 'AuviousGoogleWebRTC', '~> 84.4147.0'
+  s.dependency 'AuviousGoogleWebRTC', '~> 84.4147.2'
   s.dependency 'MQTTClient/Websocket', '~> 0.15'
   s.swift_versions = '4.2'
   s.pod_target_xcconfig = {

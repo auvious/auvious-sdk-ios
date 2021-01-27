@@ -22,7 +22,7 @@ pod 'AuviousSDK'
 
 ## Author
 
-Epi Vou, pimenas@gmail.com
+Auvious, team@auvious.com
 
 ## License
 

@@ -15,10 +15,10 @@ Podfile:
 
 
 ```
-source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/auvious/CocoaPodSpecs.git'
 target 'YOUR_APPLICATION_TARGET_NAME_HERE' do
- platform :ios, '9.0'
- pod 'GoogleWebRTC'
+ platform :ios, '10.0'
+ pod 'AuviousGoogleWebRTC'
 end
 ```
 

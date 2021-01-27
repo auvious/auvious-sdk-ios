@@ -33,7 +33,7 @@
       "~> 5.0"
     ],
     "AuviousGoogleWebRTC": [
-      "~> 84.4147.0"
+      "~> 84.4147.2"
     ],
     "MQTTClient/Websocket": [
       "~> 0.15"

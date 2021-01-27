@@ -1701,7 +1701,7 @@ freely, subject to the following restrictions:
 
 ## AuviousSDK
 
-Copyright (c) 2019 Epi Vou <pimenas@gmail.com>
+Copyright (c) 2019 Auvious <team@auvious.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

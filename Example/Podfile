@@ -1,7 +1,7 @@
 platform :ios, '10.0'
 
-source 'https://gitlab.auvious.com/auvious/api/CocoaPodSpecs.git'
-source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/auvious/CocoaPodSpecs.git'
+source 'https://cdn.cocoapods.org/'
 
 use_frameworks!
 

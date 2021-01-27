@@ -1,9 +1,9 @@
 PODS:
   - Alamofire (4.9.1)
-  - AuviousGoogleWebRTC (84.4147.0)
+  - AuviousGoogleWebRTC (84.4147.2)
   - AuviousSDK (1.0.7):
     - Alamofire (~> 4.7)
-    - AuviousGoogleWebRTC (~> 84.4147.0)
+    - AuviousGoogleWebRTC (~> 84.4147.2)
     - MQTTClient/Websocket (~> 0.15)
     - SwiftyJSON (~> 5.0)
   - BEMCheckBox (1.4.1)
@@ -32,7 +32,9 @@ DEPENDENCIES:
   - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/auvious/CocoaPodSpecs.git:
+    - AuviousGoogleWebRTC
+  trunk:
     - Alamofire
     - BEMCheckBox
     - MQTTClient
@@ -40,8 +42,6 @@ SPEC REPOS:
     - SocketRocket
     - SPPermissions
     - SwiftyJSON
-  https://gitlab.auvious.com/auvious/api/CocoaPodSpecs.git:
-    - AuviousGoogleWebRTC
 
 EXTERNAL SOURCES:
   AuviousSDK:
@@ -57,8 +57,8 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AuviousGoogleWebRTC: 29ff40c6486cdc2b7dd5ef7f36308909e986b3ee
-  AuviousSDK: 2fcdc2dd5a2ee02b23568d3250e4f0f0459a3b7a
+  AuviousGoogleWebRTC: e5a8ede1fb2e5e7a3e75f9a871c08dff7678f963
+  AuviousSDK: 321e6ad2c3dc7e80ce852f5816b595fb7730fdbc
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
   Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
@@ -67,6 +67,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 0278370586f2bb09b7148b64f4e9780e584ec788
+PODFILE CHECKSUM: 1ae56e192be0e084974f1f9235783f41ae1979ae
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.10.1
