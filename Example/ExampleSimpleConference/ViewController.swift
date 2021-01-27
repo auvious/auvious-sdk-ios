@@ -19,13 +19,38 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBOutlet weak var conferenceLabel: UILabel!
     @IBOutlet weak var callButton: UIButton!
     
-    var vc: AuviousConferenceVC!
+    //Gradient
+    private var gradientLayer = CAGradientLayer()
+    
+    var vc: AuviousConferenceVCNew!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        usernameTextfield.attributedPlaceholder = NSAttributedString(string: "Username", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
+        passwordTextfield.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
+        conferenceTextfield.attributedPlaceholder = NSAttributedString(string: "Conference to create/join", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
+        
+        usernameTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        passwordTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        conferenceTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        
+        usernameTextfield.textColor = .white
+        passwordTextfield.textColor = .white
+        conferenceTextfield.textColor = .white
+        
+        gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
+        gradientLayer.setAngle(150)
+        view.layer.insertSublayer(gradientLayer, at: 0)
+        
         checkPermissions()
         callButton.layer.cornerRadius = 5.0
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        gradientLayer.frame = view.bounds
     }
     
     //MARK: Actions
@@ -38,12 +63,39 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         if validateForm() {
             let username = usernameTextfield.text!
             let password = passwordTextfield.text!
-            let conferenceName = conferenceTextfield.text!
+            let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             
+            //TEST-RTC
+            let clientId: String = "auvious"
             let baseEndpoint: String = "https://test-rtc.stg.auvious.com/"
             let mqttEndpoint: String = "wss://events.test-rtc.stg.auvious.com/ws"
+            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
             
-            self.vc = AuviousConferenceVC(username: username, password: password, conference: conferenceName, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self)
+            //GENESYS DEV (customer)
+//            let clientId: String = "customer"
+//            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
+//            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
+//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+
+            //GENESYS DEV (test-agent)
+//            let clientId: String = "test-agent"
+//            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
+//            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
+//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+            
+            //GENESYS STAGING (customer)
+//            let clientId: String = "customer"
+//            let baseEndpoint: String = "https://genesys.stg.auvious.com/"
+//            let mqttEndpoint: String = "wss://events.genesys.stg.auvious.com/ws"
+//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+            
+            //GENESYS PROD (customer)
+//            let clientId: String = "customer"
+//            let baseEndpoint: String = "https://genesys.auvious.com/"
+//            let mqttEndpoint: String = "wss://events.genesys.auvious.com/ws"
+//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+
+            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self)
             self.vc.modalPresentationStyle = .fullScreen
             self.navigationController?.present(vc, animated: true, completion: nil)
         }
@@ -121,5 +173,30 @@ extension UIViewController {
         }))
         
         present(alert, animated: true, completion: nil)
+    }
+}
+
+extension CAGradientLayer {
+    func setAngle(_ angle: Float = 0) {
+        let alpha: Float = angle / 360
+        let startPointX = powf(
+            sinf(2 * Float.pi * ((alpha + 0.75) / 2)),
+            2
+        )
+        let startPointY = powf(
+            sinf(2 * Float.pi * ((alpha + 0) / 2)),
+            2
+        )
+        let endPointX = powf(
+            sinf(2 * Float.pi * ((alpha + 0.25) / 2)),
+            2
+        )
+        let endPointY = powf(
+            sinf(2 * Float.pi * ((alpha + 0.5) / 2)),
+            2
+        )
+
+        endPoint = CGPoint(x: CGFloat(endPointX),y: CGFloat(endPointY))
+        startPoint = CGPoint(x: CGFloat(startPointX), y: CGFloat(startPointY))
     }
 }

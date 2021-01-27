@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os
 
 public protocol AuviousSimpleCallDelegate: class {
     
@@ -64,12 +65,12 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
 //            Client.shared = try Client(dsn: "https://74765e10688d4f828efd5bc5320c607c@sentry.auvious.com/9")
 //            try Client.shared?.startCrashHandler()
 //        } catch let error {
-//            print("\(error)")
+//            os_log("\(error)")
 //        }
         
         super.init(nibName: nil, bundle: nil)
         
-        log("UI Call component: initialised")
+        os_log("UI Call component: initialised", log: Log.callUI, type: .debug)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -105,7 +106,7 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-        log("UI Call component: viewDidLoad")
+        os_log("UI Call component: viewDidLoad", log: Log.callUI, type: .debug)
         
         view.backgroundColor = .black
         
@@ -147,27 +148,27 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
         if !performedInitialValidations {
             //Check for permissions
             if !validateVideoPermissions() {
-                log("UI Call component: viewDidAppear - no video permission, returning error")
+                os_log("No video permission, returning error", log: Log.callUI, type: .debug)
                 handleError(AuviousSDKError.videoPermissionIsDisabled)
                 return
             }
             
             if !validateMicPermissions() {
-                log("UI Call component: viewDidAppear - no audio permission, returning error")
+                os_log("No audio permission, returning error", log: Log.callUI, type: .debug)
                 handleError(AuviousSDKError.audioPermissionIsDisabled)
                 return
             }
             
             //Check credentials
             if username.isEmpty || password.isEmpty {
-                log("UI Call component: viewDidAppear - username/password empty, returning error")
+                os_log("username/password empty, returning error", log: Log.callUI, type: .debug)
                 handleError(AuviousSDKError.missingSDKCredentials)
                 return
             }
             
             //Check call target
             if target.isEmpty {
-                log("UI Call component: viewDidAppear - target is empty, returning error")
+                os_log("target is empty, returning error", log: Log.callUI, type: .debug)
                 handleError(AuviousSDKError.missingCallTarget)
                 return
             }
@@ -178,27 +179,27 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
         if performedInitialValidations {
             AuviousCallSDK.sharedInstance.delegate = self
             AuviousCallSDK.sharedInstance.configure(username: username, password: password, organization: "", baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
-            log("UI Call component: Configured CallSDK")
+            os_log("Configured CallSDK", log: Log.callUI, type: .debug)
             
             //Get access to the local video stream immediately
             let localStream = AuviousCallSDK.sharedInstance.createLocalMediaStream(type: .micAndCam, streamId: "test")
-            log("UI Call component: Created local media stream")
+            os_log("Created local media stream", log: Log.callUI, type: .debug)
             
             AuviousCallSDK.sharedInstance.login(oAuth: true, onLoginSuccess: {(endpointId) in
-                self.log("UI Call component: Login success")
+                os_log("Login success", log: Log.callUI, type: .debug)
                 
                 do {
                     self.callId = try AuviousCallSDK.sharedInstance.startCallFlow(target: self.target, sendMode: .micAndCam, localStream: localStream, sipHeaders: self.sipHeaders)
                     self.startWaitingAnswerTimer()
                     
-                    self.log("UI Call component: Started call \(self.callId)")
+                    os_log("Started call %@", log: Log.callUI, type: .debug, String(describing: self.callId))
                 } catch let error {
-                    self.log("UI Call component: startCallFlow error \(error.localizedDescription)")
+                    os_log("startCallFlow error %@", log: Log.callUI, type: .error, error.localizedDescription)
                     self.handleError(error)
                 }
                 
             }, onLoginFailure: {(error) in
-                self.log("UI Call component: Login error \(error.localizedDescription)")
+                os_log("Login error %@", log: Log.callUI, type: .error, error.localizedDescription)
                 self.handleError(error)
             })
         }
@@ -223,7 +224,7 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     }
     
     public func auviousSDK(agentSwitchedCamera toFront: Bool) {
-        self.log("UI Call component: agentSwitchedCamera toFront \(toFront)")
+        os_log("agentSwitchedCamera toFront %@", log: Log.callUI, type: .debug, toFront)
         
         //UIView.animate(withDuration: 0.3, animations: {
             
@@ -290,30 +291,30 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     public func auviousSDK(didReceiveCallEvent event: CallEvent) {
         switch event.type! {
         case .callCreated:
-            self.log("UI Call component: didReceiveCallEvent CallCreated - ignoring")
+            os_log("didReceiveCallEvent CallCreated - ignoring", log: Log.callUI, type: .debug)
             break
         case .callRinging:
-            self.log("UI Call component: didReceiveCallEvent CallRinging - ignoring")
+            os_log("didReceiveCallEvent CallRinging - ignoring", log: Log.callUI, type: .debug)
             break
         case .callCancelled:
-            self.log("UI Call component: didReceiveCallEvent CallCancelled - ignoring")
+            os_log("didReceiveCallEvent CallCancelled - ignoring", log: Log.callUI, type: .debug)
             break
         case .callRejected:
-            self.log("UI Call component: didReceiveCallEvent CallRejected")
+            os_log("didReceiveCallEvent CallRejected", log: Log.callUI, type: .debug)
             handleCallRejected(event as! CallRejectedEvent)
         case .callAnswered:
-            self.log("UI Call component: didReceiveCallEvent CallAnswered")
+            os_log("didReceiveCallEvent CallAnswered", log: Log.callUI, type: .debug)
             callEstablished = true
         case .callEnded:
-            self.log("UI Call component: didReceiveCallEvent CallEnded")
+            os_log("didReceiveCallEvent CallEnded", log: Log.callUI, type: .debug)
             handleCallEnded()
         default:
-            self.log("UI Call component: didReceiveCallEvent Unknown - ignoring")
+            os_log("didReceiveCallEvent Unknown - ignoring", log: Log.callUI, type: .debug)
             break
         }
     }
     
-    public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String) {
+    public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
         DispatchQueue.main.async {
             
             self.view.bringSubviewToFront(self.localVideoView)
@@ -344,7 +345,7 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
                 self.remoteVideoView.audioStreamAdded()
             }
             
-            self.log("UI Call component: didReceiveRemoteStream")
+            os_log("didReceiveRemoteStream", log: Log.callUI, type: .debug)
         }
     }
     
@@ -353,26 +354,26 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
         self.localVideoView.alpha = 1.0
         localVideoView.videoStreamAdded(localVideoTrack)
         
-        self.log("UI Call component: didReceiveLocalStream")
+        os_log("didReceiveLocalStream", log: Log.callUI, type: .debug)
     }
     
     //MARK: Actions
     
     //Hangs up or cancels a call
     @objc private func hangupButtonPressed() {
-        self.log("UI Call component: hangup pressed")
+        os_log("hangup pressed", log: Log.callUI, type: .debug)
         
         guard let callId = callId else {
-            self.log("UI Call component: hangupButtonPressed, no call id found, ignoring")
+            os_log("hangupButtonPressed, no call id found, ignoring", log: Log.callUI, type: .debug)
             return
         }
         
         do {
             if callEstablished {
-                self.log("UI Call component: hangupButtonPressed: call is established, hanging up")
+                os_log("hangupButtonPressed: call is established, hanging up", log: Log.callUI, type: .debug)
                 try AuviousCallSDK.sharedInstance.hangupCall(callId: callId)
             } else {
-                self.log("UI Call component: hangupButtonPressed: call not established, cancelling call")
+                os_log("hangupButtonPressed: call not established, cancelling call", log: Log.callUI, type: .debug)
                 try AuviousCallSDK.sharedInstance.cancelCall(callId: callId)
             }
             
@@ -383,31 +384,18 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
             handleCallEnded()
             
             if callEstablished {
-                self.log("UI Call component: hangupButtonPressed: error hanging up \(error.localizedDescription)")
+                os_log("hangupButtonPressed: error hanging up %@", log: Log.callUI, type: .error, error.localizedDescription)
             } else {
-                self.log("UI Call component: hangupButtonPressed: error cancelling call \(error.localizedDescription)")
+                os_log("hangupButtonPressed: error cancelling call %@", log: Log.callUI, type: .error, error.localizedDescription)
             }
         }
     }
     
     //MARK: Helpers
-    private func log(_ msg: String){
-        print(msg)
-//        let event = Event(level: .debug)
-//        event.message = msg
-//        event.environment = baseEndpoint
-//
-//        let extra = ["platform": "ios", "callId" : callId]
-//        event.extra = extra
-//
-//        Client.shared?.send(event: event)
-        print("self.log(\(msg))")
-    }
-    
     private func handleError(_ error: Error) {
         let auviousError = error as! AuviousSDKError
         
-        self.log("UI Call component: handleError \(error.localizedDescription)")
+        os_log("handleError %@", log: Log.callUI, type: .error, error.localizedDescription)
         
         switch auviousError {
         case .videoPermissionIsDisabled:
@@ -428,7 +416,7 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     }
     
     private func handleCallEnded(_ event: CallEndedEvent? = nil, success: Bool = true) {
-        self.log("UI Call component: handleCallEnded with success flag \(success)")
+        os_log("handleCallEnded with success flag %@", log: Log.callUI, type: .debug, success)
         if (callId != nil){
             callId = nil
             callEstablished = false
@@ -437,10 +425,10 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
             hangupButton.alpha = 0.0
             
             AuviousCallSDK.sharedInstance.rtcClient.removeAllStreams()
-            try AuviousCallSDK.sharedInstance.logout(onSuccess: {
-                self.log("UI Call component: logout.onSuccess()")
+            AuviousCallSDK.sharedInstance.logout(onSuccess: {
+                os_log("logout.onSuccess()", log: Log.callUI, type: .debug)
             }, onFailure: { (Error) in
-                self.log("UI Call component: logout.onFailure() \(Error)")
+                os_log("logout.onFailure() %@", log: Log.callUI, type: .error, Error.localizedDescription)
             })
             
             UIView.animate(withDuration: 0.1, animations: {
@@ -448,9 +436,9 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
                 self.localVideoView.alpha = 0.0
             }, completion: {finished in
                 
-                self.log("UI Call component: handleCallEnded call ended")
+                os_log("handleCallEnded call ended", log: Log.callUI, type: .debug)
                 if success {
-                    self.log("UI Call component: handleCallEnded success, invoking onCallSuccess()")
+                    os_log("handleCallEnded success, invoking onCallSuccess()", log: Log.callUI, type: .debug)
                     self.delegate?.onCallSuccess()
                 } else {
                     self.handleError(AuviousSDKError.callNotAnswered)
@@ -460,7 +448,7 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     }
     
     private func handleCallRejected(_ event: CallRejectedEvent){
-        self.log("UI Call component: handleCallRejected")
+        os_log("handleCallRejected", log: Log.callUI, type: .debug)
         
         callEstablished = false
         remoteVideoView?.resetStreamView()
@@ -482,24 +470,24 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     
     //Stops the keep alive timer
     private func stopWaitingAnswerTimer() {
-        self.log("UI Call component: stopped answer waiting timer")
+        os_log("stopped answer waiting timer", log: Log.callUI, type: .debug)
         waitForAnswerTimer?.invalidate()
     }
     
     //Answer waiting timer tick
     @objc private func onWaitingAnswerTick(timer: Timer) {
         guard !callEstablished, let callId = callId else {
-            self.log("UI Call component: onWaitingAnswerTick but callEstablished = \(callEstablished) - invalidating timer")
+            os_log("onWaitingAnswerTick but callEstablished = %@ - invalidating timer", log: Log.callUI, type: .debug, callEstablished)
             stopWaitingAnswerTimer()
             return
         }
         
-        self.log("UI Call components: onWaitingAnswerTick() - cancel outgoing call")
+        os_log("onWaitingAnswerTick() - cancel outgoing call", log: Log.callUI, type: .debug)
         do {
             try AuviousCallSDK.sharedInstance.cancelCall(callId: callId)
             handleCallEnded(success: false)
         } catch let error {
-            self.log("UI Call component: onWaitingAnswerTick: error cancelling call \(error.localizedDescription)")
+            os_log("onWaitingAnswerTick: error cancelling call %@", log: Log.callUI, type: .error, error.localizedDescription)
         }
     }
 }

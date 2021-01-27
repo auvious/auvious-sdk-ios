@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Client.shared = try Client(dsn: "https://74765e10688d4f828efd5bc5320c607c@sentry.auvious.com/9")
             try Client.shared?.startCrashHandler()
         } catch let error {
-            print("\(error)")
+            os_log("Sentry configuration error %@", log: Log.conferenceApp, type: .error, error.localizedDescription)
         }
         
         return true
@@ -54,7 +54,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationDidBecomeActive(_ application: UIApplication) {
-        print("applicationDidBecomeActive")
         AuviousConferenceSDK.sharedInstance.onApplicationResume()
     }
     

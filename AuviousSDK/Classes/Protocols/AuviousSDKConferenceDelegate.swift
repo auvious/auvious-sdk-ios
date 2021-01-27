@@ -13,6 +13,17 @@ import Foundation
  */
 public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
     
+    func auviousSDK(trackUnmuted type: StreamType, endpointId: String)
+    
+    func auviousSDK(trackMuted type: StreamType, endpointId: String)
+    
+    /**
+     Called when a conference is put on hold or resumed
+     
+     - Parameter event: The event received.
+     */
+    func auviousSDK(conferenceOnHold flag: Bool)
+    
     /**
      Called when a conference event is received.
      

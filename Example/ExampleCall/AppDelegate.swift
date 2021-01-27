@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Client.shared = try Client(dsn: "https://74765e10688d4f828efd5bc5320c607c@sentry.auvious.com/9")
             try Client.shared?.startCrashHandler()
         } catch let error {
-            print("\(error)")
+            os_log("Sentry configuration error %@", log: Log.callApp, type: .error, error.localizedDescription)
         }
 
         return true

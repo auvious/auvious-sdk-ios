@@ -157,8 +157,7 @@ class ConferenceSelectionVC: UIViewController, UITextFieldDelegate, UITableViewD
             SVProgressHUD.dismiss()
             
             if let conference = conferenceSummary {
-                print("Created conference with id \(String(describing: conference.id))")
-                
+                os_log("Created conference with id %@", log: Log.conferenceApp, type: .info, String(describing: conference.id))
                 self.statusLabel.text = "Created conference"
                 self.conferenceTextfield.text = conference.id
                 self.addCreatedConferenceToList(confId: conference.id)
@@ -181,7 +180,7 @@ class ConferenceSelectionVC: UIViewController, UITextFieldDelegate, UITableViewD
             SVProgressHUD.dismiss()
             
             if let jConference = joinedConference {
-                print("Joined conference with id \(String(describing: jConference.id))")
+                os_log("Joined conference with id %@", log: Log.conferenceApp, type: .info, String(describing: jConference.id))
                 self.statusLabel.text = "Joined conference"
                 
                 let vc = ConferenceVC(conference: jConference)

@@ -16,6 +16,12 @@ public final class ConferenceSimpleView: NSObject {
     public var participants: [ConferenceParticipant]!
     var version: Int!
     
+    //Tracks that are initially muted
+    var mutedVideoTracks: [String] = []
+    var mutedAudioTracks: [String] = []
+    //Conference on hold
+    var onHold: Bool = false
+    
     init(fromJson json: JSON!) {
         if json == JSON.null {
             return
@@ -35,5 +41,21 @@ public final class ConferenceSimpleView: NSObject {
         }
         
         version = json["version"].intValue
+        
+        //Parse metadata
+        for (key, subJson): (String, JSON) in json["metadata"] {
+            if key.starts(with: "TRACK_MUTED") {
+                let parts = key.split(separator: "/")
+                if parts.count == 3 {
+                    if parts[1] == "video" {
+                        mutedVideoTracks.append(String(parts[2]))
+                    } else {
+                        mutedAudioTracks.append(String(parts[2]))
+                    }
+                }
+            } else if key.starts(with: "ON_HOLD") {
+                onHold = true
+            }
+        }
     }
 }

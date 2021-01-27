@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import os
 
 internal class AuthenticationModule {
     
@@ -22,17 +23,17 @@ internal class AuthenticationModule {
     internal var isLoggedIn: Bool = false
     
     /**
-     Performs a login using the configuration settings provided and returns the endpoint
+     Performs a login using the configuration settings provided and returns the endpoint and conference id(optional)
      */
     
-    internal func login(oAuth:Bool = false, username: String, password: String, organization: String, onSuccess: @escaping (String?)->(), onFailure: @escaping (Error)->()) {
+    internal func login(params: [String: String]?, username: String, password: String, onSuccess: @escaping (String?, String?)->(), onFailure: @escaping (Error)->()) {
         
         if isLoggedIn && UserEndpointModule.sharedInstance.userEndpointId != nil {
-            onSuccess(UserEndpointModule.sharedInstance.userEndpointId)
+            onSuccess(UserEndpointModule.sharedInstance.userEndpointId, loginResponse?.conferenceId)
             return
         }
         
-        let loginRequest = LoginRequest(clientId: ServerConfiguration.httpClientId, organization: organization, username: username, password: password, useOAuth: oAuth)
+        let loginRequest = LoginRequest(clientId: ServerConfiguration.clientId, username: username, password: password, params: params)
         
         API.sharedInstance.loginUser(loginRequest, onSuccess: {(json) in
             if let data = json {
@@ -41,7 +42,7 @@ internal class AuthenticationModule {
                 if let userId = self.loginResponse?.userId {
                     self.isLoggedIn = true
                     
-                    print("Logged in as user id \(userId)")
+                    os_log("Logged in as user id %@", log: Log.auth, type: .debug, userId)
                     
                     //Create an endpoint
                     UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
@@ -60,13 +61,13 @@ internal class AuthenticationModule {
                                                  credential: credential)
                                 )
                             }
-                            onSuccess(newEndpointId)
+                            onSuccess(newEndpointId, self.loginResponse?.conferenceId)
                         }, onFailure: {error in
-                            print("error getting ice servers")
+                            os_log("error getting ice servers %@", log: Log.auth, type: .error, error.localizedDescription)
                             onFailure(error)
                         })
                     }, onFailure: {(error) in
-                        print("CreateEndpoint failed: Error \(error)")
+                        os_log("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
                         onFailure(error)
                     })
                 }

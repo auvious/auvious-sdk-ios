@@ -18,7 +18,7 @@ public class ConferenceEvent: NSObject {
     public var conferenceId: String!
     
     /// Conference version
-    internal var conferenceVersion: Int!
+    internal var conferenceVersion: Int?
     
     /// Event id
     public var id: String!
@@ -28,6 +28,9 @@ public class ConferenceEvent: NSObject {
     
     /// Event type
     public var type: ConferenceEventType!
+    
+    /// Event type, as returned from the API
+    public var typeDescription: String!
     
     /// The endpoint of the user that initiated this event
     public var userEndpointId: String!
@@ -45,7 +48,7 @@ public class ConferenceEvent: NSObject {
         }
         
         conferenceId = json["conferenceId"].stringValue
-        conferenceVersion = json["conferenceVersion"].intValue
+        conferenceVersion = json["conferenceVersion"].int
         id =  json["id"].stringValue
         
         let tmpDate = json["timestamp"].stringValue
@@ -53,8 +56,11 @@ public class ConferenceEvent: NSObject {
             timestamp = obj
         }
         
+        typeDescription = json["type"].stringValue
         if let tempType = ConferenceEventType(rawValue: json["type"].stringValue) {
             type = tempType
+        } else {
+            type = .conferenceUnknownEvent
         }
         
         userEndpointId = json["userEndpointId"].stringValue

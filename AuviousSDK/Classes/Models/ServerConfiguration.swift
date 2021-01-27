@@ -15,7 +15,8 @@ public struct ServerConfiguration {
     //REST
     static var baseRTC = "https://test-rtc.stg.auvious.com"
     static var baseMeeting = "https://test-rtc.stg.auvious.com"
-    static let httpClientId = "staging-meeting"
+    static var clientId = ""
+    
     //MQTT
     static var mqttHost = "wss://events.test-rtc.stg.auvious.com/ws"
     static var mqttUser = ""
