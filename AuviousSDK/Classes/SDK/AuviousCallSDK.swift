@@ -8,6 +8,7 @@
 
 import Foundation
 import CallKit
+import os
 
 public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDelegate, MQTTSnapshotDelegate {
     
@@ -59,7 +60,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
     
     /// Background task completion handler, invalidates the background task.
     private func endBackgroundTask(){
-        print("Background task ended.")
+        os_log("Background task ended", log: Log.callSDK, type: .debug)
         UIApplication.shared.endBackgroundTask(backgroundTask)
         backgroundTask = UIBackgroundTaskIdentifier.invalid
     }
@@ -74,14 +75,14 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId, let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
-            print("AuviousCallSDK.onApplicationPause - not logged in, nothing to do")
+            os_log("onApplicationPause - not logged in, nothing to do", log: Log.callSDK, type: .debug)
             endBackgroundTask()
             return
         }
         
         //if in a call - hangup
         if let currentCall = currentCallId {
-            print("AuviousCallSDK.onApplicationPause - already in a call, hanging up")
+            os_log("onApplicationPause - already in a call, hanging up", log: Log.callSDK, type: .debug)
             do {
                 try hangupCall(callId: currentCall)
                 UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
@@ -92,7 +93,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
                     self.endBackgroundTask()
                 })
             } catch _ {
-                print("AuviousCallSDK.onApplicationPause - error while trying to hangup current call")
+                os_log("onApplicationPause - error while trying to hangup current call", log: Log.callSDK, type: .debug)
                 MQTTModule.sharedInstance.disconnect()
                 self.endBackgroundTask()
             }
@@ -131,20 +132,18 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             if let _ = json {
                 UserEndpointModule.sharedInstance.startKeepAliveTimer()
                 MQTTModule.sharedInstance.reconnect()
-                print("AuviousCallSDK.onApplicationResume() - ready for call")
+                os_log("onApplicationResume() - ready for call", log: Log.callSDK, type: .debug)
                 
             } else {
                 self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
             }
         }, onFailure: {(error) in
-            
-            print("AuviousCallSDK.onApplicationResume() keep alive failed - creating new endpoint")
+            os_log("onApplicationResume() keep alive failed - creating new endpoint", log: Log.callSDK, type: .debug)
             UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
                 
-                print("AuviousCallSDK.onApplicationResume() - created new endpoint \(newEndpointId)")
+                os_log("onApplicationResume() - created new endpoint %@", log: Log.callSDK, type: .debug, newEndpointId)
                 MQTTModule.sharedInstance.configure(endpointId: newEndpointId)
                 MQTTModule.sharedInstance.reconnect()
-                print("AuviousCallSDK.onApplicationResume() - ready for call (2)")
                 
             }, onFailure: {(error) in
                 self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
@@ -218,7 +217,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             return
         }
         
-        AuthenticationModule.sharedInstance.login(oAuth: oAuth, username: username, password: password, organization: organization, onSuccess: {endpointId in
+        AuthenticationModule.sharedInstance.login(params: [:], username: username, password: password, onSuccess: {endpointId, conferenceId in
             
             if let endpoint = endpointId {
                 //Server configuration has already been retrieved
@@ -228,8 +227,6 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
                 MQTTModule.sharedInstance.callDelegate = self
                 MQTTModule.sharedInstance.snapshotDelegate = self
                 MQTTModule.sharedInstance.connect(onSubscription: {
-                    print("$$$ MQTT says we subscribed")
-                    
                     onLoginSuccess(endpointId)
                     //We no longer want the closure to be called
                     MQTTModule.sharedInstance.clearSubscriptionCallback()
@@ -477,11 +474,11 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
     func snapshotMessageReceived(_ object: SnapshotEvent) {
         switch object.type! {
         case .snapshotAcquiredEvent:
-            print("snapshotAcquiredEvent msg received")
+            os_log("snapshotAcquiredEvent msg received", log: Log.callSDK, type: .debug)
         case .snapshotApprovedEvent:
-            print("snapshotApprovedEvent msg received")
+            os_log("snapshotApprovedEvent msg received", log: Log.callSDK, type: .debug)
         case .snapshotCameraRequestedEvent:
-            print("snapshotCameraRequestedEvent msg received")
+            os_log("snapshotCameraRequestedEvent msg received", log: Log.callSDK, type: .debug)
             
             let obj = object as! SnapshotCameraRequestedEvent
             switch obj.cameraRequestType! {
@@ -505,7 +502,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             }
             
         case .snapshotCameraRequestProcessedEvent:
-            print("snapshotCameraRequestProcessedEvent msg received")
+            os_log("snapshotCameraRequestProcessedEvent msg received", log: Log.callSDK, type: .debug)
         case .snapshotRequestedEvent:
             let obj = object as! SnapshotRequestedEvent
             let image = rtcClient.getSnapshot()
@@ -570,8 +567,8 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         delegate?.auviousSDK(didReceiveLocalVideoTrack: localVideoTrack)
     }
     
-    internal func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String) {
-        delegate?.auviousSDK(didReceiveRemoteStream: stream, streamId: streamId, endpointId: endpointId)
+    internal func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
+        delegate?.auviousSDK(didReceiveRemoteStream: stream, streamId: streamId, endpointId: endpointId, type: type)
     }
     
     //Make a call
@@ -595,7 +592,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             }
             
         }, onFailure: {(error) in
-            print("error call \(error)")
+            os_log("call error %@", log: Log.callSDK, type: .error, error.localizedDescription)
             self.delegate?.auviousSDK(onError: .callError)
         })
         

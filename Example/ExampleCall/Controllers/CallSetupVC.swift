@@ -188,7 +188,6 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
     //MARK: Actions
     
     @IBAction func hangupButtonPressed(_ sender: Any) {
-        print("hangup pressed")
         if let callId = callId {
             do {
                 try AuviousCallSDK.sharedInstance.hangupCall(callId: callId)
@@ -241,7 +240,8 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
                     "X-Genesys-Video_TOPIC": "OnBoarding"
                 ]
                 
-                print("Starting call with type \(sendMode)")
+                os_log("Starting call with type %@", log: Log.callApp, type: .error, sendMode)
+
                 self.callId = try AuviousCallSDK.sharedInstance.startCallFlow(target: target, sendMode: sendMode, sipHeaders: sipHeaders)
                 callButtonState = .calling
             } else if callButtonState == .calling {
@@ -252,14 +252,12 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
                 }
             }
         } catch let error {
-            print("callButton error \(error)")
+            os_log("callButton error %@", log: Log.callApp, type: .error, error.localizedDescription)
         }
     }
     
     //Accept a call
     @IBAction func acceptCallPressed(_ sender: Any) {
-        print("accept pressed")
-        
         guard let callCreatedEvent = callCreatedEvent else {
             return
         }
@@ -272,15 +270,13 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
             hideRingingAlert()
             
         } catch let error {
-            print("error in acceptCallPressed \(error)")
+            os_log("error in acceptCallPressed %@", log: Log.callApp, type: .error, error.localizedDescription)
         }
         
     }
     
     //Reject a call
     @IBAction func rejectCallPressed(_ sender: Any) {
-        print("reject pressed")
-        
         guard let callCreatedEvent = callCreatedEvent else {
             return
         }
@@ -290,19 +286,17 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
             hideRingingAlert()
             
         } catch let error {
-            print("error in rejectCallPressed \(error)")
+            os_log("error in rejectCallPressed %@", log: Log.callApp, type: .error, error.localizedDescription)
         }
     }
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
         if let error = error {
             // we got back an error!
-            print("ERROR saving screenshot")
 //            let ac = UIAlertController(title: "Save error", message: error.localizedDescription, preferredStyle: .alert)
 //            ac.addAction(UIAlertAction(title: "OK", style: .default))
 //            present(ac, animated: true)
         } else {
-            print("SUCCESS saving screenshot")
 //            let ac = UIAlertController(title: "Saved!", message: "Your image has been saved to your photos.", preferredStyle: .alert)
 //            ac.addAction(UIAlertAction(title: "OK", style: .default))
 //            present(ac, animated: true)

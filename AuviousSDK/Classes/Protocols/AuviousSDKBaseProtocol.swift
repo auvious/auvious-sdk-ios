@@ -23,8 +23,9 @@ public protocol AuviousSDKBaseProtocol {
      - Parameter stream: The remote stream being received.
      - Parameter streamId: The id of the remote stream being received.
      - Parameter endpointId: The endpoint of the user sending the remote stream.
+     - Parameter type: The type of stream being received
      */
-    func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String)
+    func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType)
     
     /**
      Called when an error is received.

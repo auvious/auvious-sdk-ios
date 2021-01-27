@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="KX5-ax-CIc">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="KX5-ax-CIc">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Auvious Test App-->
+        <!--Conference Demo-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ExampleSimpleConference" customModuleProvider="target" sceneMemberID="viewController">
@@ -19,46 +17,31 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rix-GS-rEx">
-                                <rect key="frame" x="10" y="84" width="355" height="40"/>
+                                <rect key="frame" x="10" y="64" width="355" height="50"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="40" id="aBK-3f-OSN"/>
+                                    <constraint firstAttribute="height" constant="50" id="aBK-3f-OSN"/>
                                 </constraints>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="La5-PO-s99">
-                                <rect key="frame" x="10" y="134" width="355" height="40"/>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <rect key="frame" x="10" y="124" width="355" height="50"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Conference to create/join" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="HuS-Dz-UHn">
-                                <rect key="frame" x="10" y="184" width="355" height="40"/>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <rect key="frame" x="10" y="184" width="355" height="50"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4ch-RS-yyN">
-                                <rect key="frame" x="316" y="244" width="51" height="31"/>
-                                <connections>
-                                    <action selector="switchToggled:" destination="BYZ-38-t0r" eventType="valueChanged" id="UwC-mK-wEq"/>
-                                </connections>
-                            </switch>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Create conference" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yfb-eC-Oy3">
-                                <rect key="frame" x="10" y="249" width="142" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dQ3-M4-u74">
-                                <rect key="frame" x="10" y="312" width="355" height="45"/>
+                                <rect key="frame" x="10" y="264" width="355" height="45"/>
                                 <color key="backgroundColor" red="0.88235294119999996" green="0.88235294119999996" blue="0.88235294119999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="45" id="tm6-7y-ho7"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <state key="normal" title="CALL NOW"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
+                                <state key="normal" title="Call Now"/>
                                 <connections>
                                     <action selector="callButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1o4-y9-7LH"/>
                                 </connections>
@@ -71,30 +54,23 @@
                             <constraint firstItem="HuS-Dz-UHn" firstAttribute="top" secondItem="La5-PO-s99" secondAttribute="bottom" constant="10" id="3Dx-jG-pMH"/>
                             <constraint firstItem="La5-PO-s99" firstAttribute="top" secondItem="rix-GS-rEx" secondAttribute="bottom" constant="10" id="5r8-JU-FSa"/>
                             <constraint firstItem="HuS-Dz-UHn" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="69o-Cu-2mh"/>
-                            <constraint firstItem="4ch-RS-yyN" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="yfb-eC-Oy3" secondAttribute="trailing" constant="8" symbolic="YES" id="72D-wB-z7c"/>
-                            <constraint firstItem="dQ3-M4-u74" firstAttribute="top" secondItem="4ch-RS-yyN" secondAttribute="bottom" constant="37" id="ATf-Sf-Dmv"/>
                             <constraint firstItem="dQ3-M4-u74" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="Gtp-9d-hzQ"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="4ch-RS-yyN" secondAttribute="trailing" constant="10" id="IHh-ZE-2DN"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="dQ3-M4-u74" secondAttribute="trailing" constant="10" id="R1N-FP-Gno"/>
-                            <constraint firstItem="yfb-eC-Oy3" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="Tnt-kd-tkL"/>
+                            <constraint firstItem="dQ3-M4-u74" firstAttribute="top" secondItem="HuS-Dz-UHn" secondAttribute="bottom" constant="30" id="S2A-LO-cu5"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rix-GS-rEx" secondAttribute="trailing" constant="10" id="U3b-Av-htK"/>
                             <constraint firstItem="rix-GS-rEx" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="dTZ-2f-tGp"/>
-                            <constraint firstItem="yfb-eC-Oy3" firstAttribute="centerY" secondItem="4ch-RS-yyN" secondAttribute="centerY" id="gD6-yX-huK"/>
                             <constraint firstItem="La5-PO-s99" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="kae-BH-vuL"/>
                             <constraint firstItem="La5-PO-s99" firstAttribute="height" secondItem="rix-GS-rEx" secondAttribute="height" id="qp4-s0-z4m"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="La5-PO-s99" secondAttribute="trailing" constant="10" id="s5x-O9-X5A"/>
                             <constraint firstItem="HuS-Dz-UHn" firstAttribute="top" secondItem="La5-PO-s99" secondAttribute="bottom" constant="10" id="usp-fM-lld"/>
-                            <constraint firstItem="4ch-RS-yyN" firstAttribute="top" secondItem="HuS-Dz-UHn" secondAttribute="bottom" constant="20" id="van-bm-lU2"/>
                             <constraint firstItem="HuS-Dz-UHn" firstAttribute="height" secondItem="rix-GS-rEx" secondAttribute="height" id="woA-4z-nNT"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Auvious Test App" id="WbQ-Fs-hIc"/>
+                    <navigationItem key="navigationItem" title="Conference Demo" id="WbQ-Fs-hIc"/>
                     <connections>
                         <outlet property="callButton" destination="dQ3-M4-u74" id="fVx-XE-Ozj"/>
-                        <outlet property="conferenceLabel" destination="yfb-eC-Oy3" id="Pdd-Qv-tD7"/>
                         <outlet property="conferenceTextfield" destination="HuS-Dz-UHn" id="P9W-Ke-mJD"/>
-                        <outlet property="createConferenceSwitch" destination="4ch-RS-yyN" id="eIs-5e-uP7"/>
                         <outlet property="passwordTextfield" destination="La5-PO-s99" id="tnP-dl-zjd"/>
                         <outlet property="usernameTextfield" destination="rix-GS-rEx" id="Rbl-TH-daa"/>
                     </connections>
@@ -109,7 +85,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="KX5-ax-CIc" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="0Q2-Xg-JF4">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

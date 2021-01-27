@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os
 
 internal protocol UserEndpointDelegate {
     
@@ -57,7 +58,7 @@ internal class UserEndpointModule {
             }
             
         }, onFailure: {(error) in
-            print("CreateEndpoint failed: Error \(error)")
+            os_log("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -86,7 +87,7 @@ internal class UserEndpointModule {
     
     //Stops the keep alive timer
     internal func stopKeepAliveTimer() {
-        print("Stopped keep alive timer")
+        os_log("Stopped keep alive timer", log: Log.auth, type: .debug)
         keepAliveTimer?.invalidate()
     }
     
@@ -108,10 +109,10 @@ internal class UserEndpointModule {
     private func fireKeepAliveRequest(_ request: KeepAliveRequest) {
         API.sharedInstance.keepAlive(request, onSuccess: {(json) in
             if let _ = json {
-                //print("Keep Alive Success")
+                //os_log("Keep Alive Success", log: Log.auth, type: .debug)
             }
         }, onFailure: {(error) in
-            print("Keep Alive failed: Error \(error) and message" + error.localizedDescription)
+            os_log("Keep Alive failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
             self.callDelegate?.userEndpoint(onError: AuviousSDKError.connectionError)
             self.conferenceDelegate?.userEndpoint(onError: AuviousSDKError.connectionError)
         })

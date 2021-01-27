@@ -106,6 +106,12 @@ public enum ConferenceEventType: String {
     
     /// A stream was unpublished
     case conferenceStreamUnpublished = "ConferenceStreamUnpublishedEvent"
+    
+    /// Audio/video muted/unmuted
+    case conferenceMetadataUpdatedEvent = "ConferenceMetadataUpdatedEvent"
+    
+    ///Unknown type
+    case conferenceUnknownEvent = "-"
 }
 
 /**

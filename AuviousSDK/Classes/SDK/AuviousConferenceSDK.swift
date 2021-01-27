@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os
 
 public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, UserEndpointDelegate {
     
@@ -19,8 +20,11 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// The password property, used for logging in
     internal var password: String?
     
-    /// The organization property, used for logging in
-    internal var organization: String?
+    /// The client id property, used for logging in
+    internal var clientId: String?
+    
+    /// Map of parameters to be passed on login call
+    internal var loginParams: [String: String]?
     
     public var isLoggedIn: Bool {
         return AuthenticationModule.sharedInstance.isLoggedIn
@@ -69,12 +73,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// The conference we were last known to have joined (used for automatic rejoining)
     private var lastConferenceJoined: String? {
         didSet {
-            print("AuviousSDK lastConferenceJoined set to \(String(describing: lastConferenceJoined))")
+            os_log("lastConferenceJoined set to %@", log: Log.conferenceSDK, type: .debug, String(describing: lastConferenceJoined))
         }
     }
     
-    /// Our viewer id
-    private var viewerId: String?
+    /// Our viewer id per stream Id
+    private var viewerIdMap: [String: String] = [:]
     
     /// Reference to the background task used for gracefully stopping streams
     private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
@@ -85,7 +89,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     
     /// Background task completion handler, invalidates the background task.
     private func endBackgroundTask(){
-        print("Background task ended.")
+        os_log("Background task ended", log: Log.conferenceSDK, type: .debug)
         UIApplication.shared.endBackgroundTask(backgroundTask)
         backgroundTask = UIBackgroundTaskIdentifier.invalid
     }
@@ -164,12 +168,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      
      - Parameter username: The username
      - Parameter password: The password
-     - Parameter organization: The user's organization
+     - Parameter clientId: The client id used for authentication
      */
-    public func configure(username: String, password: String, organization: String) {
+    public func configure(params: [String: String], username: String, password: String, clientId: String, baseEndpoint: String, mqttEndpoint: String) {
+        self.loginParams = params
         self.username = username
         self.password = password
-        self.organization = organization
+        self.clientId = clientId
+        
+        ServerConfiguration.baseRTC = baseEndpoint
+        ServerConfiguration.baseMeeting = baseEndpoint
+        ServerConfiguration.mqttHost = mqttEndpoint
+        ServerConfiguration.clientId = clientId
     }
     
     //ARTC client
@@ -195,7 +205,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 self.delegate?.auviousSDK(didRejoinConference: conf)
             }
         }, onFailure: {(error) in
-            print("Unable to rejoin conference \(conferenceId) - error \(error)")
+            os_log("Unable to rejoin conference %@ - error %@", log: Log.conferenceSDK, type: .error, conferenceId, error.localizedDescription)
         })
         
         lastConferenceJoined = nil
@@ -319,7 +329,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                             }
                             
                         }, onFailure: {(error) in
-                            print("unpublishAllLocalStreams() error for stream \(String(describing: peerConnection.streamId)) - error \(error)")
+                            let streamId = String(describing: peerConnection.streamId)
+                            os_log("unpublishAllLocalStreams() error for stream %@ - error %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
                         })
                     }
                 }
@@ -380,7 +391,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             }
             
         }, onFailure: {(error) in
-            //print("Call stop view stream ERROR: \(String(describing: error))")
+            //os_log("Call stop view stream ERROR: \(String(describing: error))")
             // Getting 404 is valid, in the sense that the viewer is already gone
             switch error {
             case let AuviousSDKError.httpError(code) where code == 404:
@@ -400,12 +411,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         if rtcClient != nil {
             for peerConnection in rtcClient.peerConnections {
                 if peerConnection.isLocal == false {
-                    if let endpointId = UserEndpointModule.sharedInstance.userEndpointId, let conference = currentConference {
-                        let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: peerConnection.streamId, userEndpointId: peerConnection.endpointId, userId: peerConnection.userId, viewerId: endpointId)
+                    
+                    if let endpointId = UserEndpointModule.sharedInstance.userEndpointId, let conference = currentConference, let viewerId = self.viewerIdMap[peerConnection.streamId] {
+                        let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: peerConnection.streamId, userEndpointId: peerConnection.endpointId, userId: peerConnection.userId, viewerId: viewerId)
                         API.sharedInstance.stopViewStream(svsRequest, onSuccess: {(response) in
                             //success
                         }, onFailure: {(error) in
-                            print("stopAllRemoteStreams() error for stream \(String(describing: peerConnection.streamId))")
+                            let streamId = String(describing: peerConnection.streamId)
+                            os_log("stopAllRemoteStreams() error for stream %@ is %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
                         })
                     }
                 }
@@ -458,7 +471,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 onSuccess(conference)
             }
         }, onFailure: {(error) in
-            print("CreateConference failed: Error \(error)")
+            os_log("CreateConference failed: Error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -485,22 +498,25 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         API.sharedInstance.joinConference(request, onSuccess: {(json) in
             if json != nil {
                 
+                os_log("Joined conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                 //Retrieve and store the current conference state
                 API.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
-                        self.currentConference = ConferenceSimpleView(fromJson: data)
                         
+                        self.currentConference = ConferenceSimpleView(fromJson: data)
+                        os_log("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                         //Notify the user of successfully joining
                         onSuccess(self.currentConference)
                         
                         //Process any messages we might have received before joining was complete
                         if !self.mqttCachedMessages.isEmpty {
                             for m in self.mqttCachedMessages {
-                                print("Processing cached MQTT msg")
+                                os_log("Processing cached MQTT msg", log: Log.conferenceSDK, type: .debug)
+                                #warning("TODO: Extra val here")
                                 self.delegateConferenceMessage(msg: m)
                             }
                             
-                            print("Finished processing of \(self.mqttCachedMessages.count) cached messages")
+                            os_log("Finished processing of %d cached messages", log: Log.conferenceSDK, type: .debug, self.mqttCachedMessages.count)
                             self.mqttCachedMessages.removeAll()
                         }
                     }
@@ -509,7 +525,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 })
             }
         }, onFailure: {(error) in
-            print("JoinConference failed: Error \(error)")
+            os_log("JoinConference failed: Error  %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -632,17 +648,16 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /**
      Performs a login, using the configuration settings already provided.
      
-     - Parameter oAuth: Determines the type of authentication to be used internally
-     - Parameter onLoginSuccess: Called after a successful login, returning your endpoint
+     - Parameter onLoginSuccess: Called after a successful login, returning your endpoint and conferenceId
      - Parameter onLoginFailure: Called in case of failure with the designated Error
      */
-    public func login(oAuth: Bool, onLoginSuccess: @escaping (String?)->(), onLoginFailure: @escaping (Error)->()) {
-        guard let username = self.username, let password = self.password, let organization = self.organization else {
+    public func login(onLoginSuccess: @escaping (String?, String?)->(), onLoginFailure: @escaping (Error)->()) {
+        guard let username = self.username, let password = self.password, let clientId = self.clientId else {
             onLoginFailure(AuviousSDKError.missingSDKCredentials)
             return
         }
         
-        AuthenticationModule.sharedInstance.login(oAuth: oAuth, username: username, password: password, organization: organization, onSuccess: { endpointId in
+        AuthenticationModule.sharedInstance.login(params: loginParams, username: username, password: password, onSuccess: { endpointId, conferenceId in
             
             if let endpoint = endpointId {
                 //Server configuration has already been retrieved
@@ -651,9 +666,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 MQTTModule.sharedInstance.configure(endpointId: endpoint)
                 MQTTModule.sharedInstance.conferenceDelegate = self
                 MQTTModule.sharedInstance.connect(onSubscription: {
-                    print("$$$ MQTT says we subscribed")
-                    
-                    onLoginSuccess(endpointId)
+                    onLoginSuccess(endpointId, conferenceId)
                     //We no longer want the closure to be called
                     MQTTModule.sharedInstance.clearSubscriptionCallback()
                 })
@@ -690,6 +703,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             }, onFailure: {(error) in
                 onFailure(error)
             })
+            
             return
         }
         
@@ -721,6 +735,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
+            UserEndpointModule.sharedInstance.userEndpointId = nil
             self.cleanState()
             onSuccess()
         }, onFailure: {(error) in
@@ -737,30 +752,72 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.currentConference = nil
     }
     
+    public func toggleLocalStream(conferenceId: String, streamId: String, operation: MetadataRequestOperation, type: MetadataRequestType, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
+        guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            onFailure(AuviousSDKError.endpointNotCreated)
+            return
+        }
+        
+        //Mute/unmute local audio or video track
+        let isEnabled = operation == .set ? false : true
+        if type == .video {
+            rtcClient.localVideoTrack?.isEnabled = isEnabled
+        } else if type == .audio {
+            rtcClient.localAudioTrack?.isEnabled = isEnabled
+        }
+        
+        let request = UpdateMetadataRequest(conferenceId: conferenceId, streamId: streamId, userEndpointId: endpointId, operation: operation, type: type, value: isEnabled ? "false" : "true")
+        
+        //Call the api
+        API.sharedInstance.updateConferenceMetadata(request, onSuccess: {json in
+            if let _ = json {
+                os_log("toggleLocalStream() success API", log: Log.conferenceSDK, type: .debug)
+                
+                if operation == .set {
+                    if type == .video {
+                        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
+                            stream.removeVideoTrack(localVideo)
+                            os_log("RTCClient removed local video track", log: Log.conferenceSDK, type: .debug)
+                        }
+                    } else if type == .audio {
+                        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
+                            stream.removeAudioTrack(localAudio)
+                            os_log("RTCClient removed local audio track", log: Log.conferenceSDK, type: .debug)
+                        }
+                    }
+                } else if operation == .remove {
+                    if type == .video {
+                        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
+                            stream.addVideoTrack(localVideo)
+                            os_log("RTCClient added local video track", log: Log.conferenceSDK, type: .debug)
+                        }
+                    } else if type == .audio {
+                        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
+                            stream.addAudioTrack(localAudio)
+                            os_log("RTCClient added local audio track", log: Log.conferenceSDK, type: .debug)
+                        }
+                    }
+                }
+                
+                //All done
+                onSuccess()
+            }
+        }, onFailure: {error in
+            os_log("toggleLocalStream() error API: %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            onFailure(error)
+        })
+    }
+    
     //MARK: -
     //MARK: MQTT Client Delegate
     //MARK: -
     
     internal func conferenceMessageReceived(_ object: ConferenceEvent) {
         //Ensure we're in a conference
-        guard let conference = currentConference else {
+        guard let _ = currentConference else {
             mqttCachedMessages.append(object)
             
-            print("WARNING: Ignoring conference msg received because we're not in a conference")
-            return
-        }
-        
-        //Discard older messages
-        if object.conferenceVersion < conference.version {
-            print("Discarding message because its conference version \(String(describing: object.conferenceVersion)) < our conference version \(String(describing: conference.version))")
-            return
-        }
-        
-        //Delay processing of messages with version > than we know
-        if object.conferenceVersion > conference.version {
-            print("Delaying message processing because its conference version \(String(describing: object.conferenceVersion)) > our conference version \(String(describing: conference.version))")
-            mqttDelayedMessages.append(object)
-            startDelayedMessageProcessorTimer(messageId: object.id)
+            os_log("WARNING: Caching conference msg received because we're not in a conference", log: Log.conferenceSDK, type: .debug)
             return
         }
         
@@ -768,30 +825,61 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         if !isProcessingMessages {
             processMessages()
         } else {
-            print("WARNING: Ignoring conference msg processing because we're already processing")
+            os_log("WARNING: Ignoring conference msg processing because we're already processing", log: Log.conferenceSDK, type: .debug)
         }
     }
     
     //MQTT message processor
     private func processMessages(){
-        guard !mqttMessages.isEmpty else {
+        guard !mqttMessages.isEmpty, let conference = currentConference else {
+            os_log("WARNING: processMessages() has no messages to process or we're not in a conference. Returning", log: Log.conferenceSDK, type: .debug)
             return
         }
         
+        //Lock processing
         isProcessingMessages = true
         
-        for (index,msg) in mqttMessages.enumerated() {
+        for (index, msg) in mqttMessages.enumerated() {
+            
+            //If the event has a conference version
+            if let eventConferenceVersion = msg.conferenceVersion {
+                
+                //Discard older messages
+                if eventConferenceVersion < conference.version {
+                    let cVersion = String(describing: eventConferenceVersion)
+                    let ourVersion = String(describing: conference.version)
+                    os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
+                    continue
+                }
+                
+                //Delay processing of messages with version > than we know
+                if eventConferenceVersion > conference.version {
+                    let cVersion = String(describing: msg.conferenceVersion)
+                    let ourVersion = String(describing: conference.version)
+                    os_log("Delaying message processing because its conference version %@ > our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
+                    mqttDelayedMessages.append(msg)
+                    startDelayedMessageProcessorTimer(messageId: msg.id)
+                    continue
+                }
+            }
             
             //Only process messages coming from other users
             if let userEndpointId = UserEndpointModule.sharedInstance.userEndpointId, msg.userEndpointId != userEndpointId {
-                
                 delegateConferenceMessage(msg: msg)
-                
-                //Remove the message after successfull processing
-                mqttMessages.remove(at: index)
             }
+            
+            //Increase conference version number
+            if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion == currentConference?.version {
+                currentConference?.version += 1
+                os_log("Local conference version incremented to %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
+            }
+        
+            os_log("Conference msg processed, our version is now %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
+            //Remove the message after successfull processing
+            mqttMessages.remove(at: index)
         }
         
+        //Unlock processing
         isProcessingMessages = false
     }
     
@@ -809,11 +897,39 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             if (rtcClient.removeRemoteStreams(streamId: object.streamId)){
                 delegate?.auviousSDK(didReceiveConferenceEvent: msg)
             }
+        case .conferenceMetadataUpdatedEvent:
+            let object = msg as! ConferenceMetadataUpdatedEvent
+            let isEnabled = object.operation == .set ? false : true
+            
+            //Conference on hold
+            if object.isHold {
+                
+                //Mute/unmute local audio and video
+                rtcClient.localVideoTrack?.isEnabled = isEnabled
+                rtcClient.localAudioTrack?.isEnabled = isEnabled
+                
+                //Delegate back to client
+                delegate?.auviousSDK(conferenceOnHold: !isEnabled)
+            } else {
+                //Mute/unmute
+                rtcClient.toggleRemoteStreams(object)
+                
+                var streamType: StreamType = .cam
+                if object.streamType == MetadataRequestType.audio {
+                    streamType = .mic
+                }
+                
+                //Delegate back to client
+                if isEnabled {
+                    delegate?.auviousSDK(trackUnmuted: streamType, endpointId: object.userEndpointId)
+                } else {
+                    delegate?.auviousSDK(trackMuted: streamType, endpointId: object.userEndpointId)
+                }
+                
+            }
+        default:
+            os_log("Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
         }
-        
-        //Increase conference version number
-        currentConference?.version += 1
-        print("Conference msg processed, our version is now \(currentConference?.version)")
     }
     
     //Schedules the delayed message processor timer
@@ -873,8 +989,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         delegate?.auviousSDK(didReceiveLocalVideoTrack: localVideoTrack)
     }
     
-    internal func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String) {
-        delegate?.auviousSDK(didReceiveRemoteStream: stream, streamId: streamId, endpointId: endpointId)
+    internal func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
+        delegate?.auviousSDK(didReceiveRemoteStream: stream, streamId: streamId, endpointId: endpointId, type: type)
     }
     
     //Publish a stream
@@ -922,13 +1038,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             return
         }
         
-        let vsRequest:ViewStreamRequest = ViewStreamRequest(conferenceId: conference.id, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: UUID().uuidString)
+        let viewerId = UUID().uuidString
+        self.viewerIdMap[streamId] = viewerId
+        let vsRequest:ViewStreamRequest = ViewStreamRequest(conferenceId: conference.id, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: viewerId)
         
         API.sharedInstance.viewStream(vsRequest, onSuccess:{(conferenceViewResult) in
             
             if let data = conferenceViewResult {
                 let response = ViewStreamResponse(fromJson: data)
-                self.viewerId = response.viewerId
                 self.rtcClient.handleAnswerReceivedRemote(withRemoteSDP: response.sdpAnswer, streamId: streamId)
             }
             
@@ -956,7 +1073,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         #warning("TODO: Create a function for this")
-        var candidatesArray:[IceCandidate] = [IceCandidate]()
+        var candidatesArray: [IceCandidate] = [IceCandidate]()
         for item in candidates {
             let obj = IceCandidate(candidate: item.sdp, sdpMLineIndex: item.sdpMLineIndex, sdpMid: item.sdpMid!)
             candidatesArray.append(obj)
@@ -980,13 +1097,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             return
         }
         
+        guard let viewerId = viewerIdMap[streamId] else {
+            delegate?.auviousSDK(onError: AuviousSDKError.internalError)
+            return
+        }
+        
         var candidatesArray:[IceCandidate] = [IceCandidate]()
         for item in candidates {
             let obj = IceCandidate(candidate: item.sdp, sdpMLineIndex: item.sdpMLineIndex, sdpMid: item.sdpMid!)
             candidatesArray.append(obj)
         }
         
-        let vsicRequest = ViewStreamIceCandidatesRequest(conferenceId: conference.id, candidates: candidatesArray, streamId: streamId, userEndpointId: endpointId, userId: userId, viewerId: self.viewerId!)
+        let vsicRequest = ViewStreamIceCandidatesRequest(conferenceId: conference.id, candidates: candidatesArray, streamId: streamId, userEndpointId: endpointId, userId: userId, viewerId: viewerId)
         API.sharedInstance.addViewStreamIceCandidates(vsicRequest, onSuccess: {(json) in
             
             self.delegate?.auviousSDK(didChangeState: .remoteStreamConnected, streamId: streamId, streamType: streamType, endpointId:endpointId)

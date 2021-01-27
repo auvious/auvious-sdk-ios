@@ -8,6 +8,7 @@
 
 import Foundation
 import CallKit
+import os
 
 internal final class CallObserver: NSObject, CXCallObserverDelegate {
     
@@ -15,7 +16,7 @@ internal final class CallObserver: NSObject, CXCallObserverDelegate {
     
     func start(){
         if callObserver == nil {
-            print("CallObserver: Started call monitoring")
+            os_log("Started call monitoring", log: Log.callObserver, type: .debug)
             callObserver = CXCallObserver()
             callObserver!.setDelegate(self, queue: nil)
         }
@@ -29,19 +30,19 @@ internal final class CallObserver: NSObject, CXCallObserverDelegate {
         
         if call.hasEnded   == true && call.isOutgoing == false || // incoming end
             call.hasEnded   == true && call.isOutgoing == true {   // outgoing end
-            print("CallObserver: Disconnected")
+            os_log("Disconnected", log: Log.callObserver, type: .debug)
         }
         
         if call.isOutgoing == true && call.hasConnected == false && call.hasEnded == false {
-            print("CallObserver: Dialing")
+            os_log("Dialing", log: Log.callObserver, type: .debug)
         }
         
         if call.isOutgoing == false && call.hasConnected == false && call.hasEnded == false {
-            print("CallObserver: Incoming")
+            os_log("Incoming", log: Log.callObserver, type: .debug)
         }
         
         if call.hasConnected == true && call.hasEnded == false {
-            print("CallObserver: Connected")
+            os_log("Connected", log: Log.callObserver, type: .debug)
             AuviousCallSDK.sharedInstance.onApplicationPause()
         }
     }

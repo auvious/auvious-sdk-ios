@@ -26,8 +26,8 @@ internal final class ViewStreamRequest {
         self.viewerId = viewerId
     }
     
-    func toDictionary() -> [String:Any] {
-        var dictionary = [String:Any]()
+    func toDictionary() -> [String: Any] {
+        var dictionary = [String: Any]()
         
         if conferenceId != nil {
             dictionary["conferenceId"] = conferenceId

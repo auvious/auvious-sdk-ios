@@ -146,7 +146,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
                         do {
                             try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: stream.id, endpointId: endpointStream.id, streamType: stream.type, remoteUserId: user.id)
                         } catch let error {
-                            print("Error \(error) - \(error.localizedDescription)")
+                            os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                             showAlert(title: "Error", msg: error.localizedDescription)
                         }
                     }
@@ -268,7 +268,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
                 sender.streamId = streamId
                 sender.isUserInteractionEnabled = false
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                os_log("startPublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 showAlert(title: "Error", msg: error.localizedDescription)
             }
         }
@@ -277,7 +277,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
                 try AuviousConferenceSDK.sharedInstance.startUnpublishLocalStreamFlow(streamId: sender.streamId, streamType: sender.btnConfType)
                 sender.isUserInteractionEnabled = false
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                os_log("startUnpublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 showAlert(title: "Error", msg: error.localizedDescription)
             }
         }
@@ -420,7 +420,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
         AuviousConferenceSDK.sharedInstance.endConference(conferenceId: currentConference.id, onSuccess: {
             SVProgressHUD.dismiss()
             self.delegate?.removeCreatedConferenceFromList(confId: self.currentConference.id)
-            print("Ended conference")
+            os_log("Ended conference", log: Log.conferenceApp, type: .debug)
             self.navigationController?.popViewController(animated: true)
 
         }, onFailure: {(error) in
@@ -435,7 +435,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
         AuviousConferenceSDK.sharedInstance.leaveConference(conferenceId: currentConference.id, onSuccess: {
             SVProgressHUD.dismiss()
 
-            print("Left conference")
+            os_log("Left conference", log: Log.conferenceApp, type: .debug)
             self.navigationController?.popViewController(animated: true)
 
         }, onFailure: {(error) in
@@ -547,7 +547,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
             do {
                 try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: object.streamId, endpointId: object.userEndpointId, streamType: object.streamType, remoteUserId: object.userId)
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 showAlert(title: "Error", msg: error.localizedDescription)
             }
         }
@@ -557,7 +557,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
             do {
                 try AuviousConferenceSDK.sharedInstance.stopRemoteStream(streamId: object.streamId, remoteUserId: object.userId, remoteEndpointId: object.userEndpointId, streamType: object.streamType)
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                os_log("stopRemoteStream error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 showAlert(title: "Error", msg: error.localizedDescription)
             }
         }
@@ -605,55 +605,55 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
     func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId:String) {
         switch newState {
             case .localStreamIsConnecting:
-            print("Local Stream Is Connecting")
+            os_log("Local Stream Is Connecting", log: Log.conferenceApp, type: .debug)
         case .localStreamConnected:
-            print("Local Stream Connected")
+            os_log("Local Stream Connected", log: Log.conferenceApp, type: .debug)
             didPublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsConnecting:
-            print("Remote Stream Is Connecting")
+            os_log("Remote Stream Is Connecting", log: Log.conferenceApp, type: .debug)
         case .remoteStreamConnected:
-            print("Remote Stream Connected")
+            os_log("Remote Stream Connected", log: Log.conferenceApp, type: .debug)
         case .localStreamIsDisconnecting:
-            print("Local Stream Is Disonnecting")
+            os_log("Local Stream Is Disonnecting", log: Log.conferenceApp, type: .debug)
         case .localStreamDisconnected:
-            print("Local Stream Disconnected")
+            os_log("Local Stream Disconnected", log: Log.conferenceApp, type: .debug)
             didUnpublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsDisconnecting:
-            print("Remote Stream Is Disonnecting")
+            os_log("Remote Stream Is Disonnecting", log: Log.conferenceApp, type: .debug)
         case .remoteStreamDisconnected:
-            print("Remote Stream Disconnected")
+            os_log("Remote Stream Disconnected", log: Log.conferenceApp, type: .debug)
             handleStreamDisconnection(streamId: streamId, streamType:streamType, endpointId: endpointId)
         case .localCaptureStarted:
-            print("Local Capture Started")
+            os_log("Local Capture Started", log: Log.conferenceApp, type: .debug)
         case .localCaptureStoped:
-            print("Local Capture Stoped")
+            os_log("Local Capture Stoped", log: Log.conferenceApp, type: .debug)
         }
     }
     
     func auviousSDK(onError error: AuviousSDKError) {
         switch error {
         case .noInternetConnection:
-            print("\(error.localizedDescription)")
+            os_log("noInternetConnection error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .httpError(let code):
-            print("Http error code \(code)")
+            os_log("httpError error code %d", log: Log.conferenceUI, type: .error, code)
         case .connectionError:
-            print("\(error.localizedDescription)")
+            os_log("connectionError error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .missingSDKCredentials:
-            print("\(error.localizedDescription)")
+            os_log("missingSDKCredentials error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .notLoggedIn:
-            print("\(error.localizedDescription)")
+            os_log("notLoggedIn error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .endpointNotCreated:
-            print("\(error.localizedDescription)")
+            os_log("endpointNotCreated error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .notInConference:
-            print("\(error.localizedDescription)")
+            os_log("notInConference error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .missingPeerConnection(let streamId):
-            print("\(error.localizedDescription) - \(streamId)")
+            os_log("missingPeerConnection for stream %@ error %@", log: Log.conferenceUI, type: .error, streamId, error.localizedDescription)
         case .videoPermissionIsDisabled:
-            print("\(error.localizedDescription)")
+            os_log("videoPermissionIsDisabled error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .audioPermissionIsDisabled:
-            print("\(error.localizedDescription)")
+            os_log("audioPermissionIsDisabled error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .startCaptureFailure:
-            print("\(error.localizedDescription)")
+            os_log("startCaptureFailure error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .publishStreamFailure(let fragment, let output):
             switch fragment {
             case .makeOfferPublishStream,
@@ -662,7 +662,7 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
                  .unpublishStream,
                  .publishStreamRequest,
                  .publishStreamIceCandidatesRequest:
-                print("\(output)")
+                os_log("publishStreamFailure error %@", log: Log.conferenceUI, type: .error, output)
             }
             self.showAlert(title: "Error", msg: output)
             return
@@ -674,16 +674,16 @@ class ConferenceVC: UIViewController, UICollectionViewDataSource, UICollectionVi
                  .remoteStreamIceCandidatesRequest,
                  .remoteStreamRequest,
                  .stopRemoteStreamRequest:
-                print("\(output)")
+                os_log("remoteStreamFailure error %@", log: Log.conferenceUI, type: .error, output)
             }
             self.showAlert(title: "Error", msg: output)
             return
         case .unauthorizedRequest:
-            print("\(error.localizedDescription)")
+            os_log("unauthorizedRequest error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         case .internalError:
-            print("\(error.localizedDescription)")
+            os_log("internalError error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         default:
-            print("\(error.localizedDescription)")
+            os_log("error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         }
         self.showAlert(title: "Error", msg: error.localizedDescription)
     }

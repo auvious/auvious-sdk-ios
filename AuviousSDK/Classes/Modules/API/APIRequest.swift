@@ -8,6 +8,7 @@
 
 import Foundation
 import Alamofire
+import os
  
 /// This struct defines all the REST calls, including their path & parameters.
 internal struct APIRequest {
@@ -46,6 +47,7 @@ internal struct APIRequest {
         case stopViewStream(object: StopViewStreamRequest)
         case unpublishStream(object: UnpublishStreamRequest)
         case viewStream(object: ViewStreamRequest)
+        case updateConferenceMetadata(object: UpdateMetadataRequest)
         
         //Endpoints
         case getEndpoints(Void)
@@ -80,9 +82,8 @@ internal struct APIRequest {
                 bodyParams = [:]
                 bodyParams?["username"] = object.username as AnyObject?
                 bodyParams?["password"] = object.password as AnyObject?
-                bodyParams?["organization"] = object.organization as AnyObject?
                 bodyParams?["clientId"] = object.clientId as AnyObject?
-            
+                
             case .loginUserOAuth(let object):
                 sendBasicAuthHeader = true
                 sendAuthenticationHeader = false
@@ -91,18 +92,25 @@ internal struct APIRequest {
                 query = "security/oauth/token"
                 httpMethod = Alamofire.HTTPMethod.post
                 bodyParams = [:]
-                bodyParams?["grant_type"] = "password" as AnyObject?
-                bodyParams?["username"] = object.username as AnyObject?
-                bodyParams?["password"] = object.password as AnyObject?
+                
+                if let loginParams = object.params {
+                    for key in loginParams.keys {
+                        let value = loginParams[key] as AnyObject?
+                        bodyParams?[key] = value
+                    }
+                }
                 
             case .refreshToken(let token):
-                //sendAuviousHeader = true
+                sendBasicAuthHeader = true
                 sendAuthenticationHeader = false
+                useFormEncoding = true
+                
                 baseURL = ServerConfiguration.baseMeeting
-                query = "security/authenticate/refresh"
+                query = "security/oauth/token"
                 httpMethod = Alamofire.HTTPMethod.post
                 bodyParams = [:]
-                bodyParams?["refreshToken"] = token as AnyObject?
+                bodyParams?["refresh_token"] = token as AnyObject?
+                bodyParams?["grant_type"] = "refresh_token" as AnyObject?
             
             //IceSupport
             case .getIceServers():
@@ -206,6 +214,11 @@ internal struct APIRequest {
                 query = "rtc-api/conferences/viewStream"
                 httpMethod = Alamofire.HTTPMethod.post
                 bodyParams = object.toDictionary() as [String : AnyObject]
+            
+            case .updateConferenceMetadata(let object):
+                query = "rtc-api/conferences/updateMetadata"
+                httpMethod = Alamofire.HTTPMethod.post
+                bodyParams = object.toDictionary() as [String : AnyObject]
                 
             //Endpoints
             case .getEndpoints():
@@ -242,7 +255,7 @@ internal struct APIRequest {
             
             var urlRequest = try URLRequest(url: URL(string: baseURL)!.appendingPathComponent(query), method: httpMethod, headers: nil)
             
-            print("REQUEST: \(urlRequest)")
+            os_log("REQUEST %@", log: Log.api, type: .debug, urlRequest.debugDescription)
             
             // Set headers
             urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -254,7 +267,7 @@ internal struct APIRequest {
             
             //Basic authentication
             if sendBasicAuthHeader {
-                if let authorizationHeader = Request.authorizationHeader(user: "auvious", password: "") {
+                if let authorizationHeader = Request.authorizationHeader(user: ServerConfiguration.clientId, password: "") {
                     urlRequest.addValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
                 }
                 

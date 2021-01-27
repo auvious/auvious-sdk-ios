@@ -19,9 +19,10 @@
     "ios": "10.0"
   },
   "source_files": "AuviousSDK/Classes/**/*",
+  "resources": "AuviousSDK/Assets/*.png",
   "resource_bundles": {
     "AuviousSDK": [
-      "AuviousSDK/Assets/*.png"
+      "Assets.xcassets"
     ]
   },
   "dependencies": {

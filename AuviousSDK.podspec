@@ -33,8 +33,10 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
 
   s.source_files = 'AuviousSDK/Classes/**/*'
   
+  s.resources = 'AuviousSDK/Assets/*.png'
+  
   s.resource_bundles = {
-    'AuviousSDK' => ['AuviousSDK/Assets/*.png']
+    'AuviousSDK' => ['Assets.xcassets']
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'

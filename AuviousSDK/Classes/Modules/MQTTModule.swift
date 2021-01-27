@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyJSON
+import os
 
 internal protocol MQTTConferenceDelegate {
     
@@ -79,22 +80,22 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     }
     
     func disconnect() {
-        print("MQTT disconnecting")
+        os_log("MQTT disconnecting", log: Log.mqtt, type: .debug)
         self.session.disconnect()
     }
     
     func reconnect() {
-        print("MQTT reconnect called:")
+        os_log("MQTT reconnect called", log: Log.mqtt, type: .debug)
+        
         switch session.status {
         case .connected:
-            print("MQTT session status CONNECTED - no need to reconnect")
+            os_log("MQTT session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
         case .connecting:
-            print("MQTT session status CONNECTING - no need to reconnect")
+            os_log("MQTT session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
         default:
-            print("MQTT session status \(session.status) - reconnecting")
+            os_log("MQTT reconnecting", log: Log.mqtt, type: .debug)
             session.connect()
         }
-        
     }
     
     func subscribeForUserEndpoint() {
@@ -105,16 +106,16 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     //MARK: Session Delegation
     
     func connected(_ session: MQTTSession!) {
-        print("*** MQTT connected")
+        os_log("MQTT connected", log: Log.mqtt, type: .debug)
         subscribeForUserEndpoint()
     }
     
     func newMessage(_ session: MQTTSession!, data: Data!, onTopic topic: String!, qos: MQTTQosLevel, retained: Bool, mid: UInt32) {
-        print("*** MQTT received message:")
+        os_log("MQTT received message:", log: Log.mqtt, type: .debug)
         
         do {
             let jsonObject = try JSON(data: data)
-            print(jsonObject)
+            os_log("%@", log: Log.mqtt, type: .debug, jsonObject.debugDescription)
             
             if let eventType = ConferenceEventType(rawValue: jsonObject["type"].stringValue) {
                 
@@ -131,6 +132,10 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
                     model = ConferenceStreamPublishedEvent(fromJson: jsonObject)
                 case .conferenceStreamUnpublished:
                     model = ConferenceStreamUnpublishedEvent(fromJson: jsonObject)
+                case .conferenceMetadataUpdatedEvent:
+                    model = ConferenceMetadataUpdatedEvent(fromJson: jsonObject)
+                default:
+                    break
                 }
                 
                 conferenceDelegate?.conferenceMessageReceived(model)
@@ -176,44 +181,46 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
                 snapshotDelegate?.snapshotMessageReceived(model)
                 
             } else {
-                print("MQTT message ignored - unknown type " + jsonObject["type"].stringValue)
+                os_log("MQTT message with unknown type %@", log: Log.mqtt, type: .debug, jsonObject["type"].stringValue)
+                let model: ConferenceEvent = ConferenceEvent(fromJson: jsonObject)
+                conferenceDelegate?.conferenceMessageReceived(model)
             }
             
         } catch {
-            print("Error creating JSON object for MQTT message")
+            os_log("Error creating JSON object for MQTT message", log: Log.mqtt, type: .error)
         }
     }
     
     func connectionError(_ session: MQTTSession!, error: Error!) {
-        print("*** MQTT connection error \(String(describing: error))")
+        os_log("MQTT connection error", log: Log.mqtt, type: .error, error.localizedDescription)
     }
     
     func connectionRefused(_ session: MQTTSession!, error: Error!) {
-        print("*** MQTT connection refused! Error \(String(describing: error))")
+        os_log("MQTT connection refused! Error", log: Log.mqtt, type: .error, error.localizedDescription)
     }
     
     func connectionClosed(_ session: MQTTSession!) {
-        print("*** MQTT connection closed")
+        os_log("MQTT connection closed", log: Log.mqtt, type: .debug)
     }
     
     func connected(_ session: MQTTSession!, sessionPresent: Bool) {
-        print("*** MQTT connected, sessionPresent \(sessionPresent)")
+        os_log("MQTT connected, sessionPresent %@", log: Log.mqtt, type: .debug, sessionPresent)
     }
     
     func handleEvent(_ session: MQTTSession!, event eventCode: MQTTSessionEvent, error: Error!) {
-        print("*** MQTT handle event with code \(eventCode.rawValue)")
+        //os_log("MQTT handle event with code %@", log: Log.mqtt, type: .debug, eventCode.rawValue)
     }
     
     func protocolError(_ session: MQTTSession!, error: Error!) {
-        print("*** MQTT protocol error \(String(describing: error))")
+        os_log("MQTT protocol error %@", log: Log.mqtt, type: .error, error.localizedDescription)
     }
     
     func unsubAckReceived(_ session: MQTTSession!, msgID: UInt16) {
-        print("*** MQTT unsubAckReceived")
+        os_log("MQTT unsubAckReceived", log: Log.mqtt, type: .debug)
     }
     
     func subAckReceived(_ session: MQTTSession!, msgID: UInt16, grantedQoss qoss: [NSNumber]!) {
-        print("*** MQTT subAckReceived")
+        os_log("MQTT subAckReceived", log: Log.mqtt, type: .debug)
         
         //Notify the SDK of the topic subcription
         if let closure = subscriptionCallback {
@@ -222,10 +229,8 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     }
     
     func session(_ session: MQTTSession!, handle eventCode: MQTTSessionEvent) {
-        print("**************** handle event")
     }
     
     func session(_ session: MQTTSession!, newMessage data: Data!, onTopic topic: String!) {
-        print("**************** new msg")
     }
 }

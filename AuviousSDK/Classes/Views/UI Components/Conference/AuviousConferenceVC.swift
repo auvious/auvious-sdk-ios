@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import os
 
 //Interface for communicating back to the host app
 public protocol AuviousSimpleConferenceDelegate: class {
@@ -22,6 +23,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     let collectionViewLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
     
     //Conference properties
+    private var clientId: String = ""
     private var username: String = ""
     private var password: String = ""
     private var conference: String = ""
@@ -48,8 +50,8 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     var remoteParticipants: [ParticipantEndpoint] = [ParticipantEndpoint]()
     
     //Public constructor
-    public init(username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate) {
-        
+    public init(clientId: String, username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate) {
+        self.clientId = clientId
         self.username = username
         self.password = password
         self.conference = conference
@@ -59,7 +61,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
-        log("UI Conference component: initialised")
+        os_log("UI Conference component: initialised")
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -78,27 +80,27 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         if !performedInitialValidations {
             //Check for permissions
             if !validateVideoPermissions() {
-                log("UI Conference component: viewDidAppear - no video permission, returning error")
+                os_log("UI Conference component: viewDidAppear - no video permission, returning error")
                 handleError(AuviousSDKError.videoPermissionIsDisabled)
                 return
             }
             
             if !validateMicPermissions() {
-                log("UI Conference component: viewDidAppear - no audio permission, returning error")
+                os_log("UI Conference component: viewDidAppear - no audio permission, returning error")
                 handleError(AuviousSDKError.audioPermissionIsDisabled)
                 return
             }
             
             //Check credentials
             if username.isEmpty || password.isEmpty {
-                log("UI Conference component: viewDidAppear - username/password empty, returning error")
+                os_log("UI Conference component: viewDidAppear - username/password empty, returning error")
                 handleError(AuviousSDKError.missingSDKCredentials)
                 return
             }
             
             //Check call target
             if conference.isEmpty {
-                log("UI Conference component: viewDidAppear - conference is empty, returning error")
+                os_log("UI Conference component: viewDidAppear - conference is empty, returning error")
                 handleError(AuviousSDKError.missingCallTarget)
                 return
             }
@@ -109,22 +111,22 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
             #warning("TODO: Expose endpoints so they can be overriden")
-            AuviousConferenceSDK.sharedInstance.configure(username: username, password: password, organization: "")
-//            AuviousCallSDK.sharedInstance.configure(username: username, password: password, organization: "", baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
-            log("UI Conference component: Configured ConferenceSDK")
+            AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+            os_log("UI Conference component: Configured ConferenceSDK")
 //
 //            //Get access to the local video stream immediately
 //            let localStream = AuviousCallSDK.sharedInstance.createLocalMediaStream(type: .micAndCam, streamId: "test")
 //            log("UI Call component: Created local media stream")
 //
             
-            AuviousConferenceSDK.sharedInstance.login(oAuth: true, onLoginSuccess: {(userId) in
-                self.log("UI Conference component: Login success")
+            AuviousConferenceSDK.sharedInstance.login(onLoginSuccess: {(userId, conferenceId) in
+                os_log("UI Conference component: Login success")
                 
+                self.conference = conferenceId!
                 AuviousConferenceSDK.sharedInstance.joinConference(conferenceId: self.conference, onSuccess: {(joinedConference) in
                     
                     if let jConference = joinedConference {
-                        print("Joined conference with id \(String(describing: jConference.id))")
+                        //os_log("Joined conference with id \(String(describing: jConference.id))")
                         self.currentConference = jConference
                         self.conferenceJoined = true
                         
@@ -132,7 +134,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
                     } else {
-                        print("WARNING: Unable to join conference")
+                        os_log("WARNING: Unable to join conference")
                     }
                 }, onFailure: {(error) in
                     self.handleError(error)
@@ -167,6 +169,10 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     
     //MARK: AuviousSDKConferenceDelegate
     
+    public func auviousSDK(conferenceOnHold flag: Bool) {
+        
+    }
+    
     public func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
         if event is ConferenceJoinedEvent {
             conferenceParticipants += 1
@@ -182,7 +188,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
             do {
                 try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: object.streamId, endpointId: object.userEndpointId, streamType: object.streamType, remoteUserId: object.userId)
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                //os_log("Error \(error) - \(error.localizedDescription)")
                 handleError(error)
             }
         }
@@ -192,13 +198,13 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
             do {
                 try AuviousConferenceSDK.sharedInstance.stopRemoteStream(streamId: object.streamId, remoteUserId: object.userId, remoteEndpointId: object.userEndpointId, streamType: object.streamType)
             } catch let error {
-                print("Error \(error) - \(error.localizedDescription)")
+                //os_log("Error \(error) - \(error.localizedDescription)")
                 handleError(error)
             }
         }
     }
     
-    public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String) {
+    public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
         DispatchQueue.main.async {
             if let indexPath = self.getIndexPathForStream(stream: stream, streamId: streamId, endpointId: endpointId),
                 let cell = self.collectionView.cellForItem(at: indexPath) as? ConferenceCell {
@@ -235,33 +241,41 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     public func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {
         switch newState {
         case .localStreamIsConnecting:
-            print("Local Stream Is Connecting")
+            os_log("Local Stream Is Connecting")
         case .localStreamConnected:
-            print("Local Stream Connected")
+            os_log("Local Stream Connected")
             didPublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsConnecting:
-            print("Remote Stream Is Connecting")
+            os_log("Remote Stream Is Connecting")
         case .remoteStreamConnected:
-            print("Remote Stream Connected")
+            os_log("Remote Stream Connected")
         case .localStreamIsDisconnecting:
-            print("Local Stream Is Disonnecting")
+            os_log("Local Stream Is Disonnecting")
         case .localStreamDisconnected:
-            print("Local Stream Disconnected")
+            os_log("Local Stream Disconnected")
             didUnpublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsDisconnecting:
-            print("Remote Stream Is Disonnecting")
+            os_log("Remote Stream Is Disonnecting")
         case .remoteStreamDisconnected:
-            print("Remote Stream Disconnected")
+            os_log("Remote Stream Disconnected")
             handleStreamDisconnection(streamId: streamId, streamType:streamType, endpointId: endpointId)
         case .localCaptureStarted:
-            print("Local Capture Started")
+            os_log("Local Capture Started")
         case .localCaptureStoped:
-            print("Local Capture Stoped")
+            os_log("Local Capture Stoped")
         }
     }
     
     public func auviousSDK(didReceiveLocalVideoTrack localVideoTrack: RTCVideoTrack!) {
         localStreamView.videoStreamAdded(localVideoTrack)
+    }
+    
+    public func auviousSDK(trackMuted type: StreamType, endpointId: String) {
+        
+    }
+    
+    public func auviousSDK(trackUnmuted type: StreamType, endpointId: String) {
+        
     }
     
     //MARK: Collection view
@@ -324,9 +338,9 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     //tmp until we have the UI with buttons etc
     private func startLocalStream() {
         do {
-            let streamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .micAndCam)
+            let _ = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .micAndCam)
         } catch let error {
-            print("Error \(error) - \(error.localizedDescription)")
+            //os_log("Error \(error) - \(error.localizedDescription)")
             handleError(error)
         }
     }
@@ -344,7 +358,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                         do {
                             try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: stream.id, endpointId: endpointStream.id, streamType: stream.type, remoteUserId: user.id)
                         } catch let error {
-                            print("Error \(error) - \(error.localizedDescription)")
+                            //os_log("Error \(error) - \(error.localizedDescription)")
                             handleError(error)
                         }
                     }
@@ -510,14 +524,10 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         return AVAudioSession.sharedInstance().recordPermission == .granted
     }
     
-    private func log(_ msg: String){
-        print(msg)
-    }
-    
     private func handleError(_ error: Error) {
         let auviousError = error as! AuviousSDKError
         
-        self.log("UI Conference component: handleError \(error.localizedDescription)")
+        //os_log("UI Conference component: handleError \(error.localizedDescription)")
         
         switch auviousError {
         case .videoPermissionIsDisabled:

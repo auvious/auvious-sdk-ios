@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import os
 
 /**
  This class is responsible for performing all HTTP requests.
@@ -23,8 +24,14 @@ internal final class API {
     var sessionManager: Alamofire.SessionManager
     
     //Auth tokens
+    var tokenRefreshTimer: Timer!
     var authenticationToken = ""
     var refreshToken: String?
+    var authTokenExpiresIn: Int? {
+        didSet {
+            startTokenRefreshTimer()
+        }
+    }
     
     //Cached tasks
     var cachedTasks: [TransactionElement] = []
@@ -55,6 +62,19 @@ internal final class API {
         objc_sync_exit(lock)
     }
     
+    func startTokenRefreshTimer() {
+        var executeIn: Int = 3
+        if authTokenExpiresIn! - 40 > executeIn {
+            executeIn = authTokenExpiresIn! - 40
+        }
+        
+        tokenRefreshTimer = Timer.scheduledTimer(timeInterval: Double(executeIn), target: self, selector: #selector(self.handleTokenRefresh), userInfo: nil, repeats: false)
+    }
+    
+    @objc func handleTokenRefresh() {
+        self.refreshToken()
+    }
+    
     //Refreshes the OAuth token and consumes pending transactions
     func refreshToken(_ completion: ((Bool) -> Void)? = nil) {
         guard let refreshToken = refreshToken else {
@@ -74,10 +94,13 @@ internal final class API {
             if let data = json {
                 self.authenticationToken = data["access_token"].stringValue
                 self.refreshToken = data["refresh_token"].stringValue
+                self.authTokenExpiresIn = data["expires_in"].intValue
+                
+                self.consumePendingTransactions()
+                completion?(true)
             }
             
-            self.consumePendingTransactions()
-            completion?(true)
+            completion?(false)
         }, onFailure: { (error)  -> () in
             self.refreshTokenDidFail({ (_) in
                 completion?(false)
@@ -178,17 +201,16 @@ internal final class API {
             }
             
             if response.error != nil {
-                print("response error: \(String(describing: response.error))")
+                os_log("response error: %@", log: Log.api, type: .error, String(describing: response.error))
             }
-            
-            //print("response response: \(String(describing: response.response))")
             
             if let responseData = response.data {
                 
                 do {
                     let jsonResponse = try JSON(data: responseData)
                     //Logger.log(level: .debug, message: "RESPONSE SUCCESS \(jsonResponse)")
-
+                    //print("RESPONSE SUCCESS \(jsonResponse)")
+                    
                     transaction.onSuccess(jsonResponse)
                     return
                 } catch {
@@ -211,12 +233,7 @@ internal final class API {
     
     // Authentication
     func loginUser(_ object: LoginRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        var transaction:TransactionElement = (APIRequest.Router.loginUser(object: object), onSuccess, onFailure, false)
-        
-        if object.useOAuth {
-            transaction = (APIRequest.Router.loginUserOAuth(object: object), onSuccess, onFailure, false)
-        }
-        
+        let transaction = (APIRequest.Router.loginUserOAuth(object: object), onSuccess, onFailure, false)
         startRequest(transaction)
     }
     
@@ -339,6 +356,11 @@ internal final class API {
         startRequest(transaction)
     }
     
+    func updateConferenceMetadata(_ object: UpdateMetadataRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction:TransactionElement = (APIRequest.Router.updateConferenceMetadata(object: object), onSuccess, onFailure, true)
+        startRequest(transaction)
+    }
+    
     //Endpoints
     func getEndpoints(onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
         let transaction:TransactionElement = (APIRequest.Router.getEndpoints(()), onSuccess, onFailure, true)
@@ -374,7 +396,7 @@ internal final class API {
     func uploadSnapshot(_ object: SnapshotUploadRequest, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         let url = ServerConfiguration.baseRTC + "/rtc-api/snapshots/snapshotAcquire"
         
-        print("Uploading snapshot to " + url)
+        os_log("Uploading snapshot to %@", log: Log.api, type: .debug, url)
         
         let headers: HTTPHeaders = [
             "Content-Type": "application/form-data",
@@ -399,16 +421,16 @@ internal final class API {
                 upload.response { response in
                     
                     if let err = response.error {
-                        print("upload error is \(err)")
+                        os_log("Upload error is %@", log: Log.api, type: .error, err.localizedDescription)
                         onFailure(err)
                         return
                     }
                     
-                    print("Succesfully uploaded")
+                    os_log("Succesfully uploaded", log: Log.api, type: .debug)
                     onSuccess()
                 }
             case .failure(let error):
-                print("Error in upload: \(error.localizedDescription)")
+                os_log("Error in upload: %@", log: Log.api, type: .error, error.localizedDescription)
                 onFailure(error)
             }
         }

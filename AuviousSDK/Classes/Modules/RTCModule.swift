@@ -8,6 +8,7 @@
 
 import Foundation
 import AVFoundation
+import os
 
 //Return type for camera commands such as FlashOn, FlashOff, CameraSwitch etc.
 internal typealias CameraResponse = (Bool, String)
@@ -16,7 +17,7 @@ internal protocol RTCDelegate {
     
     //required for client
     func rtcClient(didReceiveLocalVideoTrack localVideoTrack: RTCVideoTrack!)
-    func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String)
+    func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType)
     func rtcClient(onError error: AuviousSDKError)
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
     func rtcClient(agentSwitchedCamera toFront: Bool)
@@ -113,6 +114,11 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     private var lastLocalFrame: RTCVideoFrame?
     private var capturingScreenshot: Bool = false
     
+    //Local tracks (for muting/unmuting)
+    internal var localVideoTrack: RTCVideoTrack?
+    internal var localAudioTrack: RTCAudioTrack?
+    internal var localStream: RTCMediaStream?
+    
     internal override init(){
         super.init()
         
@@ -197,16 +203,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                                 self.invokeAnswer(callId: callId, sdpAnswer: sessionDescription!.sdp, userEndpointId: userEndpointId, userId: userId, container: object)
                                 
                             } else {
-                                print("ARTCClient set local description ERROR \(String(describing: error))")
+                                os_log("ARTCClient set local description ERROR %@", log: Log.rtc, type: .error, error!.localizedDescription)
                             }
                         })
                     } else {
-                        print("AERCClient sdp answer creation FAILURE - error \(String(describing: error))")
+                        os_log("ARTCClient sdp answer creation FAILURE - error %@", log: Log.rtc, type: .error, error!.localizedDescription)
                     }
                 })
                 
             } else {
-                print("ARTCClient remote description FAILED for call answer. Error is \(String(describing: error))")
+                os_log("ARTCClient remote description FAILED for call answer. Error is %@", log: Log.rtc, type: .error, error!.localizedDescription)
             }
         })
     }
@@ -243,6 +249,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         
         peerConnections.append(connectionContainer)
+        os_log("Created connection for stream type", log: Log.rtc, type: .debug, type.rawValue)
     }
     
     //Returns the connection created for the given stream id, if any
@@ -267,8 +274,8 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     internal func createLocalMediaStream(type: StreamType, streamId: String) -> RTCMediaStream {
-        print("RTCModule.createLocalMediaStream() for type \(type) and stream \(streamId)")
-        let localStream = factory.mediaStream(withStreamId: streamId)
+        os_log("createLocalMediaStream() for type %@ and stream %@", log: Log.rtc, type: .debug, type.rawValue, streamId)
+        localStream = factory.mediaStream(withStreamId: streamId)
         
         if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) != .denied ||
             AVCaptureDevice.authorizationStatus(for: AVMediaType.video) != .restricted {
@@ -280,11 +287,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 capturer.delegate = self
                 startCapture(type: type, streamId: streamId)
                 
-                let videoTrack: RTCVideoTrack = factory.videoTrack(with: localVideoSource!, trackId: "ARDAMSv0")
-                
-                videoTrack.isEnabled = true
-                localStream.addVideoTrack(videoTrack)
-                print("local video track added")
+                localVideoTrack = factory.videoTrack(with: localVideoSource!, trackId: "ARDAMSv0")
+                localVideoTrack!.isEnabled = true
+                localStream!.addVideoTrack(localVideoTrack!)
+                os_log("local video track added", log: Log.rtc, type: .debug)
             }
         }
         else {
@@ -294,19 +300,19 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         if AVCaptureDevice.authorizationStatus(for: AVMediaType.audio) != .denied ||
             AVCaptureDevice.authorizationStatus(for: AVMediaType.audio) != .restricted {
             if type != .cam {
-                let audioTrack = factory.audioTrack(withTrackId: "ARDAMSa0")
-                localStream.addAudioTrack(audioTrack)
+                localAudioTrack = factory.audioTrack(withTrackId: "ARDAMSa0")
+                localStream!.addAudioTrack(localAudioTrack!)
             }
         }
         else {
             delegate?.rtcClient(onError: AuviousSDKError.audioPermissionIsDisabled)
         }
         
-        if let localVideoTrack = localStream.videoTracks.first {
+        if let localVideoTrack = localStream!.videoTracks.first {
             delegate?.rtcClient(didReceiveLocalVideoTrack: localVideoTrack)
         }
         
-        return localStream
+        return localStream!
     }
     
     private func makeOfferPublishStream(type: StreamType, streamId: String) {
@@ -350,7 +356,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         switch type {
         case .mic:
             return RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio" : "true", "OfferToReceiveVideo": "false"], optionalConstraints: nil)
-        case .cam:
+        case .cam, .screen:
             return RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio" : "false", "OfferToReceiveVideo": "true"], optionalConstraints: nil)
         default:
             return RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio" : "true", "OfferToReceiveVideo": "true"], optionalConstraints: nil)
@@ -460,12 +466,12 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                         }
                         
                     }, onFailure: {(error) in
-                        print("addCallIceCandidates request error \(error)")
+                        os_log("addCallIceCandidates request error %@", log: Log.rtc, type: .error, error.localizedDescription)
                     })
                 }
             }
         }, onFailure: {(error) in
-            print("answer call error")
+            os_log("answer call error %@", log: Log.rtc, type: .error, error.localizedDescription)
         })
         
     }
@@ -473,7 +479,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func handleTerminatedCall(_ callId: String) {
         let containerList = peerConnections.filter{$0.callId == callId}
         guard containerList.first != nil else {
-            print("error no connection for call id!")
+            os_log("error no connection for call id %@", log: Log.rtc, type: .error, callId)
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: callId))
             return
         }
@@ -487,7 +493,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func handleCallRejectedEvent(_ event: CallRejectedEvent) {
         let containerList = peerConnections.filter{$0.callId == event.callId!}
         guard containerList.first != nil else {
-            print("error no connection for call id!")
+            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
             return
         }
@@ -501,7 +507,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func handleCallEndedEvent(_ event: CallEndedEvent){
         let containerList = peerConnections.filter{$0.callId == event.callId!}
         guard containerList.first != nil else {
-            print("error no connection for call id!")
+            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
             return
         }
@@ -515,7 +521,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func handleCallAnsweredEvent(_ event: CallAnsweredEvent, userEndpointId: String, userId: String) {
         let containerList = peerConnections.filter{$0.callId == event.callId!}
         guard containerList.first != nil else {
-            print("error no connection for call id!")
+            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
             return
         }
@@ -546,7 +552,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                         }
                         
                     }, onFailure: {(error) in
-                        print("addCallIceCandidates request error \(error)")
+                        os_log("addCallIceCandidates request error %@", log: Log.rtc, type: .error, error.localizedDescription)
                     })
                 }
             }
@@ -556,7 +562,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func addCallIceCandidates(event: IceCandidatesFoundEvent) {
         let containerList = peerConnections.filter{$0.callId == event.callId!}
         guard containerList.first != nil else {
-            print("error no connection for call id!")
+            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
             return
         }
@@ -688,17 +694,47 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         peerConnections.removeAll()
     }
     
+    // MARK: -
+    // MARK: Track muting
+    // MARK: -
+    
+    internal func toggleRemoteStreams(_ event: ConferenceMetadataUpdatedEvent) {
+        if !event.isHold {
+            //Remote stream to process
+            if let remoteStreamId = event.streamId, let streamConnection = peerConnections.filter({$0.streamId == remoteStreamId}).first {
+                if event.operation == MetadataRequestOperation.set {
+                    if event.streamType == MetadataRequestType.audio {
+                        //Mute audio
+                        let _ = streamConnection.connection.localStreams.map {$0.audioTracks.map {$0.isEnabled = false} }
+                    } else if event.streamType == MetadataRequestType.video {
+                        //Mute video
+                        let _ = streamConnection.connection.localStreams.map {$0.videoTracks.map {$0.isEnabled = false} }
+                    }
+                } else {
+                    if event.streamType == MetadataRequestType.audio {
+                        //Unmute audio
+                        let _ = streamConnection.connection.localStreams.map {$0.audioTracks.map {$0.isEnabled = true} }
+                    } else if event.streamType == MetadataRequestType.video {
+                        //Unmute video
+                        let _ = streamConnection.connection.localStreams.map {$0.videoTracks.map {$0.isEnabled = true} }
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: -
     // MARK: Audio routing
+    // MARK: -
     
     private func checkCurrentAudioRoute() {
         let currentRoute = AVAudioSession.sharedInstance().currentRoute
-        print("Current audio outputs: \(currentRoute.outputs)")
         for description in currentRoute.outputs {
             
             if description.portType == AVAudioSession.Port.headphones || description.portType == AVAudioSession.Port.bluetoothHFP {
-                print("headphone plugged in")
+                os_log("headphone plugged in", log: Log.rtc, type: .debug)
             } else {
-                print("headphone pulled out")
+                os_log("headphone pulled out", log: Log.rtc, type: .debug)
                 changeAudioRoot(toSpeaker: true)
             }
         }
@@ -711,22 +747,18 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 return
         }
         
-        var headphonesConnected = false
-        
         switch reason {
         case .newDeviceAvailable:
             let session = AVAudioSession.sharedInstance()
             for output in session.currentRoute.outputs where output.portType == AVAudioSession.Port.headphones || output.portType == AVAudioSession.Port.bluetoothHFP || output.portType == AVAudioSession.Port.bluetoothA2DP || output.portType == AVAudioSession.Port.bluetoothLE {
-                headphonesConnected = true
-                print("Headphones/Bluetooth device just connected")
+                os_log("Headphones/Bluetooth device just connected", log: Log.rtc, type: .debug)
                 break
             }
         case .oldDeviceUnavailable:
             if let previousRoute =
                 userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
                 for output in previousRoute.outputs where output.portType == AVAudioSession.Port.headphones || output.portType == AVAudioSession.Port.bluetoothHFP || output.portType == AVAudioSession.Port.bluetoothA2DP || output.portType == AVAudioSession.Port.bluetoothLE {
-                    headphonesConnected = false
-                    print("Headphones/Bluetooth device just removed, switching to speaker")
+                    os_log("Headphones/Bluetooth device just removed, switching to speaker", log: Log.rtc, type: .debug)
                     changeAudioRoot(toSpeaker: true)
                     break
                 }
@@ -738,7 +770,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     // MARK: RTCPeerConnectionDelegate
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         
-        var targetContainer:RTCPeerConnectionContainer!
+        var targetContainer: RTCPeerConnectionContainer!
         for item in peerConnections {
             if item.connection == peerConnection {
                 targetContainer = item
@@ -747,14 +779,15 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         
         checkCurrentAudioRoute()
-        delegate?.rtcClient(didReceiveRemoteStream: stream, streamId: targetContainer.streamId, endpointId: targetContainer.endpointId)
+        
+        delegate?.rtcClient(didReceiveRemoteStream: stream, streamId: targetContainer.streamId, endpointId: targetContainer.endpointId, type: targetContainer.streamType)
     }
     
     //Setup an IceCandidate listener to gather candidates
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         
         //Find the appropriate connection
-        var targetContainer:RTCPeerConnectionContainer?
+        var targetContainer: RTCPeerConnectionContainer?
         for item in peerConnections {
             if item.connection == peerConnection {
                 targetContainer = item
@@ -771,35 +804,35 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - Channel did open")
+//        os_log("RTCPeerConnectionDelegate - ARTCClient - Channel did open", log: Log.rtc, type: .debug)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - Gathering new State: \(newState.rawValue)");
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - Gathering new State: %@", log: Log.rtc, type: .debug, newState.rawValue)
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        //print("*** RTCPeerConnectionDelegate - ARTCClient - Peer connection should negotiate")
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - Peer connection should negotiate", log: Log.rtc, type: .debug)
     }
     
     func peerConnection(onRenegotiationNeeded peerConnection: RTCPeerConnection!) {
-        //print("!!! RTCPeerConnectionDelegate - ARTCClient - WARNING: Renegotiation needed but unimplemented");
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - WARNING: Renegotiation needed but unimplemented", log: Log.rtc, type: .debug)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - Stream was removed")
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - Stream was removed", log: Log.rtc, type: .debug)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - stateChanged: \(stateChanged.rawValue)");
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - stateChanged: %@", log: Log.rtc, type: .debug, stateChanged.rawValue)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - Connection state changed: \(newState.rawValue)")
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - Connection state changed: %@", log: Log.rtc, type: .debug, newState.rawValue)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
-        //print("RTCPeerConnectionDelegate - ARTCClient - Candidate was removed")
+        //os_log("RTCPeerConnectionDelegate - ARTCClient - Candidate was removed", log: Log.rtc, type: .debug)
     }
     
     // MARK: Camera controls
@@ -810,7 +843,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         
         guard device.hasTorch && device.isTorchAvailable else {
-            print("RTCModule: no torch available")
+            os_log("no torch available", log: Log.rtc, type: .debug)
             return CameraResponse(false, "No torch available")
         }
         
@@ -818,10 +851,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             try device.lockForConfiguration()
             
             if on {
-                print("RTCModule: Torch set to on")
+                os_log("Torch set to on", log: Log.rtc, type: .debug)
                 device.torchMode = .on
             } else {
-                print("RTCModule: Torch set to off")
+                os_log("Torch set to off", log: Log.rtc, type: .debug)
                 device.torchMode = .off
             }
             
@@ -897,7 +930,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
-        //print("Frame captured \(frame.width)x\(frame.height) pixels")
+        //os_log("Frame captured %@ x %@ pixels", log: Log.rtc, type: .debug, String(frame.width), String(frame.height))
         
         if let local = localVideoSource {
             if !capturingScreenshot {
@@ -915,7 +948,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             delegate?.rtcClient(didChangeState: .localCaptureStoped, streamId: streamId, streamType: type, endpointId: UserEndpointModule.sharedInstance.userEndpointId!)
             capturer = nil
         } else {
-            print("ARTCClient error stopping local capture")
+            os_log("ARTCClient error stopping local capture", log: Log.rtc, type: .error)
         }
     }
     
@@ -962,12 +995,13 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             }
             
         } else {
-            print("getSnapshot() error")
+            os_log("getSnapshot() error", log: Log.rtc, type: .error)
             capturingScreenshot = false
             return nil
         }
     }
     
+    @discardableResult
     internal func changeAudioRoot(toSpeaker: Bool) -> Bool {
         //#warning("Feature Idea: Change audio session type for better audio quality (https://www.twilio.com/docs/video/ios-v2-configuring-audio-video-inputs-and-outputs)")
         if toSpeaker {

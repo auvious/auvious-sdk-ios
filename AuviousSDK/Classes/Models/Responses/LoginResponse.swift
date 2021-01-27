@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyJSON
+import os
 
 internal final class LoginResponse {
     
@@ -19,12 +20,14 @@ internal final class LoginResponse {
     var expiresIn: Int!
     var userId: String!
     var deviceId: String!
+    var conferenceId: String?
     
     init(fromJson json: JSON!) {
         if json == JSON.null {
             return
         }
         
+        conferenceId = json["conference_id"].string
         accessToken = json["access_token"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         organization = json["organization"].stringValue
         jti = json["jti"].stringValue
@@ -38,6 +41,6 @@ internal final class LoginResponse {
         API.sharedInstance.refreshToken = refreshToken
         ServerConfiguration.mqttUser = accessToken
         
-        print("mqtt user \(accessToken)")
+        os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)
     }
 }
