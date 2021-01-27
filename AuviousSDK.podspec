@@ -22,11 +22,11 @@ AuviousSDK makes it easy to use Auvious services in your app. Add now video call
 multiparty video conferencing, snapshot, and many more things are coming your way!
                        DESC
 
-  s.homepage         = 'https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git'
+  s.homepage         = 'https://github.com/auvious/auvious-sdk-ios.git'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Epi Vou' => 'pimenas@gmail.com' }
-  s.source           = { :git => 'https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git', :tag => s.version.to_s }
+  s.author           = { 'Auvious' => 'team@auvious.com' }
+  s.source           = { :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '10.0'
