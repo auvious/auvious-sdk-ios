@@ -51,6 +51,7 @@ class ConferenceHoldView: UIImageView {
         topLabel.translatesAutoresizingMaskIntoConstraints = false
         topLabel.text = "Your call is on hold"
         topLabel.textAlignment = .center
+        topLabel.textColor = UIColor.lightGray
         topLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         addSubview(topLabel)
         topLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
