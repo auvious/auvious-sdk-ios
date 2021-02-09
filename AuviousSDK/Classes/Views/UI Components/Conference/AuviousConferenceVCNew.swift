@@ -206,6 +206,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         //Start connecting to any existing streams in our conference
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
+                        
+                        //Joined conference is on hold
+                        if self.currentConference.onHold {
+                            self.auviousSDK(conferenceOnHold: true)
+                        }
                     } else {
                         os_log("Unable to join conference", log: Log.conferenceUI, type: .error)
                     }
@@ -432,6 +437,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     self.blurredOverlayView?.blurView.alpha = 0.9
                 }, completion: { _ in
                     self.buttonContainerView.conferenceOnHold(true)
+                    AuviousConferenceSDK.sharedInstance.removeLocalAudioStream()
+                    AuviousConferenceSDK.sharedInstance.removeLocalVideoStream()
                 })
             }
         } else {
@@ -440,6 +447,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     blurredOverlayView.alpha = 0
                 }, completion: { _ in
                     self.buttonContainerView.conferenceOnHold(false)
+                    
+                    AuviousConferenceSDK.sharedInstance.addLocalAudioStream()
+                    AuviousConferenceSDK.sharedInstance.addLocalVideoStream()
+                    
                     blurredOverlayView.removeFromSuperview()
                     self.blurredOverlayView = nil
                 })

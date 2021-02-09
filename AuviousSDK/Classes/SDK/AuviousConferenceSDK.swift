@@ -752,6 +752,35 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.currentConference = nil
     }
     
+    //Helper for HOLD, MUTE/UNMUTE functionality
+    internal func removeLocalVideoStream() {
+        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
+            stream.removeVideoTrack(localVideo)
+            os_log("RTCClient removed local video track", log: Log.conferenceSDK, type: .debug)
+        }
+    }
+    
+    internal func removeLocalAudioStream() {
+        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
+            stream.removeAudioTrack(localAudio)
+            os_log("RTCClient removed local audio track", log: Log.conferenceSDK, type: .debug)
+        } 
+    }
+    
+    internal func addLocalVideoStream() {
+        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
+            stream.addVideoTrack(localVideo)
+            os_log("RTCClient added local video track", log: Log.conferenceSDK, type: .debug)
+        }
+    }
+    
+    internal func addLocalAudioStream() {
+        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
+            stream.addAudioTrack(localAudio)
+            os_log("RTCClient added local audio track", log: Log.conferenceSDK, type: .debug)
+        }
+    }
+    
     public func toggleLocalStream(conferenceId: String, streamId: String, operation: MetadataRequestOperation, type: MetadataRequestType, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
             onFailure(AuviousSDKError.endpointNotCreated)
@@ -775,27 +804,15 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 
                 if operation == .set {
                     if type == .video {
-                        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
-                            stream.removeVideoTrack(localVideo)
-                            os_log("RTCClient removed local video track", log: Log.conferenceSDK, type: .debug)
-                        }
+                        self.removeLocalVideoStream()
                     } else if type == .audio {
-                        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
-                            stream.removeAudioTrack(localAudio)
-                            os_log("RTCClient removed local audio track", log: Log.conferenceSDK, type: .debug)
-                        }
+                        self.removeLocalAudioStream()
                     }
                 } else if operation == .remove {
                     if type == .video {
-                        if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
-                            stream.addVideoTrack(localVideo)
-                            os_log("RTCClient added local video track", log: Log.conferenceSDK, type: .debug)
-                        }
+                        self.addLocalVideoStream()
                     } else if type == .audio {
-                        if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
-                            stream.addAudioTrack(localAudio)
-                            os_log("RTCClient added local audio track", log: Log.conferenceSDK, type: .debug)
-                        }
+                        self.addLocalAudioStream()
                     }
                 }
                 
