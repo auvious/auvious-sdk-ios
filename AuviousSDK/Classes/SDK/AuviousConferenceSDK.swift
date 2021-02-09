@@ -715,7 +715,11 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             })
             
         }, onFailure: {(error) in
-            onFailure(error)
+            self.logoutRequest(onSuccess: {
+                onSuccess()
+            }, onFailure: {(error) in
+                onFailure(error)
+            })
         })
     }
     
