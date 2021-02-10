@@ -148,7 +148,6 @@ internal class AuviousNotification {
                     self.view.alpha = 0.3
                 }, completion: { finished in
                     self.isPresenting = false
-                    #warning("Potential crash here (3) - when a second notification is presented")
                     self.view.removeFromSuperview()
                 })
             })

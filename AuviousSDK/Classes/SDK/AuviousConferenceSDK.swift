@@ -907,7 +907,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     //MQTT message delegation
     private func delegateConferenceMessage(msg: ConferenceEvent) {
         switch msg.type! {
-        case .conferenceJoined, .conferenceLeft, .conferenceStreamPublished:
+        case .conferenceJoined, .conferenceLeft, .conferenceStreamPublished, .conferenceNetworkIndicatorEvent:
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceEnded:
             removeAllStreams()

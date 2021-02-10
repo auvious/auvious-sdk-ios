@@ -12,6 +12,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //UI components
     
+    //Network indicator view
+    let networkIndicator = NetworkIndicatorView()
     //Container of all stream views
     private var streamContainerView: UIView!
     //Our local stream view
@@ -129,6 +131,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         streamContainerView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0).isActive = true
         streamContainerView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0).isActive = true
         streamContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
+        
+        //Network indicator
+        view.addSubview(networkIndicator)
+        networkIndicator.alpha = 0.7
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor).isActive = true
+        networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor).isActive = true
+        networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        networkIndicator.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
         //Setup feedback
         selectionFeedbackGenerator.prepare()
@@ -461,14 +471,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
         if event is ConferenceJoinedEvent {
             conferenceParticipants += 1
-        }
-        else if event is ConferenceLeftEvent {
+        } else if event is ConferenceLeftEvent {
             conferenceParticipants -= 1
-        }
-        else if event is ConferenceEndedEvent {
+        } else if event is ConferenceEndedEvent {
             handleConferenceEndedEvent()
-        }
-        else if event is ConferenceStreamPublishedEvent {
+        } else if event is ConferenceNetworkIndicatorEvent {
+            let endpoint = AuviousConferenceSDK.sharedInstance.userEndpointId
+            let object = event as! ConferenceNetworkIndicatorEvent
+            networkIndicator.updateUI(with: object, participantId: endpoint)
+        } else if event is ConferenceStreamPublishedEvent {
             let object = event as! ConferenceStreamPublishedEvent
             do {
                 os_log("Starting remote stream flow for type %@", log: Log.conferenceUI, type: .debug, object.streamType.rawValue)
@@ -477,8 +488,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 handleError(error)
             }
-        }
-        else if event is ConferenceStreamUnpublishedEvent {
+        } else if event is ConferenceStreamUnpublishedEvent {
             let object = event as! ConferenceStreamUnpublishedEvent
             
             do {

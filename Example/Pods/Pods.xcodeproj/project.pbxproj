@@ -25,6 +25,8 @@
 		01606EE81DA770D12551F299BF617399 /* SPPermissionDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10585AE79F3A7E4A745BCEB75304C3ED /* SPPermissionDialog.swift */; };
 		028FD3D72F025D4500AE5CD5A057E22E /* SentryCrashVarArgs.h in Headers */ = {isa = PBXBuildFile; fileRef = FA21E277F5F39B046FB2C542155B5E5C /* SentryCrashVarArgs.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0380218825D1436C003A56EA /* ConferenceInitialHoldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0380218725D1436C003A56EA /* ConferenceInitialHoldView.swift */; };
+		0380218A25D3CEA0003A56EA /* ConferenceNetworkIndicatorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0380218925D3CEA0003A56EA /* ConferenceNetworkIndicatorEvent.swift */; };
+		0380218C25D3E14F003A56EA /* NetworkIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0380218B25D3E14F003A56EA /* NetworkIndicatorView.swift */; };
 		03FBA08EB92CCBE0145486A6F022AA6B /* ConferenceStreamUnpublishedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A377A92547CD63A0A3484E88BE9EE533 /* ConferenceStreamUnpublishedEvent.swift */; };
 		0447085C830511AD0B8B93B27E9E41B5 /* CreateConferenceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE0346F899B7219141B949F1C58CD65 /* CreateConferenceRequest.swift */; };
 		045CA60D86D124E0771204CB1B08992B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0DEBA5A43BC83508997C43590CC6C7C /* UIKit.framework */; };
@@ -746,6 +748,8 @@
 		02B45F825F0E9A2ED2494D7EC900C91F /* MQTTLog.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTLog.m; path = MQTTClient/MQTTClient/MQTTLog.m; sourceTree = "<group>"; };
 		0342E5EA65A89DEE32755987E64C2922 /* SentryBreadcrumbTracker.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumbTracker.h; path = Sources/Sentry/include/SentryBreadcrumbTracker.h; sourceTree = "<group>"; };
 		0380218725D1436C003A56EA /* ConferenceInitialHoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceInitialHoldView.swift; sourceTree = "<group>"; };
+		0380218925D3CEA0003A56EA /* ConferenceNetworkIndicatorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConferenceNetworkIndicatorEvent.swift; sourceTree = "<group>"; };
+		0380218B25D3E14F003A56EA /* NetworkIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkIndicatorView.swift; sourceTree = "<group>"; };
 		03A7C7777AC600AEAC06C88FDBF13E45 /* SPPermissionMicrophone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionMicrophone.swift; path = Source/SPPermission/Permissions/SPPermissionMicrophone.swift; sourceTree = "<group>"; };
 		03DF7A7B758C2384988394C567CB0A18 /* SentryCrashStackCursor_Backtrace.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor_Backtrace.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_Backtrace.c; sourceTree = "<group>"; };
 		04215C4FD65E2A1E989496B4E8AA09B5 /* SentryCrashObjC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashObjC.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjC.h; sourceTree = "<group>"; };
@@ -1566,6 +1570,7 @@
 				7C79A0468773CB2F7D14D0A85C3848DB /* ConferenceHoldView.swift */,
 				0EAA4DDBAD0BCB0BA3F62FCE7B6C83DE /* ZoomableUIView.swift */,
 				0380218725D1436C003A56EA /* ConferenceInitialHoldView.swift */,
+				0380218B25D3E14F003A56EA /* NetworkIndicatorView.swift */,
 			);
 			path = "UI Elements";
 			sourceTree = "<group>";
@@ -2027,6 +2032,7 @@
 				CCD06B15A5B3AA3F8E83A1E400D33EC0 /* ConferenceLeftEvent.swift */,
 				EC1BFC1CB1833B56CBD798D4E71FB161 /* ConferenceMetadataUpdatedEvent.swift */,
 				69460FDC0012D3D153B96040B425BABB /* ConferenceStreamPublishedEvent.swift */,
+				0380218925D3CEA0003A56EA /* ConferenceNetworkIndicatorEvent.swift */,
 				A377A92547CD63A0A3484E88BE9EE533 /* ConferenceStreamUnpublishedEvent.swift */,
 			);
 			path = Conferences;
@@ -3208,7 +3214,9 @@
 				A22BD39D6A83B660F5AD910362872065 /* CallCancelledEvent.swift in Sources */,
 				D02AF2B37C7DC52AA157EDA47B93E46B /* CallCancelRequest.swift in Sources */,
 				A38203FBD2484426F7B7A3A1983C8E4E /* CallCreatedEvent.swift in Sources */,
+				0380218A25D3CEA0003A56EA /* ConferenceNetworkIndicatorEvent.swift in Sources */,
 				4E7169C1E7CFE688A9D8093D98783BDC /* CallEndedEvent.swift in Sources */,
+				0380218C25D3E14F003A56EA /* NetworkIndicatorView.swift in Sources */,
 				E782D68E7B089BB187D3DA385B2A8914 /* CallEvent.swift in Sources */,
 				62C2180176F77F159EBB9110E9FD3BC1 /* CallHangupRequest.swift in Sources */,
 				D11F2D089122AA42F72851F81442AE7D /* CallIceCandidatesRequest.swift in Sources */,
