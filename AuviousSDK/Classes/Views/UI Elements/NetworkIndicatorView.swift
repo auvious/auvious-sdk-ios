@@ -18,6 +18,9 @@ class NetworkIndicatorView: UIView {
     private let barWidth: CGFloat = 5
     private let borderWidth: CGFloat = 0.3
     
+    //Data
+    private var event: NetworkStatistics?
+    
     var index = 0
     
     init() {
@@ -37,7 +40,7 @@ class NetworkIndicatorView: UIView {
     }
     
     private func setupUI() {
-        layer.zPosition = 9999
+        layer.zPosition = 2000
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = UIColor.black.withAlphaComponent(0.5)
                 
@@ -73,13 +76,15 @@ class NetworkIndicatorView: UIView {
     }
         
     @objc private func tapped() {
-        print("tapped")
+        AuviousNotification.shared.showNetworkDetails(self.event)
     }
     
     func updateUI(with object: ConferenceNetworkIndicatorEvent, participantId: String?) {
         guard let endpointId = participantId, let data = object.data[endpointId] else {
             return
         }
+        
+        self.event = data
         
         if index == 0 {
             data.grade = .bad

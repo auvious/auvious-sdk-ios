@@ -44,7 +44,7 @@ public class NetworkStatistics {
         
         avgJitter = json["averageJitter"].intValue
         avgRtt = json["averageRtt"].intValue
-        avgNetworkQuality = json["avgNetworkQuality"].intValue
+        avgNetworkQuality = json["averageNetworkQuality"].intValue
         if let ng = NetworkGrade(rawValue: json["grade"].stringValue) {
             grade = ng
         }
