@@ -149,7 +149,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator details
         view.addSubview(networkIndicatorDetails)
         networkIndicatorDetails.layer.zPosition = 2100
-        networkIndicatorDetails.alpha = 0.8
+        networkIndicatorDetails.alpha = 0
         networkIndicatorDetails.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
         networkIndicatorDetails.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
@@ -178,6 +178,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
      
     //Shows the network details view
     @objc private func showNetworkDetails() {
+        networkIndicatorDetails.alpha = 1
+        
         UIView.animate(withDuration: 0.2, animations: {
             self.networkIndicatorDetailsTop.constant = 10
             self.view.layoutIfNeeded()
