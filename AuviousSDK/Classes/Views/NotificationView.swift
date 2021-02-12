@@ -188,37 +188,6 @@ internal class AuviousNotification {
     private let size: CGFloat = 150
     
     //Displays the given notification
-    func showNetworkDetails(_ object: NetworkStatistics?) {
-        guard let presenter = presenter else {
-            os_log("WARNING, notification skipped", log: Log.conferenceUI, type: .debug)
-            return
-        }
-        
-//        toastView = NetworkDetailsNotificationView(with: object)
-//        presenter.view.addSubview(toastView)
-//        toastView.layer.zPosition = 2100
-//        toastView.alpha = 0.8
-//        toastView.leadingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
-//        toastView.trailingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
-//        toastView.heightAnchor.constraint(equalToConstant: 60).isActive = true
-//
-//        let topConstraint = toastView.topAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.topAnchor, constant: -100)
-//        topConstraint.isActive = true
-        
-        UIView.animate(withDuration: 0.2, animations: {
-            //topConstraint.constant = 10
-            //presenter.view.layoutIfNeeded()
-        }, completion: { finished in
-            UIView.animate(withDuration: 0.2, delay: 3.0, options: [], animations: {
-//                self.toastView.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
-//                self.toastView.alpha = 0.3
-            }, completion: { finished in
-                //self.toastView.removeFromSuperview()
-            })
-        })
-    }
-    
-    //Displays the given notification
     func show(_ type: NotificationType) {
         guard let presenter = presenter else {
             os_log("WARNING, notification skipped", log: Log.conferenceUI, type: .debug)

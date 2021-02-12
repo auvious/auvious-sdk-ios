@@ -72,10 +72,6 @@ class NetworkIndicatorView: UIView {
         bar1.widthAnchor.constraint(equalToConstant: barWidth).isActive = true
     }
         
-    @objc private func tapped() {
-        AuviousNotification.shared.showNetworkDetails(self.event)
-    }
-    
     func updateUI(with object: ConferenceNetworkIndicatorEvent, participantId: String?) {
         guard let endpointId = participantId, let data = object.data[endpointId] else {
             return
