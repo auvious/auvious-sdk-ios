@@ -44,9 +44,6 @@ class NetworkIndicatorView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = UIColor.black.withAlphaComponent(0.5)
                 
-        let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.tapped))
-        addGestureRecognizer(tapRecogniser)
-        
         bar3.translatesAutoresizingMaskIntoConstraints = false
         bar3.backgroundColor = NetworkGrade.optimal.color
         bar3.layer.borderWidth = borderWidth

@@ -10,7 +10,7 @@ import os
 
 //Notification types
 internal enum NotificationType {
-    case cameraOn, cameraOff, microphoneOn, microphoneOff, networkIndication(NetworkStatistics)
+    case cameraOn, cameraOff, microphoneOn, microphoneOff
     
     var title: String {
         switch self {
@@ -22,8 +22,6 @@ internal enum NotificationType {
             return NSLocalizedString("Microphone on", comment: "Notification")
         case .microphoneOff:
             return NSLocalizedString("Microphone off", comment: "Notification")
-        case .networkIndication(_):
-            return NSLocalizedString("Network indicator (beta)", comment: "Notification")
         }
     }
     
@@ -36,8 +34,6 @@ internal enum NotificationType {
         case .microphoneOff:
             return UIImage(podAssetName: "notificationMicrophoneOff")
         case .microphoneOn:
-            return UIImage(podAssetName: "notificationMicrophoneOn")
-        case .networkIndication(_):
             return UIImage(podAssetName: "notificationMicrophoneOn")
         }
     }
@@ -86,17 +82,23 @@ internal class NetworkDetailsNotificationView: UIView {
         closeButton.isUserInteractionEnabled = true
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(closeButton)
-        closeButton.backgroundColor = .red
+        closeButton.backgroundColor = .clear
         closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
         closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
         closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        closeButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
         closeButton.layer.zPosition = 2199
-        //closeButton.addTarget(self, action: #selector(self.closePressed(sender:)), for: .touchUpInside)
-        
+
+        updateUI(with: statistics)
+    }
+    
+    internal func updateUI(with data: NetworkStatistics?) {
+        self.statistics = data
+            
         let detailsText = "Jitter: %@   Packet loss: %@   Round-trip time: %@"
         var detailsMsg = ""
+        
         if let data = statistics {
             let packetLoss = String(100 - data.avgNetworkQuality)
             detailsMsg = String(format: detailsText, String(data.avgJitter), "\(packetLoss)%", String(data.avgRtt))
@@ -105,10 +107,6 @@ internal class NetworkDetailsNotificationView: UIView {
         }
         
         subtitleLabel.text = detailsMsg
-    }
-    
-    @objc private func closePressed(sender: Any) {
-        print("PRESSED")
     }
 }
 
@@ -180,9 +178,6 @@ internal class AuviousNotification {
     //The notification being displayed
     private var view: NotificationView!
     
-    //The toast notification being displayed
-    private var toastView: NetworkDetailsNotificationView!
-    
     //The VC that will host this notification
     internal var presenter: UIViewController?
     
@@ -199,26 +194,26 @@ internal class AuviousNotification {
             return
         }
         
-        toastView = NetworkDetailsNotificationView(with: object)
-        presenter.view.addSubview(toastView)
-        toastView.layer.zPosition = 2100
-        toastView.alpha = 0.8
-        toastView.leadingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
-        toastView.trailingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
-        toastView.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        
-        let topConstraint = toastView.topAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.topAnchor, constant: -100)
-        topConstraint.isActive = true
+//        toastView = NetworkDetailsNotificationView(with: object)
+//        presenter.view.addSubview(toastView)
+//        toastView.layer.zPosition = 2100
+//        toastView.alpha = 0.8
+//        toastView.leadingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+//        toastView.trailingAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
+//        toastView.heightAnchor.constraint(equalToConstant: 60).isActive = true
+//
+//        let topConstraint = toastView.topAnchor.constraint(equalTo: presenter.view.saferAreaLayoutGuide.topAnchor, constant: -100)
+//        topConstraint.isActive = true
         
         UIView.animate(withDuration: 0.2, animations: {
-            topConstraint.constant = 10
-            presenter.view.layoutIfNeeded()
+            //topConstraint.constant = 10
+            //presenter.view.layoutIfNeeded()
         }, completion: { finished in
             UIView.animate(withDuration: 0.2, delay: 3.0, options: [], animations: {
-                self.toastView.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
-                self.toastView.alpha = 0.3
+//                self.toastView.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
+//                self.toastView.alpha = 0.3
             }, completion: { finished in
-                self.toastView.removeFromSuperview()
+                //self.toastView.removeFromSuperview()
             })
         })
     }
@@ -260,10 +255,6 @@ internal class AuviousNotification {
                 })
             })
         }
-    }
-    
-    @objc private func closeButtonPressed() {
-        print("CLOSE PRESSED")
     }
     
     private func updateNotification(newType: NotificationType) {

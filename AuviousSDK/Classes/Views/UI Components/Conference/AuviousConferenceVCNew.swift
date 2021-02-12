@@ -14,6 +14,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Network indicator view
     let networkIndicator = NetworkIndicatorView()
+    let networkIndicatorDetails = NetworkDetailsNotificationView(with: nil)
+    var hideNetworkDetailsBlock: DispatchWorkItem?
+    
     //Container of all stream views
     private var streamContainerView: UIView!
     //Our local stream view
@@ -32,6 +35,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var existingConstraints: [NSLayoutConstraint] = []
     private let viewPadding: CGFloat = 10
     private let viewSize: CGFloat = 80
+    private var networkIndicatorDetailsTop: NSLayoutConstraint!
     
     //UI feedback
     private let selectionFeedbackGenerator = UIImpactFeedbackGenerator()
@@ -139,7 +143,24 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor).isActive = true
         networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
         networkIndicator.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.showNetworkDetails))
+        networkIndicator.addGestureRecognizer(tapRecogniser)
         
+        //Network indicator details
+        view.addSubview(networkIndicatorDetails)
+        networkIndicatorDetails.layer.zPosition = 2100
+        networkIndicatorDetails.alpha = 0.8
+        networkIndicatorDetails.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+        networkIndicatorDetails.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
+        networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -100)
+        networkIndicatorDetailsTop.isActive = true
+        networkIndicatorDetails.closeButton.addTarget(self, action: #selector(self.hideNetworkDetailsPressed), for: .touchUpInside)
+        view.bringSubviewToFront(networkIndicatorDetails)
+        //Setup a cancellable piece of code to hide the network details
+        hideNetworkDetailsBlock = DispatchWorkItem {
+            self.hideNetworkDetails()
+        }
         //Setup feedback
         selectionFeedbackGenerator.prepare()
         
@@ -154,7 +175,34 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         createButtonBar()
     }
-        
+     
+    //Shows the network details view
+    @objc private func showNetworkDetails() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.networkIndicatorDetailsTop.constant = 10
+            self.view.layoutIfNeeded()
+        }, completion: { finished in
+            if finished {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    self.hideNetworkDetails()
+                }
+            }
+        })
+    }
+    
+    //Hides the network details view
+    @objc private func hideNetworkDetails() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.networkIndicatorDetailsTop.constant = -100
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    @objc private func hideNetworkDetailsPressed() {
+        self.hideNetworkDetailsBlock?.cancel()
+        hideNetworkDetails()
+    }
+    
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -479,6 +527,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             let endpoint = AuviousConferenceSDK.sharedInstance.userEndpointId
             let object = event as! ConferenceNetworkIndicatorEvent
             networkIndicator.updateUI(with: object, participantId: endpoint)
+            
+            if let endpoint = endpoint {
+                networkIndicatorDetails.updateUI(with: object.data[endpoint])
+            }
         } else if event is ConferenceStreamPublishedEvent {
             let object = event as! ConferenceStreamPublishedEvent
             do {
