@@ -85,9 +85,34 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             } else {
                 scale = bounds.size.width / videoFrame.size.width
             }
-            videoFrame.size.width = videoFrame.size.width * scale
-            videoFrame.size.height = videoFrame.size.height * scale
-            self.videoView.frame = videoFrame
+            
+            if scale.isNaN {
+                scale = 1
+            }
+            
+            var width = videoFrame.size.width
+            var height = videoFrame.size.height
+            if width.isNaN {
+               width = 0
+            }
+            
+            if height.isNaN {
+                height = 0
+            }
+            
+            var x = videoFrame.origin.x
+            if x.isNaN {
+                x = 0
+            }
+            
+            var y = videoFrame.origin.y
+            if y.isNaN {
+                y = 0
+            }
+            
+            width = width * scale
+            height = height * scale
+            self.videoView.frame = CGRect(x: x, y: y, width: width, height: height)
             self.videoView.center = CGPoint(x: bounds.midX, y: bounds.midY)
         } else {
             self.videoView.frame = bounds

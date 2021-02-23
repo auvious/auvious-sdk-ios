@@ -397,14 +397,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 if participant?.streams.count == 1 {
                     let remoteView = remoteViews.remove(at: index)
 
-                    if streamType == .mic {
-                        remoteView.audioStreamRemoved()
-                    } else if streamType == .cam {
-                        remoteView.videoStreamRemoved()
-                    } else if streamType == .micAndCam {
-                        remoteView.avStreamRemoved()
+                    if index < 3 {
+                        if streamType == .mic {
+                            remoteView.audioStreamRemoved()
+                        } else if streamType == .cam {
+                            remoteView.videoStreamRemoved()
+                        } else if streamType == .micAndCam {
+                            remoteView.avStreamRemoved()
+                        }
                     }
-
+                        
                     remoteView.removeFromSuperview()
                     
                     //Refresh UI
@@ -803,7 +805,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                 constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                 constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            } else if remoteViews.count == 3 {
+            } else if remoteViews.count >= 3 {
                 let view1 = remoteViews[0]
                 let view2 = remoteViews[1]
                 let view3 = remoteViews[2]
@@ -1041,7 +1043,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                 }
 
-            } else if remoteViews.count == 3 {
+            } else if remoteViews.count >= 3 {
                 let view1 = remoteViews[0]
                 let view2 = remoteViews[1]
                 let view3 = remoteViews[2]
@@ -1141,6 +1143,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     constraints.append(view1.heightAnchor.constraint(equalTo: view3.heightAnchor, constant: 0))
                     constraints.append(view2.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
                 }
+            } else {
+                //nothing to do here
             }
         }
         
