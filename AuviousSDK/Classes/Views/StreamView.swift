@@ -78,7 +78,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         super.layoutSubviews()
                 
         if (self.size.width > 0 && self.size.height > 0) {
-            var videoFrame = AVMakeRect(aspectRatio: CGSize(width: bounds.width, height: bounds.height), insideRect: bounds)
+            let videoFrame = AVMakeRect(aspectRatio: CGSize(width: bounds.width, height: bounds.height), insideRect: bounds)
             var scale: CGFloat = 1.0
             if (videoFrame.size.width > videoFrame.size.height) {
                 scale = bounds.size.height / videoFrame.size.height

@@ -43,7 +43,7 @@ public final class ConferenceSimpleView: NSObject {
         version = json["version"].intValue
         
         //Parse metadata
-        for (key, subJson): (String, JSON) in json["metadata"] {
+        for (key, _): (String, JSON) in json["metadata"] {
             if key.starts(with: "TRACK_MUTED") {
                 let parts = key.split(separator: "/")
                 if parts.count == 3 {

@@ -786,16 +786,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
-        var isLandscapeLeft: Bool = false
-        var isLandscapeRight: Bool = false
         var safeLeadingConstraint = view.leadingAnchor
         
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
-            isLandscapeLeft = true
             safeLeadingConstraint = safeArea.leadingAnchor
         } else if UIDevice.current.orientation == UIDeviceOrientation.landscapeRight {
-            isLandscapeRight = true
             safeLeadingConstraint = view.leadingAnchor
         }
         
