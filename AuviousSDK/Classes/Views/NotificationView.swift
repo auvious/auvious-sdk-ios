@@ -106,7 +106,13 @@ internal class NetworkDetailsNotificationView: UIView {
             detailsMsg = String(format: detailsText, "n/a", "n/a", "n/a")
         }
         
+        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
         subtitleLabel.text = detailsMsg
+    }
+    
+    internal func updateUI(with title: String, subtitle: String) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
     }
 }
 
