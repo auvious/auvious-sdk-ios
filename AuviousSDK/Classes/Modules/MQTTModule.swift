@@ -134,6 +134,8 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
                     model = ConferenceStreamUnpublishedEvent(fromJson: jsonObject)
                 case .conferenceMetadataUpdatedEvent:
                     model = ConferenceMetadataUpdatedEvent(fromJson: jsonObject)
+                case .conferenceNetworkIndicatorEvent:
+                    model = ConferenceNetworkIndicatorEvent(fromJson: jsonObject)
                 default:
                     break
                 }

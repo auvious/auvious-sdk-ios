@@ -110,7 +110,6 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
-            #warning("TODO: Expose endpoints so they can be overriden")
             AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             os_log("UI Conference component: Configured ConferenceSDK")
 //

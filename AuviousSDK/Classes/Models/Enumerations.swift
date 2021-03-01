@@ -110,6 +110,9 @@ public enum ConferenceEventType: String {
     /// Audio/video muted/unmuted
     case conferenceMetadataUpdatedEvent = "ConferenceMetadataUpdatedEvent"
     
+    /// Network indicator stats
+    case conferenceNetworkIndicatorEvent = "ConferenceNetworkIndicatorUpdatedEvent"
+    
     ///Unknown type
     case conferenceUnknownEvent = "-"
 }

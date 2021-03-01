@@ -212,7 +212,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
      - Parameter onLoginFailure: Called in case of failure with the designated Error
      */
     public func login(oAuth: Bool, onLoginSuccess: @escaping (String?)->(), onLoginFailure: @escaping (Error)->()) {
-        guard let username = self.username, let password = self.password, let organization = self.organization else {
+        guard let username = self.username, let password = self.password, let _ = self.organization else {
             onLoginFailure(AuviousSDKError.missingSDKCredentials)
             return
         }

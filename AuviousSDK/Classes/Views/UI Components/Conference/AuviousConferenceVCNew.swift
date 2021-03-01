@@ -12,6 +12,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //UI components
     
+    //Network indicator view
+    private let networkIndicator = NetworkIndicatorView()
+    private let networkIndicatorDetails = NetworkDetailsNotificationView(with: nil)
+    private var hideNetworkDetailsBlock: DispatchWorkItem?
+    private var lastKnownNetworkStatistics: NetworkStatistics? = nil
+    
     //Container of all stream views
     private var streamContainerView: UIView!
     //Our local stream view
@@ -30,9 +36,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var existingConstraints: [NSLayoutConstraint] = []
     private let viewPadding: CGFloat = 10
     private let viewSize: CGFloat = 80
+    private var networkIndicatorDetailsTop: NSLayoutConstraint!
+    private let maximumRemoteStreamsRendered = 3
     
     //UI feedback
     private let selectionFeedbackGenerator = UIImpactFeedbackGenerator()
+    
+    //Service dispatch group for distinguishing remote streams
+    private let serviceGroup = DispatchGroup()
     
     //Configuration
     private var videoViewBackgroundColor: UIColor = UIColor.gray
@@ -50,6 +61,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var performedInitialValidations: Bool = false
     private var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
+    private var initialStreamsConnected: Bool = false
     
     //Delegate
     private weak var delegate: AuviousSimpleConferenceDelegate?
@@ -130,6 +142,32 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         streamContainerView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0).isActive = true
         streamContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
         
+        //Network indicator
+        view.addSubview(networkIndicator)
+        networkIndicator.alpha = 0.7
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor).isActive = true
+        networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor).isActive = true
+        networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        networkIndicator.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
+        networkIndicator.addGestureRecognizer(tapRecogniser)
+        
+        //Network indicator details
+        view.addSubview(networkIndicatorDetails)
+        networkIndicatorDetails.layer.zPosition = 2100
+        networkIndicatorDetails.alpha = 0
+        networkIndicatorDetails.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+        networkIndicatorDetails.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
+        networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -100)
+        networkIndicatorDetailsTop.isActive = true
+        networkIndicatorDetails.closeButton.addTarget(self, action: #selector(self.hideNetworkDetailsPressed), for: .touchUpInside)
+        view.bringSubviewToFront(networkIndicatorDetails)
+        
+        //Setup a cancellable piece of code to hide the network details
+        hideNetworkDetailsBlock = DispatchWorkItem {
+            self.hideNetworkDetails()
+        }
         //Setup feedback
         selectionFeedbackGenerator.prepare()
         
@@ -144,7 +182,45 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         createButtonBar()
     }
+     
+    //Shows the toast notification view
+    @objc private func showNetworkDetails() {
+        networkIndicatorDetails.alpha = 1
         
+        UIView.animate(withDuration: 0.2, animations: {
+            self.networkIndicatorDetailsTop.constant = 10
+            self.view.layoutIfNeeded()
+        }, completion: { finished in
+            if finished {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    self.hideNetworkDetails()
+                }
+            }
+        })
+    }
+    
+    //Hides the toast notification view
+    @objc private func hideNetworkDetails() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.networkIndicatorDetailsTop.constant = -100
+            self.view.layoutIfNeeded()
+        }, completion: { finished in
+            self.networkIndicatorDetails.updateUI(with: self.lastKnownNetworkStatistics)
+        })
+    }
+    
+    //Updates the toast notification view with latest network data and displays the view
+    @objc private func networkIndicatorPressed() {
+        networkIndicatorDetails.updateUI(with: lastKnownNetworkStatistics)
+        showNetworkDetails()
+    }
+    
+    //Cancels the scheduled dismissal of the toast view and hides it
+    @objc private func hideNetworkDetailsPressed() {
+        self.hideNetworkDetailsBlock?.cancel()
+        hideNetworkDetails()
+    }
+    
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -232,6 +308,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         })
     }
     
+    //When orientation changes we simply reevaluate our UI constraints
     @objc func orientationChanged(notification: NSNotification) {
         createConstraints()
     }
@@ -251,14 +328,25 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Initialises the RTC view stream flow for existing conference streams
     private func handleExistingConferenceStreams(){
+        //Reset our flag, and start connecting to remote participants
+        initialStreamsConnected = false
+        
         if !currentConference.participants.isEmpty {
             for user in currentConference.participants {
                 for endpointStream in user.endpoints {
                     for stream in endpointStream.streams {
                         do {
+                            if !initialStreamsConnected {
+                                serviceGroup.enter()
+                            }
                             try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: stream.id, endpointId: endpointStream.id, streamType: stream.type, remoteUserId: user.id)
                         } catch let error {
                             os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                            
+                            if !initialStreamsConnected {
+                                serviceGroup.leave()
+                            }
+                            
                             handleError(error)
                         }
                     }
@@ -337,14 +425,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 if participant?.streams.count == 1 {
                     let remoteView = remoteViews.remove(at: index)
 
-                    if streamType == .mic {
-                        remoteView.audioStreamRemoved()
-                    } else if streamType == .cam {
-                        remoteView.videoStreamRemoved()
-                    } else if streamType == .micAndCam {
-                        remoteView.avStreamRemoved()
+                    if index < maximumRemoteStreamsRendered {
+                        if streamType == .mic {
+                            remoteView.audioStreamRemoved()
+                        } else if streamType == .cam {
+                            remoteView.videoStreamRemoved()
+                        } else if streamType == .micAndCam {
+                            remoteView.avStreamRemoved()
+                        }
                     }
-
+                        
                     remoteView.removeFromSuperview()
                     
                     //Refresh UI
@@ -409,6 +499,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.remoteViews.append(remoteView)
             streamContainerView.addSubview(remoteView)
             view.bringSubviewToFront(buttonContainerView)
+            
+            //If we can't show remote video due to UI limits, notify the user
+            if initialStreamsConnected && remoteViews.count > maximumRemoteStreamsRendered {
+                self.networkIndicatorDetails.titleLabel.text = "A new participant has joined"
+                self.networkIndicatorDetails.subtitleLabel.text = "Due to current limitations, you can only listen"
+                self.showNetworkDetails()
+            }
+            
             return self.remoteViews.count - 1
         }
     }
@@ -461,14 +559,19 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
         if event is ConferenceJoinedEvent {
             conferenceParticipants += 1
-        }
-        else if event is ConferenceLeftEvent {
+        } else if event is ConferenceLeftEvent {
             conferenceParticipants -= 1
-        }
-        else if event is ConferenceEndedEvent {
+        } else if event is ConferenceEndedEvent {
             handleConferenceEndedEvent()
-        }
-        else if event is ConferenceStreamPublishedEvent {
+        } else if event is ConferenceNetworkIndicatorEvent {
+            let endpoint = AuviousConferenceSDK.sharedInstance.userEndpointId
+            let object = event as! ConferenceNetworkIndicatorEvent
+            networkIndicator.updateUI(with: object, participantId: endpoint)
+            
+            if let endpoint = endpoint {
+                self.lastKnownNetworkStatistics = object.data[endpoint]
+            }
+        } else if event is ConferenceStreamPublishedEvent {
             let object = event as! ConferenceStreamPublishedEvent
             do {
                 os_log("Starting remote stream flow for type %@", log: Log.conferenceUI, type: .debug, object.streamType.rawValue)
@@ -477,8 +580,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 handleError(error)
             }
-        }
-        else if event is ConferenceStreamUnpublishedEvent {
+        } else if event is ConferenceStreamUnpublishedEvent {
             let object = event as! ConferenceStreamUnpublishedEvent
             
             do {
@@ -548,6 +650,26 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Handle muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved()
+                    }
+                }
+            }
+            
+            //Keep track of this stream addition
+            if !self.initialStreamsConnected {
+                self.serviceGroup.leave()
+            }
+            
+            // Proceed when all API requests are finished
+            self.serviceGroup.notify(queue: DispatchQueue.main) {
+                if !self.initialStreamsConnected {
+                    self.initialStreamsConnected = true
+                    
+                    if self.remoteViews.count > self.maximumRemoteStreamsRendered {
+                        let title = "Limited visibility"
+                        let subtitle = "You can only see \(self.maximumRemoteStreamsRendered)/\(self.remoteViews.count) participants"
+                        self.networkIndicatorDetails.titleLabel.text = title
+                        self.networkIndicatorDetails.subtitleLabel.text = subtitle
+                        self.showNetworkDetails()
                     }
                 }
             }
@@ -664,16 +786,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
-        var isLandscapeLeft: Bool = false
-        var isLandscapeRight: Bool = false
         var safeLeadingConstraint = view.leadingAnchor
         
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
-            isLandscapeLeft = true
             safeLeadingConstraint = safeArea.leadingAnchor
         } else if UIDevice.current.orientation == UIDeviceOrientation.landscapeRight {
-            isLandscapeRight = true
             safeLeadingConstraint = view.leadingAnchor
         }
         
@@ -739,7 +857,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                 constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                 constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            } else if remoteViews.count == 3 {
+            } else if remoteViews.count >= maximumRemoteStreamsRendered {
                 let view1 = remoteViews[0]
                 let view2 = remoteViews[1]
                 let view3 = remoteViews[2]
@@ -779,7 +897,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         } else {
         
             //Local view, no screen sharing
-            if shareScreenContainerView == nil && remoteViews.count < 3 {
+            if shareScreenContainerView == nil && remoteViews.count < maximumRemoteStreamsRendered {
                 
                 //Solo, no screen sharing
                 if remoteViews.count == 0 {
@@ -977,7 +1095,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                 }
 
-            } else if remoteViews.count == 3 {
+            } else if remoteViews.count >= maximumRemoteStreamsRendered {
                 let view1 = remoteViews[0]
                 let view2 = remoteViews[1]
                 let view3 = remoteViews[2]
@@ -1077,6 +1195,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     constraints.append(view1.heightAnchor.constraint(equalTo: view3.heightAnchor, constant: 0))
                     constraints.append(view2.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
                 }
+            } else {
+                //nothing to do here
             }
         }
         

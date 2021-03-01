@@ -30,9 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         //Prevent device locking
         UIApplication.shared.isIdleTimerDisabled = true
-
-        //Prevent device locking
-        UIApplication.shared.isIdleTimerDisabled = true
         
         // Create a Sentry client and start crash handler
         do {

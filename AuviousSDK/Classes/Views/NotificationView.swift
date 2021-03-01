@@ -39,8 +39,86 @@ internal enum NotificationType {
     }
 }
 
+internal class NetworkDetailsNotificationView: UIView {
+    
+    //UI components
+    internal var titleLabel: UILabel = UILabel(frame: .zero)
+    internal var subtitleLabel: UILabel = UILabel(frame: .zero)
+    internal var closeButton: UIButton = UIButton(frame: .zero)
+    
+    private var statistics: NetworkStatistics?
+    
+    init(with details: NetworkStatistics?) {
+        super.init(frame: .zero)
+        
+        self.statistics = details
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(frame: .zero)
+        setupUI()
+    }
+    
+    private func setupUI() {
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 10
+        backgroundColor = .white
+        
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabel)
+        titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
+        
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(subtitleLabel)
+        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5).isActive = true
+        subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        subtitleLabel.textColor = UIColor.black.withAlphaComponent(0.8)
+        
+        closeButton.isUserInteractionEnabled = true
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(closeButton)
+        closeButton.backgroundColor = .clear
+        closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
+        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
+        closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        closeButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        closeButton.layer.zPosition = 2199
+
+        updateUI(with: statistics)
+    }
+    
+    internal func updateUI(with data: NetworkStatistics?) {
+        self.statistics = data
+            
+        let detailsText = "Jitter: %@   Packet loss: %@   Round-trip time: %@"
+        var detailsMsg = ""
+        
+        if let data = statistics {
+            let packetLoss = String(100 - data.avgNetworkQuality)
+            detailsMsg = String(format: detailsText, String(data.avgJitter), "\(packetLoss)%", String(data.avgRtt))
+        } else {
+            detailsMsg = String(format: detailsText, "n/a", "n/a", "n/a")
+        }
+        
+        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
+        subtitleLabel.text = detailsMsg
+    }
+    
+    internal func updateUI(with title: String, subtitle: String) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
+    }
+}
+
 //A notification view
 internal class NotificationView: UIView {
+    
     //UI components
     private var imageView: UIImageView = UIImageView(frame: .zero)
     private var label: UILabel = UILabel(frame: .zero)
@@ -148,7 +226,6 @@ internal class AuviousNotification {
                     self.view.alpha = 0.3
                 }, completion: { finished in
                     self.isPresenting = false
-                    #warning("Potential crash here (3) - when a second notification is presented")
                     self.view.removeFromSuperview()
                 })
             })
