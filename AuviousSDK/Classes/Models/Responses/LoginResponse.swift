@@ -39,6 +39,7 @@ internal final class LoginResponse {
         
         API.sharedInstance.authenticationToken = accessToken
         API.sharedInstance.refreshToken = refreshToken
+        API.sharedInstance.authTokenExpiresIn = expiresIn
         ServerConfiguration.mqttUser = accessToken
         
         os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)

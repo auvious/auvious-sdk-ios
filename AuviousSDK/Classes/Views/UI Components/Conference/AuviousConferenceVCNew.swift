@@ -330,6 +330,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private func handleExistingConferenceStreams(){
         //Reset our flag, and start connecting to remote participants
         initialStreamsConnected = false
+        var serviceGroupEntries = 0
         
         if !currentConference.participants.isEmpty {
             for user in currentConference.participants {
@@ -338,6 +339,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         do {
                             if !initialStreamsConnected {
                                 serviceGroup.enter()
+                                serviceGroupEntries += 1
                             }
                             try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: stream.id, endpointId: endpointStream.id, streamType: stream.type, remoteUserId: user.id)
                         } catch let error {
@@ -352,6 +354,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                 }
             }
+            
+            //Sanity check
+            if serviceGroupEntries == 0 {
+                initialStreamsConnected = true
+            }
+            
+        } else {
+            initialStreamsConnected = true
         }
     }
     

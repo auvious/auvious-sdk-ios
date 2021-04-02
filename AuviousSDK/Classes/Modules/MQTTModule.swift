@@ -69,7 +69,6 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
         self.session.userName = ServerConfiguration.mqttUser
         self.session.password = ServerConfiguration.mqttPass
         self.session.keepAliveInterval = keepAliveSeconds
-        
         //TODO: WHY DOES THIS BREAK EVERYTHING????
         //session.queue = mqttQueue
         
@@ -81,6 +80,7 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     
     func disconnect() {
         os_log("MQTT disconnecting", log: Log.mqtt, type: .debug)
+        self.session.userName = ServerConfiguration.mqttUser
         self.session.disconnect()
     }
     
@@ -203,10 +203,13 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     
     func connectionClosed(_ session: MQTTSession!) {
         os_log("MQTT connection closed", log: Log.mqtt, type: .debug)
+        if AuviousConferenceSDK.sharedInstance.isLoggedIn {
+            reconnect()
+        }
     }
     
     func connected(_ session: MQTTSession!, sessionPresent: Bool) {
-        os_log("MQTT connected, sessionPresent %@", log: Log.mqtt, type: .debug, sessionPresent)
+        //os_log("MQTT connected, sessionPresent %@", log: Log.mqtt, type: .debug, sessionPresent)
     }
     
     func handleEvent(_ session: MQTTSession!, event eventCode: MQTTSessionEvent, error: Error!) {

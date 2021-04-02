@@ -96,6 +96,10 @@ internal final class API {
                 self.refreshToken = data["refresh_token"].stringValue
                 self.authTokenExpiresIn = data["expires_in"].intValue
                 
+                //Trigger a reconnect by disconnecting
+                ServerConfiguration.mqttUser = self.authenticationToken
+                MQTTModule.sharedInstance.disconnect()
+                
                 self.consumePendingTransactions()
                 completion?(true)
             }

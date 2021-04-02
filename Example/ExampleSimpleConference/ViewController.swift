@@ -67,8 +67,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             
             //TEST-RTC
             let clientId: String = "auvious"
-            let baseEndpoint: String = "https://test-rtc.stg.auvious.com/"
-            let mqttEndpoint: String = "wss://events.test-rtc.stg.auvious.com/ws"
+            let baseEndpoint: String = "https://test-rtc.auvious.video/"
+            let mqttEndpoint: String = "wss://events.test-rtc.auvious.video/ws"
             let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
             
             //GENESYS DEV (customer)

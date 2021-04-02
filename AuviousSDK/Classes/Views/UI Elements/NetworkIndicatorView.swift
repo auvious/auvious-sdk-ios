@@ -79,17 +79,6 @@ class NetworkIndicatorView: UIView {
         
         self.event = data
         
-        if index == 0 {
-            data.grade = .bad
-            index += 1
-        } else if index == 1 {
-            data.grade = .suboptimal
-            index += 1
-        } else if index == 2 {
-            data.grade = .optimal
-            index += 1
-        }
-        
         UIView.animate(withDuration: 0.25, animations: {
             switch data.grade {
             case .optimal:
