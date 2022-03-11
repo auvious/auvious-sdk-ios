@@ -5,7 +5,8 @@ FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/Alamofire
 GCC_ENABLE_CPP_EXCEPTIONS = YES
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
 HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/Alamofire/Alamofire.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/AuviousSDK/AuviousSDK.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/BEMCheckBox/BEMCheckBox.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/MQTTClient/MQTTClient.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SPPermissions/SPPermissions.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SVProgressHUD/SVProgressHUD.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SocketRocket/SocketRocket.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON/SwiftyJSON.framework/Headers"
-LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/Frameworks' '@loader_path/Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
 OTHER_LDFLAGS = $(inherited) -l"c++" -l"icucore" -l"z" -framework "Alamofire" -framework "AuviousSDK" -framework "BEMCheckBox" -framework "CFNetwork" -framework "Foundation" -framework "MQTTClient" -framework "QuartzCore" -framework "SPPermissions" -framework "SVProgressHUD" -framework "Security" -framework "Sentry" -framework "SocketRocket" -framework "SwiftyJSON" -framework "UIKit" -framework "WebRTC"
 OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
 PODS_BUILD_DIR = ${BUILD_DIR}

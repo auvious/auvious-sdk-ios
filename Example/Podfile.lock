@@ -1,10 +1,11 @@
 PODS:
   - Alamofire (4.9.1)
   - AuviousGoogleWebRTC (84.4147.2)
-  - AuviousSDK (1.0.7):
+  - AuviousSDK (1.1.0):
     - Alamofire (~> 4.7)
     - AuviousGoogleWebRTC (~> 84.4147.2)
     - MQTTClient/Websocket (~> 0.15)
+    - SocketRocket (~> 0.5.1)
     - SwiftyJSON (~> 5.0)
   - BEMCheckBox (1.4.1)
   - MQTTClient/Min (0.15.3)
@@ -21,7 +22,7 @@ PODS:
   - SPPermissions/Microphone (4.1.4):
     - SPPermissions/Core
   - SVProgressHUD (2.2.5)
-  - SwiftyJSON (5.0.0)
+  - SwiftyJSON (5.0.1)
 
 DEPENDENCIES:
   - AuviousSDK (from `../`)
@@ -58,15 +59,15 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   AuviousGoogleWebRTC: e5a8ede1fb2e5e7a3e75f9a871c08dff7678f963
-  AuviousSDK: 321e6ad2c3dc7e80ce852f5816b595fb7730fdbc
+  AuviousSDK: 1ac950e9bb5e772304db9a90e94cdbd6e0fec27a
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
   Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
-  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
+  SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
 
 PODFILE CHECKSUM: 1ae56e192be0e084974f1f9235783f41ae1979ae
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

@@ -1,19 +1,19 @@
 {
   "name": "AuviousSDK",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
   "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
-  "homepage": "https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git",
+  "homepage": "https://github.com/auvious/auvious-sdk-ios.git",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
   },
   "authors": {
-    "Epi Vou": "pimenas@gmail.com"
+    "Auvious": "team@auvious.com"
   },
   "source": {
-    "git": "https://gitlab.auvious.com/auvious/api/auvious-sdk-ios.git",
-    "tag": "1.0.7"
+    "git": "https://github.com/auvious/auvious-sdk-ios.git",
+    "tag": "1.1.0"
   },
   "platforms": {
     "ios": "10.0"
@@ -37,13 +37,20 @@
     ],
     "MQTTClient/Websocket": [
       "~> 0.15"
+    ],
+    "SocketRocket": [
+      "~> 0.5.1"
     ]
   },
   "swift_versions": "4.2",
   "pod_target_xcconfig": {
     "ENABLE_BITCODE": "NO",
     "GCC_PREPROCESSOR_DEFINITIONS": "AUVIOUSSDK",
-    "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "$(inherited) AUVIOUSSDK"
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "$(inherited) AUVIOUSSDK",
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": "arm64"
+  },
+  "user_target_xcconfig": {
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": "arm64"
   },
   "swift_version": "4.2"
 }
