@@ -99,7 +99,7 @@ internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     }
     
     func subscribeForUserEndpoint() {
-        let topic = "users/endpoints/" + self.endpointId
+        let topic = "user/\(ServerConfiguration.mqttUser)/\(self.endpointId ?? "unknown")"
         self.session.subscribe(toTopic: topic, at: .atLeastOnce)
     }
 

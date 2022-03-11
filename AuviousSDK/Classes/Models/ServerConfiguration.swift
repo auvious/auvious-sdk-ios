@@ -20,7 +20,7 @@ public struct ServerConfiguration {
     //MQTT
     static var mqttHost = "wss://events.test-rtc.stg.auvious.com/ws"
     static var mqttUser = ""
-    static let mqttPass = ""
+    static var mqttPass = ""
     //RTC
     static var iceServers : [RTCIceServer] = []
 }

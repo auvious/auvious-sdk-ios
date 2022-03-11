@@ -66,16 +66,16 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             
             //TEST-RTC
-            let clientId: String = "auvious"
-            let baseEndpoint: String = "https://test-rtc.auvious.video/"
-            let mqttEndpoint: String = "wss://events.test-rtc.auvious.video/ws"
-            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
-            
+//            let clientId: String = "auvious"
+//            let baseEndpoint: String = "https://test-rtc.auvious.video/"
+//            let mqttEndpoint: String = "wss://events.test-rtc.auvious.video/ws"
+//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
+//
             //GENESYS DEV (customer)
-//            let clientId: String = "customer"
-//            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+            let clientId: String = "customer"
+            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
+            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
+            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
 
             //GENESYS DEV (test-agent)
 //            let clientId: String = "test-agent"

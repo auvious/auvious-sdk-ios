@@ -34,13 +34,14 @@ internal final class LoginResponse {
         scope = json["scope"].stringValue
         refreshToken = json["refresh_token"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         expiresIn = json["expires_in"].intValue
-        userId = json["userId"].stringValue
+        userId = json["sub"].stringValue
         deviceId = json["DEVICE_ID"].stringValue
         
         API.sharedInstance.authenticationToken = accessToken
         API.sharedInstance.refreshToken = refreshToken
         API.sharedInstance.authTokenExpiresIn = expiresIn
-        ServerConfiguration.mqttUser = accessToken
+        ServerConfiguration.mqttUser = userId
+        ServerConfiguration.mqttPass = accessToken
         
         os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)
     }
