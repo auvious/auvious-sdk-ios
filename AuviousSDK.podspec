@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.1.0'
+  s.version          = '1.1.1'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
@@ -36,7 +36,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.resources = 'AuviousSDK/Assets/*.png'
   
   s.resource_bundles = {
-    'AuviousSDK' => ['Assets.xcassets']
+    'AuviousSDKAssets' => ['Assets.xcassets']
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'

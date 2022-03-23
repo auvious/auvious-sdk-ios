@@ -1,6 +1,6 @@
 {
   "name": "AuviousSDK",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
   "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
   "homepage": "https://github.com/auvious/auvious-sdk-ios.git",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/auvious/auvious-sdk-ios.git",
-    "tag": "1.1.0"
+    "tag": "1.1.1"
   },
   "platforms": {
     "ios": "10.0"
@@ -21,7 +21,7 @@
   "source_files": "AuviousSDK/Classes/**/*",
   "resources": "AuviousSDK/Assets/*.png",
   "resource_bundles": {
-    "AuviousSDK": [
+    "AuviousSDKAssets": [
       "Assets.xcassets"
     ]
   },

@@ -74,7 +74,7 @@ extension UIImage {
         let podBundle = Bundle(for: ConferenceButton.self)
 
         // A given class within your Pod framework
-        guard let url = podBundle.url(forResource: "AuviousSDK", withExtension: "bundle") else {
+        guard let url = podBundle.url(forResource: "AuviousSDKAssets", withExtension: "bundle") else {
             return nil
         }
 

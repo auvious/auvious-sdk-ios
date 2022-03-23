@@ -1,7 +1,7 @@
 PODS:
   - Alamofire (4.9.1)
   - AuviousGoogleWebRTC (84.4147.2)
-  - AuviousSDK (1.1.0):
+  - AuviousSDK (1.1.1):
     - Alamofire (~> 4.7)
     - AuviousGoogleWebRTC (~> 84.4147.2)
     - MQTTClient/Websocket (~> 0.15)
@@ -59,7 +59,7 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   AuviousGoogleWebRTC: e5a8ede1fb2e5e7a3e75f9a871c08dff7678f963
-  AuviousSDK: 1ac950e9bb5e772304db9a90e94cdbd6e0fec27a
+  AuviousSDK: 3f414765efccb5ffbef5948fb69fe92049e4f9f3
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
   Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
