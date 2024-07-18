@@ -17,7 +17,7 @@ fileprivate enum CallButtonState {
 }
 
 class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate {
-    
+
     //UI components
     @IBOutlet weak var hangupButton: UIButton!
     @IBOutlet weak var callTextfield: UITextField!
@@ -241,7 +241,7 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
                     "X-Genesys-Video_TOPIC": "OnBoarding"
                 ]
                 
-                os_log("Starting call with type %@", log: Log.callApp, type: .error, sendMode)
+                os_log("Starting call with type %@", log: Log.callApp, type: .error, sendMode.rawValue)
 
                 self.callId = try AuviousCallSDK.sharedInstance.startCallFlow(target: target, sendMode: sendMode, sipHeaders: sipHeaders)
                 callButtonState = .calling
@@ -306,7 +306,7 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
     
     //MARK: Helpers
     
-    private func configureOutgoingStream(sendVideo: Bool, sendAudio: Bool) -> StreamType {
+    private func configureOutgoingStream(sendVideo: Bool, sendAudio: Bool) -> AuviousSDK.StreamType {
         var sendMode: StreamType = .micAndCam
         if !sendVideo && !sendAudio {
             sendMode = .unknown
@@ -401,8 +401,8 @@ class CallSetupVC: UIViewController, UITextFieldDelegate, AuviousSDKCallDelegate
             self.localView.alpha = 1.0
         }
     }
-    
-    func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String) {
+        
+    func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: AuviousSDK.StreamType) {
         DispatchQueue.main.async {
             
             if let remoteView = self.remoteView {

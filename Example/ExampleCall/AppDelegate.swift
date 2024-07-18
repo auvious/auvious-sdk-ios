@@ -10,6 +10,7 @@ import UIKit
 import SVProgressHUD
 import Sentry
 import AuviousSDK
+import OSLog
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
