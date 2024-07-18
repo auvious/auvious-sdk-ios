@@ -9,6 +9,7 @@
 import UIKit
 import SVProgressHUD
 import AuviousSDK
+import OSLog
 
 /*
  Collection view test cases covered:

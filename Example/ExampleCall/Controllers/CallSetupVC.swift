@@ -10,6 +10,7 @@ import UIKit
 import AuviousSDK
 import BEMCheckBox
 import AVFoundation
+import OSLog
 
 fileprivate enum CallButtonState {
     case invalid, readyToCall, calling
