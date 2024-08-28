@@ -198,7 +198,7 @@
 		600F6D7AA3EA5A90F762853B9D18D633 /* SentryCrashSignalInfo.c in Sources */ = {isa = PBXBuildFile; fileRef = D9DD9A719ED8257F58200770114EC949 /* SentryCrashSignalInfo.c */; };
 		6058A765FDDA5B7406ADC1D6204D0736 /* SentryDsn.h in Headers */ = {isa = PBXBuildFile; fileRef = 08F8323138CC79617587CF1BD8FDEDA5 /* SentryDsn.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		608BAE22CB8ED81B78418B05D782867F /* SentryMechanism.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BD6E7362C91CBD8C7DC272A0EB5B271 /* SentryMechanism.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		636CC7AE5EF62F7343E80767A31B5944 /* AuviousSDK-AuviousSDKAssets in Resources */ = {isa = PBXBuildFile; fileRef = 611E2450765661DC37473466D0DE328A /* AuviousSDK-AuviousSDKAssets */; };
+		636CC7AE5EF62F7343E80767A31B5944 /* AuviousSDKAssets.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 611E2450765661DC37473466D0DE328A /* AuviousSDKAssets.bundle */; };
 		63E5F1A4C32B42E640EFE1F660A03E2E /* SentryMechanism.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C8F60943008E8E2E8A009D74ED9BB0F /* SentryMechanism.m */; };
 		64334F4857F2113854E17594B3CF2C89 /* JoinConferenceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAA3CD8B3ECAD97B6540DC7FE4859EA /* JoinConferenceRequest.swift */; };
 		645BE79635680AA157962E64FFD92C2E /* SPPermissionDialogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD01479768956D03C320E45F428F35BC /* SPPermissionDialogController.swift */; };
@@ -942,7 +942,7 @@
 		5FA6CD54071AC891310D0CFC9E20226C /* SPPermissions-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SPPermissions-Info.plist"; sourceTree = "<group>"; };
 		5FD8E4EBA830B51FA0871FEAA75E4DF8 /* SPPermissions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPPermissions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		611D5A2DC18D5301898441E775FFAE7D /* SPPermissionContacts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionContacts.swift; path = Source/SPPermission/Permissions/SPPermissionContacts.swift; sourceTree = "<group>"; };
-		611E2450765661DC37473466D0DE328A /* AuviousSDK-AuviousSDKAssets */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "AuviousSDK-AuviousSDKAssets"; path = AuviousSDKAssets.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		611E2450765661DC37473466D0DE328A /* AuviousSDKAssets.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AuviousSDKAssets.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		6235FE757B8ADFA79A42089D1499AD66 /* SwiftyJSON-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SwiftyJSON-umbrella.h"; sourceTree = "<group>"; };
 		6273D54D25C507FDF710641EAF366EE7 /* SentryCrashMonitorType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashMonitorType.h; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitorType.h; sourceTree = "<group>"; };
 		6306FD47F9471E9B88ACE3D9643ECA9E /* CallRejectedEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallRejectedEvent.swift; sourceTree = "<group>"; };
@@ -1386,7 +1386,7 @@
 			children = (
 				5D797E9A5C5782CE845840781FA1CC81 /* Alamofire.framework */,
 				29103FD3D910060167AE171E6DDB2757 /* AuviousSDK.framework */,
-				611E2450765661DC37473466D0DE328A /* AuviousSDK-AuviousSDKAssets */,
+				611E2450765661DC37473466D0DE328A /* AuviousSDKAssets.bundle */,
 				3F282D213AB9D1ECA1228C986CC9D2BA /* BEMCheckBox.framework */,
 				C0E79AD53820186F5DE86726D150F447 /* MQTTClient.framework */,
 				7D81B069796FC26F43D8A3BF6C6AEF79 /* Pods_ExampleCall.framework */,
@@ -2741,7 +2741,7 @@
 			);
 			name = "AuviousSDK-AuviousSDKAssets";
 			productName = AuviousSDKAssets;
-			productReference = 611E2450765661DC37473466D0DE328A /* AuviousSDK-AuviousSDKAssets */;
+			productReference = 611E2450765661DC37473466D0DE328A /* AuviousSDKAssets.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 		A5DFC4AB0D3BCF770CD8ED04AC057C82 /* AuviousSDK */ = {
@@ -2908,6 +2908,11 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					9F4107D5DB53B7DF2D7BB0C5F0A2BC27 = {
+						DevelopmentTeam = 2WYS7Y8JDD;
+					};
+				};
 			};
 			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2960,7 +2965,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				636CC7AE5EF62F7343E80767A31B5944 /* AuviousSDK-AuviousSDKAssets in Resources */,
+				636CC7AE5EF62F7343E80767A31B5944 /* AuviousSDKAssets.bundle in Resources */,
 				87131200C7FDC536ADB30ACB3A50FF96 /* phone.png in Resources */,
 				337105DA8F270C5CED01D62E8FE229B9 /* phone@2x.png in Resources */,
 				12F1F8AAE08A3EA9885567DFFC55F818 /* phone@3x.png in Resources */,
@@ -4613,7 +4618,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B7E23E4C264E60C2B7F2D927007E4F08 /* AuviousSDK.debug.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
+				DEVELOPMENT_TEAM = 2WYS7Y8JDD;
 				IBSC_MODULE = AuviousSDK;
 				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -4629,7 +4636,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AF0A408B6D71569F4F3A550745C0BDD4 /* AuviousSDK.release.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
+				DEVELOPMENT_TEAM = 2WYS7Y8JDD;
 				IBSC_MODULE = AuviousSDK;
 				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
