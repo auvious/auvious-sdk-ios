@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.2.0-beta.1'
+  s.version          = '1.2.0-beta.2'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
@@ -29,7 +29,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.source           = { :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '10.0'
 
   s.source_files = 'AuviousSDK/Classes/**/*'
   
