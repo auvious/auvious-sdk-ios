@@ -4,7 +4,7 @@ This is Auvious iOS SDK, which simplifies integration with [Auvious](https://auv
 
 ## Requirements
 
-iOS version >= 10.0
+iOS version >= 13.0
 
 ## Installation
 
@@ -20,11 +20,11 @@ AuviousSDK is available through as a [CocoaPod](https://cocoapods.org). You can 
   ```
   Last but not least, you need to add the AuviousSDK pod on all targets that will need it
   ```ruby
-  pod 'AuviousSDK', '1.0.8'
+  pod 'AuviousSDK', '1.2.0'
   ```
 - Auvious SDK github repo. This method only requires the following line on the target dependencies:
   ```ruby
-  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.0.8'
+  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.2.0'
   ```
   
 Next you need to run `pod install` in order for AuviousSDK and it's dependencies to be installed in the project workspace.
