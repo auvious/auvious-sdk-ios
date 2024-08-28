@@ -27,6 +27,12 @@ public protocol AuviousSDKBaseProtocol {
      */
     func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType)
     
+    
+    /**
+      Called when a local video stream is ready
+     */
+    func auviousSDK(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType)
+    
     /**
      Called when an error is received.
      

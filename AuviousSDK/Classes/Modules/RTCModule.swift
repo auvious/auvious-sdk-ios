@@ -18,6 +18,7 @@ internal protocol RTCDelegate {
     //required for client
     func rtcClient(didReceiveLocalVideoTrack localVideoTrack: RTCVideoTrack!)
     func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType)
+    func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType)
     func rtcClient(onError error: AuviousSDKError)
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
     func rtcClient(agentSwitchedCamera toFront: Bool)
@@ -79,6 +80,8 @@ internal final class RTCMyVP8VideoEncoderFactory: NSObject, RTCVideoEncoderFacto
 internal extension RTCDelegate {
     func rtcClient(call streamId: String, sdpOffer: String, target: String) {}
     func rtcClient(publishStream streamId: String, streamType: StreamType, sdpOffer: String) {}
+    func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {}
+    func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {}
     func rtcClient(remoteStream streamId: String, sdpOffer: String, remoteEndpointId: String, remoteUserId: String) {}
     func rtcClient(addPublishStreamIceCandidates candidates: [RTCIceCandidate], streamId: String, streamType: StreamType) {}
     func rtcClient(addRemoteStreamIceCandidates candidates: [RTCIceCandidate], userId: String, endpointId: String, streamId: String, streamType: StreamType) {}
@@ -308,10 +311,14 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             delegate?.rtcClient(onError: AuviousSDKError.audioPermissionIsDisabled)
         }
         
+        
         if let localVideoTrack = localStream!.videoTracks.first {
             delegate?.rtcClient(didReceiveLocalVideoTrack: localVideoTrack)
         }
         
+        if let localStream = localStream {
+            delegate?.rtcClient(didReceiveLocalStream: localStream, streamId: localStream.streamId, type: type)
+        }
         return localStream!
     }
     

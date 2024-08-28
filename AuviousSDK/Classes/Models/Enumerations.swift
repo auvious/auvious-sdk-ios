@@ -44,6 +44,10 @@ public enum StreamType: String {
     case unknown = "UNKNOWN"
 }
 
+public enum AuviousCallMode {
+    case audio, video, audioVideo
+}
+
 internal enum APIErrorCode: Int {
     case none = 0
     case invalidReplyObject = -1

@@ -90,7 +90,7 @@ class ViewController: UIViewController, AuviousSimpleCallDelegate {
             mqttEndpoint = "wss://video.praxiabank.com/ws"
         }
         
-        self.vc = AuviousCallVC(username: username, password: password, target: target, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, sipHeaders: sipHeaders, delegate: self, callMode: .audioVideo)
+        self.vc = AuviousCallVC(username: username, password: password, target: target, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, sipHeaders: sipHeaders, delegate: self, callMode: .video)
         self.vc.modalPresentationStyle = .fullScreen
         self.navigationController?.present(vc, animated: true, completion: nil)
     }

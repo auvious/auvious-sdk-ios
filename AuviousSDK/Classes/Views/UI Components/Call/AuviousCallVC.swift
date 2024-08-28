@@ -15,10 +15,6 @@ public protocol AuviousSimpleCallDelegate: class {
     func onCallSuccess()
 }
 
-public enum AuviousCallMode {
-    case audio, video, audioVideo
-}
-
 open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     
     //Outgoing call
@@ -299,6 +295,10 @@ open class AuviousCallVC: UIViewController, AuviousSDKCallDelegate {
     }
     
     public func auviousSDK(didChangeState newState: StreamEventState, callId: String, streamType: StreamType) {
+        
+    }
+    
+    public func auviousSDK(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {
         
     }
     

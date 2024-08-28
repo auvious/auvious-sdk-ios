@@ -8,7 +8,7 @@
 import Foundation
 
 enum ConferenceButtonType {
-    case micEnabled, micDisabled, camEnabled, camDisabled, camSwitch, hangup
+    case micEnabled, micDisabled, camEnabled, camDisabled, camSwitch, camSwitchDisabled, hangup
 }
 
 class ConferenceButton: UIButton {
@@ -31,6 +31,7 @@ class ConferenceButton: UIButton {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -68,6 +69,14 @@ class ConferenceButton: UIButton {
             image = "camSwitch"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
+            imageView?.layer.opacity = 1
+            super.isEnabled = true
+        case .camSwitchDisabled:
+            image = "camSwitch"
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.45).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.45).cgColor]
+            gradientLayer.setAngle(150)
+            imageView?.layer.opacity = 0.3
+            super.isEnabled = false
         case .hangup:
             image = "hangup"
             gradientLayer.colors = [UIColor(red: 245/255, green: 39/255, blue: 107/255, alpha: 0.85).cgColor, UIColor(red: 227/255, green: 23/255, blue: 23/255, alpha: 0.85).cgColor]

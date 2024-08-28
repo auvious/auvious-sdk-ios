@@ -1014,6 +1014,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         delegate?.auviousSDK(didReceiveRemoteStream: stream, streamId: streamId, endpointId: endpointId, type: type)
     }
     
+    internal func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {
+        delegate?.auviousSDK(didReceiveLocalStream: stream, streamId: streamId, type: type)
+    }
+    
     //Publish a stream
     internal func rtcClient(publishStream streamId: String, streamType: StreamType, sdpOffer: String) {
         

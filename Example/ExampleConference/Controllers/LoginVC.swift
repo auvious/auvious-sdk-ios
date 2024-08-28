@@ -62,21 +62,21 @@ class LoginVC: UIViewController, UITextFieldDelegate {
         let isFormValid = validate()
         
         if isFormValid, let u = usernameTextfield.text, let p = passwordTextfield.text, let o = organizationTextfield.text {
-            AuviousConferenceSDK.sharedInstance.configure(username: u, password: p, organization: o)
+//            AuviousConferenceSDK.sharedInstance.configure(username: u, password: p, organization: o)
             
             SVProgressHUD.show(withStatus: NSLocalizedString("Please wait...", comment: "General"))
             
-            #warning("TODO: oAuth flag is hardcoded")
-            AuviousConferenceSDK.sharedInstance.login(oAuth: true, onLoginSuccess: {(userId) in
-                SVProgressHUD.dismiss()
-                
-                if let _ = userId {
-                    self.dismiss(animated: true, completion: nil)
-                }
-            }, onLoginFailure: {(error) in
-                SVProgressHUD.dismiss()
-                self.showAlert(title: "Error", msg: error.localizedDescription)
-            })
+//            #warning("TODO: oAuth flag is hardcoded")
+//            AuviousConferenceSDK.sharedInstance.login(oAuth: true, onLoginSuccess: {(userId) in
+//                SVProgressHUD.dismiss()
+//                
+//                if let _ = userId {
+//                    self.dismiss(animated: true, completion: nil)
+//                }
+//            }, onLoginFailure: {(error) in
+//                SVProgressHUD.dismiss()
+//                self.showAlert(title: "Error", msg: error.localizedDescription)
+//            })
         }
     }
     

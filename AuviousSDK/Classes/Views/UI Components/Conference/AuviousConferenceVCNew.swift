@@ -56,6 +56,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var mqttEndpoint: String = ""
     private var clientId: String = ""
     private var params: [String: String] = [:]
+    private var configuredStreamType: StreamType = .unknown
     
     //Control flags
     private var performedInitialValidations: Bool = false
@@ -68,6 +69,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Our local stream id
     private var localStreamId: String?
+    private var localStreamType: StreamType?
     //The conference we're in
     private var currentConference: ConferenceSimpleView!
     //Current conference participants
@@ -78,7 +80,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     //Public constructor
-    public init(clientId: String, params: [String: String], baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate) {
+    public init(clientId: String, params: [String: String], baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate,  callMode: AuviousCallMode) {
         self.params = params
         self.clientId = clientId
         self.baseEndpoint = baseEndpoint
@@ -97,13 +99,22 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.conference = conference
         }
         
+        switch callMode {
+        case .audio:
+            configuredStreamType = .mic
+        case .video:
+            configuredStreamType = .cam
+        case .audioVideo:
+            configuredStreamType = .micAndCam
+        }
+        
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
         os_log("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
     }
     
     //Public constructor
-    public init(clientId: String, username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate) {
+    public init(clientId: String, username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate, callMode: AuviousCallMode) {
         self.clientId = clientId
         self.username = username
         self.password = password
@@ -111,6 +122,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         self.baseEndpoint = baseEndpoint
         self.mqttEndpoint = mqttEndpoint
         self.delegate = delegate
+        
+        switch callMode {
+        case .audio:
+            configuredStreamType = .mic
+        case .video:
+            configuredStreamType = .cam
+        case .audioVideo:
+            configuredStreamType = .micAndCam
+        }
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
@@ -178,8 +198,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         localView.translatesAutoresizingMaskIntoConstraints = false
         localView.frame = .zero
         localView.layer.zPosition = 100
-        streamContainerView.addSubview(localView)
+        localView.layer.borderColor = UIColor.gray.cgColor
+        localView.layer.borderWidth = 1.0 / UIScreen.main.scale
         
+        streamContainerView.addSubview(localView)
+
         createButtonBar()
     }
      
@@ -319,7 +342,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     private func startLocalStream() {
         do {
-            localStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .micAndCam)
+            localStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: configuredStreamType)
         } catch let error {
             os_log("startPublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
@@ -728,10 +751,30 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
-    //Local stream received
+    //Local stream received (streamAdded)
     public func auviousSDK(didReceiveLocalVideoTrack localVideoTrack: RTCVideoTrack!) {
         localView.avStreamAdded(localVideoTrack)
         createConstraints()
+        
+        // sync local view with call type
+        switch (configuredStreamType){
+            case .cam:
+                localView.audioStreamRemoved();
+                break;
+            case .mic:
+                localView.videoStreamRemoved();
+                break;
+            default:
+                // no changes
+            break;
+        }
+    }
+    
+    public func auviousSDK(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {
+       localStreamType = type
+        if  type == .mic {
+            localView.audioStreamAdded()
+        }
     }
     
     public func auviousSDK(trackMuted type: StreamType, endpointId: String) {
@@ -785,6 +828,19 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         buttonContainerView.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
         buttonContainerView.bottomAnchor.constraint(equalTo: view.saferAreaLayoutGuide.bottomAnchor, constant: 0).isActive = true
         buttonContainerView.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        
+        switch (configuredStreamType){
+            case .cam:
+                buttonContainerView.micButton.type = .micDisabled
+                break;
+            case .mic:
+                buttonContainerView.cameraButton.type = .camDisabled
+                buttonContainerView.cameraSwitchButton.type = .camSwitchDisabled
+                break;
+            default:
+                // no changes
+            break;
+        }
     }
     
     @objc func shareScreenDoubleTapped() {
@@ -1254,20 +1310,34 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         
         let button = sender as! ConferenceButton
         
+        // open camera
         if button.type == .camDisabled {
             button.type = .camEnabled
             localView.videoStreamAdded()
+            // re-enable switch cam
+            buttonContainerView.cameraSwitchButton.type = .camSwitch
             
-            AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .video, onSuccess: {
+            if localStreamType == .mic {
+                // mic is open, we need to unpublish the stream and publish a micAndCam
+                // todo: we should replace 'all local streams' if we want to support screen share
+                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
+                configuredStreamType = .micAndCam
+                startLocalStream()
                 
-                AuviousNotification.shared.show(.cameraOn)
-                
-            }, onFailure: { error in
-            })
+            } else {
+                AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .video, onSuccess: {
+                    
+                    AuviousNotification.shared.show(.cameraOn)
+                    
+                }, onFailure: { error in
+                })
+            }
             
         } else {
+            // close camera
             button.type = .camDisabled
             localView.videoStreamRemoved()
+            buttonContainerView.cameraSwitchButton.type = .camSwitchDisabled
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .video, onSuccess: {
                 AuviousNotification.shared.show(.cameraOff)
@@ -1285,16 +1355,27 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         
         let button = sender as! ConferenceButton
         
+        // open microphone
         if button.type == .micDisabled {
             button.type = .micEnabled
             localView.audioStreamAdded()
             
-            AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
-                AuviousNotification.shared.show(.microphoneOn)
+            if localStreamType == .cam {
+                // cam is open, we need to unpublish and publish a micAndCam stream
+                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
+                configuredStreamType = .micAndCam
+                startLocalStream()
                 
-            }, onFailure: { error in
-            })
+            } else {
+                AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
+                    AuviousNotification.shared.show(.microphoneOn)
+                    
+                }, onFailure: { error in
+                })
+            }
+            
         } else {
+            // close microphone
             button.type = .micDisabled
             localView.audioStreamRemoved()
             

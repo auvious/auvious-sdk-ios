@@ -29,7 +29,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     private var conference: String = ""
     private var baseEndpoint: String = ""
     private var mqttEndpoint: String = ""
-    
+
     //Control flags
     private var performedInitialValidations: Bool = false
     private var conferenceJoined: Bool = false
@@ -50,7 +50,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     var remoteParticipants: [ParticipantEndpoint] = [ParticipantEndpoint]()
     
     //Public constructor
-    public init(clientId: String, username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate) {
+    public init(clientId: String, username: String, password: String, conference: String, baseEndpoint: String, mqttEndpoint: String, delegate: AuviousSimpleConferenceDelegate, callMode: AuviousCallMode) {
         self.clientId = clientId
         self.username = username
         self.password = password
@@ -170,6 +170,10 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     
     public func auviousSDK(conferenceOnHold flag: Bool) {
         
+    }
+    
+    public func auviousSDK(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {
+    
     }
     
     public func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
