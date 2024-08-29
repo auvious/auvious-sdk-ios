@@ -46,6 +46,45 @@ There is also a separate repository with examples available at https://github.co
 - [SimpleConference](https://github.com/auvious/ios-examples/tree/master/SimpleConference) Similar to ExampleSimpleConference written in SwiftUI.
 - [GenesysCloudSimpleConference](https://github.com/auvious/ios-examples/tree/master/GenesysCloudSimpleConference) Demonstrates how to quickly add video call capability to your iOS application, utilizing Genesys Cloud webChat channel for ACD routing.
 
+
+## Publish version
+
+Follow the steps below to publish a new version
+
+### Publish to git
+Increase the version in `AuviousSDK.podspec`
+
+Tag git with the version (ex `1.2.0`)
+
+Push the version and the tag to github
+
+### Publish Pod
+If this is the first time you do this process in your machine, you need to have cocoapods installed. Follow the instructions in http://cocoapods.org on how to install it in your machine. 
+
+Once you have the pod command ready, add the auvious podspec repo to your pod repos by running this command 
+
+```
+pod repo add <your-pod-name> https://github.com/auvious/CocoaPodSpecs.git
+```
+
+Example: 
+
+```
+pod repo add auvious-cocoa-pod https://github.com/auvious/CocoaPodSpecs.git
+```
+
+Next you need to push to that repo
+
+```
+pod repo push <your-pod-name> AuviousSDK.podspec --verbose --allow-warnings
+```
+
+Example: 
+```
+pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
+```
+ 
+
 ## Author
 
 Auvious, team@auvious.com
