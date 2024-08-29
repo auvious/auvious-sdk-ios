@@ -19,6 +19,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var lastKnownNetworkStatistics: NetworkStatistics? = nil
     private let notification = DismissableNotificationView(title: "", subtitle: "")
     private var hideNotificationBlock: DispatchWorkItem?
+    private let recorderIndicator = UIView()
     
     //Container of all stream views
     private var streamContainerView: UIView!
@@ -175,6 +176,38 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
         networkIndicator.addGestureRecognizer(tapRecogniser)
         
+        //Recorder indicator
+        recorderIndicator.backgroundColor = UIColor.red
+        recorderIndicator.layer.cornerRadius = 5
+        recorderIndicator.layer.masksToBounds = true
+        recorderIndicator.alpha = 0;
+        
+        // REC text
+        let recLabel = UILabel()
+        recLabel.text = "REC"
+        recLabel.textColor = UIColor.white
+        recLabel.font = UIFont.boldSystemFont(ofSize: 14) // Set the font size as needed
+        recLabel.textAlignment = .center
+        // Add the label to the view
+        recorderIndicator.addSubview(recLabel)
+        
+        // Set up Auto Layout constraints
+        recLabel.translatesAutoresizingMaskIntoConstraints = false
+        recLabel.centerXAnchor.constraint(equalTo: recorderIndicator.centerXAnchor).isActive = true
+        recLabel.centerYAnchor.constraint(equalTo: recorderIndicator.centerYAnchor).isActive = true
+
+        recorderIndicator.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(recorderIndicator)
+        
+        recorderIndicator.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        recorderIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        
+        recorderIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 5).isActive = true
+        recorderIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 45).isActive = true
+       
+        let recTapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.recorderIndicatorPressed))
+        recorderIndicator.addGestureRecognizer(recTapRecogniser)
+        
         //Network indicator details
         view.addSubview(networkIndicatorDetails)
         networkIndicatorDetails.layer.zPosition = 2100
@@ -222,7 +255,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         streamContainerView.addSubview(localView)
 
-       
         createButtonBar()
     }
     
@@ -259,6 +291,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         self.hideNotificationBlock?.cancel()
         hideNotification()
     }
+    
+    
      
     //Shows the toast notification view
     @objc private func showNetworkDetails() {
@@ -293,6 +327,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         networkIndicatorDetails.updateUI(with: lastKnownNetworkStatistics)
         showNetworkDetails()
     }
+    
+    @objc private func recorderIndicatorPressed() {
+        showNotification(with: "Recording", subtitle: "Session is being recorded")
+    }
+
     
     //Cancels the scheduled dismissal of the toast view and hides it
     @objc private func hideNetworkDetailsPressed() {
@@ -837,6 +876,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         // show a notification
         os_log("recorder state changed", log: Log.conferenceUI, type: .debug )
         showNotification(with: "Recording", subtitle: toActive ? "Session is being recorded" : "Session is no longer recorded")
+        recorderIndicator.alpha = toActive ? 1 : 0
     }
     
     public func auviousSDK(trackMuted type: StreamType, endpointId: String) {
