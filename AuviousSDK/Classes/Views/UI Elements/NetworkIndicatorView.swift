@@ -15,7 +15,7 @@ class NetworkIndicatorView: UIView {
     private var bar3 = UIView(frame: .zero)
     
     //UI configuration
-    private let barWidth: CGFloat = 5
+    private let barWidth: CGFloat = 4
     private let borderWidth: CGFloat = 0.3
     
     //Data
@@ -36,7 +36,7 @@ class NetworkIndicatorView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        self.roundCorners([.bottomRight], radius: 10)
+        self.roundCorners([.bottomRight, .bottomLeft, .topRight, .topLeft], radius: 20)
     }
     
     private func setupUI() {
@@ -47,28 +47,31 @@ class NetworkIndicatorView: UIView {
         bar3.translatesAutoresizingMaskIntoConstraints = false
         bar3.backgroundColor = NetworkGrade.optimal.color
         bar3.layer.borderWidth = borderWidth
+        bar3.layer.cornerRadius = 2
         addSubview(bar3)
         bar3.centerXAnchor.constraint(equalTo: centerXAnchor, constant: barWidth * 1.5).isActive = true
         bar3.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
-        bar3.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.5).isActive = true
+        bar3.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.4).isActive = true
         bar3.widthAnchor.constraint(equalToConstant: barWidth).isActive = true
         
         bar2.translatesAutoresizingMaskIntoConstraints = false
         bar2.backgroundColor = NetworkGrade.optimal.color
         bar2.layer.borderWidth = borderWidth
+        bar2.layer.cornerRadius = 2
         addSubview(bar2)
         bar2.centerXAnchor.constraint(equalTo: centerXAnchor, constant: 0).isActive = true
-        bar2.heightAnchor.constraint(equalTo: bar3.heightAnchor, multiplier: 0.83).isActive = true
+        bar2.heightAnchor.constraint(equalTo: bar3.heightAnchor, multiplier: 0.7).isActive = true
         bar2.bottomAnchor.constraint(equalTo: bar3.bottomAnchor, constant: 0).isActive = true
         bar2.widthAnchor.constraint(equalToConstant: barWidth).isActive = true
         
         bar1.translatesAutoresizingMaskIntoConstraints = false
         bar1.backgroundColor = NetworkGrade.optimal.color
         bar1.layer.borderWidth = borderWidth
+        bar1.layer.cornerRadius = 2
         addSubview(bar1)
         bar1.centerXAnchor.constraint(equalTo: centerXAnchor, constant: barWidth * -1.5).isActive = true
         bar1.bottomAnchor.constraint(equalTo: bar2.bottomAnchor, constant: 0).isActive = true
-        bar1.heightAnchor.constraint(equalTo: bar2.heightAnchor, multiplier: 0.83).isActive = true
+        bar1.heightAnchor.constraint(equalTo: bar2.heightAnchor, multiplier: 0.7).isActive = true
         bar1.widthAnchor.constraint(equalToConstant: barWidth).isActive = true
     }
         

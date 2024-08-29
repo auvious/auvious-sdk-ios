@@ -120,7 +120,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         
         if let o = overlayView {
             if overlayState == .audioMuted {
-                o.cornerRadius(usingCorners: .bottomRight, cornerRadii: CGSize(width: 8, height: 8))
+                o.cornerRadius(usingCorners: [.bottomRight, .bottomLeft, .topRight, .topLeft], cornerRadii: CGSize(width: 16, height: 16))
             } else {
                 o.layer.mask = nil
             }
@@ -143,8 +143,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         view.translatesAutoresizingMaskIntoConstraints = true
         //view.layer.borderColor = UIColor.black.cgColor
         //view.layer.borderWidth = 1.0
-        view.layer.cornerRadius = 10
-        layer.cornerRadius = 10
+        view.layer.cornerRadius = 12
+        layer.cornerRadius = 12
         clipsToBounds = true
         addSubview(view)
         
@@ -205,14 +205,14 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         switch overlayState {
         case .audioMuted:
             iconName = "notificationMicrophoneOff"
-            backgroundColor = UIColor.black.withAlphaComponent(0.1)
-            constraints.append(overlayView!.topAnchor.constraint(equalTo: self.topAnchor, constant: 0))
-            constraints.append(overlayView!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0))
-            constraints.append(overlayView!.widthAnchor.constraint(equalToConstant: 42))
-            constraints.append(overlayView!.heightAnchor.constraint(equalToConstant: 42))
+            backgroundColor = UIColor.black.withAlphaComponent(0.4)
+            constraints.append(overlayView!.topAnchor.constraint(equalTo: self.topAnchor, constant: 2))
+            constraints.append(overlayView!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 2))
+            constraints.append(overlayView!.widthAnchor.constraint(equalToConstant: 30))
+            constraints.append(overlayView!.heightAnchor.constraint(equalToConstant: 30))
             constraints.append(overlayIcon!.centerYAnchor.constraint(equalTo: overlayView!.centerYAnchor, constant: 0))
             constraints.append(overlayIcon!.centerXAnchor.constraint(equalTo: overlayView!.centerXAnchor, constant: 0))
-            constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 26))
+            constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 20))
         case .videoMuted:
             iconName = "notificationMicrophoneOn"
             backgroundColor = .black
