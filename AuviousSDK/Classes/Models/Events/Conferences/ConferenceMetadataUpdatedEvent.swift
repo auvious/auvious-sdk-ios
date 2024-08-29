@@ -21,6 +21,8 @@ public final class ConferenceMetadataUpdatedEvent: ConferenceEvent {
     
     //Determines if we need to set/remove the call on HOLD
     public var isHold: Bool = false
+    public var isRecorder: Bool = false
+    public var isMuteToggle: Bool = false
     
     /// Initialiser using a JSON object
     override internal init(fromJson json: JSON!){
@@ -42,8 +44,12 @@ public final class ConferenceMetadataUpdatedEvent: ConferenceEvent {
             if parts.count == 3 {
                 streamId = String(parts[2])
             }
+            isMuteToggle = true
         } else if key.starts(with: "ON_HOLD") {
             isHold = true
+        } else if key.starts(with: "RECORDER") {
+            isRecorder = true
         }
+        // todo: add more conference metadata keys
     }
 }

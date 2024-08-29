@@ -931,7 +931,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 
                 //Delegate back to client
                 delegate?.auviousSDK(conferenceOnHold: !isEnabled)
-            } else {
+            } else if object.isRecorder {
+                // we get a SET with value = {on:true} when the recorder starts
+                // we get a REMOVE when the recorder stops
+                delegate?.auviousSDK(recorderStateChanged: object.operation == .set)
+                
+            } else if object.isMuteToggle {
                 //Mute/unmute
                 rtcClient.toggleRemoteStreams(object)
                 
@@ -1149,6 +1154,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     
     internal func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId:String) {
         delegate?.auviousSDK(didChangeState: newState, streamId: streamId, streamType: streamType, endpointId: endpointId)
+    }
+    
+    internal func rtcClient(recorderStateChanged toActive: Bool) {
+        delegate?.auviousSDK(recorderStateChanged: toActive)
     }
     
     //Not needed for conferences

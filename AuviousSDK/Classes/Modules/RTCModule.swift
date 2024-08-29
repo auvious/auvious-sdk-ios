@@ -22,6 +22,7 @@ internal protocol RTCDelegate {
     func rtcClient(onError error: AuviousSDKError)
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
     func rtcClient(agentSwitchedCamera toFront: Bool)
+    func rtcClient(recorderStateChanged toActive: Bool)
     
     //rest call
     func rtcClient(call streamId: String, sdpOffer: String, target: String)
@@ -85,6 +86,7 @@ internal extension RTCDelegate {
     func rtcClient(remoteStream streamId: String, sdpOffer: String, remoteEndpointId: String, remoteUserId: String) {}
     func rtcClient(addPublishStreamIceCandidates candidates: [RTCIceCandidate], streamId: String, streamType: StreamType) {}
     func rtcClient(addRemoteStreamIceCandidates candidates: [RTCIceCandidate], userId: String, endpointId: String, streamId: String, streamType: StreamType) {}
+    func rtcClient(recorderStateChanged toActive: Bool){}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {

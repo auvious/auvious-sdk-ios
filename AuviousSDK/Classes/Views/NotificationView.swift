@@ -39,6 +39,66 @@ internal enum NotificationType {
     }
 }
 
+internal class DismissableNotificationView: UIView {
+    
+    //UI components
+    internal var titleLabel: UILabel = UILabel(frame: .zero)
+    internal var subtitleLabel: UILabel = UILabel(frame: .zero)
+    internal var closeButton: UIButton = UIButton(frame: .zero)
+    
+    
+    init(title: String, subtitle: String?) {
+        super.init(frame: .zero)
+        setupUI()
+        updateUI(withTitle: title, subtitle: subtitle)
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(frame: .zero)
+        setupUI()
+    }
+    
+    private func setupUI() {
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 10
+        backgroundColor = UIColor.white.withAlphaComponent(0.8)
+        
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabel)
+        titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+//        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
+        
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(subtitleLabel)
+        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5).isActive = true
+        subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        subtitleLabel.textColor = UIColor.black.withAlphaComponent(0.8)
+        
+        closeButton.isUserInteractionEnabled = true
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(closeButton)
+        closeButton.backgroundColor = .clear
+        closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
+        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
+        closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+        closeButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        closeButton.layer.zPosition = 2199
+
+//        updateUI(with: statistics)
+    }
+    
+    internal func updateUI(withTitle: String, subtitle: String?) {
+        titleLabel.text = withTitle
+        if let subtitle = subtitle {
+            subtitleLabel.text = subtitle
+        }
+    }
+}
+
 internal class NetworkDetailsNotificationView: UIView {
     
     //UI components
@@ -63,7 +123,7 @@ internal class NetworkDetailsNotificationView: UIView {
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 10
-        backgroundColor = .white
+        backgroundColor = UIColor.white.withAlphaComponent(0.8)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
@@ -86,8 +146,8 @@ internal class NetworkDetailsNotificationView: UIView {
         closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
         closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
         closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        closeButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
         closeButton.layer.zPosition = 2199
 
         updateUI(with: statistics)

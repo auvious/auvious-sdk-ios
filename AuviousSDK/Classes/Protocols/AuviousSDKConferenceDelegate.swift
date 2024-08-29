@@ -39,6 +39,12 @@ public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
      */
     func auviousSDK(didRejoinConference conference: ConferenceSimpleView)
     
+    
+    /**
+        When we receive a conference metadata updated event
+     */
+    func auviousSDK(recorderStateChanged toActive: Bool)
+    
     /**
      Called when a certain stream's state is changed.
      

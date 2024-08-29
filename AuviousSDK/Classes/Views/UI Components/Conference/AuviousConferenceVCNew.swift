@@ -17,6 +17,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private let networkIndicatorDetails = NetworkDetailsNotificationView(with: nil)
     private var hideNetworkDetailsBlock: DispatchWorkItem?
     private var lastKnownNetworkStatistics: NetworkStatistics? = nil
+    private let notification = DismissableNotificationView(title: "", subtitle: "")
+    private var hideNotificationBlock: DispatchWorkItem?
     
     //Container of all stream views
     private var streamContainerView: UIView!
@@ -37,6 +39,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private let viewPadding: CGFloat = 10
     private let viewSize: CGFloat = 80
     private var networkIndicatorDetailsTop: NSLayoutConstraint!
+    private var notificationTop: NSLayoutConstraint!
     private let maximumRemoteStreamsRendered = 3
     
     //UI feedback
@@ -179,10 +182,26 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         networkIndicatorDetails.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
         networkIndicatorDetails.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -100)
+        networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
         networkIndicatorDetailsTop.isActive = true
         networkIndicatorDetails.closeButton.addTarget(self, action: #selector(self.hideNetworkDetailsPressed), for: .touchUpInside)
         view.bringSubviewToFront(networkIndicatorDetails)
+        
+        //Generic dismissable notification
+        view.addSubview(notification)
+        notification.layer.zPosition = 2101
+        notification.alpha = 0
+        notification.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+        notification.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
+        notification.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        notificationTop = notification.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
+        notificationTop.isActive = true
+        notification.closeButton.addTarget(self, action: #selector(self.hideNotificationPressed), for: .touchUpInside)
+        view.bringSubviewToFront(notification)
+        
+        hideNotificationBlock = DispatchWorkItem {
+            self.hideNotification()
+        }
         
         //Setup a cancellable piece of code to hide the network details
         hideNetworkDetailsBlock = DispatchWorkItem {
@@ -203,14 +222,48 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         streamContainerView.addSubview(localView)
 
+       
         createButtonBar()
+    }
+    
+    //Shows the toast notification view
+    @objc private func showNotification(with title: String, subtitle: String?) {
+        notification.updateUI(withTitle: title, subtitle: subtitle)
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.notification.alpha = 1
+            self.notificationTop.constant = 10
+            self.view.layoutIfNeeded()
+        }, completion: { finished in
+            if finished {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    self.hideNotification()
+                }
+            }
+        })
+    }
+    
+    //Hides the toast notification view
+    @objc private func hideNotification() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.notification.alpha = 0
+            self.notificationTop.constant = -150
+            self.view.layoutIfNeeded()
+        }, completion: { finished in
+            self.notification.updateUI(withTitle: "", subtitle: "")
+        })
+    }
+    
+    //Cancels the scheduled dismissal of the toast view and hides it
+    @objc private func hideNotificationPressed() {
+        self.hideNotificationBlock?.cancel()
+        hideNotification()
     }
      
     //Shows the toast notification view
     @objc private func showNetworkDetails() {
-        networkIndicatorDetails.alpha = 1
-        
         UIView.animate(withDuration: 0.2, animations: {
+            self.networkIndicatorDetails.alpha = 1
             self.networkIndicatorDetailsTop.constant = 10
             self.view.layoutIfNeeded()
         }, completion: { finished in
@@ -224,13 +277,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Hides the toast notification view
     @objc private func hideNetworkDetails() {
+        
         UIView.animate(withDuration: 0.2, animations: {
-            self.networkIndicatorDetailsTop.constant = -100
+            self.networkIndicatorDetails.alpha = 0
+            self.networkIndicatorDetailsTop.constant = -150
             self.view.layoutIfNeeded()
         }, completion: { finished in
             self.networkIndicatorDetails.updateUI(with: self.lastKnownNetworkStatistics)
         })
     }
+
     
     //Updates the toast notification view with latest network data and displays the view
     @objc private func networkIndicatorPressed() {
@@ -775,6 +831,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if  type == .mic {
             localView.audioStreamAdded()
         }
+    }
+    
+    public func auviousSDK(recorderStateChanged toActive: Bool) {
+        // show a notification
+        os_log("recorder state changed", log: Log.conferenceUI, type: .debug )
+        showNotification(with: "Recording", subtitle: toActive ? "Session is being recorded" : "Session is no longer recorded")
     }
     
     public func auviousSDK(trackMuted type: StreamType, endpointId: String) {

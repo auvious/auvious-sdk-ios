@@ -172,6 +172,10 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
     }
     
+    public func auviousSDK(recorderStateChanged toActive: Bool) {
+        
+    }
+    
     public func auviousSDK(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {
     
     }
