@@ -329,7 +329,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     @objc private func recorderIndicatorPressed() {
-        showNotification(with: "Recording", subtitle: "Session is being recorded")
+        showNotification(
+            with: NSLocalizedString("Recording", comment: "Notification"),
+            subtitle: NSLocalizedString("Session is being recorded", comment: "Notification")
+        )
     }
 
     
@@ -875,7 +878,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public func auviousSDK(recorderStateChanged toActive: Bool) {
         // show a notification
         os_log("recorder state changed", log: Log.conferenceUI, type: .debug )
-        showNotification(with: "Recording", subtitle: toActive ? "Session is being recorded" : "Session is no longer recorded")
+        
+        showNotification(
+            with: NSLocalizedString("Recording", comment: "Notification"),
+            subtitle: toActive
+            ? NSLocalizedString("Session is being recorded", comment: "Notification")
+            : NSLocalizedString("Session is no longer recorded", comment: "Notification")
+            
+        )
         recorderIndicator.alpha = toActive ? 1 : 0
     }
     

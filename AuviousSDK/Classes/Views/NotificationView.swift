@@ -61,15 +61,15 @@ internal class DismissableNotificationView: UIView {
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 10
-        backgroundColor = UIColor.white.withAlphaComponent(0.8)
+        backgroundColor = UIColor.white.withAlphaComponent(0.9)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
         titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-//        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
-        
+        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        titleLabel.textColor = UIColor.black
+
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(subtitleLabel)
         subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5).isActive = true
@@ -123,14 +123,15 @@ internal class NetworkDetailsNotificationView: UIView {
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 10
-        backgroundColor = UIColor.white.withAlphaComponent(0.8)
+        backgroundColor = UIColor.white.withAlphaComponent(0.9)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
         titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
+        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        titleLabel.text =  NSLocalizedString("Network indicator (beta)", comment: "Notification")
+        titleLabel.textColor = UIColor.black
         
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(subtitleLabel)
