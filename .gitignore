@@ -35,3 +35,6 @@ Carthage/Build
 # `pod install` in .travis.yml
 #
 # Pods/
+Example/AuviousSDK.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+Example/Pods/Pods.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+Example/Pods/Pods.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
