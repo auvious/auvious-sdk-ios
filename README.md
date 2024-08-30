@@ -61,16 +61,16 @@ Push the version and the tag to github
 ### Publish Pod
 If this is the first time you do this process in your machine, you need to have cocoapods installed. Follow the instructions in http://cocoapods.org on how to install it in your machine. 
 
-Once you have the pod command ready, add the auvious podspec repo to your pod repos by running this command 
+Once you have the pod command ready, add the auvious podspec repo to your pod repos by running this command. This will add a repo that requires SSH authentication so be sure that you have setup an SSH key with gitHub.  
 
 ```
-pod repo add <your-pod-name> https://github.com/auvious/CocoaPodSpecs.git
+pod repo add <your-pod-name> git@github.com:auvious/CocoaPodSpecs.git
 ```
 
 Example: 
 
 ```
-pod repo add auvious-cocoa-pod https://github.com/auvious/CocoaPodSpecs.git
+pod repo add auvious-cocoa-pod git@github.com:auvious/CocoaPodSpecs.git
 ```
 
 Next you need to push to that repo
