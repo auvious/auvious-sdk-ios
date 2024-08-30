@@ -84,6 +84,15 @@ Example:
 pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
 ```
  
+## Release notes
+
+### 1.2.1
+
+- Feature / Show notifications and indicator when recordring starts / stops
+
+### 1.2.0
+
+- Feature / Simple confernce can now start with either mic, cam or both 
 
 ## Author
 
