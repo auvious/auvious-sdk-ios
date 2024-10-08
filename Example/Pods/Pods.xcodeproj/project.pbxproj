@@ -30,6 +30,7 @@
 		03240F9B37F7985F72BB235C2D210427 /* APIRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5AC35CD6959812083AA9C1099E5D2B /* APIRequestHandler.swift */; };
 		03484AE8CC5550A494D74B6EA4CBF618 /* SentryCrashMonitor_MachException.h in Headers */ = {isa = PBXBuildFile; fileRef = CD116B784CB88257AD0D8DA4D5EC5A52 /* SentryCrashMonitor_MachException.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		039740236FBC067C5FFAC63ADD5225F5 /* SentryCrashReportFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F5A9EC8B13CDEA634A1C88E7F705DE /* SentryCrashReportFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		03AE69AB2CB429C0006C811B /* AuviousConferenceConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AE69AA2CB429C0006C811B /* AuviousConferenceConfiguration.swift */; };
 		0496399D052527B1F629EBF79CE244A5 /* SentryJavaScriptBridgeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = A43F3B00F2431E20B4FA0B9B10A70EA8 /* SentryJavaScriptBridgeHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04D63331DED0F9D2336077647DEB15C5 /* SentryCrashStackCursor_SelfThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 3470D6AF732AA54D21CB93BE587FC784 /* SentryCrashStackCursor_SelfThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E2F93DD7CA1E817671CF7FEFCE5D72 /* MQTTSSLSecurityPolicyEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 9FA80FFFA2CBAD6CF1D5346778CC96B9 /* MQTTSSLSecurityPolicyEncoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -752,6 +753,7 @@
 		02B45F825F0E9A2ED2494D7EC900C91F /* MQTTLog.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTLog.m; path = MQTTClient/MQTTClient/MQTTLog.m; sourceTree = "<group>"; };
 		0342E5EA65A89DEE32755987E64C2922 /* SentryBreadcrumbTracker.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumbTracker.h; path = Sources/Sentry/include/SentryBreadcrumbTracker.h; sourceTree = "<group>"; };
 		03A7C7777AC600AEAC06C88FDBF13E45 /* SPPermissionMicrophone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionMicrophone.swift; path = Source/SPPermission/Permissions/SPPermissionMicrophone.swift; sourceTree = "<group>"; };
+		03AE69AA2CB429C0006C811B /* AuviousConferenceConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuviousConferenceConfiguration.swift; sourceTree = "<group>"; };
 		03DF7A7B758C2384988394C567CB0A18 /* SentryCrashStackCursor_Backtrace.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashStackCursor_Backtrace.c; path = Sources/SentryCrash/Recording/Tools/SentryCrashStackCursor_Backtrace.c; sourceTree = "<group>"; };
 		04215C4FD65E2A1E989496B4E8AA09B5 /* SentryCrashObjC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashObjC.h; path = Sources/SentryCrash/Recording/Tools/SentryCrashObjC.h; sourceTree = "<group>"; };
 		044EF4AD7C711272C93D5858BB04731B /* Pods-ExampleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -1560,6 +1562,7 @@
 				AC9CCCCEBAE6E6373578C5EE114B8C46 /* AuviousConferenceVC.swift */,
 				3CCFA37C34099CE0970A53BB8B85BD5D /* AuviousConferenceVC.xib */,
 				5982812AEF812AE6FA85582E3367AE0B /* AuviousConferenceVCNew.swift */,
+				03AE69AA2CB429C0006C811B /* AuviousConferenceConfiguration.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -3383,6 +3386,7 @@
 				3FCFE234B4B0B7302822F93995669F13 /* LoginRequest.swift in Sources */,
 				C5D7BD61CFA3A4C908125A966BD56218 /* LoginResponse.swift in Sources */,
 				910C056B678C2A4FCB7CF5CBDCC7D3D9 /* MQTTModule.swift in Sources */,
+				03AE69AB2CB429C0006C811B /* AuviousConferenceConfiguration.swift in Sources */,
 				47341F4E5A2A311B8972E265584EBB33 /* NetworkIndicatorView.swift in Sources */,
 				20143C5FEE4C14A8AFD1D293142B9B3D /* NotificationView.swift in Sources */,
 				4723C01D37E79A6FDE3DB6E7362F3375 /* ParticipantEndpoint.swift in Sources */,

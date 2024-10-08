@@ -40,9 +40,10 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
         
         // hard code values for faster debugging
-//        usernameTextfield.text = "bpe-luf"
-//        passwordTextfield.text = "b"
-//        conferenceTextfield.text = "915156de-c822-40ba-8043-b8645a097363"
+    
+        usernameTextfield.text = "rop-kao" //https://dev.auvious.video/t/nof-bnx
+        passwordTextfield.text = "b"
+        conferenceTextfield.text = "481445be-9ec9-4940-90a1-6deb12a969e5"
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
@@ -77,9 +78,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 //            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
 //
             //GENESYS DEV (customer)
-            let clientId: String = "customer"
+            let clientId: String = "customer" //dev.auvious.video/t/vyn-kym <-----
             let baseEndpoint: String = "https://dev.auvious.video/"
-            let mqttEndpoint: String = "wss://events.dev.auvious.video/ws"
+            let mqttEndpoint: String = "wss://dev.auvious.video/ws"
             let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
 
             //GENESYS DEV (test-agent)
@@ -100,7 +101,18 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 //            let mqttEndpoint: String = "wss://events.genesys.auvious.com/ws"
 //            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
 
-            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
+            //New configuration approach
+            var conf = AuviousConferenceConfiguration()
+            conf.username = username
+            conf.password = password
+            conf.clientId = clientId
+            conf.conference = conferenceName
+            conf.baseEndpoint = baseEndpoint
+            conf.mqttEndpoint = mqttEndpoint
+            conf.conferenceBackgroundColor = .systemGreen
+            
+//            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
+            self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
             self.vc.modalPresentationStyle = .fullScreen
             self.navigationController?.present(vc, animated: true, completion: nil)
         }
