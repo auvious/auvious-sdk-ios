@@ -1443,6 +1443,19 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         AuviousConferenceSDK.sharedInstance.switchCamera()
     }
     
+    @objc internal func speakerButtonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        let button = sender as! ConferenceButton
+        
+        if button.type == .speakerON {
+            button.type = .speakerOFF
+            let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: false)
+        } else {
+            button.type = .speakerON
+            let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: true)
+        }
+    }
+    
     @objc internal func cameraButtonPressed(_ sender: Any) {
         guard let localStreamId = localStreamId else {
             return

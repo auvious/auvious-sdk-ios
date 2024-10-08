@@ -8,6 +8,7 @@
 import Foundation
 
 internal protocol ConferenceButtonBarDelegate: class {
+    func speakerButtonPressed(_ sender: Any)
     func micButtonPressed(_ sender: Any)
     func cameraButtonPressed(_ sender: Any)
     func camSwitchButtonPressed(_ sender: Any)
@@ -17,6 +18,7 @@ internal protocol ConferenceButtonBarDelegate: class {
 class ConferenceButtonBar: UIView {
     
     //Buttons
+    let speakerButton = ConferenceButton(type: .speakerON)
     let micButton = ConferenceButton(type: .micEnabled)
     let cameraButton = ConferenceButton(type: .camEnabled)
     let cameraSwitchButton = ConferenceButton(type: .camSwitch)
@@ -47,7 +49,8 @@ class ConferenceButtonBar: UIView {
         cameraButton.addTarget(self, action: #selector(self.cameraButtonPressed(_:)), for: .touchUpInside)
         cameraSwitchButton.addTarget(self, action: #selector(self.camSwitchButtonPressed(_:)), for: .touchUpInside)
         hangupButton.addTarget(self, action: #selector(self.hangupButtonPressed(_:)), for: .touchUpInside)
-        let buttons: [ConferenceButton] = [micButton, cameraButton, cameraSwitchButton, hangupButton]
+        speakerButton.addTarget(self, action: #selector(self.speakerButtonPressed(_:)), for: .touchUpInside)
+        let buttons: [ConferenceButton] = [speakerButton, micButton, cameraButton, cameraSwitchButton, hangupButton]
         
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
@@ -75,6 +78,10 @@ class ConferenceButtonBar: UIView {
     //MARK: Actions
     //MARK:-
     
+    @objc private func speakerButtonPressed(_ sender: Any) {
+        delegate?.speakerButtonPressed(sender)
+    }
+    
     @objc private func micButtonPressed(_ sender: Any) {
         delegate?.micButtonPressed(sender)
     }
@@ -92,10 +99,12 @@ class ConferenceButtonBar: UIView {
     }
     
     internal func conferenceOnHold(_ flag: Bool) {
+        speakerButton.alpha = flag ? 0.5 : 1
         micButton.alpha = flag ? 0.5 : 1
         cameraButton.alpha = flag ? 0.5 : 1
         cameraSwitchButton.alpha = flag ? 0.5 : 1
         
+        speakerButton.isUserInteractionEnabled = !flag
         micButton.isUserInteractionEnabled = !flag
         cameraButton.isUserInteractionEnabled = !flag
         cameraSwitchButton.isUserInteractionEnabled = !flag
