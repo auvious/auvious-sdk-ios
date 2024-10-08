@@ -16,6 +16,7 @@ internal protocol ConferenceButtonBarDelegate: class {
 }
 
 class ConferenceButtonBar: UIView {
+    private var configuration: AuviousConferenceConfiguration!
     
     //Buttons
     let speakerButton = ConferenceButton(type: .speakerON)
@@ -29,8 +30,10 @@ class ConferenceButtonBar: UIView {
     
     weak var delegate: ConferenceButtonBarDelegate?
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(configuration: AuviousConferenceConfiguration) {
+        super.init(frame: .zero)
+        
+        self.configuration = configuration
         setupView()
     }
     
@@ -43,6 +46,11 @@ class ConferenceButtonBar: UIView {
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = .clear
         layer.zPosition = 200
+        
+        //Respect client configuration
+        if !configuration.enableSpeaker {
+            speakerButton.type = .speakerOFF
+        }
         
         //Create buttons handlers
         micButton.addTarget(self, action: #selector(self.micButtonPressed(_:)), for: .touchUpInside)

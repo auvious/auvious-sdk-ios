@@ -430,6 +430,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         self.currentConference = jConference
                         self.conferenceJoined = true
                         
+                        //Respect client configuration
+                        if !self.clientConfiguration.enableSpeaker {
+                            let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: false)
+                        }
+                        
                         //Start connecting to any existing streams in our conference
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
@@ -962,7 +967,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     //Creates the button bar
     private func createButtonBar() {
         //Button container
-        buttonContainerView = ConferenceButtonBar(frame: .zero)
+        buttonContainerView = ConferenceButtonBar(configuration: clientConfiguration)
         buttonContainerView.delegate = self
         view.addSubview(buttonContainerView)
         

@@ -109,6 +109,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
             conf.conferenceBackgroundColor = .systemGreen
+//            conf.enableSpeaker = false
+            
             
 //            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
