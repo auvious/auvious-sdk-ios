@@ -23,6 +23,9 @@ public struct AuviousConferenceConfiguration {
     //UI
     public var conferenceBackgroundColor: UIColor = .gray
     public var enableSpeaker = true
+    public var cameraAvailable = true
+    public var microphoneAvailable = true
+    public var speakerAvailable = true
     
     //Stream properties
     public var callMode: AuviousCallMode = .audioVideo

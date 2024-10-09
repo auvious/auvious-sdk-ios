@@ -40,9 +40,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
         
         // hard code values for faster debugging
-        usernameTextfield.text = "fpl-dbv" //https://dev.auvious.video/t/nof-bnx
+        usernameTextfield.text = "ttv-hus" //https://dev.auvious.video/t/nof-bnx
         passwordTextfield.text = "b"
-        conferenceTextfield.text = "9a0ff4ef-463b-4b76-bf80-27b58fa5dcd6"
+        conferenceTextfield.text = "815ce094-dc09-4c98-ace1-429c1ad4442f"
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
@@ -110,7 +110,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.mqttEndpoint = mqttEndpoint
             conf.conferenceBackgroundColor = .systemGreen
 //            conf.enableSpeaker = false
-            
+//            conf.cameraAvailable = false
+//            conf.microphoneAvailable = false
+//            conf.speakerAvailable = false
             
 //            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)

@@ -58,7 +58,20 @@ class ConferenceButtonBar: UIView {
         cameraSwitchButton.addTarget(self, action: #selector(self.camSwitchButtonPressed(_:)), for: .touchUpInside)
         hangupButton.addTarget(self, action: #selector(self.hangupButtonPressed(_:)), for: .touchUpInside)
         speakerButton.addTarget(self, action: #selector(self.speakerButtonPressed(_:)), for: .touchUpInside)
-        let buttons: [ConferenceButton] = [speakerButton, micButton, cameraButton, cameraSwitchButton, hangupButton]
+        
+        //Add buttons according to the configuration
+        var buttons: [ConferenceButton] = []
+        if configuration.speakerAvailable {
+            buttons.append(speakerButton)
+        }
+        if configuration.microphoneAvailable {
+            buttons.append(micButton)
+        }
+        if configuration.cameraAvailable {
+            buttons.append(cameraButton)
+            buttons.append(cameraSwitchButton)
+        }
+        buttons.append(hangupButton)
         
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
