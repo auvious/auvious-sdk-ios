@@ -18,6 +18,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBOutlet weak var createConferenceSwitch: UISwitch!
     @IBOutlet weak var conferenceLabel: UILabel!
     @IBOutlet weak var callButton: UIButton!
+    @IBOutlet weak var callMode: UISegmentedControl!
+    @IBOutlet weak var cameraSwitch: UISwitch!
+    @IBOutlet weak var speakerEnabledSwitch: UISwitch!
+    @IBOutlet weak var micSwitch: UISwitch!
+    @IBOutlet weak var speakerSwitch: UISwitch!
     
     //Gradient
     private var gradientLayer = CAGradientLayer()
@@ -40,13 +45,13 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
         
         // hard code values for faster debugging
-        usernameTextfield.text = "ttv-hus" //https://dev.auvious.video/t/nof-bnx
+        usernameTextfield.text = "mdp-rvw"
         passwordTextfield.text = "b"
-        conferenceTextfield.text = "815ce094-dc09-4c98-ace1-429c1ad4442f"
+        conferenceTextfield.text = "6b7011df-ce16-4d26-a1c0-848bea791c64"
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
-        view.layer.insertSublayer(gradientLayer, at: 0)
+//        view.layer.insertSublayer(gradientLayer, at: 0)
         
         checkPermissions()
         callButton.layer.cornerRadius = 5.0
@@ -55,7 +60,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        gradientLayer.frame = view.bounds
+//        gradientLayer.frame = view.bounds
     }
     
     //MARK: Actions
@@ -109,10 +114,23 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
             conf.conferenceBackgroundColor = .systemGreen
-//            conf.enableSpeaker = false
-//            conf.cameraAvailable = false
-//            conf.microphoneAvailable = false
-//            conf.speakerAvailable = false
+            conf.enableSpeaker = self.speakerEnabledSwitch.isOn
+            switch (self.callMode.selectedSegmentIndex){
+            case 0:
+                conf.callMode = .audio
+                break
+            case 1:
+                conf.callMode = .video
+                break
+            case 2:
+                conf.callMode = .audioVideo
+                break
+            default:
+                conf.callMode = .audioVideo
+            }
+            conf.cameraAvailable = self.cameraSwitch.isOn
+            conf.microphoneAvailable = self.micSwitch.isOn
+            conf.speakerAvailable = self.speakerSwitch.isOn
             
 //            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
