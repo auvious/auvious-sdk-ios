@@ -430,11 +430,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         self.currentConference = jConference
                         self.conferenceJoined = true
                         
-                        //Respect client configuration
-                        if !self.clientConfiguration.enableSpeaker {
-                            let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: false)
-                        }
-                        
                         //Start connecting to any existing streams in our conference
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
@@ -842,6 +837,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             
             //Refresh UI
             self.createConstraints()
+            
+            //Respect client configuration for audio routing
+            let result = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: self.clientConfiguration.enableSpeaker)
         }
     }
     
