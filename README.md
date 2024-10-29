@@ -86,6 +86,12 @@ pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
  
 ## Release notes
 
+### 1.3.0
+
+- Feature / Option to show/hide mic, camera and speaker buttons
+- Feature / Option to change background color in conference view
+- Feature / Option to output audio directly to speaker
+
 ### 1.2.1
 
 - Feature / Show notifications and indicator when recordring starts / stops
