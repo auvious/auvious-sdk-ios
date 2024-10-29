@@ -61,16 +61,18 @@ class ConferenceButtonBar: UIView {
         
         //Add buttons according to the configuration
         var buttons: [ConferenceButton] = []
-        if configuration.speakerAvailable {
-            buttons.append(speakerButton)
-        }
+       
         if configuration.microphoneAvailable {
             buttons.append(micButton)
+        }
+        if configuration.speakerAvailable {
+            buttons.append(speakerButton)
         }
         if configuration.cameraAvailable {
             buttons.append(cameraButton)
             buttons.append(cameraSwitchButton)
         }
+    
         buttons.append(hangupButton)
         
         //Stack view to hold the buttons
