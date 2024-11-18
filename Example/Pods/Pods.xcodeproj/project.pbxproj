@@ -28,6 +28,7 @@
 		024C5FDEA1526317123553EBFDFC098C /* UpdateMetadataRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1F509069A57BABC6B6C17E282BC5ED /* UpdateMetadataRequest.swift */; };
 		030A00712933FC48CF6EFF4F6F9FCD3A /* EndConferenceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4364B28B02E0C2438BD6955066A94C /* EndConferenceRequest.swift */; };
 		03240F9B37F7985F72BB235C2D210427 /* APIRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5AC35CD6959812083AA9C1099E5D2B /* APIRequestHandler.swift */; };
+		033E13EF2CDF8FB700051457 /* ConferenceStreamMetadataUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 033E13EE2CDF8FB600051457 /* ConferenceStreamMetadataUpdatedEvent.swift */; };
 		03484AE8CC5550A494D74B6EA4CBF618 /* SentryCrashMonitor_MachException.h in Headers */ = {isa = PBXBuildFile; fileRef = CD116B784CB88257AD0D8DA4D5EC5A52 /* SentryCrashMonitor_MachException.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		039740236FBC067C5FFAC63ADD5225F5 /* SentryCrashReportFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 22F5A9EC8B13CDEA634A1C88E7F705DE /* SentryCrashReportFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		03AE69AB2CB429C0006C811B /* AuviousConferenceConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AE69AA2CB429C0006C811B /* AuviousConferenceConfiguration.swift */; };
@@ -751,6 +752,7 @@
 		01F7712E9AF0EF8A333E6BA912B37AD3 /* SentryDefines.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryDefines.h; path = Sources/Sentry/include/SentryDefines.h; sourceTree = "<group>"; };
 		020EEBE61C19D477D01307EB8483D6DC /* ParticipantEndpointStream.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ParticipantEndpointStream.swift; sourceTree = "<group>"; };
 		02B45F825F0E9A2ED2494D7EC900C91F /* MQTTLog.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MQTTLog.m; path = MQTTClient/MQTTClient/MQTTLog.m; sourceTree = "<group>"; };
+		033E13EE2CDF8FB600051457 /* ConferenceStreamMetadataUpdatedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceStreamMetadataUpdatedEvent.swift; sourceTree = "<group>"; };
 		0342E5EA65A89DEE32755987E64C2922 /* SentryBreadcrumbTracker.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryBreadcrumbTracker.h; path = Sources/Sentry/include/SentryBreadcrumbTracker.h; sourceTree = "<group>"; };
 		03A7C7777AC600AEAC06C88FDBF13E45 /* SPPermissionMicrophone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SPPermissionMicrophone.swift; path = Source/SPPermission/Permissions/SPPermissionMicrophone.swift; sourceTree = "<group>"; };
 		03AE69AA2CB429C0006C811B /* AuviousConferenceConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuviousConferenceConfiguration.swift; sourceTree = "<group>"; };
@@ -1887,6 +1889,7 @@
 				B51A6727EA2ED99F3EDC2831152D8389 /* ConferenceNetworkIndicatorEvent.swift */,
 				BFE54F37986C0E50958733898ED4FB78 /* ConferenceStreamPublishedEvent.swift */,
 				28EC5B40C7C4D7E499DD64489097D13E /* ConferenceStreamUnpublishedEvent.swift */,
+				033E13EE2CDF8FB600051457 /* ConferenceStreamMetadataUpdatedEvent.swift */,
 			);
 			path = Conferences;
 			sourceTree = "<group>";
@@ -3342,6 +3345,7 @@
 				C0201CDD3985A16AF8B241908B61FED1 /* CallAnsweredEvent.swift in Sources */,
 				C7200999D46BA2B3A556B1F8003FB0C0 /* CallAnswerRequest.swift in Sources */,
 				CB08FCE5D72A380F50BD6BB6CAD88DE6 /* CallCancelledEvent.swift in Sources */,
+				033E13EF2CDF8FB700051457 /* ConferenceStreamMetadataUpdatedEvent.swift in Sources */,
 				5CD110AF579D330BC904213DAAB93417 /* CallCancelRequest.swift in Sources */,
 				838259E14CCF6B05A4BDFBD478DC90E2 /* CallCreatedEvent.swift in Sources */,
 				D8FDF34B9F543DA9E0173FB9E09A1047 /* CallEndedEvent.swift in Sources */,

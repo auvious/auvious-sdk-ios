@@ -958,6 +958,22 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
+        var remoteParticipantIndex: Int?
+        for (index, item) in remoteViews.enumerated() {
+            if item.participantEndpoint?.id == endpointId {
+                remoteParticipantIndex = index
+                break
+            }
+        }
+        
+        if let index = remoteParticipantIndex {
+            print("FOUND REMOTE VIEW WITH ENDPOINT \(endpointId) for portrait mode")
+            print("")
+            remoteViews[index].setVideoPortraitMode(flag: flag)
+        }
+    }
+    
     // MARK: -
     // MARK: UI
     // MARK: -
@@ -1212,7 +1228,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                         constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
+                        constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                        constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+//                        constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
                     } else {
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                         constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))

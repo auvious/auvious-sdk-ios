@@ -285,6 +285,9 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
     }
     
+    public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
+    }
+    
     //MARK: Collection view
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

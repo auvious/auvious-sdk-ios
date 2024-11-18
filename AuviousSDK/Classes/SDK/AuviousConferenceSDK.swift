@@ -953,8 +953,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 }
                 
             }
+        
+        case .conferenceStreamMetadataUpdatedEvent:
+            let object = msg as! ConferenceStreamMetadataUpdatedEvent
+            delegate?.auviousSDK(agentPortraitMode: object.portraitMode, endpointId: object.userEndpointId)
+            
         default:
-            os_log("Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
+            os_log("WARNING: Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
         }
     }
     

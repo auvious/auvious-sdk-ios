@@ -117,6 +117,9 @@ public enum ConferenceEventType: String {
     /// Network indicator stats
     case conferenceNetworkIndicatorEvent = "ConferenceNetworkIndicatorUpdatedEvent"
     
+    /// Conference metadata changes
+    case conferenceStreamMetadataUpdatedEvent = "ConferenceStreamMetadataUpdatedEvent"
+    
     ///Unknown type
     case conferenceUnknownEvent = "-"
 }

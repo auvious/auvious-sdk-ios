@@ -53,5 +53,11 @@ public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
      - Parameter streamType: The type of the stream (mic, cam, mic and cam etc.)
      */
     func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
+    
+    /**
+        When we receive a conference stream metadata updated event
+     - Parameter flag: The current state of the portrait mode
+     */
+    func auviousSDK(agentPortraitMode flag: Bool, endpointId: String)
 }
 
