@@ -45,9 +45,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "hdo-ewr"
+        usernameTextfield.text = "nah-bhb"
         passwordTextfield.text = "b"
-        conferenceTextfield.text = "25877411-2f0c-41ba-9a6f-85a744d843d7"
+        conferenceTextfield.text = "88628458-58cf-45a4-9ded-5878af7043cd"
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)

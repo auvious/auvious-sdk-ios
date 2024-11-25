@@ -44,6 +44,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var notificationTop: NSLayoutConstraint!
     private let maximumRemoteStreamsRendered = 3
     
+    //Triggers portrait/landscape rendering of agent remote view
+    //Works ONLY on 1-1 calls without screensharing
+    private var agentVideoPortraitMode: Bool = false {
+        didSet {
+            createConstraints()
+        }
+    }
+    
     //UI feedback
     private let selectionFeedbackGenerator = UIImpactFeedbackGenerator()
     
@@ -322,8 +330,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         hideNotification()
     }
     
-    
-     
     //Shows the toast notification view
     @objc private func showNetworkDetails() {
         UIView.animate(withDuration: 0.2, animations: {
@@ -341,7 +347,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Hides the toast notification view
     @objc private func hideNetworkDetails() {
-        
         UIView.animate(withDuration: 0.2, animations: {
             self.networkIndicatorDetails.alpha = 0
             self.networkIndicatorDetailsTop.constant = -150
@@ -350,7 +355,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.networkIndicatorDetails.updateUI(with: self.lastKnownNetworkStatistics)
         })
     }
-
     
     //Updates the toast notification view with latest network data and displays the view
     @objc private func networkIndicatorPressed() {
@@ -365,7 +369,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         )
     }
 
-    
     //Cancels the scheduled dismissal of the toast view and hides it
     @objc private func hideNetworkDetailsPressed() {
         self.hideNetworkDetailsBlock?.cancel()
@@ -968,9 +971,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
         
         if let index = remoteParticipantIndex {
-            print("FOUND REMOTE VIEW WITH ENDPOINT \(endpointId) for portrait mode")
-            print("")
-            remoteViews[index].setVideoPortraitMode(flag: flag)
+            agentVideoPortraitMode = flag
         }
     }
     
@@ -1224,13 +1225,22 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 } else { //1 Remote WITHOUT Share screen
                 
                     if !isLandscape {
-                        constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
-                        constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-//                        constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
+                        //Full screen portrait video (with top|safeArea)
+                        if agentVideoPortraitMode {
+                            constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
+                            constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                        } else {
+                            //16:9 centered video with fixed height
+                            constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+                            constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
+                        }
                     } else {
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                         constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
@@ -1429,7 +1439,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         }
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 9, options: .curveEaseInOut, animations: {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: {
             //Clear existing constraints
             if !self.existingConstraints.isEmpty {
                 NSLayoutConstraint.deactivate(self.existingConstraints)

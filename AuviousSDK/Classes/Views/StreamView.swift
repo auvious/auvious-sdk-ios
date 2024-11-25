@@ -53,7 +53,6 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private var hasAudioStream: Bool = false
     private var hasVideoStream: Bool = false
     private var isScreen: Bool = false
-    private var isPortrait: Bool = false
     
     var size: CGSize = .zero
     
@@ -261,10 +260,6 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         //})
         
         os_log("handleOverlay() for state %@", log: Log.conferenceUI, type: .debug, overlayState.description)
-    }
-    
-    public func setVideoPortraitMode(flag: Bool) {
-        print("streamview toggle portrait to \(flag)")
     }
     
     public func audioStreamAdded(){
