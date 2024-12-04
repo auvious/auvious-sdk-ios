@@ -433,6 +433,18 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         self.currentConference = jConference
                         self.conferenceJoined = true
                         
+                        //Handle portrait mode flag so we render the agent video appropriately
+                        for p in jConference.participants {
+                            for e in p.endpoints {
+                                for s in e.streams {
+                                    if s.portraitMode {
+                                        self.agentVideoPortraitMode = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        
                         //Start connecting to any existing streams in our conference
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
