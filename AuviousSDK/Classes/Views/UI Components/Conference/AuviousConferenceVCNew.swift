@@ -52,6 +52,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    //Triggers network indicator positioning
+    //Works ONLY on 1-1 calls with agentVideoPortraitMode and without screensharing
+    private var isAgentMuted: Bool = false {
+        didSet {
+            createConstraints()
+        }
+    }
+    
     //UI feedback
     private let selectionFeedbackGenerator = UIImpactFeedbackGenerator()
     
@@ -207,9 +215,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator
         view.addSubview(networkIndicator)
         networkIndicator.alpha = 0.7
-        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor).isActive = true
-        networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        networkIndicator.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
+        networkIndicator.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        networkIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
         networkIndicator.addGestureRecognizer(tapRecogniser)
         
@@ -815,6 +823,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Hande muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved()
+                        self.isAgentMuted = true
                     }
                     
                     os_log("Remote stream added", log: Log.conferenceUI, type: .debug)
@@ -825,6 +834,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Handle muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved()
+                        self.isAgentMuted = true
                     }
                 }
             }
@@ -948,6 +958,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamRemoved()
+                isAgentMuted = true
             } else if type == .cam {
                 remoteViews[index].videoStreamRemoved()
             }
@@ -966,6 +977,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamAdded()
+                isAgentMuted = false
             } else if type == .cam {
                 remoteViews[index].videoStreamAdded()
             }
@@ -1247,7 +1259,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                             constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                             constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
-                            networkIndicatorLeadingConstant = 45
+                            
+                            if isAgentMuted {
+                                networkIndicatorLeadingConstant = 40
+                            }
                         } else {
                             //4:3 centered video
                             constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
