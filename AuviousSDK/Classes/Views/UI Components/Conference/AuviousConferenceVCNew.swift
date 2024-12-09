@@ -208,7 +208,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         view.addSubview(networkIndicator)
         networkIndicator.alpha = 0.7
         networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor).isActive = true
-        networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor).isActive = true
         networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
         networkIndicator.heightAnchor.constraint(equalToConstant: 40).isActive = true
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
@@ -1028,6 +1027,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
         var safeLeadingConstraint = view.leadingAnchor
         
+        //Network indicator placement
+        var networkIndicatorLeadingConstant: CGFloat = 0
+        
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
             safeLeadingConstraint = safeArea.leadingAnchor
@@ -1245,6 +1247,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                             constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                             constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                            networkIndicatorLeadingConstant = 45
                         } else {
                             //4:3 centered video
                             constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
@@ -1450,6 +1453,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 //nothing to do here
             }
         }
+        
+        constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: {
             //Clear existing constraints
