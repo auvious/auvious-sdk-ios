@@ -1246,12 +1246,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                             constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
                         } else {
-                            //16:9 centered video with fixed height
+                            //4:3 centered video
                             constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
                             constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
                             constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                            constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 0.66))
                         }
                     } else {
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
