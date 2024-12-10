@@ -45,9 +45,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "fsh-lni"
+        usernameTextfield.text = "fav-xva"
         passwordTextfield.text = "b"
-        conferenceTextfield.text = "d67299d4-edb4-4c47-bf83-600ab63c0992"
+        conferenceTextfield.text = "-"
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
@@ -73,7 +73,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         if validateForm() {
             let username = usernameTextfield.text!
             let password = passwordTextfield.text!
-            let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let conferenceName = ""//conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             
             //TEST-RTC
 //            let clientId: String = "auvious"

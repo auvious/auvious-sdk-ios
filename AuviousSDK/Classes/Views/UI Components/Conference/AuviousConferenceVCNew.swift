@@ -44,6 +44,22 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var notificationTop: NSLayoutConstraint!
     private let maximumRemoteStreamsRendered = 3
     
+    //Triggers portrait/landscape rendering of agent remote view
+    //Works ONLY on 1-1 calls without screensharing
+    private var agentVideoPortraitMode: Bool = false {
+        didSet {
+            createConstraints()
+        }
+    }
+    
+    //Triggers network indicator positioning
+    //Works ONLY on 1-1 calls with agentVideoPortraitMode and without screensharing
+    private var isAgentMuted: Bool = false {
+        didSet {
+            createConstraints()
+        }
+    }
+    
     //UI feedback
     private let selectionFeedbackGenerator = UIImpactFeedbackGenerator()
     
@@ -199,10 +215,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator
         view.addSubview(networkIndicator)
         networkIndicator.alpha = 0.7
-        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor).isActive = true
-        networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor).isActive = true
-        networkIndicator.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        networkIndicator.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
+        networkIndicator.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        networkIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
         networkIndicator.addGestureRecognizer(tapRecogniser)
         
@@ -322,8 +337,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         hideNotification()
     }
     
-    
-     
     //Shows the toast notification view
     @objc private func showNetworkDetails() {
         UIView.animate(withDuration: 0.2, animations: {
@@ -341,7 +354,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Hides the toast notification view
     @objc private func hideNetworkDetails() {
-        
         UIView.animate(withDuration: 0.2, animations: {
             self.networkIndicatorDetails.alpha = 0
             self.networkIndicatorDetailsTop.constant = -150
@@ -350,7 +362,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.networkIndicatorDetails.updateUI(with: self.lastKnownNetworkStatistics)
         })
     }
-
     
     //Updates the toast notification view with latest network data and displays the view
     @objc private func networkIndicatorPressed() {
@@ -365,7 +376,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         )
     }
 
-    
     //Cancels the scheduled dismissal of the toast view and hides it
     @objc private func hideNetworkDetailsPressed() {
         self.hideNetworkDetailsBlock?.cancel()
@@ -429,6 +439,18 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         os_log("Joined conference with id %@", log: Log.conferenceUI, type: .debug, String(describing: jConference.id))
                         self.currentConference = jConference
                         self.conferenceJoined = true
+                        
+                        //Handle portrait mode flag so we render the agent video appropriately
+                        for p in jConference.participants {
+                            for e in p.endpoints {
+                                for s in e.streams {
+                                    if s.portraitMode {
+                                        self.agentVideoPortraitMode = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
                         
                         //Start connecting to any existing streams in our conference
                         self.handleExistingConferenceStreams()
@@ -801,6 +823,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Hande muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved()
+                        self.isAgentMuted = true
                     }
                     
                     os_log("Remote stream added", log: Log.conferenceUI, type: .debug)
@@ -811,6 +834,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Handle muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved()
+                        self.isAgentMuted = true
                     }
                 }
             }
@@ -934,6 +958,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamRemoved()
+                isAgentMuted = true
             } else if type == .cam {
                 remoteViews[index].videoStreamRemoved()
             }
@@ -952,9 +977,24 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamAdded()
+                isAgentMuted = false
             } else if type == .cam {
                 remoteViews[index].videoStreamAdded()
             }
+        }
+    }
+    
+    public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
+        var remoteParticipantIndex: Int?
+        for (index, item) in remoteViews.enumerated() {
+            if item.participantEndpoint?.id == endpointId {
+                remoteParticipantIndex = index
+                break
+            }
+        }
+        
+        if let index = remoteParticipantIndex {
+            agentVideoPortraitMode = flag
         }
     }
     
@@ -998,6 +1038,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
         var safeLeadingConstraint = view.leadingAnchor
+        
+        //Network indicator placement
+        var networkIndicatorLeadingConstant: CGFloat = 0
         
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
@@ -1208,11 +1251,26 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 } else { //1 Remote WITHOUT Share screen
                 
                     if !isLandscape {
-                        constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
-                        constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalToConstant: 200))
+                        //Full screen portrait video (with top|safeArea)
+                        if agentVideoPortraitMode {
+                            constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
+                            constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                            
+                            if isAgentMuted {
+                                networkIndicatorLeadingConstant = 40
+                            }
+                        } else {
+                            //4:3 centered video
+                            constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+                            constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 0.66))
+                        }
                     } else {
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                         constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
@@ -1411,7 +1469,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         }
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 9, options: .curveEaseInOut, animations: {
+        constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: {
             //Clear existing constraints
             if !self.existingConstraints.isEmpty {
                 NSLayoutConstraint.deactivate(self.existingConstraints)
