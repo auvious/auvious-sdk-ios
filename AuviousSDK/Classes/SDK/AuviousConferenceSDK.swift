@@ -138,7 +138,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         API.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
             if let _ = json {
                 UserEndpointModule.sharedInstance.startKeepAliveTimer()
-                MQTTModule.sharedInstance.reconnect()
+                MQTTModule2.sharedInstance.reconnect()
                 
                 //Rejoin conference if needed
                 if let rejoinId = self.lastConferenceJoined {
@@ -663,12 +663,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 //Server configuration has already been retrieved
                 AuviousConferenceSDK.sharedInstance.initializeARTCClient()
                 
-                MQTTModule.sharedInstance.configure(endpointId: endpoint)
-                MQTTModule.sharedInstance.conferenceDelegate = self
-                MQTTModule.sharedInstance.connect(onSubscription: {
+                MQTTModule2.sharedInstance.configure(endpointId: endpoint)
+                MQTTModule2.sharedInstance.conferenceDelegate = self
+                MQTTModule2.sharedInstance.connect(onSubscription: {
                     onLoginSuccess(endpointId, conferenceId)
                     //We no longer want the closure to be called
-                    MQTTModule.sharedInstance.clearSubscriptionCallback()
+                    MQTTModule2.sharedInstance.clearSubscriptionCallback()
                 })
             }
         }, onFailure: {error in
@@ -752,7 +752,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Cleanup state
     private func cleanState(){
         UserEndpointModule.sharedInstance.stopKeepAliveTimer()
-        MQTTModule.sharedInstance.disconnect()
+        MQTTModule2.sharedInstance.disconnect()
         self.currentConference = nil
     }
     

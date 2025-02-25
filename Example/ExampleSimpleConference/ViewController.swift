@@ -43,9 +43,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         usernameTextfield.textColor = .white
         passwordTextfield.textColor = .white
         conferenceTextfield.textColor = .white
-    
+
         // hard code values for faster debugging
-        usernameTextfield.text = "fav-xva"
+        usernameTextfield.text = "602-225-260"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -84,7 +84,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             //GENESYS DEV (customer)
             let clientId: String = "customer" //dev.auvious.video/t/vyn-kym <-----
             let baseEndpoint: String = "https://dev.auvious.video/"
-            let mqttEndpoint: String = "wss://dev.auvious.video/ws"
+//            let mqttEndpoint: String = "wss://dev.auvious.video/ws"
+            let mqttEndpoint: String = "dev.auvious.video"
             let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
 
             //GENESYS DEV (test-agent)
