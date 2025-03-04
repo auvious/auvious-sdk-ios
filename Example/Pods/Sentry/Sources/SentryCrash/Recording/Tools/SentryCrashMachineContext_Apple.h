@@ -1,3 +1,4 @@
+// Adapted from: https://github.com/kstenerud/KSCrash
 //
 //  SentryCrashMachineContext_Apple.h
 //
@@ -24,7 +25,6 @@
 // THE SOFTWARE.
 //
 
-
 #ifndef HDR_SentryCrashMachineContext_Apple_h
 #define HDR_SentryCrashMachineContext_Apple_h
 
@@ -34,16 +34,16 @@ extern "C" {
 
 #include <mach/mach_types.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <sys/ucontext.h>
 
 #ifdef __arm64__
-    #define STRUCT_MCONTEXT_L _STRUCT_MCONTEXT64
+#    define STRUCT_MCONTEXT_L _STRUCT_MCONTEXT64
 #else
-    #define STRUCT_MCONTEXT_L _STRUCT_MCONTEXT
+#    define STRUCT_MCONTEXT_L _STRUCT_MCONTEXT
 #endif
 
-typedef struct SentryCrashMachineContext
-{
+typedef struct SentryCrashMachineContext {
     thread_t thisThread;
     thread_t allThreads[100];
     int threadCount;
@@ -54,6 +54,7 @@ typedef struct SentryCrashMachineContext
     STRUCT_MCONTEXT_L machineContext;
 } SentryCrashMachineContext;
 
+static const size_t sentrycrashmc_contextSize = sizeof(SentryCrashMachineContext);
 
 #ifdef __cplusplus
 }

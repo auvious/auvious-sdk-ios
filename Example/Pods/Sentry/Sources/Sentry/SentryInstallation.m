@@ -1,57 +1,87 @@
-//
-//  SentryCrashInstallation.m
-//  Sentry
-//
-//  Created by Daniel Griesser on 10/05/2017.
-//  Copyright © 2017 Sentry. All rights reserved.
-//
-
-#if __has_include(<Sentry/Sentry.h>)
-
-#import <Sentry/SentryDefines.h>
-#import <Sentry/SentryInstallation.h>
-#import <Sentry/SentryCrashReportSink.h>
-#import <Sentry/SentryLog.h>
-
-#import <Sentry/SentryCrash.h>
-#import <Sentry/SentryCrashInstallation+Private.h>
-
-#else
-#import "SentryDefines.h"
 #import "SentryInstallation.h"
-#import "SentryCrashReportSink.h"
+#import "SentryDefines.h"
+#import "SentryDependencyContainer.h"
+#import "SentryDispatchQueueWrapper.h"
 #import "SentryLog.h"
-
-#import "SentryCrash.h"
-#import "SentryCrashInstallation+Private.h"
-#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface SentryInstallation ()
+@property (class, nonatomic, readonly)
+    NSMutableDictionary<NSString *, NSString *> *installationStringsByCacheDirectoryPaths;
+
+@end
+
 @implementation SentryInstallation
 
-- (id)init {
-    return [super initWithRequiredProperties:[NSArray new]];
++ (NSMutableDictionary<NSString *, NSString *> *)installationStringsByCacheDirectoryPaths
+{
+    static dispatch_once_t once;
+    static NSMutableDictionary *dictionary;
+
+    dispatch_once(&once, ^{ dictionary = [NSMutableDictionary dictionary]; });
+    return dictionary;
 }
 
-- (id<SentryCrashReportFilter>)sink {
-    return [[SentryCrashReportSink alloc] init];
-}
++ (NSString *)idWithCacheDirectoryPath:(NSString *)cacheDirectoryPath
+{
+    @synchronized(self) {
+        NSString *installationString
+            = self.installationStringsByCacheDirectoryPaths[cacheDirectoryPath];
 
-- (void)sendAllReports {
-    [self sendAllReportsWithCompletion:NULL];
-}
-
-- (void)sendAllReportsWithCompletion:(SentryCrashReportFilterCompletion)onCompletion {
-    [super sendAllReportsWithCompletion:^(NSArray *filteredReports, BOOL completed, NSError *error) {
-        if (nil != error) {
-            [SentryLog logWithMessage:error.localizedDescription andLevel:kSentryLogLevelError];
+        if (nil != installationString) {
+            return installationString;
         }
-        [SentryLog logWithMessage:[NSString stringWithFormat:@"Sent %lu crash report(s)", (unsigned long)filteredReports.count] andLevel:kSentryLogLevelDebug];
-        if (completed && onCompletion) {
-            onCompletion(filteredReports, completed, error);
+
+        installationString =
+            [SentryInstallation idWithCacheDirectoryPathNonCached:cacheDirectoryPath];
+
+        if (installationString == nil) {
+            installationString = [NSUUID UUID].UUIDString;
+
+            NSData *installationStringData =
+                [installationString dataUsingEncoding:NSUTF8StringEncoding];
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+
+            NSString *installationFilePath =
+                [SentryInstallation installationFilePath:cacheDirectoryPath];
+
+            if (![fileManager createFileAtPath:installationFilePath
+                                      contents:installationStringData
+                                    attributes:nil]) {
+                SENTRY_LOG_ERROR(
+                    @"Failed to store installationID file at path %@", installationFilePath);
+            }
         }
+
+        self.installationStringsByCacheDirectoryPaths[cacheDirectoryPath] = installationString;
+        return installationString;
+    }
+}
+
++ (nullable NSString *)idWithCacheDirectoryPathNonCached:(NSString *)cacheDirectoryPath
+{
+    NSString *installationFilePath = [SentryInstallation installationFilePath:cacheDirectoryPath];
+
+    NSData *installationData = [NSData dataWithContentsOfFile:installationFilePath];
+
+    if (installationData != nil) {
+        return [[NSString alloc] initWithData:installationData encoding:NSUTF8StringEncoding];
+    } else {
+        return nil;
+    }
+}
+
++ (void)cacheIDAsyncWithCacheDirectoryPath:(NSString *)cacheDirectoryPath
+{
+    [SentryDependencyContainer.sharedInstance.dispatchQueueWrapper dispatchAsyncWithBlock:^{
+        [SentryInstallation idWithCacheDirectoryPath:cacheDirectoryPath];
     }];
+}
+
++ (NSString *)installationFilePath:(NSString *)cacheDirectoryPath
+{
+    return [cacheDirectoryPath stringByAppendingPathComponent:@"INSTALLATION"];
 }
 
 @end

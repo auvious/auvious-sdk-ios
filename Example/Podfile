@@ -1,7 +1,8 @@
 platform :ios, '13.0'
 
+#source 'https://cdn.cocoapods.org/'
+source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/auvious/CocoaPodSpecs.git'
-source 'https://cdn.cocoapods.org/'
 
 use_frameworks!
 
@@ -11,7 +12,7 @@ target 'ExampleConference' do
   pod 'SPPermissions/Camera', '~> 4.1'
   pod 'SPPermissions/Microphone', '~> 4.1'
   pod 'BEMCheckBox', '~> 1.4'
-  pod 'Sentry', '~> 4.4'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
 end
 
 target 'ExampleCall' do
@@ -20,17 +21,17 @@ target 'ExampleCall' do
   pod 'SPPermissions/Camera', '~> 4.1'
   pod 'SPPermissions/Microphone', '~> 4.1'
   pod 'BEMCheckBox', '~> 1.4'
-  pod 'Sentry', '~> 4.4'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
 end
 
 target 'ExampleSimpleCall' do
   pod 'AuviousSDK', :path => '../'
-  pod 'Sentry', '~> 4.4'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
 end
 
 target 'ExampleSimpleConference' do
   pod 'AuviousSDK', :path => '../'
-  pod 'Sentry', '~> 4.4'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
 end
 
 post_install do |installer|

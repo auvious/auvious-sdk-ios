@@ -19,9 +19,9 @@ PODS:
     - MQTTClient/Min
     - SocketRocket
   - MqttCocoaAsyncSocket (1.0.8)
-  - Sentry (4.5.0):
-    - Sentry/Core (= 4.5.0)
-  - Sentry/Core (4.5.0)
+  - Sentry (8.46.0):
+    - Sentry/Core (= 8.46.0)
+  - Sentry/Core (8.46.0)
   - SocketRocket (0.5.1)
   - SPPermissions/Camera (4.1.4):
     - SPPermissions/Core
@@ -35,7 +35,7 @@ PODS:
 DEPENDENCIES:
   - AuviousSDK (from `../`)
   - BEMCheckBox (~> 1.4)
-  - Sentry (~> 4.4)
+  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `8.46.0`)
   - SPPermissions/Camera (~> 4.1)
   - SPPermissions/Microphone (~> 4.1)
   - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
@@ -43,13 +43,13 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/auvious/CocoaPodSpecs.git:
     - AuviousGoogleWebRTC
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - Alamofire
+  trunk:
     - BEMCheckBox
     - CocoaMQTT
     - MQTTClient
     - MqttCocoaAsyncSocket
-    - Sentry
     - SocketRocket
     - SPPermissions
     - Starscream
@@ -58,11 +58,17 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   AuviousSDK:
     :path: "../"
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 8.46.0
   SVProgressHUD:
     :branch: patch-1
     :git: https://github.com/mmdock/SVProgressHUD.git
 
 CHECKOUT OPTIONS:
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 8.46.0
   SVProgressHUD:
     :commit: 41afba447103c44c55482db1174569172607c1e6
     :git: https://github.com/mmdock/SVProgressHUD.git
@@ -75,13 +81,13 @@ SPEC CHECKSUMS:
   CocoaMQTT: 1f206228b29318eabdacad0c2e4e88575922c27a
   MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
   MqttCocoaAsyncSocket: 77d3b74f76228dd5a05d1f9526eab101d415b30c
-  Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
+  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
   SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
   Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
 
-PODFILE CHECKSUM: f9ac09f9e81a24f530a94a674db1aa12e334fc12
+PODFILE CHECKSUM: 37f970597fc7479f276552caec235ef107ef5835
 
 COCOAPODS: 1.13.0
