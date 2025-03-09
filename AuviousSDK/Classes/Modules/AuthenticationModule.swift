@@ -35,7 +35,7 @@ internal class AuthenticationModule {
         
         let loginRequest = LoginRequest(clientId: ServerConfiguration.clientId, username: username, password: password, params: params)
         
-        API.sharedInstance.loginUser(loginRequest, onSuccess: {(json) in
+        API2.sharedInstance.loginUser(loginRequest, onSuccess: {(json) in
             if let data = json {
                 self.loginResponse = LoginResponse(fromJson: data)
                 

@@ -45,7 +45,7 @@ internal class UserEndpointModule {
     internal func createEndpoint(newEndpointId: String, userId: String, onSuccess: @escaping (String)->(), onFailure: @escaping (Error)->()){
         let ceRequest = CreateEndpointRequest(keepAliveSeconds: Int(self.keepAliveSeconds), userEndpointId: newEndpointId, userId: userId)
         
-        API.sharedInstance.createEndpoint(ceRequest, onSuccess: {(json) in
+        API2.sharedInstance.createEndpoint(ceRequest, onSuccess: {(json) in
             
             if let data = json {
                 self.userEndpointId = data["id"].stringValue
