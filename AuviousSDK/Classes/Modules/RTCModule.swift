@@ -455,7 +455,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     private func invokeAnswer(callId: String, sdpAnswer: String, userEndpointId: String, userId: String, container: RTCPeerConnectionContainer) {
         let object = CallAnswerRequest(callId: callId, sdpAnswer: sdpAnswer, userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.answerCall(object, onSuccess: {(json) in
+        API2.sharedInstance.answerCall(object, onSuccess: {(json) in
             
             if let _ = json {
                 
@@ -468,7 +468,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                     }
                     
                     let iceCandidatesRequest = CallIceCandidatesRequest(callId: callId, candidates: candidatesArray, userEndpointId: userEndpointId, userId: userId)
-                    API.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
+                    API2.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
                         
                         if let _ = json {
                             //success
@@ -554,7 +554,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                     }
                     
                     let iceCandidatesRequest = CallIceCandidatesRequest(callId: event.callId, candidates: candidatesArray, userEndpointId: userEndpointId, userId: userId)
-                    API.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
+                    API2.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
                         
                         if let _ = json {
                             //success

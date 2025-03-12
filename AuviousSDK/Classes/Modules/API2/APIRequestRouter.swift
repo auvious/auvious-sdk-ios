@@ -253,7 +253,7 @@ enum Router: URLRequestConvertible2 {
         
         //Standard authentication
         if sendAuthenticationHeader {
-            urlRequest.addValue("Bearer " + API.sharedInstance.authenticationToken, forHTTPHeaderField: "Authorization")
+            urlRequest.addValue("Bearer " + API2.sharedInstance.authenticationToken, forHTTPHeaderField: "Authorization")
         }
         
         //Basic authentication
@@ -269,19 +269,22 @@ enum Router: URLRequestConvertible2 {
         }
         
         // Encoding URL Request
-//        urlRequest = try Alamofire.URLEncoding.default.encode(urlRequest, with: queryParams)
         if useFormEncoding {
-//            urlRequest.httpBody = try Alamofire.URLEncoding.default.encode(urlRequest, with: bodyParams).httpBody
-            urlRequest.httpBody = encodeWithURLComponents(bodyParams!).data(using: .utf8)
+            if let params = bodyParams {
+                urlRequest.httpBody = encodeWithURLComponents(params).data(using: .utf8)
+            }
         } else {
-            do {
-                urlRequest.httpBody = try JSONSerialization.data(withJSONObject: bodyParams)
+            if let params = bodyParams {
+                do {
+                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: params)
+                }
             }
         }
-        
+        os_log("NEW REQUEST ENCODED %@", log: Log.api, type: .debug, urlRequest.debugDescription)
         let allowedCharacterSet = (CharacterSet(charactersIn: ",").inverted)
         
         urlRequest.url = URL(string: urlRequest.url!.absoluteString.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)!)
+        
         
         return urlRequest
     }

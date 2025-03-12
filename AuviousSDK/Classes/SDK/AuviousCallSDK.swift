@@ -128,7 +128,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         
         //Check if endpoint is alive
         UserEndpointModule.sharedInstance.keepAliveRequest = KeepAliveRequest(userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
+        API2.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
             if let _ = json {
                 UserEndpointModule.sharedInstance.startKeepAliveTimer()
                 MQTTModule.sharedInstance.reconnect()
@@ -340,7 +340,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let object = CallRingingRequest(callId: callId, userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.callRinging(object, onSuccess: { (json) in
+        API2.sharedInstance.callRinging(object, onSuccess: { (json) in
             
             if let _ = json {
                 //success
@@ -374,7 +374,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let request = CallRejectRequest(callId: callEvent.callId, reason: reason, userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.rejectCall(request, onSuccess: {(json) in
+        API2.sharedInstance.rejectCall(request, onSuccess: {(json) in
             
             if let _ = json {
                 //success
@@ -395,7 +395,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let request = CallCancelRequest(callId: callId, userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.callCancel(request, onSuccess: {(json) in
+        API2.sharedInstance.callCancel(request, onSuccess: {(json) in
             
             if let _ = json {
                 self.rtcClient.handleTerminatedCall(callId)
@@ -416,7 +416,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let request = CallHangupRequest(callId: callId, reason: "No reason", userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.callHangup(request, onSuccess: {(json) in
+        API2.sharedInstance.callHangup(request, onSuccess: {(json) in
             
             //Close all connections
             if let _ = json {
@@ -441,15 +441,15 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let object = SnapshotCameraRQRPRequest(info: result.1, snapshotCameraRequestId: request.snapshotCameraRequestId, succeeded: result.0, userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.cameraRequestRespond(object, onSuccess: {json in
-            
-            if let _ = json {
-                //success
-            }
-            
-        }, onFailure: {error in
-            self.delegate?.auviousSDK(onError: .internalError)
-        })
+//        API2.sharedInstance.cameraRequestRespond(object, onSuccess: {json in
+//            
+//            if let _ = json {
+//                //success
+//            }
+//            
+//        }, onFailure: {error in
+//            self.delegate?.auviousSDK(onError: .internalError)
+//        })
     }
     
     internal func uploadSnapshot(request: SnapshotRequestedEvent, snapshot: UIImage) throws {
@@ -462,11 +462,11 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let upload = SnapshotUploadRequest(snapshot: snapshot, id: request.snapshotId, suffix: "jpeg", type: request.snapshotType, userEndpointId:  userEndpointId, userId: userId)
-        API.sharedInstance.uploadSnapshot(upload, onSuccess: {
-            //success
-        }, onFailure: {error in
-            //error
-        })
+//        API2.sharedInstance.uploadSnapshot(upload, onSuccess: {
+//            //success
+//        }, onFailure: {error in
+//            //error
+//        })
     }
     
     //MARK: MQTTSnapshotDelegate
@@ -585,7 +585,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         }
         
         let callRequest = CallRequest(callId: streamId, sdpOffer: sdpOffer, target: target, userEndpointId: endpointId, userId: userId, sipHeaders: AuviousCallSDK.sharedInstance.sipHeaders)
-        API.sharedInstance.call(callRequest, onSuccess: { (json) in
+        API2.sharedInstance.call(callRequest, onSuccess: { (json) in
             
             if let _ = json {
                 //success

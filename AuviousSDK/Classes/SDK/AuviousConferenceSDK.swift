@@ -135,7 +135,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         
         //Check if endpoint is alive
         UserEndpointModule.sharedInstance.keepAliveRequest = KeepAliveRequest(userEndpointId: userEndpointId, userId: userId)
-        API.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
+        API2.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
             if let _ = json {
                 UserEndpointModule.sharedInstance.startKeepAliveTimer()
                 MQTTModule2.sharedInstance.reconnect()
@@ -302,7 +302,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let usRequest = UnpublishStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.unpublishStream(usRequest, onSuccess: {(json) in
+        API2.sharedInstance.unpublishStream(usRequest, onSuccess: {(json) in
             
             if let _ = json {
                 self.delegate?.auviousSDK(didChangeState: .localStreamDisconnected, streamId: streamId, streamType: streamType, endpointId:endpointId)
@@ -322,7 +322,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 if peerConnection.isLocal == true {
                     if let conference = currentConference {
                         let usRequest = UnpublishStreamRequest(conferenceId: conference.id, streamId: peerConnection.streamId, userEndpointId: peerConnection.endpointId, userId: peerConnection.userId)
-                        API.sharedInstance.unpublishStream(usRequest, onSuccess: {(json) in
+                        API2.sharedInstance.unpublishStream(usRequest, onSuccess: {(json) in
                             
                             if let _ = json {
                                 //success
@@ -384,7 +384,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.delegate?.auviousSDK(didChangeState: .remoteStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:remoteEndpointId)
         
         let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
-        API.sharedInstance.stopViewStream(svsRequest, onSuccess: {(response) in
+        API2.sharedInstance.stopViewStream(svsRequest, onSuccess: {(response) in
             
             if let _ = response {
                 self.delegate?.auviousSDK(didChangeState: .remoteStreamDisconnected, streamId: streamId, streamType: streamType, endpointId:remoteEndpointId)
@@ -414,7 +414,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                     
                     if let _ = UserEndpointModule.sharedInstance.userEndpointId, let conference = currentConference, let viewerId = self.viewerIdMap[peerConnection.streamId] {
                         let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: peerConnection.streamId, userEndpointId: peerConnection.endpointId, userId: peerConnection.userId, viewerId: viewerId)
-                        API.sharedInstance.stopViewStream(svsRequest, onSuccess: {(response) in
+                        API2.sharedInstance.stopViewStream(svsRequest, onSuccess: {(response) in
                             //success
                         }, onFailure: {(error) in
                             let streamId = String(describing: peerConnection.streamId)
@@ -465,7 +465,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let request = CreateConferenceRequest(conferenceId: conferenceId, creatorId: userId, creatorEndpoint: endpointId, mode: mode)
-        API.sharedInstance.createConference(request, onSuccess: {(json) in
+        API2.sharedInstance.createConference(request, onSuccess: {(json) in
             if let data = json {
                 let conference = ConferenceSummary(fromJson: data)
                 onSuccess(conference)
@@ -495,12 +495,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let request = JoinConferenceRequest(conferenceId: conferenceId, userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.joinConference(request, onSuccess: {(json) in
+        API2.sharedInstance.joinConference(request, onSuccess: {(json) in
             if json != nil {
                 
                 os_log("Joined conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                 //Retrieve and store the current conference state
-                API.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
+                API2.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
                         
                         self.currentConference = ConferenceSimpleView(fromJson: data)
@@ -568,7 +568,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: "", userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.leaveConference(lcRequest, onSuccess: {(json) in
+        API2.sharedInstance.leaveConference(lcRequest, onSuccess: {(json) in
             
             if let _ = json {
                 self.currentConference = nil
@@ -619,7 +619,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let ecRequest = EndConferenceRequest(conferenceId: conferenceId, reason: "", userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.endConference(ecRequest, onSuccess: {(json) in
+        API2.sharedInstance.endConference(ecRequest, onSuccess: {(json) in
             
             if let _ = json {
                 self.currentConference = nil
@@ -802,7 +802,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         let request = UpdateMetadataRequest(conferenceId: conferenceId, streamId: streamId, userEndpointId: endpointId, operation: operation, type: type, value: isEnabled ? "false" : "true")
         
         //Call the api
-        API.sharedInstance.updateConferenceMetadata(request, onSuccess: {json in
+        API2.sharedInstance.updateConferenceMetadata(request, onSuccess: {json in
             if let _ = json {
                 os_log("toggleLocalStream() success API", log: Log.conferenceSDK, type: .debug)
                 
@@ -1048,7 +1048,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         
         let psRequest:PublishStreamRequest = PublishStreamRequest(conferenceId: conference.id, streamType: streamType, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: endpointId, userId: userId)
         
-        API.sharedInstance.publishStream(psRequest, onSuccess:{(conferencePublishResult) in
+        API2.sharedInstance.publishStream(psRequest, onSuccess:{(conferencePublishResult) in
             
             if let data = conferencePublishResult {
                 let response = PublishStreamResponse(fromJson: data)
@@ -1077,7 +1077,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.viewerIdMap[streamId] = viewerId
         let vsRequest:ViewStreamRequest = ViewStreamRequest(conferenceId: conference.id, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: viewerId)
         
-        API.sharedInstance.viewStream(vsRequest, onSuccess:{(conferenceViewResult) in
+        API2.sharedInstance.viewStream(vsRequest, onSuccess:{(conferenceViewResult) in
             
             if let data = conferenceViewResult {
                 let response = ViewStreamResponse(fromJson: data)
@@ -1115,7 +1115,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let psicRequest = PublishStreamIceCandidatesRequest(conferenceId: conference.id, candidates: candidatesArray, streamId: streamId, userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.addPublishStreamIceCandidates(psicRequest, onSuccess: {(json) in
+        API2.sharedInstance.addPublishStreamIceCandidates(psicRequest, onSuccess: {(json) in
             
             self.delegate?.auviousSDK(didChangeState: .localStreamConnected, streamId: streamId, streamType: streamType, endpointId:endpointId)
             
@@ -1144,7 +1144,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         let vsicRequest = ViewStreamIceCandidatesRequest(conferenceId: conference.id, candidates: candidatesArray, streamId: streamId, userEndpointId: endpointId, userId: userId, viewerId: viewerId)
-        API.sharedInstance.addViewStreamIceCandidates(vsicRequest, onSuccess: {(json) in
+        API2.sharedInstance.addViewStreamIceCandidates(vsicRequest, onSuccess: {(json) in
             
             self.delegate?.auviousSDK(didChangeState: .remoteStreamConnected, streamId: streamId, streamType: streamType, endpointId:endpointId)
             

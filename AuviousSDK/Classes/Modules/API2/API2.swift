@@ -33,6 +33,11 @@ internal final class API2 {
     var tokenRefreshTimer: Timer!
     var authenticationToken = ""
     var refreshToken: String?
+    var authTokenExpiresIn: Int? {
+        didSet {
+            startTokenRefreshTimer()
+        }
+    }
     
     //Token refresh related
     var isRefreshing = false
@@ -62,6 +67,19 @@ internal final class API2 {
     }
     
     // MARK: Token Refresh
+    
+    func startTokenRefreshTimer() {
+        var executeIn: Int = 3
+        if authTokenExpiresIn! - 40 > executeIn {
+            executeIn = authTokenExpiresIn! - 40
+        }
+        
+        tokenRefreshTimer = Timer.scheduledTimer(timeInterval: Double(executeIn), target: self, selector: #selector(self.handleTokenRefresh), userInfo: nil, repeats: false)
+    }
+    
+    @objc func handleTokenRefresh() {
+        self.refreshToken()
+    }
     
     //Refreshes the OAuth token and consumes pending transactions
     private func refreshToken(_ completion: ((Bool) -> Void)? = nil) {
@@ -120,7 +138,7 @@ internal final class API2 {
         
         do {
             let request = try transaction.request.asURLRequest()
-    
+            print("FIRING REQUEST \(request.debugDescription)")
             let task = session.dataTask(with: request) { (data, response, error) in
                 var responseCode = 0
                 if let httpResponse = response as? HTTPURLResponse {
@@ -171,8 +189,7 @@ internal final class API2 {
                         
                         do {
                             let jsonResponse = try JSON(data: responseData)
-                            //Logger.log(level: .debug, message: "RESPONSE SUCCESS \(jsonResponse)")
-                            //print("RESPONSE SUCCESS \(jsonResponse)")
+                            print("RESPONSE SUCCESS \(jsonResponse)")
                             
                             transaction.onSuccess(jsonResponse)
                             return

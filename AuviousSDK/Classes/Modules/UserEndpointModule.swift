@@ -65,7 +65,7 @@ internal class UserEndpointModule {
     
     internal func destroyEndpoint(endpointId: String, userId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         let uRequest = UnregisterEndpointRequest(reason: "User logout", userEndpointId: endpointId, userId: userId)
-        API.sharedInstance.unregisterEndpoint(uRequest, onSuccess: {(json) in
+        API2.sharedInstance.unregisterEndpoint(uRequest, onSuccess: {(json) in
             
             self.stopKeepAliveTimer()
             onSuccess()
@@ -107,7 +107,7 @@ internal class UserEndpointModule {
     
     //Fires the keep alive rest call
     private func fireKeepAliveRequest(_ request: KeepAliveRequest) {
-        API.sharedInstance.keepAlive(request, onSuccess: {(json) in
+        API2.sharedInstance.keepAlive(request, onSuccess: {(json) in
             if let _ = json {
                 //os_log("Keep Alive Success", log: Log.auth, type: .debug)
             }

@@ -48,7 +48,7 @@ internal class AuthenticationModule {
                     UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
                         
                         //Obtain RTC server configuration
-                        API.sharedInstance.getIceServers(onSuccess: {json in
+                        API2.sharedInstance.getIceServers(onSuccess: {json in
                             for iceServer in json!["iceServers"].array! {
                                 let urlStrings = iceServer["urls"].array?.map({ (url) -> String in
                                     url.stringValue

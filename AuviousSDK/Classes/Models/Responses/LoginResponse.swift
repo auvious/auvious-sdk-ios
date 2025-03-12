@@ -37,9 +37,9 @@ internal final class LoginResponse {
         userId = json["sub"].stringValue
         deviceId = json["DEVICE_ID"].stringValue
         
-        API.sharedInstance.authenticationToken = accessToken
-        API.sharedInstance.refreshToken = refreshToken
-        API.sharedInstance.authTokenExpiresIn = expiresIn
+        API2.sharedInstance.authenticationToken = accessToken
+        API2.sharedInstance.refreshToken = refreshToken
+        API2.sharedInstance.authTokenExpiresIn = expiresIn
         ServerConfiguration.mqttUser = userId
         ServerConfiguration.mqttPass = accessToken
         
