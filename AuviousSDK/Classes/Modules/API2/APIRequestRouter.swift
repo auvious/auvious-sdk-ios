@@ -12,9 +12,43 @@ enum Router: URLRequestConvertible2 {
     
     //Authentication
     case loginUserOAuth(object: LoginRequest)
+    case refreshToken(token: String)
+    
+    //IceSupport
+    case getIceServers(Void)
+    
+    // Calls
+    case call(object: CallRequest)
+    case answerCall(object: CallAnswerRequest)
+    case rejectCall(object: CallRejectRequest)
+    case callRinging(object: CallRingingRequest)
+    case callHangup(object: CallHangupRequest)
+    case callCancel(object: CallCancelRequest)
+    case addCallIceCandidates(object: CallIceCandidatesRequest)
+    
+    //Conferences
+    case getConferences(Void)
+    case getConferenceDetails(id: String)
+    case getConferenceSimpleView(id: String)
+    case getConferenceSummary(id: String)
+    case addPublishStreamIceCandidates(object: PublishStreamIceCandidatesRequest)
+    case addViewStreamIceCandidates(object: ViewStreamIceCandidatesRequest)
+    case createConference(object: CreateConferenceRequest)
+    case endConference(object: EndConferenceRequest)
+    case joinConference(object: JoinConferenceRequest)
+    case leaveConference(object: LeaveConferenceRequest)
+    case publishStream(object: PublishStreamRequest)
+    case stopViewStream(object: StopViewStreamRequest)
+    case unpublishStream(object: UnpublishStreamRequest)
+    case viewStream(object: ViewStreamRequest)
+    case updateConferenceMetadata(object: UpdateMetadataRequest)
     
     //Endpoints
+    case getEndpoints(Void)
     case createEndpoint(object: CreateEndpointRequest)
+    case getEndpointDetails(id: String)
+    case keepAlive(object: KeepAliveRequest)
+    case unregisterEndpoint(object: UnregisterEndpointRequest)
     
     func encodeWithURLComponents(_ parameters: [String: Any]) -> String {
         var components = URLComponents()
@@ -48,7 +82,7 @@ enum Router: URLRequestConvertible2 {
         }
         
         switch self {
-            //Authentication
+        //Authentication
         case .loginUserOAuth(let object):
             sendBasicAuthHeader = true
             sendAuthenticationHeader = false
@@ -64,11 +98,148 @@ enum Router: URLRequestConvertible2 {
                     bodyParams?[key] = value
                 }
             }
+        
+        case .refreshToken(let token):
+            sendBasicAuthHeader = true
+            sendAuthenticationHeader = false
+            useFormEncoding = true
+            
+            baseURL = ServerConfiguration.baseMeeting
+            query = "security/oauth/token"
+            httpMethod = "POST"
+            bodyParams = [:]
+            bodyParams?["refresh_token"] = token as AnyObject?
+            bodyParams?["grant_type"] = "refresh_token" as AnyObject?
+            
+        //IceSupport
+        case .getIceServers():
+            query = "rtc-api/iceServers"
+            
+        //Calls
+        case .call(let object):
+            query = "rtc-api/calls/call"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+        
+        case .answerCall(let object):
+            query = "rtc-api/calls/answer"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+        
+        case .rejectCall(let object):
+            query = "rtc-api/calls/reject"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .callRinging(let object):
+            query = "rtc-api/calls/ringing"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .callHangup(let object):
+            query = "rtc-api/calls/hangup"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .callCancel(let object):
+            query = "rtc-api/calls/cancel"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .addCallIceCandidates(let object):
+            query = "rtc-api/calls/addIceCandidates"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        //Conferences
+        case .getConferences():
+            query = "rtc-api/conferences"
+            
+        case .getConferenceDetails(let id):
+            query = "rtc-api/conferences/" + id
+            
+        case .getConferenceSimpleView(let id):
+            query = "rtc-api/conferences/" + id + "/simpleView"
+            
+        case .getConferenceSummary(let id):
+            query = "rtc-api/conferences/" + id + "/summary"
+            
+        case .addPublishStreamIceCandidates(let object):
+            query = "rtc-api/conferences/addPublishStreamIceCandidates"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .addViewStreamIceCandidates(let object):
+            query = "rtc-api/conferences/addViewStreamIceCandidates"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .createConference(let object):
+            query = "rtc-api/conferences/create"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .endConference(let object):
+            query = "rtc-api/conferences/end"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .joinConference(let object):
+            query = "rtc-api/conferences/join"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+        
+        case .leaveConference(let object):
+            query = "rtc-api/conferences/leave"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .publishStream(let object):
+            query = "rtc-api/conferences/publishStream"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .stopViewStream(let object):
+            query = "rtc-api/conferences/stopViewStream"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .unpublishStream(let object):
+            query = "rtc-api/conferences/unpublishStream"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .viewStream(let object):
+            query = "rtc-api/conferences/viewStream"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+        
+        case .updateConferenceMetadata(let object):
+            query = "rtc-api/conferences/updateMetadata"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        //Endpoints
+        case .getEndpoints():
+            query = "rtc-api/users/endpoints"
             
         case .createEndpoint(let object):
             query = "rtc-api/users/endpoints/register"
             httpMethod = "POST"
             bodyParams = [:]
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .getEndpointDetails(let id):
+            query = "rtc-api/users/endpoints/" + id
+            
+        case .keepAlive(let object):
+            query = "rtc-api/users/endpoints/keepalive"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary() as [String : AnyObject]
+            
+        case .unregisterEndpoint(let object):
+            query = "rtc-api/users/endpoints/unregister"
+            httpMethod = "POST"
             bodyParams = object.toDictionary() as [String : AnyObject]
         }
         

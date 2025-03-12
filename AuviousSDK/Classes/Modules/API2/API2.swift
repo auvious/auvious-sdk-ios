@@ -205,8 +205,153 @@ internal final class API2 {
         fireRequest(transaction)
     }
     
+    //Token refresh
+    func refreshAuthToken(_ token: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.refreshToken(token: token), onSuccess, onFailure, false)
+        fireRequest(transaction)
+    }
+    
+    //IceSupport
+    func getIceServers(onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getIceServers(()), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    //Calls
+    func call(_ object: CallRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.call(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func answerCall(_ object: CallAnswerRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.answerCall(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func rejectCall(_ object: CallRejectRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.rejectCall(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func callRinging(_ object: CallRingingRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.callRinging(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func callHangup(_ object: CallHangupRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.callHangup(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func callCancel(_ object: CallCancelRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.callCancel(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func addCallIceCandidates(_ object: CallIceCandidatesRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.addCallIceCandidates(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    //Conferences
+    func getConferences(onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getConferences(()), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func getConferenceDetails(_ id: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getConferenceDetails(id: id), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func getConferenceSimpleView(_ id: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getConferenceSimpleView(id: id), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func getConferenceSummary(_ id: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getConferenceSummary(id: id), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func addPublishStreamIceCandidates(_ object: PublishStreamIceCandidatesRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.addPublishStreamIceCandidates(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func addViewStreamIceCandidates(_ object: ViewStreamIceCandidatesRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.addViewStreamIceCandidates(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func createConference(_ object: CreateConferenceRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.createConference(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func endConference(_ object: EndConferenceRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.endConference(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func joinConference(_ object: JoinConferenceRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.joinConference(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func leaveConference(_ object: LeaveConferenceRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.leaveConference(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func publishStream(_ object: PublishStreamRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.publishStream(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func stopViewStream(_ object: StopViewStreamRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.stopViewStream(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func unpublishStream(_ object: UnpublishStreamRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.unpublishStream(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func viewStream(_ object: ViewStreamRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.viewStream(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func updateConferenceMetadata(_ object: UpdateMetadataRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.updateConferenceMetadata(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    //Endpoints
+    func getEndpoints(onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getEndpoints(()), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
     func createEndpoint(_ object: CreateEndpointRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
         let transaction: TransactionElementNew = (Router.createEndpoint(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func getEndpointDetails(_ id: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getEndpointDetails(id:id), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func keepAlive(_ object: KeepAliveRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.keepAlive(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction)
+    }
+    
+    func unregisterEndpoint(_ object: UnregisterEndpointRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.unregisterEndpoint(object: object), onSuccess, onFailure, true)
         fireRequest(transaction)
     }
 }
