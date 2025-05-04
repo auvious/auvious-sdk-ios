@@ -59,14 +59,14 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func reconnect() {
-        os_log("MQTT reconnect called", log: Log.mqtt, type: .debug)
+        os_log("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
         switch mqtt.connState {
         case .connected:
-            os_log("MQTT session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
+            os_log("MQTT2 session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
         case .connecting:
-            os_log("MQTT session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
+            os_log("MQTT2 session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
         default:
-            os_log("MQTT reconnecting", log: Log.mqtt, type: .debug)
+            os_log("MQTT2 reconnecting", log: Log.mqtt, type: .debug)
             _ = mqtt.connect()
         }
     }
@@ -204,6 +204,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
         print("MQTT2 mqttDidDisconnect")
+        self.reconnect()
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {

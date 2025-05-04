@@ -83,39 +83,40 @@ internal final class API2 {
     
     //Refreshes the OAuth token and consumes pending transactions
     private func refreshToken(_ completion: ((Bool) -> Void)? = nil) {
-//        guard let refreshToken = refreshToken else {
-//            refreshTokenDidFail({ (_) in
-//                completion?(false)
-//            })
-//            
-//            return
-//        }
-//        
-//        self.isRefreshing = true
-//        self.refreshAuthToken(refreshToken, onSuccess: { (json) -> () in
-//            self.isRefreshing = false
-//            self.refreshTokenAttempts = 0
-//            
-//            //Keep a copy of the new tokens
-//            if let data = json {
-//                self.authenticationToken = data["access_token"].stringValue
-//                self.refreshToken = data["refresh_token"].stringValue
-//                self.authTokenExpiresIn = data["expires_in"].intValue
-//                
-//                //Trigger a reconnect by disconnecting
-//                ServerConfiguration.mqttPass = self.authenticationToken
-//                MQTTModule.sharedInstance.disconnect()
-//                
-//                self.consumePendingTransactions()
-//                completion?(true)
-//            }
-//            
-//            completion?(false)
-//        }, onFailure: { (error)  -> () in
-//            self.refreshTokenDidFail({ (_) in
-//                completion?(false)
-//            })
-//        })
+        guard let refreshToken = refreshToken else {
+            refreshTokenDidFail({ (_) in
+                completion?(false)
+            })
+            
+            return
+        }
+        
+        self.isRefreshing = true
+        self.refreshAuthToken(refreshToken, onSuccess: { (json) -> () in
+            print("REFRESHED TOKEN!")
+            self.isRefreshing = false
+            self.refreshTokenAttempts = 0
+            
+            //Keep a copy of the new tokens
+            if let data = json {
+                self.authenticationToken = data["access_token"].stringValue
+                self.refreshToken = data["refresh_token"].stringValue
+                self.authTokenExpiresIn = data["expires_in"].intValue
+                
+                //Trigger a reconnect by disconnecting
+                ServerConfiguration.mqttPass = self.authenticationToken
+                MQTTModule2.sharedInstance.disconnect()
+                
+                //self.consumePendingTransactions()
+                completion?(true)
+            }
+            
+            completion?(false)
+        }, onFailure: { (error)  -> () in
+            self.refreshTokenDidFail({ (_) in
+                completion?(false)
+            })
+        })
     }
     
     //Refresh token failure handler
