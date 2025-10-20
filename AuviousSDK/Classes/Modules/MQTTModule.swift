@@ -10,21 +10,6 @@ import Foundation
 import SwiftyJSON
 import os
 
-internal protocol MQTTConferenceDelegate {
-    
-    func conferenceMessageReceived(_ object: ConferenceEvent)
-}
-
-internal protocol MQTTCallDelegate {
-    
-    func callMessageReceived(_ object: CallEvent)
-}
-
-internal protocol MQTTSnapshotDelegate {
-    
-    func snapshotMessageReceived(_ object: SnapshotEvent)
-}
-
 internal final class MQTTModule: NSObject, MQTTSessionDelegate {
     
     /// Singleton instance

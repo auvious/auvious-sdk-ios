@@ -1,0 +1,36 @@
+{
+  "name": "CocoaMQTTWebsocket_IOS13",
+  "version": "3.0.7",
+  "summary": "MQTT v3.1.1 client library for iOS and OS X written with Swift 5",
+  "homepage": "https://github.com/emqx/CocoaMQTT",
+  "license": {
+    "type": "MIT"
+  },
+  "authors": {
+    "Feng Lee": "feng@emqtt.io",
+    "CrazyWisdom": "zh.whong@gmail.com",
+    "Alex Yu": "alexyu.dc@gmail.com",
+    "Leeway": "leeway1208@gmail.com"
+  },
+  "swift_versions": "5.0",
+  "requires_arc": true,
+  "platforms": {
+    "osx": "10.12",
+    "ios": "13.0",
+    "tvos": "10.0"
+  },
+  "source": {
+    "git": "https://github.com/jkritikos/CocoaMQTT_Fixed.git",
+    "tag": "3.0.7"
+  },
+  "source_files": "Source/*.swift",
+  "dependencies": {
+    "Starscream_IOS13": [
+      "4.0.4"
+    ],
+    "MqttCocoaAsyncSocket_IOS13": [
+      "14.0.0"
+    ]
+  },
+  "swift_version": "5.0"
+}

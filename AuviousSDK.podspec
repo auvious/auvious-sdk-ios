@@ -29,7 +29,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.source           = { :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '10.0'
+  s.ios.deployment_target = '13.0'
 
   s.source_files = 'AuviousSDK/Classes/**/*'
   
@@ -41,21 +41,20 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
-  s.dependency 'Alamofire', '~> 4.7'
   s.dependency 'SwiftyJSON', '~> 5.0'
-  s.dependency 'AuviousGoogleWebRTC', '~> 84.4147.2'
-  s.dependency 'MQTTClient/Websocket', '~> 0.15'
-  s.dependency 'SocketRocket', '~> 0.5.1'
-  s.dependency 'CocoaMQTT/WebSockets'
+  s.dependency 'AuviousGoogleWebRTC', '~> 84.4147.4'
+  s.dependency 'CocoaMQTTWebsocket_IOS13'
+  s.dependency 'MqttCocoaAsyncSocket_IOS13', '~> 14.0.0'
+  s.dependency 'Starscream_IOS13', '~> 4.0.4'
+  
   s.swift_versions = '4.2'
   s.pod_target_xcconfig = {
     'ENABLE_BITCODE' => 'NO',
     'GCC_PREPROCESSOR_DEFINITIONS' => 'AUVIOUSSDK',
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) AUVIOUSSDK',
     # Xcode 12 workaround
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
+   # 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
   }
 
-  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' } 
+  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
 end

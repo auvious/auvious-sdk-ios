@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Alamofire
-import SwiftyJSON
+//import Alamofire
+//import SwiftyJSON
 import os
 
 internal class AuthenticationModule {

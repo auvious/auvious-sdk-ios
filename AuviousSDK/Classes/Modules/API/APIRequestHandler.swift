@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Alamofire
+//import Alamofire
 
 class APIRequestHandler: RequestAdapter, RequestRetrier {
     // [Request url: Number of times retried]
@@ -16,7 +16,7 @@ class APIRequestHandler: RequestAdapter, RequestRetrier {
     /// Inspects and adapts the specified `URLRequest` in some manner if necessary and returns the result.
     ///
     /// - parameter urlRequest: The URL request to adapt.
-    ///
+    /// b
     /// - throws: An `Error` if the adaptation encounters an error.
     ///
     /// - returns: The adapted `URLRequest`.

@@ -86,15 +86,15 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             do {
                 try hangupCall(callId: currentCall)
                 UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
-                    MQTTModule.sharedInstance.disconnect()
+                    MQTTModule2.sharedInstance.disconnect()
                     self.endBackgroundTask()
                 }, onFailure: {(error) in
-                    MQTTModule.sharedInstance.disconnect()
+                    MQTTModule2.sharedInstance.disconnect()
                     self.endBackgroundTask()
                 })
             } catch _ {
                 os_log("onApplicationPause - error while trying to hangup current call", log: Log.callSDK, type: .debug)
-                MQTTModule.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnect()
                 self.endBackgroundTask()
             }
         } else {
@@ -103,10 +103,10 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             
             //endpoint unregister + endpoint stop timer + mqtt disconnect
             UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
-                MQTTModule.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnect()
                 self.endBackgroundTask()
             }, onFailure: {(error) in
-                MQTTModule.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnect()
                 self.endBackgroundTask()
             })
         }
@@ -131,7 +131,7 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
         API2.sharedInstance.keepAlive(UserEndpointModule.sharedInstance.keepAliveRequest!, onSuccess: {(json) in
             if let _ = json {
                 UserEndpointModule.sharedInstance.startKeepAliveTimer()
-                MQTTModule.sharedInstance.reconnect()
+                MQTTModule2.sharedInstance.reconnect()
                 os_log("onApplicationResume() - ready for call", log: Log.callSDK, type: .debug)
                 
             } else {
@@ -142,8 +142,8 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
                 
                 os_log("onApplicationResume() - created new endpoint %@", log: Log.callSDK, type: .debug, newEndpointId)
-                MQTTModule.sharedInstance.configure(endpointId: newEndpointId)
-                MQTTModule.sharedInstance.reconnect()
+                MQTTModule2.sharedInstance.configure(endpointId: newEndpointId)
+                MQTTModule2.sharedInstance.reconnect()
                 
             }, onFailure: {(error) in
                 self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
@@ -223,13 +223,13 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
                 //Server configuration has already been retrieved
                 AuviousCallSDK.sharedInstance.initializeARTCClient()
                 
-                MQTTModule.sharedInstance.configure(endpointId: endpoint)
-                MQTTModule.sharedInstance.callDelegate = self
-                MQTTModule.sharedInstance.snapshotDelegate = self
-                MQTTModule.sharedInstance.connect(onSubscription: {
+                MQTTModule2.sharedInstance.configure(endpointId: endpoint)
+                MQTTModule2.sharedInstance.callDelegate = self
+                MQTTModule2.sharedInstance.snapshotDelegate = self
+                MQTTModule2.sharedInstance.connect(onSubscription: {
                     onLoginSuccess(endpointId)
                     //We no longer want the closure to be called
-                    MQTTModule.sharedInstance.clearSubscriptionCallback()
+                    MQTTModule2.sharedInstance.clearSubscriptionCallback()
                 })
             }
             
@@ -257,10 +257,10 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             do {
                 try hangupCall(callId: currentCall)
                 UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
-                    MQTTModule.sharedInstance.disconnect()
+                    MQTTModule2.sharedInstance.disconnect()
                     onSuccess()
                 }, onFailure: {(error) in
-                    MQTTModule.sharedInstance.disconnect()
+                    MQTTModule2.sharedInstance.disconnect()
                     onFailure(error)
                 })
             } catch let error {
@@ -272,10 +272,10 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
             
             //endpoint unregister + endpoint stop timer + mqtt disconnect
             UserEndpointModule.sharedInstance.destroyEndpoint(endpointId: endpointId, userId: userId, onSuccess: {
-                MQTTModule.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnect()
                 onSuccess()
             }, onFailure: {(error) in
-                MQTTModule.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnect()
                 onFailure(error)
             })
         }

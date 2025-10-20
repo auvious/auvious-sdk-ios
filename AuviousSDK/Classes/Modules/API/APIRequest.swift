@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Alamofire
+//import Alamofire
 import os
  
 /// This struct defines all the REST calls, including their path & parameters.
