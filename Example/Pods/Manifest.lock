@@ -79,7 +79,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   AuviousGoogleWebRTC: 146e1bcb5423fbef3796d1e2cd28c7c592ae575a
-  AuviousSDK: 94882c1d7f74bfea7fbdb112d63388354e7d234f
+  AuviousSDK: eedc8393e54ceeb11f50d2a2ee85e9fd8f4ae81d
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   CocoaMQTTWebsocket_IOS13: cb657e8cfc7a0729b58f37a01f4cdf67b2fe259a
   MqttCocoaAsyncSocket_IOS13: a32f9a761890366c28d22a6383e2389ff2a5a312
