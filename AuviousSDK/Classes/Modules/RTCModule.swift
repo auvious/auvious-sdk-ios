@@ -100,6 +100,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     //Default connection constraint, used when instatiating a connection
     private let defaultConnectionConstraint = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: ["DtlsSrtpKeyAgreement": "true"])
     
+    private var screenCapturer: ScreenCapturer!
+    private var localScreenVideoSource: RTCVideoSource?
+    private var localScreenVideoTrack: RTCVideoTrack?
+    
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
     
@@ -274,8 +278,28 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             return
         }
         
-        let localStream = createLocalMediaStream(type: type, streamId: streamId)
-        peerConnection.add(localStream)
+        if type == .screen {
+            let screenStream = createScreenSharingStream(streamId: streamId)
+            peerConnection.add(screenStream)
+        } else {
+            let localStream = createLocalMediaStream(type: type, streamId: streamId)
+            peerConnection.add(localStream)
+        }
+    }
+    
+    internal func createScreenSharingStream(streamId: String) -> RTCMediaStream {
+        os_log("createLocalMediaStream() for type screen and stream %@", log: Log.rtc, type: .debug, streamId)
+        localStream = factory.mediaStream(withStreamId: streamId)
+        
+        localScreenVideoSource = factory.videoSource()
+        screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
+        screenCapturer.start()
+        
+        localScreenVideoTrack = factory.videoTrack(with: localScreenVideoSource!, trackId: "screenVideo")
+        localScreenVideoTrack!.isEnabled = true
+        localStream!.addVideoTrack(localScreenVideoTrack!)
+        
+        return localStream!
     }
     
     internal func createLocalMediaStream(type: StreamType, streamId: String) -> RTCMediaStream {

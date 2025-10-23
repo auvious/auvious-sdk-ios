@@ -13,6 +13,8 @@ public protocol AuviousSimpleConferenceDelegate: class {
     
     func onConferenceError(_ error: AuviousSDKGenericError)
     func onConferenceSuccess()
+    func onScreenSharingStart()
+    func onScreenSharingStop()
 }
 
 public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {

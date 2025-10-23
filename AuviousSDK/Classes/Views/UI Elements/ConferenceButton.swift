@@ -8,7 +8,7 @@
 import Foundation
 
 enum ConferenceButtonType {
-    case micEnabled, micDisabled, camEnabled, camDisabled, camSwitch, camSwitchDisabled, hangup, speakerON, speakerOFF
+    case micEnabled, micDisabled, camEnabled, camDisabled, camSwitch, camSwitchDisabled, hangup, speakerON, speakerOFF, screenShareEnabled, screenShareDisabled
 }
 
 class ConferenceButton: UIButton {
@@ -87,6 +87,14 @@ class ConferenceButton: UIButton {
             gradientLayer.setAngle(150)
         case .speakerOFF:
             image = "speakerOFF"
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.setAngle(150)
+        case .screenShareEnabled:
+            image = "screenShareON"
+            gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
+            gradientLayer.setAngle(150)
+        case.screenShareDisabled:
+            image = "screenShareOFF"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         }

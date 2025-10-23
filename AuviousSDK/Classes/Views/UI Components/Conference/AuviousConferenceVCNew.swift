@@ -32,6 +32,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var shareScreenContainerView: StreamView?
     //Bottom button bar
     private var buttonContainerView: ConferenceButtonBar!
+    //Button for stopping the screen share when in PIP mode
+    private var stopScreenSharingButton: ConferenceButton!
     
     //Overlay view for hold mode
     private var blurredOverlayView: ConferenceHoldView?
@@ -84,11 +86,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
     private var initialStreamsConnected: Bool = false
+    private var sharingMyScreen: Bool = false {
+        didSet {
+            createConstraints()
+        }
+    }
     
     //Delegate
     private weak var delegate: AuviousSimpleConferenceDelegate?
     
     //Our local stream id
+    private var localScreenShareStreamId: String?
     private var localStreamId: String?
     private var localStreamType: StreamType?
     //The conference we're in
@@ -299,6 +307,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         localView.layer.borderWidth = 1.0 / UIScreen.main.scale
         
         streamContainerView.addSubview(localView)
+        
+        //Setup screen sharing stop button
+        stopScreenSharingButton = ConferenceButton(type: .screenShareEnabled)
+        stopScreenSharingButton.addTarget(self, action: #selector(screenSharePipModePressed), for: .touchUpInside)
+        stopScreenSharingButton.alpha = 0
+        stopScreenSharingButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stopScreenSharingButton)
+        stopScreenSharingButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
+        stopScreenSharingButton.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 0).isActive = true
+        stopScreenSharingButton.widthAnchor.constraint(equalToConstant: 54).isActive = true
+        stopScreenSharingButton.heightAnchor.constraint(equalToConstant: 54).isActive = true
 
         createButtonBar()
     }
@@ -1049,423 +1068,442 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             safeLeadingConstraint = view.leadingAnchor
         }
         
-        //Full screen screen sharing
-        if let shareScreenContainer = shareScreenContainerView, shareScreenFullScreen {
-            os_log("Screen share full screen mode", log: Log.conferenceUI, type: .info)
+        //Sharing my screen (PIP mode)
+        if sharingMyScreen {
+            os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            networkIndicator.alpha = 0
+            stopScreenSharingButton.alpha = 1
+            buttonContainerView.alpha = 0
             
-            if remoteViews.count == 0 {
-                constraints.append(localView.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor, constant: 0))
-                constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
-                constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                
-                //share screen
-                constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            } else if remoteViews.count == 1 {
-                let view1 = remoteViews[0]
-                constraints.append(view1.leadingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.leadingAnchor, constant: 0))
-                constraints.append(view1.widthAnchor.constraint(equalTo: view1.heightAnchor, multiplier: 1))
-                constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                
-                constraints.append(localView.trailingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.trailingAnchor, constant: 0))
-                constraints.append(localView.widthAnchor.constraint(equalTo: localView.heightAnchor, multiplier: 1))
-                constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                
-                //relationship
-                constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                constraints.append(view1.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
-                
-                //share screen
-                constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            } else if remoteViews.count == 2 {
-                let view1 = remoteViews[0]
-                let view2 = remoteViews[1]
-                
-                constraints.append(view2.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor))
-                constraints.append(view2.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                constraints.append(view2.heightAnchor.constraint(equalToConstant: viewSize))
-                constraints.append(view2.widthAnchor.constraint(equalTo: view2.heightAnchor, multiplier: 1))
-                
-                constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                
-                constraints.append(localView.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
-                constraints.append(localView.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                constraints.append(localView.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                
-                //relationship
-                constraints.append(view2.widthAnchor.constraint(equalTo: view1.widthAnchor, constant: 0))
-                constraints.append(view2.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                
-                //share screen
-                constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            } else if remoteViews.count >= maximumRemoteStreamsRendered {
-                let view1 = remoteViews[0]
-                let view2 = remoteViews[1]
-                let view3 = remoteViews[2]
-                
-                constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: viewPadding))
-                constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                constraints.append(view1.heightAnchor.constraint(equalToConstant: viewSize))
-                
-                constraints.append(view2.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
-                constraints.append(view2.trailingAnchor.constraint(equalTo: view3.leadingAnchor, constant: -viewPadding))
-                constraints.append(view2.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                constraints.append(view2.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
-                
-                constraints.append(view3.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
-                constraints.append(view3.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
-                constraints.append(view3.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                constraints.append(view3.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
-                
-                constraints.append(localView.leadingAnchor.constraint(equalTo: view3.trailingAnchor, constant: viewPadding))
-                constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -viewPadding))
-                constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
-                constraints.append(localView.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
-                
-                //relationship
-                constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                constraints.append(view2.widthAnchor.constraint(equalTo: view3.widthAnchor, constant: 0))
-                constraints.append(view3.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                
-                //share screen
-                constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                //constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
-            }
+            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+            constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+            constraints.append(localView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+            
         } else {
-        
-            //Local view, no screen sharing
-            if shareScreenContainerView == nil && remoteViews.count < maximumRemoteStreamsRendered {
+            os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
+            networkIndicator.alpha = 1
+            stopScreenSharingButton.alpha = 0
+            buttonContainerView.alpha = 1
+            
+            //Full screen screen sharing
+            if let shareScreenContainer = shareScreenContainerView, shareScreenFullScreen {
+                os_log("Screen share full screen mode", log: Log.conferenceUI, type: .info)
                 
-                //Solo, no screen sharing
                 if remoteViews.count == 0 {
-                    constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                    constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                    constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                    constraints.append(localView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                } else {
+                    constraints.append(localView.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor, constant: 0))
+                    constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
+                    constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                    constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    
+                    //share screen
+                    constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                } else if remoteViews.count == 1 {
+                    let view1 = remoteViews[0]
+                    constraints.append(view1.leadingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.leadingAnchor, constant: 0))
+                    constraints.append(view1.widthAnchor.constraint(equalTo: view1.heightAnchor, multiplier: 1))
+                    constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    
+                    constraints.append(localView.trailingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.trailingAnchor, constant: 0))
+                    constraints.append(localView.widthAnchor.constraint(equalTo: localView.heightAnchor, multiplier: 1))
+                    constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    
+                    //relationship
+                    constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                    constraints.append(view1.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
+                    
+                    //share screen
+                    constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                } else if remoteViews.count == 2 {
+                    let view1 = remoteViews[0]
+                    let view2 = remoteViews[1]
+                    
+                    constraints.append(view2.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor))
+                    constraints.append(view2.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    constraints.append(view2.heightAnchor.constraint(equalToConstant: viewSize))
+                    constraints.append(view2.widthAnchor.constraint(equalTo: view2.heightAnchor, multiplier: 1))
+                    
+                    constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
+                    constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                    constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                    constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    
+                    constraints.append(localView.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
+                    constraints.append(localView.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                    constraints.append(localView.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                    constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    
+                    //relationship
+                    constraints.append(view2.widthAnchor.constraint(equalTo: view1.widthAnchor, constant: 0))
+                    constraints.append(view2.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                    
+                    //share screen
+                    constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                } else if remoteViews.count >= maximumRemoteStreamsRendered {
+                    let view1 = remoteViews[0]
+                    let view2 = remoteViews[1]
+                    let view3 = remoteViews[2]
+                    
+                    constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: viewPadding))
+                    constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
+                    constraints.append(view1.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    constraints.append(view1.heightAnchor.constraint(equalToConstant: viewSize))
+                    
+                    constraints.append(view2.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
+                    constraints.append(view2.trailingAnchor.constraint(equalTo: view3.leadingAnchor, constant: -viewPadding))
+                    constraints.append(view2.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    constraints.append(view2.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                    
+                    constraints.append(view3.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
+                    constraints.append(view3.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
+                    constraints.append(view3.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    constraints.append(view3.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                    
+                    constraints.append(localView.leadingAnchor.constraint(equalTo: view3.trailingAnchor, constant: viewPadding))
+                    constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -viewPadding))
+                    constraints.append(localView.topAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 150))
+                    constraints.append(localView.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                    
+                    //relationship
+                    constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                    constraints.append(view2.widthAnchor.constraint(equalTo: view3.widthAnchor, constant: 0))
+                    constraints.append(view3.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                    
+                    //share screen
+                    constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                    constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                    //constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
+                }
+            } else {
                 
-                    if !isLandscape {
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
-                        constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
-                        constraints.append(localView.widthAnchor.constraint(equalToConstant: 75))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 16/9))
+                //Local view, no screen sharing
+                if shareScreenContainerView == nil && remoteViews.count < maximumRemoteStreamsRendered {
+                    
+                    //Solo, no screen sharing
+                    if remoteViews.count == 0 {
+                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                        constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                        constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                     } else {
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
-                        constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
-                        constraints.append(localView.widthAnchor.constraint(equalToConstant: 132))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 9/16))
+                        
+                        if !isLandscape {
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
+                            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
+                            constraints.append(localView.widthAnchor.constraint(equalToConstant: 75))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 16/9))
+                        } else {
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
+                            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
+                            constraints.append(localView.widthAnchor.constraint(equalToConstant: 132))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 9/16))
+                        }
                     }
                 }
-            }
-            if remoteViews.count == 0 {
-                //0 Remote WITH Share screen
-                if let shareScreenContainer = shareScreenContainerView {
-                    if !isLandscape {
-                        constraints.append(localView.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor, constant: 0))
-                        constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                    } else {
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(localView.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: 0))
-                        constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: localView.trailingAnchor, constant: viewPadding))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
-                    }
-                }
-                
-            } else if remoteViews.count == 1 {
-                let view1 = remoteViews[0]
-                
-                //1 Remote WITH Share screen
-                if let shareScreenContainer = shareScreenContainerView {
-                    if !isLandscape {
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.leadingAnchor, constant: 0))
-                        constraints.append(view1.widthAnchor.constraint(equalTo: view1.heightAnchor, multiplier: 1))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.trailingAnchor, constant: 0))
-                        constraints.append(localView.widthAnchor.constraint(equalTo: localView.heightAnchor, multiplier: 1))
-                        constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
-                        
-                        //relationship
-                        constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                    } else {
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view1.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: -(viewSize / 2) - viewPadding))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 1))
-                        
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(localView.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: viewSize / 2))
-                        
-                        //relationship
-                        constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
+                if remoteViews.count == 0 {
+                    //0 Remote WITH Share screen
+                    if let shareScreenContainer = shareScreenContainerView {
+                        if !isLandscape {
+                            constraints.append(localView.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor, constant: 0))
+                            constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                        } else {
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(localView.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: 0))
+                            constraints.append(localView.widthAnchor.constraint(equalTo: buttonContainerView.buttonStackView.widthAnchor, multiplier: 0.5))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: localView.trailingAnchor, constant: viewPadding))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
+                        }
                     }
                     
-                } else { //1 Remote WITHOUT Share screen
-                
-                    if !isLandscape {
-                        //Full screen portrait video (with top|safeArea)
-                        if agentVideoPortraitMode {
-                            constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
-                            constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
+                } else if remoteViews.count == 1 {
+                    let view1 = remoteViews[0]
+                    
+                    //1 Remote WITH Share screen
+                    if let shareScreenContainer = shareScreenContainerView {
+                        if !isLandscape {
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.leadingAnchor, constant: 0))
+                            constraints.append(view1.widthAnchor.constraint(equalTo: view1.heightAnchor, multiplier: 1))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: buttonContainerView.buttonStackView.trailingAnchor, constant: 0))
+                            constraints.append(localView.widthAnchor.constraint(equalTo: localView.heightAnchor, multiplier: 1))
+                            constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
+                            
+                            //relationship
+                            constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                        } else {
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view1.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: -(viewSize / 2) - viewPadding))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 1))
+                            
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(localView.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: viewSize / 2))
+                            
+                            //relationship
+                            constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
+                        }
+                        
+                    } else { //1 Remote WITHOUT Share screen
+                        
+                        if !isLandscape {
+                            //Full screen portrait video (with top|safeArea)
+                            if agentVideoPortraitMode {
+                                constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
+                                constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
+                                constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                                constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                                constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                                constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                                
+                                if isAgentMuted {
+                                    networkIndicatorLeadingConstant = 40
+                                }
+                            } else {
+                                //4:3 centered video
+                                constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+                                constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+                                constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                                constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                                constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 0.66))
+                            }
+                        } else {
                             constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                             constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                            constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                        }
+                    }
+                } else if remoteViews.count == 2 {
+                    let view1 = remoteViews[0]
+                    let view2 = remoteViews[1]
+                    
+                    //2 Remote WITH share screen
+                    if let shareScreenContainer = shareScreenContainerView {
+                        if !isLandscape {
                             
-                            if isAgentMuted {
-                                networkIndicatorLeadingConstant = 40
-                            }
+                            constraints.append(view2.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor))
+                            constraints.append(view2.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(view2.heightAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view2.widthAnchor.constraint(equalTo: view2.heightAnchor, multiplier: 1))
+                            
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
+                            constraints.append(localView.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                            constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
+                            
+                            //relationship
+                            constraints.append(view2.widthAnchor.constraint(equalTo: view1.widthAnchor, constant: 0))
+                            constraints.append(view2.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                         } else {
-                            //4:3 centered video
-                            constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
-                            constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
-                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                            constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 0.66))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
+                            
+                            constraints.append(view2.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view2.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view2.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view2.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: 0))
+                            constraints.append(view2.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
+                            
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(localView.topAnchor.constraint(equalTo: view2.bottomAnchor, constant: viewPadding))
+                            
+                            //relationship
+                            constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
                         }
                     } else {
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                        
+                        if !isLandscape {
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            
+                            constraints.append(view2.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view2.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view2.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                            
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                        } else {
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                            
+                            constraints.append(view2.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(view2.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(view2.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                            
+                            constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
+                        }
                     }
-                }
-            } else if remoteViews.count == 2 {
-                let view1 = remoteViews[0]
-                let view2 = remoteViews[1]
-                
-                //2 Remote WITH share screen
-                if let shareScreenContainer = shareScreenContainerView {
-                    if !isLandscape {
-                        
-                        constraints.append(view2.centerXAnchor.constraint(equalTo: buttonContainerView.buttonStackView.centerXAnchor))
-                        constraints.append(view2.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(view2.heightAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view2.widthAnchor.constraint(equalTo: view2.heightAnchor, multiplier: 1))
-                        
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
-                        constraints.append(localView.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                        constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
-                        
-                        //relationship
-                        constraints.append(view2.widthAnchor.constraint(equalTo: view1.widthAnchor, constant: 0))
-                        constraints.append(view2.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                    
+                } else if remoteViews.count >= maximumRemoteStreamsRendered {
+                    let view1 = remoteViews[0]
+                    let view2 = remoteViews[1]
+                    let view3 = remoteViews[2]
+                    
+                    //3 Remote WITH share screen
+                    if let shareScreenContainer = shareScreenContainerView {
+                        if !isLandscape {
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: viewPadding))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(view1.heightAnchor.constraint(equalToConstant: viewSize))
+                            
+                            constraints.append(view2.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
+                            constraints.append(view2.trailingAnchor.constraint(equalTo: view3.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view2.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(view2.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                            
+                            constraints.append(view3.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
+                            constraints.append(view3.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view3.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(view3.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                            
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: view3.trailingAnchor, constant: viewPadding))
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -viewPadding))
+                            constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
+                            constraints.append(localView.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                            
+                            //relationship
+                            constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                            constraints.append(view2.widthAnchor.constraint(equalTo: view3.widthAnchor, constant: 0))
+                            constraints.append(view3.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
+                        } else {
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: viewPadding))
+                            constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
+                            
+                            constraints.append(view2.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view2.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view2.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view2.bottomAnchor.constraint(equalTo: view3.topAnchor, constant: -viewPadding))
+                            constraints.append(view2.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
+                            
+                            constraints.append(view3.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(view3.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(view3.widthAnchor.constraint(equalToConstant: viewSize))
+                            constraints.append(view3.bottomAnchor.constraint(equalTo: localView.topAnchor, constant: -viewPadding))
+                            constraints.append(view3.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
+                            
+                            constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
+                            constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
+                            constraints.append(localView.topAnchor.constraint(equalTo: view3.bottomAnchor, constant: viewPadding))
+                            
+                            //relationship
+                            constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
+                            constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
+                            
+                            //share screen
+                            constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
+                            constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
+                        }
                     } else {
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
                         
-                        constraints.append(view2.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view2.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view2.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view2.centerYAnchor.constraint(equalTo: shareScreenContainer.centerYAnchor, constant: 0))
-                        constraints.append(view2.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
-                        
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(localView.topAnchor.constraint(equalTo: view2.bottomAnchor, constant: viewPadding))
-                        
-                        //relationship
-                        constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
-                    }
-                } else {
-                
-                    if !isLandscape {
+                        //Same for landscape & portrait
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                         constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                         
-                        constraints.append(view2.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                         constraints.append(view2.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view2.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                        
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                    } else {
-                        constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                        
                         constraints.append(view2.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(view2.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(view2.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
                         
-                        constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
+                        constraints.append(view3.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                        constraints.append(view3.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                        
+                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                        constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
+                        
+                        //relationship
                         constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                    }
-                }
-
-            } else if remoteViews.count >= maximumRemoteStreamsRendered {
-                let view1 = remoteViews[0]
-                let view2 = remoteViews[1]
-                let view3 = remoteViews[2]
-                
-                //3 Remote WITH share screen
-                if let shareScreenContainer = shareScreenContainerView {
-                    if !isLandscape {
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: viewPadding))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(view1.heightAnchor.constraint(equalToConstant: viewSize))
-                        
-                        constraints.append(view2.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
-                        constraints.append(view2.trailingAnchor.constraint(equalTo: view3.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view2.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(view2.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
-                        
-                        constraints.append(view3.leadingAnchor.constraint(equalTo: view2.trailingAnchor, constant: viewPadding))
                         constraints.append(view3.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view3.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(view3.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
+                        constraints.append(view1.bottomAnchor.constraint(equalTo: view3.topAnchor, constant: -viewPadding))
+                        constraints.append(view2.bottomAnchor.constraint(equalTo: localView.topAnchor, constant: -viewPadding))
                         
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: view3.trailingAnchor, constant: viewPadding))
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -viewPadding))
-                        constraints.append(localView.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -15))
-                        constraints.append(localView.heightAnchor.constraint(equalTo: view1.heightAnchor, constant: 0))
-                        
-                        //relationship
                         constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                        constraints.append(view2.widthAnchor.constraint(equalTo: view3.widthAnchor, constant: 0))
                         constraints.append(view3.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
-                    } else {
-                        constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: viewPadding))
-                        constraints.append(view1.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view1.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view1.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view1.bottomAnchor.constraint(equalTo: view2.topAnchor, constant: -viewPadding))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
-                        
-                        constraints.append(view2.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view2.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view2.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view2.bottomAnchor.constraint(equalTo: view3.topAnchor, constant: -viewPadding))
-                        constraints.append(view2.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
-                        
-                        constraints.append(view3.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(view3.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(view3.widthAnchor.constraint(equalToConstant: viewSize))
-                        constraints.append(view3.bottomAnchor.constraint(equalTo: localView.topAnchor, constant: -viewPadding))
-                        constraints.append(view3.heightAnchor.constraint(equalTo: shareScreenContainer.heightAnchor, multiplier: 0.25))
-                        
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeLeadingConstraint, constant: viewPadding))
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: shareScreenContainer.leadingAnchor, constant: -viewPadding))
-                        constraints.append(localView.topAnchor.constraint(equalTo: view3.bottomAnchor, constant: viewPadding))
-                        
-                        //relationship
-                        constraints.append(view1.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                        constraints.append(view1.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
-                        
-                        //share screen
-                        constraints.append(shareScreenContainer.leadingAnchor.constraint(equalTo: view1.trailingAnchor, constant: viewPadding))
-                        constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 0))
+                        constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
+                        constraints.append(view3.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
+                        constraints.append(view1.heightAnchor.constraint(equalTo: view3.heightAnchor, constant: 0))
+                        constraints.append(view2.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
                     }
                 } else {
-                
-                    //Same for landscape & portrait
-                    constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                    constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                    
-                    constraints.append(view2.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                    constraints.append(view2.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                    
-                    constraints.append(view3.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                    constraints.append(view3.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                    
-                    constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                    constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                    
-                    //relationship
-                    constraints.append(view1.trailingAnchor.constraint(equalTo: view2.leadingAnchor, constant: -viewPadding))
-                    constraints.append(view3.trailingAnchor.constraint(equalTo: localView.leadingAnchor, constant: -viewPadding))
-                    constraints.append(view1.bottomAnchor.constraint(equalTo: view3.topAnchor, constant: -viewPadding))
-                    constraints.append(view2.bottomAnchor.constraint(equalTo: localView.topAnchor, constant: -viewPadding))
-                 
-                    constraints.append(view1.widthAnchor.constraint(equalTo: view2.widthAnchor, constant: 0))
-                    constraints.append(view3.widthAnchor.constraint(equalTo: localView.widthAnchor, constant: 0))
-                    constraints.append(view1.heightAnchor.constraint(equalTo: view2.heightAnchor, constant: 0))
-                    constraints.append(view3.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
-                    constraints.append(view1.heightAnchor.constraint(equalTo: view3.heightAnchor, constant: 0))
-                    constraints.append(view2.heightAnchor.constraint(equalTo: localView.heightAnchor, constant: 0))
+                    //nothing to do here
                 }
-            } else {
-                //nothing to do here
             }
         }
         
@@ -1489,6 +1527,30 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 // MARK: ConferenceButtonBarDelegate
 // MARK: -
 extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
+    
+    @objc internal func screenSharePipModePressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        
+        sharingMyScreen = false
+        
+        delegate?.onScreenSharingStop()
+    }
+    
+    @objc internal func screenShareButtonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        
+        do {
+            sharingMyScreen = true
+            
+            delegate?.onScreenSharingStart()
+            localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
+            
+        } catch let error {
+            os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+            handleError(error)
+        }
+    }
+    
     @objc internal func hangupButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         

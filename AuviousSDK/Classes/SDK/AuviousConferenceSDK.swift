@@ -223,6 +223,20 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     //MARK: SDK Conference functions
     //MARK: -
     
+    public func startScreenSharingFlow() throws -> String? {
+        guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
+            throw AuviousSDKError.notLoggedIn
+        }
+        
+        guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            throw AuviousSDKError.endpointNotCreated
+        }
+        
+        let streamId = UUID().uuidString
+        
+        return streamId
+    }
+    
     /**
      Starts the publish stream flow for the specified type. Returns the stream id.
      Success/Failure handled with delegation using the AuviousSDKDelegate

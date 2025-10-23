@@ -25,6 +25,7 @@
 		0201B1156F8E946CDB7827F5BAA8890E /* SentryCrashCPU_Apple.h in Headers */ = {isa = PBXBuildFile; fileRef = E1FCD89D6EFADC53A9515BBD9C0ACBE8 /* SentryCrashCPU_Apple.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		0237F400664CCFDAE9CEED7633872CB1 /* SentryDictionaryDeepSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 1393E9AEFA29E3D8E2CFDEC8684E3EDA /* SentryDictionaryDeepSearch.m */; };
 		026059FF8B1BDE39BD97B2AB27733EA3 /* SentryDebugImageProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 03F51009E2B3C67FB3F137C4BD5BE07E /* SentryDebugImageProvider.m */; };
+		034048262EA7F24B00741C89 /* ScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034048252EA7F24B00741C89 /* ScreenCapturer.swift */; };
 		036E456A1C79DA4AA78ECE9DD8E6508C /* SentrySample.h in Headers */ = {isa = PBXBuildFile; fileRef = EAA9AD83FADBD15A50DE439AF86162CF /* SentrySample.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		0385E9B65C72C59A8EE85178B51645AD /* SentrySessionReplayIntegration.h in Headers */ = {isa = PBXBuildFile; fileRef = 2931E945D0E6C9E840F9A53109DFA7D7 /* SentrySessionReplayIntegration.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		03A87062A7136836EFF9A89FEC952A47 /* SentryCrashFileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2BCBB598F1BD408EF8B319CF970FA63D /* SentryCrashFileUtils.c */; };
@@ -1273,6 +1274,7 @@
 		02B9477863168135CDC9D7DF68123F80 /* SentryCrashBinaryImageCache.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = SentryCrashBinaryImageCache.c; path = Sources/SentryCrash/Recording/SentryCrashBinaryImageCache.c; sourceTree = "<group>"; };
 		02C74A633EAD5D4FF0CFC159FB72F38A /* SentryBaggageSerialization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentryBaggageSerialization.swift; path = Sources/Swift/Helper/SentryBaggageSerialization.swift; sourceTree = "<group>"; };
 		03390328B44AD897DC90A5DE61C1E368 /* SentryFormatter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryFormatter.h; path = Sources/Sentry/include/HybridPublic/SentryFormatter.h; sourceTree = "<group>"; };
+		034048252EA7F24B00741C89 /* ScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCapturer.swift; sourceTree = "<group>"; };
 		034289770B58A7C5081A748E4929AAFB /* SentryUIEventTrackingIntegration.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryUIEventTrackingIntegration.h; path = Sources/Sentry/include/SentryUIEventTrackingIntegration.h; sourceTree = "<group>"; };
 		0359A72A69FB71D818B854BDD6CE75D2 /* CocoaMQTTProperty.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CocoaMQTTProperty.swift; path = Source/CocoaMQTTProperty.swift; sourceTree = "<group>"; };
 		037A90AB5FAA9C4CF60DD4097BCD7CEC /* SentryNSFileManagerSwizzling.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryNSFileManagerSwizzling.m; path = Sources/Sentry/SentryNSFileManagerSwizzling.m; sourceTree = "<group>"; };
@@ -2489,6 +2491,7 @@
 				B346DE637BDC4715A4B1AADC0B23DB56 /* RTCModule.swift */,
 				7DECD505A7F977F82D100C02C7AEE63B /* UserEndpointModule.swift */,
 				46CBB940215EAECA9C305E42D806B8A7 /* API2 */,
+				034048252EA7F24B00741C89 /* ScreenCapturer.swift */,
 			);
 			name = Modules;
 			path = AuviousSDK/Classes/Modules;
@@ -5133,6 +5136,7 @@
 				57F8D3155DCEB5C0F583130DE2889776 /* ConferenceStreamUnpublishedEvent.swift in Sources */,
 				FC27445997A1A5F631C82BC6654A9FBA /* ConferenceSummary.swift in Sources */,
 				D9BA0805CA2BE092F72836EACBB12574 /* CreateConferenceRequest.swift in Sources */,
+				034048262EA7F24B00741C89 /* ScreenCapturer.swift in Sources */,
 				BEEF41B52F110FC72AB72B3B880D6EC4 /* CreateEndpointRequest.swift in Sources */,
 				9426239C1F0B48F5582675FD8A80FCB2 /* EndConferenceRequest.swift in Sources */,
 				047C61EF98DB77BA4603D7507EFDD28D /* Enumerations.swift in Sources */,

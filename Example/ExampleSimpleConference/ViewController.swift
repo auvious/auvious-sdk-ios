@@ -45,7 +45,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         conferenceTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "xb9-8cr-l64"//"fav-xva"
+        usernameTextfield.text = "mjk-xgu"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -133,14 +133,20 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.microphoneAvailable = self.micSwitch.isOn
             conf.speakerAvailable = self.speakerSwitch.isOn
             
-//            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
-            self.vc.modalPresentationStyle = .fullScreen
-            self.navigationController?.present(vc, animated: true, completion: nil)
+            presentAuviousUI(childVC: self.vc)
         }
     }
     
     // MARK: AuviousSimpleConferenceDelegate
+    
+    func onScreenSharingStart() {
+        self.minimizeToPiP(childVC: self.vc)
+    }
+    
+    func onScreenSharingStop() {
+        self.restoreFromPiP(childVC: self.vc)
+    }
     
     func onConferenceSuccess() {
         self.vc.showAlert(title: "Message", msg: "Conference completed successfully", onSuccess: {
@@ -155,7 +161,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     }
     
     // MARK: Helpers
-    
+
     private func validateForm() -> Bool {
         guard let username = usernameTextfield.text, !username.isEmpty else {
             showAlert(title: "Warning", msg: "Please enter your username")
@@ -199,43 +205,112 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     }
 }
 
-extension UIViewController {
-    
-    func showAlert(title:String, msg:String, onSuccess: (()->())? = nil){
-        let alert = UIAlertController(title: title, message: msg, preferredStyle: UIAlertController.Style.alert)
-        alert.view.tintColor = UIColor.black
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK",comment:""), style: .default, handler: { (action: UIAlertAction!) in
-            
-            if let callback = onSuccess {
-                callback()
-            }
-        }))
+//Various UI helper functions for PIP etc.
+extension ViewController {
+    private func presentAuviousUI(childVC: UIViewController) {
+        // Add as child
+        addChild(childVC)
         
-        present(alert, animated: true, completion: nil)
+        // Set initial frame off-screen (bottom)
+        let screenBounds = view.bounds
+        childVC.view.frame = CGRect(x: 0, y: screenBounds.height, width: screenBounds.width, height: screenBounds.height)
+        
+        // Add the view
+        view.addSubview(childVC.view)
+        
+        // Animate into position
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
+            childVC.view.frame = screenBounds
+        }, completion: { _ in
+            childVC.didMove(toParent: self)
+        })
     }
-}
+    
+    private func minimizeToPiP(childVC: UIViewController) {
+        let screenBounds = view.bounds
+        let pipWidth: CGFloat = 100
+        let pipHeight: CGFloat = 160
+        let margin: CGFloat = 20
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            childVC.view.frame = CGRect(
+                x: screenBounds.width - pipWidth - margin,
+                y: screenBounds.height - pipHeight - margin,
+                width: pipWidth,
+                height: pipHeight
+            )
+            childVC.view.layer.cornerRadius = 12
+            childVC.view.layer.masksToBounds = true
+        })
+        
+        // Add draggable behavior
+        addDragGesture(to: childVC.view)
+    }
+    
+    func restoreFromPiP(childVC: UIViewController) {
+        let screenBounds = view.bounds
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            childVC.view.frame = screenBounds
+            childVC.view.layer.cornerRadius = 0
+        })
+    }
+    
+    func snapToNearestCorner(_ pipView: UIView) {
+        let screenBounds = view.bounds
+        let pipSize = pipView.frame.size
+        let margin: CGFloat = 16
+        
+        // Determine possible corners
+        let topLeft = CGPoint(x: margin, y: margin)
+        let topRight = CGPoint(x: screenBounds.width - pipSize.width - margin, y: margin)
+        let bottomLeft = CGPoint(x: margin, y: screenBounds.height - pipSize.height - margin)
+        let bottomRight = CGPoint(x: screenBounds.width - pipSize.width - margin, y: screenBounds.height - pipSize.height - margin)
+        
+        // Calculate distances to each
+        let positions = [topLeft, topRight, bottomLeft, bottomRight]
+        let currentCenter = pipView.frame.origin
+        let nearest = positions.min(by: {
+            distance(from: $0, to: currentCenter) < distance(from: $1, to: currentCenter)
+        }) ?? bottomRight
+        
+        // Animate to nearest corner
+        UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: {
+            pipView.frame.origin = nearest
+        })
+    }
 
-extension CAGradientLayer {
-    func setAngle(_ angle: Float = 0) {
-        let alpha: Float = angle / 360
-        let startPointX = powf(
-            sinf(2 * Float.pi * ((alpha + 0.75) / 2)),
-            2
-        )
-        let startPointY = powf(
-            sinf(2 * Float.pi * ((alpha + 0) / 2)),
-            2
-        )
-        let endPointX = powf(
-            sinf(2 * Float.pi * ((alpha + 0.25) / 2)),
-            2
-        )
-        let endPointY = powf(
-            sinf(2 * Float.pi * ((alpha + 0.5) / 2)),
-            2
-        )
+    private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
+        let dx = p1.x - p2.x
+        let dy = p1.y - p2.y
+        return sqrt(dx*dx + dy*dy)
+    }
+    
+    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+        guard let pipView = gesture.view else { return }
+        
+        let translation = gesture.translation(in: view)
+        
+        switch gesture.state {
+        case .changed:
+            // Move the view with finger
+            pipView.center = CGPoint(
+                x: pipView.center.x + translation.x,
+                y: pipView.center.y + translation.y
+            )
+            gesture.setTranslation(.zero, in: view)
 
-        endPoint = CGPoint(x: CGFloat(endPointX),y: CGFloat(endPointY))
-        startPoint = CGPoint(x: CGFloat(startPointX), y: CGFloat(startPointY))
+        case .ended, .cancelled:
+            snapToNearestCorner(pipView)
+
+        default:
+            break
+        }
+    }
+    
+    func addDragGesture(to view: UIView) {
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        view.addGestureRecognizer(panGesture)
+        view.isUserInteractionEnabled = true
     }
 }
