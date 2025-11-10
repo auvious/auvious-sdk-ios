@@ -83,6 +83,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Reference to the background task used for gracefully stopping streams
     private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
     
+    /// Internal flag for handling the iOS ReplayKit permission dialog app resume
+    private var sharingMyScreen: Bool = false
+    
     //MARK: -
     //MARK: Pause/Resume handlers
     //MARK: -
@@ -130,6 +133,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         guard let userEndpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            return
+        }
+        
+        //Ensure we are not resuming due to ReplayKit permission dialog closure
+        guard !sharingMyScreen else {
+            print("onApplicationResume() called but we are sharing our screen so no rejoin")
             return
         }
         
@@ -253,6 +262,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         
         guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
             throw AuviousSDKError.endpointNotCreated
+        }
+        
+        if type == .screen {
+            sharingMyScreen = true
         }
         
         let streamId = UUID().uuidString

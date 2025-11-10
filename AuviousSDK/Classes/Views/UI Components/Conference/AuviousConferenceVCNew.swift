@@ -1552,6 +1552,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     }
     
     @objc internal func hangupButtonPressed(_ sender: Any) {
+        os_log("hangupButtonPressed", log: Log.conferenceUI, type: .debug)
         selectionFeedbackGenerator.impactOccurred()
         
         AuviousConferenceSDK.sharedInstance.leaveConference(conferenceId: currentConference.id, onSuccess: {

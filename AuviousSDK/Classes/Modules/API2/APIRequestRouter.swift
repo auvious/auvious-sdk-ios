@@ -246,7 +246,7 @@ enum Router: URLRequestConvertible2 {
         var urlRequest = URLRequest(url: url.appendingPathComponent(query))
         urlRequest.httpMethod = httpMethod
         
-        os_log("NEW REQUEST %@", log: Log.api, type: .debug, urlRequest.debugDescription)
+//        os_log("NEW REQUEST %@", log: Log.api, type: .debug, urlRequest.debugDescription)
         
         // Set headers
         urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -280,7 +280,7 @@ enum Router: URLRequestConvertible2 {
                 }
             }
         }
-        os_log("NEW REQUEST ENCODED %@", log: Log.api, type: .debug, urlRequest.debugDescription)
+//        os_log("NEW REQUEST ENCODED %@", log: Log.api, type: .debug, urlRequest.debugDescription)
         let allowedCharacterSet = (CharacterSet(charactersIn: ",").inverted)
         
         urlRequest.url = URL(string: urlRequest.url!.absoluteString.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)!)

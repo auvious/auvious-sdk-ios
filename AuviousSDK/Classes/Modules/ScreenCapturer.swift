@@ -26,10 +26,10 @@ class ScreenCapturer: NSObject {
         recorder.startCapture(handler: { [weak self] (sampleBuffer, sampleType, error) in
             guard let self = self else { return }
             guard error == nil else {
-                print("ReplayKit error: \(error!)")
+                print("❌ ReplayKit error: \(error!)")
                 return
             }
-
+            
             guard sampleType == .video,
                   let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
                   CMSampleBufferIsValid(sampleBuffer) else {
@@ -39,7 +39,7 @@ class ScreenCapturer: NSObject {
             let timestampNs = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) * Double(NSEC_PER_SEC)
             let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
             let videoFrame = RTCVideoFrame(buffer: rtcPixelBuffer, rotation: ._0, timeStampNs: Int64(timestampNs))
-
+            
             self.videoSource.capturer(self.capturer, didCapture: videoFrame) // ✅ Pass valid capturer
         }, completionHandler: { error in
             if let error = error {

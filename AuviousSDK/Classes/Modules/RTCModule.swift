@@ -100,9 +100,11 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     //Default connection constraint, used when instatiating a connection
     private let defaultConnectionConstraint = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: ["DtlsSrtpKeyAgreement": "true"])
     
+    //Screen capturing
     private var screenCapturer: ScreenCapturer!
     private var localScreenVideoSource: RTCVideoSource?
     private var localScreenVideoTrack: RTCVideoTrack?
+    private var localScreenStream: RTCMediaStream?
     
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
@@ -258,7 +260,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         
         peerConnections.append(connectionContainer)
-        os_log("Created connection for stream type", log: Log.rtc, type: .debug, type.rawValue)
+        os_log("Created connection for stream type %@", log: Log.rtc, type: .debug, type.rawValue)
     }
     
     //Returns the connection created for the given stream id, if any
@@ -289,7 +291,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     internal func createScreenSharingStream(streamId: String) -> RTCMediaStream {
         os_log("createLocalMediaStream() for type screen and stream %@", log: Log.rtc, type: .debug, streamId)
-        localStream = factory.mediaStream(withStreamId: streamId)
+        localScreenStream = factory.mediaStream(withStreamId: streamId)
         
         localScreenVideoSource = factory.videoSource()
         screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
@@ -297,9 +299,9 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         
         localScreenVideoTrack = factory.videoTrack(with: localScreenVideoSource!, trackId: "screenVideo")
         localScreenVideoTrack!.isEnabled = true
-        localStream!.addVideoTrack(localScreenVideoTrack!)
+        localScreenStream!.addVideoTrack(localScreenVideoTrack!)
         
-        return localStream!
+        return localScreenStream!
     }
     
     internal func createLocalMediaStream(type: StreamType, streamId: String) -> RTCMediaStream {
