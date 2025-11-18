@@ -29,6 +29,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     private var username: String = ""
     private var password: String = ""
     private var conference: String = ""
+    private var participantName: String = ""
     private var baseEndpoint: String = ""
     private var mqttEndpoint: String = ""
 
@@ -112,7 +113,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
-            AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+            AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             os_log("UI Conference component: Configured ConferenceSDK")
 //
 //            //Get access to the local video stream immediately

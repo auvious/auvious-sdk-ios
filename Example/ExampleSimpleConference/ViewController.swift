@@ -15,6 +15,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBOutlet weak var usernameTextfield: UITextField!
     @IBOutlet weak var passwordTextfield: UITextField!
     @IBOutlet weak var conferenceTextfield: UITextField!
+    @IBOutlet weak var participantTextfield: UITextField!
     @IBOutlet weak var createConferenceSwitch: UISwitch!
     @IBOutlet weak var conferenceLabel: UILabel!
     @IBOutlet weak var callButton: UIButton!
@@ -23,6 +24,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBOutlet weak var speakerEnabledSwitch: UISwitch!
     @IBOutlet weak var micSwitch: UISwitch!
     @IBOutlet weak var speakerSwitch: UISwitch!
+    @IBOutlet weak var pipSwitch: UISwitch!
+    @IBOutlet weak var screenSharingSwitch: UISwitch!
     
     //Gradient
     private var gradientLayer = CAGradientLayer()
@@ -35,17 +38,20 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         usernameTextfield.attributedPlaceholder = NSAttributedString(string: "Username", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         passwordTextfield.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         conferenceTextfield.attributedPlaceholder = NSAttributedString(string: "Conference to create/join", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
+        participantTextfield.attributedPlaceholder = NSAttributedString(string: "Participant name (optional)", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         
         usernameTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         passwordTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         conferenceTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        participantTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         
         usernameTextfield.textColor = .white
         passwordTextfield.textColor = .white
         conferenceTextfield.textColor = .white
+        participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "qgf-nnb"//"fav-xva"
+        usernameTextfield.text = "ijo-dey"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -74,6 +80,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             let username = usernameTextfield.text!
             let password = passwordTextfield.text!
             let conferenceName = ""//conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let participantName = participantTextfield.text
             
             //TEST-RTC
 //            let clientId: String = "auvious"
@@ -111,6 +118,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.username = username
             conf.password = password
             conf.clientId = clientId
+            
+            if let name = participantName, !name.isEmpty {
+                conf.participantName = name
+            }
+            
             conf.conference = conferenceName
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
@@ -132,6 +144,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.cameraAvailable = self.cameraSwitch.isOn
             conf.microphoneAvailable = self.micSwitch.isOn
             conf.speakerAvailable = self.speakerSwitch.isOn
+            conf.pipAvailable = self.pipSwitch.isOn
+            conf.screenSharingAvailable = self.screenSharingSwitch.isOn
             
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
             presentAuviousUI(childVC: self.vc)

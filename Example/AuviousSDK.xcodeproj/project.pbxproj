@@ -63,6 +63,7 @@
 		03363811249CA435009A08AA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		03363813249CA435009A08AA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		03CA4E862EA8EE54008A54F2 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		03FF1A372ECB85940019CAAD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		1859B21A77B6EAED5F9ED751 /* AuviousSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = AuviousSDK.podspec; path = ../AuviousSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4369D4C77CB46D5F4830F157 /* Pods-ExampleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleConference.debug.xcconfig"; path = "Target Support Files/Pods-ExampleConference/Pods-ExampleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		5C290A7D5BAD089DC515900E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -796,6 +797,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				0336380C249CA434009A08AA /* Base */,
+				03FF1A372ECB85940019CAAD /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";

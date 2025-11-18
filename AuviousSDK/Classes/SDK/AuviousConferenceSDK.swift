@@ -20,6 +20,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// The password property, used for logging in
     internal var password: String?
     
+    /// The participant name
+    internal var participantName: String?
+    
     /// The client id property, used for logging in
     internal var clientId: String?
     
@@ -179,11 +182,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Parameter password: The password
      - Parameter clientId: The client id used for authentication
      */
-    public func configure(params: [String: String], username: String, password: String, clientId: String, baseEndpoint: String, mqttEndpoint: String) {
+    public func configure(params: [String: String], username: String, password: String, name: String?, clientId: String, baseEndpoint: String, mqttEndpoint: String) {
         self.loginParams = params
         self.username = username
         self.password = password
         self.clientId = clientId
+        self.participantName = name
         
         ServerConfiguration.baseRTC = baseEndpoint
         ServerConfiguration.baseMeeting = baseEndpoint
@@ -521,7 +525,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             return
         }
         
-        let request = JoinConferenceRequest(conferenceId: conferenceId, userEndpointId: endpointId, userId: userId)
+        let request = JoinConferenceRequest(conferenceId: conferenceId, userEndpointId: endpointId, userId: userId, participantName: participantName)
         API2.sharedInstance.joinConference(request, onSuccess: {(json) in
             if json != nil {
                 
@@ -1073,7 +1077,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             return
         }
         
-        let psRequest:PublishStreamRequest = PublishStreamRequest(conferenceId: conference.id, streamType: streamType, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: endpointId, userId: userId)
+        let psRequest: PublishStreamRequest = PublishStreamRequest(conferenceId: conference.id, streamType: streamType, sdpOffer: sdpOffer, streamId: streamId, userEndpointId: endpointId, userId: userId, participantName: self.participantName)
         
         API2.sharedInstance.publishStream(psRequest, onSuccess:{(conferencePublishResult) in
             

@@ -27,6 +27,8 @@ class ConferenceButtonBar: UIView {
     let hangupButton = ConferenceButton(type: .hangup)
     let screenShareButton = ConferenceButton(type: .screenShareDisabled)
     
+    let buttonSeparator = UIView(frame: .zero)
+    
     //Container of the buttons
     internal var buttonStackView: UIStackView!
     
@@ -76,8 +78,8 @@ class ConferenceButtonBar: UIView {
             buttons.append(cameraSwitchButton)
         }
     
-        buttons.append(screenShareButton)
-        buttons.append(hangupButton)
+        //buttons.append(screenShareButton)
+//        buttons.append(hangupButton)
         
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
@@ -99,6 +101,13 @@ class ConferenceButtonBar: UIView {
             b.widthAnchor.constraint(equalToConstant: 50).isActive = true
             b.heightAnchor.constraint(equalToConstant: 50).isActive = true
         }
+        
+        //Add hangup button
+        addSubview(hangupButton)
+        hangupButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        hangupButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        hangupButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+        hangupButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
     }
     
     //MARK:-

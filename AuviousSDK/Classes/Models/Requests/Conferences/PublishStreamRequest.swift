@@ -16,14 +16,16 @@ internal final class PublishStreamRequest {
     var streamId: String!
     var userEndpointId: String!
     var userId: String!
+    var participantName: String?
     
-    init(conferenceId: String, streamType: StreamType, sdpOffer: String, streamId: String, userEndpointId: String, userId: String) {
+    init(conferenceId: String, streamType: StreamType, sdpOffer: String, streamId: String, userEndpointId: String, userId: String, participantName: String?) {
         self.conferenceId = conferenceId
         self.streamType = streamType
         self.sdpOffer = sdpOffer
         self.streamId = streamId
         self.userEndpointId = userEndpointId
         self.userId = userId
+        self.participantName = participantName
     }
     
     func toDictionary() -> [String:Any] {
@@ -52,6 +54,20 @@ internal final class PublishStreamRequest {
         if userId != nil {
             dictionary["userId"] = userId
         }
+        
+        //Metadata
+        var metaDataDictionary = [String:Any]()
+        metaDataDictionary["correlationId"] = streamId
+        metaDataDictionary["primary"] = true
+        metaDataDictionary["portraitMode"] = false
+        metaDataDictionary["participantRoles"] = ["CUSTOMER"]
+        if let participantName = participantName {
+            metaDataDictionary["participantName"] = participantName
+        } else {
+            metaDataDictionary["participantName"] = NSNull()
+        }
+        
+        dictionary["metadata"] = metaDataDictionary
         
         return dictionary
     }

@@ -26,6 +26,11 @@ public struct AuviousConferenceConfiguration {
     public var cameraAvailable = true
     public var microphoneAvailable = true
     public var speakerAvailable = true
+    public var pipAvailable: Bool = true
+    public var screenSharingAvailable: Bool = true
+    
+    //Other
+    public var participantName: String? = nil
     
     //Stream properties
     public var callMode: AuviousCallMode = .audioVideo
