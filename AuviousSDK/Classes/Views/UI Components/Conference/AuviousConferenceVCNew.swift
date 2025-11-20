@@ -1108,18 +1108,30 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             safeLeadingConstraint = view.leadingAnchor
         }
         
-        //Sharing my screen (PIP mode)
+        //PIP mode
         if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
-            stopScreenSharingButton.alpha = 1
+            stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
+            let agentView = remoteViews[0]
             
-            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-            constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-            constraints.append(localView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+            constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
+            constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
+            constraints.append(agentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+            constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
             
+        } else if screenMode == .expandedPip {
+            os_log("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            networkIndicator.alpha = 0
+            stopScreenSharingButton.alpha = 0
+            buttonContainerView.alpha = 0
+            let agentView = remoteViews[0]
+            
+            constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
+            constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
+            constraints.append(agentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+            constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
         } else {
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 1

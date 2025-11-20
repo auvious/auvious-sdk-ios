@@ -30,8 +30,7 @@ extension AuviousConferenceVCNew {
         
         // Add gestures
         addDragGesture(to: view)
-        addTapGesture(to: view)
-        
+        addTapGestures(to: view)
     }
     
     func enlargePip() {

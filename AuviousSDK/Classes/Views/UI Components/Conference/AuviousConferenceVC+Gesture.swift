@@ -17,23 +17,47 @@ extension AuviousConferenceVCNew {
     }
     
     //Tappable pip view
-    func addTapGesture(to view: UIView) {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handlePiPTap(_:)))
-        view.addGestureRecognizer(tapGesture)
+    func addTapGestures(to view: UIView) {
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(handlePiPTap(_:)))
+        singleTap.numberOfTapsRequired = 1
+        
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handlePiPDoubleTap(_:)))
+        doubleTap.numberOfTapsRequired = 2
+        
+        singleTap.require(toFail: doubleTap)
+        
+        view.addGestureRecognizer(singleTap)
+        view.addGestureRecognizer(doubleTap)
+    }
+    
+    @objc func handlePiPDoubleTap(_ gesture: UITapGestureRecognizer) {
+        guard let pipView = gesture.view else { return }
+        guard let container = pipView.superview else { return }
+
+        screenMode = .fullScreen
+
+        UIView.animate(withDuration: 0.3) {
+            pipView.frame = container.bounds
+            pipView.layer.cornerRadius = 0
+        }
     }
     
     @objc func handlePiPTap(_ gesture: UITapGestureRecognizer) {
         guard let pipView = gesture.view else { return }
 
-        let isSmall = pipView.tag == 0
-        pipView.tag = isSmall ? 1 : 0
-
         let smallSize = CGSize(width: ScreenMode.pip.width, height: ScreenMode.pip.height)
         let largeSize = CGSize(width: ScreenMode.expandedPip.width, height: ScreenMode.expandedPip.height)
         
         let oldSize = pipView.frame.size
-        let newSize = isSmall ? largeSize : smallSize
-
+        var newSize: CGSize = .zero
+        if screenMode == .pip {
+            newSize = largeSize
+            screenMode = .expandedPip
+        } else if screenMode == .expandedPip {
+            newSize = smallSize
+            screenMode = .pip
+        }
+    
         let dx = newSize.width - oldSize.width
         let dy = newSize.height - oldSize.height
 
@@ -59,6 +83,9 @@ extension AuviousConferenceVCNew {
         UIView.animate(withDuration: 0.3) {
             pipView.bounds.size = newSize
             pipView.center = center
+            
+            pipView.setNeedsLayout()
+            pipView.layoutIfNeeded()
         }
     }
     
