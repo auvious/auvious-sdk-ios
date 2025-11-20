@@ -10,8 +10,45 @@ import os
 
 public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDelegate {
     
+    //Defines the possible UI modes
+    enum ScreenMode {
+        case fullScreen, pip, expandedPip
+        
+        var width: CGFloat {
+            switch self {
+            case .fullScreen:
+                return UIScreen.main.bounds.width
+            case .pip:
+                return 100
+            case .expandedPip:
+                return 130
+            }
+        }
+        
+        var height: CGFloat {
+            switch self {
+            case .fullScreen:
+                return UIScreen.main.bounds.height
+            case .pip:
+                return 160
+            case .expandedPip:
+                return 208
+            }
+        }
+    }
+    
+    //The current state of our UI
+    internal var screenMode: ScreenMode = .fullScreen {
+        didSet {
+            createConstraints()
+        }
+    }
+    
     //UI components
     private var clientConfiguration = AuviousConferenceConfiguration()
+    
+    //Popover options (PIP, screen share)
+    private let popoverVC = ConferencePopoverVC()
     
     //Network indicator view
     private let networkIndicator = NetworkIndicatorView()
@@ -440,6 +477,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
             AuviousConferenceSDK.sharedInstance.configure(params: params, username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+            AuviousConferenceSDK.sharedInstance.setUIConfiguration(config: clientConfiguration)
             os_log("Configured ConferenceSDK", log: Log.conferenceUI, type: .debug)
 //
 //            //Get access to the local video stream immediately
@@ -1071,7 +1109,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
         
         //Sharing my screen (PIP mode)
-        if sharingMyScreen {
+        if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
             stopScreenSharingButton.alpha = 1
@@ -1535,21 +1573,45 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         
         sharingMyScreen = false
         
-        delegate?.onScreenSharingStop()
+        //delegate?.onScreenSharingStop()
+    }
+    
+    @objc internal func pipModeButtonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        minimizeToPiP()
     }
     
     @objc internal func screenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
         do {
-            sharingMyScreen = true
+            minimizeToPiP()
+            //sharingMyScreen = true
             
-            delegate?.onScreenSharingStart()
-            localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
+            //delegate?.onScreenSharingStart()
+            //localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
             
         } catch let error {
             os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
+        }
+    }
+    
+    @objc internal func optionsButtonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        
+        let button = sender as! ConferenceButton
+        if button.type == .options {
+            button.type = .optionsTapped
+            
+            popoverVC.delegate = self
+            popoverVC.preferredContentSize = .init(width: 150, height: 130)
+            
+            let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
+            present(vc, animated: true, completion: nil)
+            
+        } else {
+            button.type = .options
         }
     }
     
@@ -1668,5 +1730,22 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             }, onFailure: { error in
             })
         }
+    }
+}
+
+//Delegates the taps on the conference popover
+extension AuviousConferenceVCNew: ConferencePopoverDelegate {
+    //Calls the same handler as the button bar
+    func didPressPIPButton() {
+        popoverVC.dismiss(animated: true, completion: {
+            self.pipModeButtonPressed(self)
+        })
+    }
+    
+    //Calls the same handler as the button bar
+    func didPressShareScreenButton() {
+        popoverVC.dismiss(animated: true, completion: {
+            self.screenShareButtonPressed(self)
+        })
     }
 }

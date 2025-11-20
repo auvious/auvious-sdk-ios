@@ -14,6 +14,7 @@ internal protocol ConferenceButtonBarDelegate: class {
     func camSwitchButtonPressed(_ sender: Any)
     func hangupButtonPressed(_ sender: Any)
     func screenShareButtonPressed(_ sender: Any)
+    func optionsButtonPressed(_ sender: Any)
 }
 
 class ConferenceButtonBar: UIView {
@@ -26,6 +27,7 @@ class ConferenceButtonBar: UIView {
     let cameraSwitchButton = ConferenceButton(type: .camSwitch)
     let hangupButton = ConferenceButton(type: .hangup)
     let screenShareButton = ConferenceButton(type: .screenShareDisabled)
+    let optionsButton = ConferenceButton(type: .options)
     
     let buttonSeparator = UIView(frame: .zero)
     
@@ -63,6 +65,7 @@ class ConferenceButtonBar: UIView {
         hangupButton.addTarget(self, action: #selector(self.hangupButtonPressed(_:)), for: .touchUpInside)
         speakerButton.addTarget(self, action: #selector(self.speakerButtonPressed(_:)), for: .touchUpInside)
         screenShareButton.addTarget(self, action: #selector(self.screenShareButtonPressed(_:)), for: .touchUpInside)
+        optionsButton.addTarget(self, action: #selector(self.optionsButtonPressed(_:)), for: .touchUpInside)
         
         //Add buttons according to the configuration
         var buttons: [ConferenceButton] = []
@@ -77,6 +80,8 @@ class ConferenceButtonBar: UIView {
             buttons.append(cameraButton)
             buttons.append(cameraSwitchButton)
         }
+        
+        buttons.append(optionsButton)
     
         //buttons.append(screenShareButton)
 //        buttons.append(hangupButton)
@@ -136,6 +141,10 @@ class ConferenceButtonBar: UIView {
     
     @objc private func screenShareButtonPressed(_ sender: Any) {
         delegate?.screenShareButtonPressed(sender)
+    }
+    
+    @objc private func optionsButtonPressed(_ sender: Any) {
+        delegate?.optionsButtonPressed(sender)
     }
     
     internal func conferenceOnHold(_ flag: Bool) {

@@ -28,6 +28,9 @@
 		034048262EA7F24B00741C89 /* ScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034048252EA7F24B00741C89 /* ScreenCapturer.swift */; };
 		036E456A1C79DA4AA78ECE9DD8E6508C /* SentrySample.h in Headers */ = {isa = PBXBuildFile; fileRef = EAA9AD83FADBD15A50DE439AF86162CF /* SentrySample.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		0385E9B65C72C59A8EE85178B51645AD /* SentrySessionReplayIntegration.h in Headers */ = {isa = PBXBuildFile; fileRef = 2931E945D0E6C9E840F9A53109DFA7D7 /* SentrySessionReplayIntegration.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		03A473EA2ECCFE4600BA07D5 /* ConferencePopoverVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A473E92ECCFE4600BA07D5 /* ConferencePopoverVC.swift */; };
+		03A474222ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A474212ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift */; };
+		03A474242ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A474232ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift */; };
 		03A87062A7136836EFF9A89FEC952A47 /* SentryCrashFileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2BCBB598F1BD408EF8B319CF970FA63D /* SentryCrashFileUtils.c */; };
 		03F6635FFD20F4962092E441F5176C47 /* SentrySessionReplayIntegration-Hybrid.h in Headers */ = {isa = PBXBuildFile; fileRef = 36A8463AFFB07E1E4A292D7E523E8145 /* SentrySessionReplayIntegration-Hybrid.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		043DD44D5F05CBF63662C3DDA3DCAED2 /* SentrySdkInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 494535E36499BA342A9BD254A9083897 /* SentrySdkInfo.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -1279,6 +1282,9 @@
 		0359A72A69FB71D818B854BDD6CE75D2 /* CocoaMQTTProperty.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CocoaMQTTProperty.swift; path = Source/CocoaMQTTProperty.swift; sourceTree = "<group>"; };
 		037A90AB5FAA9C4CF60DD4097BCD7CEC /* SentryNSFileManagerSwizzling.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryNSFileManagerSwizzling.m; path = Sources/Sentry/SentryNSFileManagerSwizzling.m; sourceTree = "<group>"; };
 		0396E67852395949DB89AA8E401ED58A /* NSMutableDictionary+Sentry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSMutableDictionary+Sentry.h"; path = "Sources/Sentry/include/NSMutableDictionary+Sentry.h"; sourceTree = "<group>"; };
+		03A473E92ECCFE4600BA07D5 /* ConferencePopoverVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencePopoverVC.swift; sourceTree = "<group>"; };
+		03A474212ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuviousConferenceVC+PIP.swift"; sourceTree = "<group>"; };
+		03A474232ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuviousConferenceVC+Gesture.swift"; sourceTree = "<group>"; };
 		03F51009E2B3C67FB3F137C4BD5BE07E /* SentryDebugImageProvider.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryDebugImageProvider.m; path = Sources/Sentry/SentryDebugImageProvider.m; sourceTree = "<group>"; };
 		0429E0BA81D93B8A8B7C5D3AC2232E1C /* SentrySpan.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentrySpan.m; path = Sources/Sentry/SentrySpan.m; sourceTree = "<group>"; };
 		044EF4AD7C711272C93D5858BB04731B /* Pods-ExampleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -2765,6 +2771,9 @@
 				1AC1CFCBBA9428C9FA1F716C1239B0F4 /* AuviousConferenceVC.swift */,
 				665D7A74D5723D7C35109B86F92FE33F /* AuviousConferenceVC.xib */,
 				BFFE6157DB5887C562617E44AF6398BD /* AuviousConferenceVCNew.swift */,
+				03A473E92ECCFE4600BA07D5 /* ConferencePopoverVC.swift */,
+				03A474212ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift */,
+				03A474232ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift */,
 			);
 			path = Conference;
 			sourceTree = "<group>";
@@ -5126,6 +5135,7 @@
 				0A01AF5B8AB5B632F1861C8EB3F222D9 /* ConferenceHoldView.swift in Sources */,
 				E948A720253D668D901EA2C98965585D /* ConferenceInitialHoldView.swift in Sources */,
 				48191E8DAAC650D6FD96BDEF53E8DBCB /* ConferenceJoinedEvent.swift in Sources */,
+				03A474222ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift in Sources */,
 				308D4C3D2B2C7AC868B2ED45A4E48E2B /* ConferenceLeftEvent.swift in Sources */,
 				B3BC731981E2F836A93F244A71486381 /* ConferenceMetadataUpdatedEvent.swift in Sources */,
 				8D7D94CBE0E01AB23298BBCA073AAA5A /* ConferenceNetworkIndicatorEvent.swift in Sources */,
@@ -5165,11 +5175,13 @@
 				7E312C417ABF1FAE27070B4ADFB5BD88 /* SnapshotApprovedEvent.swift in Sources */,
 				06005C1C2384FEC6D7F5CCBE080F536C /* SnapshotCameraRequestedEvent.swift in Sources */,
 				FB44A1360BC2A3A2049FBB9BD8B80169 /* SnapshotCameraRequestProcessedEvent.swift in Sources */,
+				03A473EA2ECCFE4600BA07D5 /* ConferencePopoverVC.swift in Sources */,
 				9955A70FC4AC38C8EC72383D96BFBA0F /* SnapshotCameraRQRPRequest.swift in Sources */,
 				A3840CD57F9A9A9370BBA2DD4C823687 /* SnapshotEvent.swift in Sources */,
 				5C041378F9B339572C5127FC8CE8E20D /* SnapshotRequestedEvent.swift in Sources */,
 				25CBFE29A8B48C878E122114A2E56DCC /* SnapshotUploadRequest.swift in Sources */,
 				5AB66F0FD30053F5C23D2D7F11CD7920 /* StopViewStreamRequest.swift in Sources */,
+				03A474242ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift in Sources */,
 				3FD080B8C6C96C42DB17817E204C149B /* StreamButton.swift in Sources */,
 				4A992DCA0EB343E3720C10D9ECE71EDC /* StreamView.swift in Sources */,
 				184543A52B1D773B6B4EE79FC220A1ED /* StreamView.xib in Sources */,

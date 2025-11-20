@@ -51,7 +51,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "ijo-dey"//"fav-xva"
+        usernameTextfield.text = "lso-khd"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -155,11 +155,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     // MARK: AuviousSimpleConferenceDelegate
     
     func onScreenSharingStart() {
-        self.minimizeToPiP(childVC: self.vc)
+        //self.minimizeToPiP(childVC: self.vc)
     }
     
     func onScreenSharingStop() {
-        self.restoreFromPiP(childVC: self.vc)
+        //self.restoreFromPiP(childVC: self.vc)
     }
     
     func onConferenceSuccess() {
@@ -238,93 +238,5 @@ extension ViewController {
         }, completion: { _ in
             childVC.didMove(toParent: self)
         })
-    }
-    
-    private func minimizeToPiP(childVC: UIViewController) {
-        let screenBounds = view.bounds
-        let pipWidth: CGFloat = 100
-        let pipHeight: CGFloat = 160
-        let margin: CGFloat = 20
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
-            childVC.view.frame = CGRect(
-                x: screenBounds.width - pipWidth - margin,
-                y: screenBounds.height - pipHeight - margin,
-                width: pipWidth,
-                height: pipHeight
-            )
-            childVC.view.layer.cornerRadius = 12
-            childVC.view.layer.masksToBounds = true
-        })
-        
-        // Add draggable behavior
-        addDragGesture(to: childVC.view)
-    }
-    
-    func restoreFromPiP(childVC: UIViewController) {
-        let screenBounds = view.bounds
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
-            childVC.view.frame = screenBounds
-            childVC.view.layer.cornerRadius = 0
-        })
-    }
-    
-    func snapToNearestCorner(_ pipView: UIView) {
-        let screenBounds = view.bounds
-        let pipSize = pipView.frame.size
-        let margin: CGFloat = 16
-        
-        // Determine possible corners
-        let topLeft = CGPoint(x: margin, y: margin)
-        let topRight = CGPoint(x: screenBounds.width - pipSize.width - margin, y: margin)
-        let bottomLeft = CGPoint(x: margin, y: screenBounds.height - pipSize.height - margin)
-        let bottomRight = CGPoint(x: screenBounds.width - pipSize.width - margin, y: screenBounds.height - pipSize.height - margin)
-        
-        // Calculate distances to each
-        let positions = [topLeft, topRight, bottomLeft, bottomRight]
-        let currentCenter = pipView.frame.origin
-        let nearest = positions.min(by: {
-            distance(from: $0, to: currentCenter) < distance(from: $1, to: currentCenter)
-        }) ?? bottomRight
-        
-        // Animate to nearest corner
-        UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: {
-            pipView.frame.origin = nearest
-        })
-    }
-
-    private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
-        let dx = p1.x - p2.x
-        let dy = p1.y - p2.y
-        return sqrt(dx*dx + dy*dy)
-    }
-    
-    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-        guard let pipView = gesture.view else { return }
-        
-        let translation = gesture.translation(in: view)
-        
-        switch gesture.state {
-        case .changed:
-            // Move the view with finger
-            pipView.center = CGPoint(
-                x: pipView.center.x + translation.x,
-                y: pipView.center.y + translation.y
-            )
-            gesture.setTranslation(.zero, in: view)
-
-        case .ended, .cancelled:
-            snapToNearestCorner(pipView)
-
-        default:
-            break
-        }
-    }
-    
-    func addDragGesture(to view: UIView) {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-        view.addGestureRecognizer(panGesture)
-        view.isUserInteractionEnabled = true
     }
 }

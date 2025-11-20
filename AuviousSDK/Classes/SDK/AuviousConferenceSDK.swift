@@ -29,6 +29,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Map of parameters to be passed on login call
     internal var loginParams: [String: String]?
     
+    /// UI Configuration
+    internal var uiConfiguration: AuviousConferenceConfiguration = AuviousConferenceConfiguration()
+    
     public var isLoggedIn: Bool {
         return AuthenticationModule.sharedInstance.isLoggedIn
     }
@@ -173,6 +176,15 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
             })
         })
+    }
+    
+    /**
+     Configures the Auvious SDK with the necessary UI settings.
+     
+     - Parameter config: The UI configuration
+     */
+    public func setUIConfiguration(config: AuviousConferenceConfiguration) {
+        self.uiConfiguration = config
     }
     
     /**

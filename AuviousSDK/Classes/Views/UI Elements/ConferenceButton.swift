@@ -8,7 +8,19 @@
 import Foundation
 
 enum ConferenceButtonType {
-    case micEnabled, micDisabled, camEnabled, camDisabled, camSwitch, camSwitchDisabled, hangup, speakerON, speakerOFF, screenShareEnabled, screenShareDisabled
+    case micEnabled
+    case micDisabled
+    case camEnabled
+    case camDisabled
+    case camSwitch
+    case camSwitchDisabled
+    case hangup
+    case speakerON
+    case speakerOFF
+    case screenShareEnabled
+    case screenShareDisabled
+    case options
+    case optionsTapped
 }
 
 class ConferenceButton: UIButton {
@@ -93,9 +105,15 @@ class ConferenceButton: UIButton {
             image = "screenShareON"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
-        case.screenShareDisabled:
+        case .screenShareDisabled:
             image = "screenShareOFF"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.setAngle(150)
+        case .options:
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.setAngle(150)
+        case .optionsTapped:
+            gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         }
         

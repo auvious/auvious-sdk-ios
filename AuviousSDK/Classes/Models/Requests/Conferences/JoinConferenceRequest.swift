@@ -40,8 +40,14 @@ internal final class JoinConferenceRequest {
         //Metadata
         var metaDataDictionary = [String:Any]()
         metaDataDictionary["roles"] = ["CUSTOMER"]
-        //metaDataDictionary["capabilities"] = ["CUSTOMER"]
-//        metaDataDictionary["language"] = ["CUSTOMER"]
+        
+        if AuviousConferenceSDK.sharedInstance.uiConfiguration.screenSharingAvailable {
+            metaDataDictionary["capabilities"] = ["display-capture"]
+        } else {
+            metaDataDictionary["capabilities"] = []
+        }
+        
+//        metaDataDictionary["language"] =
         metaDataDictionary["type"] = "stream"
         metaDataDictionary["mediaDevices"] = NSNull()
         
