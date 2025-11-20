@@ -312,6 +312,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             throw AuviousSDKError.notInConference
         }
         
+        if streamType == .screen {
+            sharingMyScreen = false
+        }
+        
         delegate?.auviousSDK(didChangeState: .localStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:userEndpointId)
         
         if rtcClient.removePublishStreams(streamId: streamId) {

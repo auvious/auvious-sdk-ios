@@ -8,15 +8,42 @@
 import Foundation
 import UIKit
 
+//Delegation of popover button taps
 protocol ConferencePopoverDelegate: class {
     func didPressPIPButton()
     func didPressShareScreenButton()
 }
 
+//Popover button (icon + text)
+final class ConferencePopoverButton: UIButton {
+    init(title: String, iconName: String, backgroundColor: UIColor) {
+        super.init(frame: .zero)
+
+        setTitle(title, for: .normal)
+        setImage(UIImage(podAssetName: iconName), for: .normal)
+
+        self.backgroundColor = backgroundColor
+        self.tintColor = .white
+        setTitleColor(.white, for: .normal)
+        titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+
+        // Layout
+        contentHorizontalAlignment = .leading
+        imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 12)
+        titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
+
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 8
+        clipsToBounds = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+//Popover with PIP/Share screen options
 internal class ConferencePopoverVC: UIViewController {
-    
-    private var pipButton: UIButton = UIButton(frame: .zero)
-    private var shareScreenButton: UIButton = UIButton(frame: .zero)
     
     weak var delegate: ConferencePopoverDelegate?
     
@@ -27,10 +54,22 @@ internal class ConferencePopoverVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .clear
         
+        let pipButton = ConferencePopoverButton(
+            title: NSLocalizedString("Floating window", comment: ""),
+            iconName: "camSwitch",
+            backgroundColor: .systemBlue
+        )
+        
         pipButton.translatesAutoresizingMaskIntoConstraints = false
         pipButton.setTitle(NSLocalizedString("PIP", comment: ""), for: .normal)
         pipButton.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
         pipButton.backgroundColor = .systemBlue
+        
+        let shareScreenButton = ConferencePopoverButton(
+            title: NSLocalizedString("Share Screen", comment: ""),
+            iconName: "camSwitch",
+            backgroundColor: .systemPurple
+        )
         
         shareScreenButton.translatesAutoresizingMaskIntoConstraints = false
         shareScreenButton.setTitle(NSLocalizedString("Share Screen", comment: ""), for: .normal)
@@ -58,7 +97,7 @@ internal class ConferencePopoverVC: UIViewController {
         //Add buttons to stack view
         for b in buttons {
             buttonStackView.addArrangedSubview(b)
-            b.widthAnchor.constraint(equalToConstant: 140).isActive = true
+            b.widthAnchor.constraint(equalToConstant: 170).isActive = true
             b.heightAnchor.constraint(equalToConstant: 45).isActive = true
         }
     }

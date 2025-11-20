@@ -1593,15 +1593,28 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         minimizeToPiP()
     }
     
+    @objc internal func stopScreenShareButtonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        
+        guard let streamId = localScreenShareStreamId else {
+            return
+        }
+        
+        do {
+            try AuviousConferenceSDK.sharedInstance.startUnpublishLocalStreamFlow(streamId: streamId, streamType: .screen)
+        } catch let error {
+            os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+            handleError(error)
+        }
+    }
+    
     @objc internal func screenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
         do {
             minimizeToPiP()
-            //sharingMyScreen = true
             
-            //delegate?.onScreenSharingStart()
-            //localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
+            localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
             
         } catch let error {
             os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
@@ -1617,7 +1630,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             button.type = .optionsTapped
             
             popoverVC.delegate = self
-            popoverVC.preferredContentSize = .init(width: 150, height: 130)
+            popoverVC.preferredContentSize = .init(width: 170, height: 140)
             
             let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
             present(vc, animated: true, completion: nil)
