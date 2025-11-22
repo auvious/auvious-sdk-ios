@@ -68,9 +68,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     //Share screen stream view
     private var shareScreenContainerView: StreamView?
     //Bottom button bar
-    private var buttonContainerView: ConferenceButtonBar!
+    internal var buttonContainerView: ConferenceButtonBar!
     //Button for stopping the screen share when in PIP mode
-    private var stopScreenSharingButton: ConferenceButton!
+    private var stopScreenSharingButton: UIButton = UIButton(frame: .zero)
     
     //Overlay view for hold mode
     private var blurredOverlayView: ConferenceHoldView?
@@ -347,18 +347,18 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         streamContainerView.addSubview(localView)
         
+        //Button bar
+        createButtonBar()
+        
         //Setup screen sharing stop button
-        stopScreenSharingButton = ConferenceButton(type: .screenShareEnabled)
         stopScreenSharingButton.addTarget(self, action: #selector(screenSharePipModePressed), for: .touchUpInside)
         stopScreenSharingButton.alpha = 0
         stopScreenSharingButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stopScreenSharingButton)
         stopScreenSharingButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
-        stopScreenSharingButton.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 0).isActive = true
+        stopScreenSharingButton.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 20).isActive = true
         stopScreenSharingButton.widthAnchor.constraint(equalToConstant: 54).isActive = true
         stopScreenSharingButton.heightAnchor.constraint(equalToConstant: 54).isActive = true
-
-        createButtonBar()
     }
     
     //Shows the toast notification view
@@ -1112,7 +1112,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
-            stopScreenSharingButton.alpha = 0
+            
+            if sharingMyScreen {
+                stopScreenSharingButton.alpha = 0
+            }
             buttonContainerView.alpha = 0
             let agentView = remoteViews[0]
             
@@ -1616,6 +1619,8 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
             
+            buttonContainerView.resetOptionsButton()
+            
         } catch let error {
             os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
@@ -1625,18 +1630,22 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     @objc internal func optionsButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
-        let button = sender as! ConferenceButton
-        if button.type == .options {
-            button.type = .optionsTapped
-            
-            popoverVC.delegate = self
-            popoverVC.preferredContentSize = .init(width: 170, height: 140)
-            
-            let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
-            present(vc, animated: true, completion: nil)
-            
+        if let button = sender as? ConferenceButton {
+            if button.type == .options {
+                button.type = .optionsTapped
+                
+                popoverVC.delegate = self
+                popoverVC.preferredContentSize = .init(width: 180, height: 185)
+                
+                let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
+                present(vc, animated: true, completion: nil)
+                
+            } else {
+                button.type = .options
+            }
         } else {
-            button.type = .options
+            //Pressed from popover button
+            buttonContainerView.resetOptionsButton()
         }
     }
     
@@ -1760,6 +1769,13 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
 
 //Delegates the taps on the conference popover
 extension AuviousConferenceVCNew: ConferencePopoverDelegate {
+    //Calls the same handler as the button bar
+    func didPressSpeakerButton() {
+        popoverVC.dismiss(animated: true, completion: {
+            self.speakerButtonPressed(self)
+        })
+    }
+    
     //Calls the same handler as the button bar
     func didPressPIPButton() {
         popoverVC.dismiss(animated: true, completion: {

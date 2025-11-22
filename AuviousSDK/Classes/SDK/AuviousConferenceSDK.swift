@@ -90,7 +90,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
     
     /// Internal flag for handling the iOS ReplayKit permission dialog app resume
-    private var sharingMyScreen: Bool = false
+    internal var sharingMyScreen: Bool = false
     
     //MARK: -
     //MARK: Pause/Resume handlers

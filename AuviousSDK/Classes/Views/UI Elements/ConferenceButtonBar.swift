@@ -73,19 +73,18 @@ class ConferenceButtonBar: UIView {
         if configuration.microphoneAvailable {
             buttons.append(micButton)
         }
-        if configuration.speakerAvailable {
-            buttons.append(speakerButton)
-        }
+        
         if configuration.cameraAvailable {
             buttons.append(cameraButton)
             buttons.append(cameraSwitchButton)
         }
         
         buttons.append(optionsButton)
-    
-        //buttons.append(screenShareButton)
-//        buttons.append(hangupButton)
         
+//        if configuration.speakerAvailable {
+//            buttons.append(speakerButton)
+//        }
+                
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
         buttonStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -103,16 +102,54 @@ class ConferenceButtonBar: UIView {
         //Add buttons to stack view
         for b in buttons {
             buttonStackView.addArrangedSubview(b)
-            b.widthAnchor.constraint(equalToConstant: 50).isActive = true
-            b.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            b.widthAnchor.constraint(equalToConstant: 55).isActive = true
+            b.heightAnchor.constraint(equalToConstant: 55).isActive = true
         }
         
+        let separatorSpacer = makeSeparatorSpacer()
+        buttonStackView.addArrangedSubview(separatorSpacer)
+
+        buttonStackView.addArrangedSubview(hangupButton)
+        hangupButton.widthAnchor.constraint(equalToConstant: 55).isActive = true
+        hangupButton.heightAnchor.constraint(equalToConstant: 55).isActive = true
+        
         //Add hangup button
-        addSubview(hangupButton)
-        hangupButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
-        hangupButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        hangupButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        hangupButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
+//        addSubview(hangupButton)
+//        hangupButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+//        hangupButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+//        hangupButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+//        hangupButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
+    }
+    
+    private func makeSeparatorSpacer() -> UIView {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = 0
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        let leftSpacer = UIView()
+        let rightSpacer = UIView()
+        [leftSpacer, rightSpacer].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                $0.widthAnchor.constraint(equalToConstant: 3)
+            ])
+        }
+
+        let separator = UIView()
+        separator.backgroundColor = .lightGray
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            separator.widthAnchor.constraint(equalToConstant: 1),
+            separator.heightAnchor.constraint(equalToConstant: 24)
+        ])
+
+        stack.addArrangedSubview(leftSpacer)
+        stack.addArrangedSubview(separator)
+        stack.addArrangedSubview(rightSpacer)
+
+        return stack
     }
     
     //MARK:-
@@ -143,8 +180,12 @@ class ConferenceButtonBar: UIView {
         delegate?.screenShareButtonPressed(sender)
     }
     
-    @objc private func optionsButtonPressed(_ sender: Any) {
+    @objc func optionsButtonPressed(_ sender: Any) {
         delegate?.optionsButtonPressed(sender)
+    }
+    
+    func resetOptionsButton() {
+        optionsButton.type = .options
     }
     
     internal func conferenceOnHold(_ flag: Bool) {
