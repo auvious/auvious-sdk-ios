@@ -609,4 +609,8 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
     internal func rtcClient(agentSwitchedCamera toFront: Bool) {
         delegate?.auviousSDK(agentSwitchedCamera: toFront)
     }
+    
+    internal func rtcClient(didStopScreenSharing: Bool) {}
+    
+    internal func rtcClient(didStartScreenSharing: Bool) {}
 }

@@ -28,15 +28,12 @@ extension AuviousConferenceVCNew {
             self.view.layer.masksToBounds = true
         })
         
+        //Handle sharing border
+        toggleSharingBorder(mode: AuviousConferenceSDK.sharedInstance.sharingMyScreen)
+        
         // Add gestures
         addDragGesture(to: view)
         addTapGestures(to: view)
-        
-//        if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-            view.layer.borderWidth = 4
-            view.layer.borderColor = UIColor.red.cgColor
-            view.layer.masksToBounds = false
-//        }
     }
     
     func enlargePip() {
@@ -60,14 +57,22 @@ extension AuviousConferenceVCNew {
     }
     
     func restoreFromPiP(childVC: UIViewController) {
-        view.layer.borderWidth = 0
-        
         let screenBounds = view.bounds
         
         UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
             childVC.view.frame = screenBounds
             childVC.view.layer.cornerRadius = 0
         })
+    }
+    
+    func toggleSharingBorder(mode: Bool) {
+        if mode {
+            view.layer.borderWidth = 4
+            view.layer.borderColor = UIColor.red.cgColor
+            view.layer.masksToBounds = false
+        } else {
+            view.layer.borderWidth = 0
+        }
     }
     
 }

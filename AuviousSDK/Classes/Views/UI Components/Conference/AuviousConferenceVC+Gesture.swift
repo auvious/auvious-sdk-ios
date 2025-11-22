@@ -35,6 +35,9 @@ extension AuviousConferenceVCNew {
         guard let container = pipView.superview else { return }
 
         screenMode = .fullScreen
+        
+        //Remove sharing border
+        view.layer.borderWidth = 0
 
         UIView.animate(withDuration: 0.3) {
             pipView.frame = container.bounds

@@ -59,5 +59,8 @@ public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
      - Parameter flag: The current state of the portrait mode
      */
     func auviousSDK(agentPortraitMode flag: Bool, endpointId: String)
+    
+    func auviousSDK(screenSharingStarted: Bool)
+    func auviousSDK(screenSharingStopped: Bool)
 }
 

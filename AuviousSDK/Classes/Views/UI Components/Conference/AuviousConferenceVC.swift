@@ -289,6 +289,9 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
     }
     
+    public func auviousSDK(screenSharingStarted: Bool) {}
+    public func auviousSDK(screenSharingStopped: Bool) {}
+    
     //MARK: Collection view
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

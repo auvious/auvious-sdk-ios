@@ -1057,6 +1057,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    public func auviousSDK(screenSharingStarted: Bool) {
+        minimizeToPiP()
+        
+        //Display sharing border
+        toggleSharingBorder(mode: true)
+    }
+    
+    public func auviousSDK(screenSharingStopped: Bool) {}
+    
     // MARK: -
     // MARK: UI
     // MARK: -
@@ -1611,12 +1620,12 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    //Try to start the screen sharing - will trigger iOS permission dialog
+    //UI changes will occur once delegation ensures sharing started
     @objc internal func screenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
         do {
-            minimizeToPiP()
-            
             localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
             
             buttonContainerView.resetOptionsButton()

@@ -23,6 +23,8 @@ internal protocol RTCDelegate {
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
     func rtcClient(agentSwitchedCamera toFront: Bool)
     func rtcClient(recorderStateChanged toActive: Bool)
+    func rtcClient(didStopScreenSharing: Bool)
+    func rtcClient(didStartScreenSharing: Bool)
     
     //rest call
     func rtcClient(call streamId: String, sdpOffer: String, target: String)
@@ -295,6 +297,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         
         localScreenVideoSource = factory.videoSource()
         screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
+        screenCapturer.delegate = self
         screenCapturer.start()
         
         localScreenVideoTrack = factory.videoTrack(with: localScreenVideoSource!, trackId: "screenVideo")
@@ -302,6 +305,12 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         localScreenStream!.addVideoTrack(localScreenVideoTrack!)
         
         return localScreenStream!
+    }
+    
+    internal func stopScreenSharing() {
+        os_log("stopScreenSharing() for type screen and stream %@", log: Log.rtc, type: .debug, localScreenStream ?? "nil")
+        delegate?.rtcClient(didStopScreenSharing: true)
+        screenCapturer?.stop()
     }
     
     internal func createLocalMediaStream(type: StreamType, streamId: String) -> RTCMediaStream {
@@ -1058,4 +1067,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             }
         }
     }
+}
+
+extension RTCModule: ScreenCapturerDelegate {
+    func onScreenSharingStart() {
+        delegate?.rtcClient(didStartScreenSharing: true)
+    }
+    
+    func onScreenSharingStop() {
+        
+    }
+    
+    
 }
