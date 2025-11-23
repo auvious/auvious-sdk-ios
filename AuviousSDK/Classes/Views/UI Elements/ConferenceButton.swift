@@ -126,5 +126,76 @@ class ConferenceButton: UIButton {
     }
 }
 
+final class LargeButton: UIButton {
+    private let gradientView = UIView()
+    private let gradientLayer = CAGradientLayer()
+    private let iconView = UIImageView()
+    private let label = UILabel()
 
+    init(title: String, iconName: String) {
+        super.init(frame: .zero)
 
+        // Setup gradient
+        gradientView.isUserInteractionEnabled = false
+        gradientView.translatesAutoresizingMaskIntoConstraints = false
+        insertSubview(gradientView, at: 0)
+        gradientLayer.colors = [
+            UIColor(red: 245/255, green: 39/255, blue: 107/255, alpha: 0.85).cgColor,
+            UIColor(red: 227/255, green: 23/255, blue: 23/255, alpha: 0.85).cgColor
+        ]
+        gradientLayer.setAngle(150)
+        gradientView.layer.addSublayer(gradientLayer)
+
+        // Setup icon
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.image = UIImage(podAssetName: iconName)
+        iconView.contentMode = .scaleAspectFit
+        iconView.tintColor = .white
+
+        // Setup label
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = title
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+
+        let stack = UIStackView(arrangedSubviews: [iconView, label])
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        
+        // Layout constraints
+        NSLayoutConstraint.activate([
+            gradientView.topAnchor.constraint(equalTo: topAnchor),
+            gradientView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            gradientView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            gradientView.trailingAnchor.constraint(equalTo: trailingAnchor),
+
+            stack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            iconView.widthAnchor.constraint(equalToConstant: 25),
+            iconView.heightAnchor.constraint(equalToConstant: 25)
+        ])
+
+        layer.cornerRadius = 8
+        clipsToBounds = true
+        translatesAutoresizingMaskIntoConstraints = false
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer.frame = gradientView.bounds
+    }
+
+    override var isHighlighted: Bool {
+        didSet {
+            alpha = isHighlighted ? 0.6 : 1.0
+        }
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}

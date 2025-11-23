@@ -70,7 +70,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     //Bottom button bar
     internal var buttonContainerView: ConferenceButtonBar!
     //Button for stopping the screen share when in PIP mode
-    private var stopScreenSharingButton: UIButton = UIButton(frame: .zero)
+    private var stopScreenSharingButton: LargeButton = LargeButton(title: "Stop sharing", iconName: "stopSharing")
     
     //Overlay view for hold mode
     private var blurredOverlayView: ConferenceHoldView?
@@ -124,11 +124,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
     private var initialStreamsConnected: Bool = false
-    private var sharingMyScreen: Bool = false {
-        didSet {
-            createConstraints()
-        }
-    }
     
     //Delegate
     private weak var delegate: AuviousSimpleConferenceDelegate?
@@ -353,11 +348,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Setup screen sharing stop button
         stopScreenSharingButton.addTarget(self, action: #selector(screenSharePipModePressed), for: .touchUpInside)
         stopScreenSharingButton.alpha = 0
+        stopScreenSharingButton.backgroundColor = .red
         stopScreenSharingButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stopScreenSharingButton)
         stopScreenSharingButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
-        stopScreenSharingButton.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: 20).isActive = true
-        stopScreenSharingButton.widthAnchor.constraint(equalToConstant: 54).isActive = true
+        stopScreenSharingButton.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -20).isActive = true
+        stopScreenSharingButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
+        stopScreenSharingButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         stopScreenSharingButton.heightAnchor.constraint(equalToConstant: 54).isActive = true
     }
     
@@ -1122,7 +1119,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
             
-            if sharingMyScreen {
+            if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 0
             }
             buttonContainerView.alpha = 0
@@ -1147,7 +1144,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         } else {
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 1
-            stopScreenSharingButton.alpha = 0
+            
+            if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                stopScreenSharingButton.alpha = 1
+            }
+            
+            //Show button container
             buttonContainerView.alpha = 1
             
             //Full screen screen sharing
@@ -1595,14 +1597,16 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     @objc internal func screenSharePipModePressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
-        sharingMyScreen = false
+        //sharingMyScreen = false
         
         //delegate?.onScreenSharingStop()
     }
     
     @objc internal func pipModeButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
+        
         minimizeToPiP()
+        buttonContainerView.resetOptionsButton()
     }
     
     @objc internal func stopScreenShareButtonPressed(_ sender: Any) {
