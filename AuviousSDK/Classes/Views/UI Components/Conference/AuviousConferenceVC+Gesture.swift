@@ -9,25 +9,33 @@ import Foundation
 
 extension AuviousConferenceVCNew {
     
+    //Toggles the gestures so that they only work outside fullscreen mode
+    func updateGestureState(for mode: ScreenMode) {
+        let enabled = mode != .fullScreen
+        tapGesture?.isEnabled = enabled
+        doubleTapGesture?.isEnabled = enabled
+        panGesture?.isEnabled = enabled
+    }
+    
     //Draggable pip view
     func addDragGesture(to view: UIView) {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         view.addGestureRecognizer(panGesture)
         view.isUserInteractionEnabled = true
     }
     
     //Tappable pip view
     func addTapGestures(to view: UIView) {
-        let singleTap = UITapGestureRecognizer(target: self, action: #selector(handlePiPTap(_:)))
-        singleTap.numberOfTapsRequired = 1
+        tapGesture = UITapGestureRecognizer(target: self, action: #selector(handlePiPTap(_:)))
+        tapGesture.numberOfTapsRequired = 1
         
-        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handlePiPDoubleTap(_:)))
-        doubleTap.numberOfTapsRequired = 2
+        doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(handlePiPDoubleTap(_:)))
+        doubleTapGesture.numberOfTapsRequired = 2
         
-        singleTap.require(toFail: doubleTap)
+        tapGesture.require(toFail: doubleTapGesture)
         
-        view.addGestureRecognizer(singleTap)
-        view.addGestureRecognizer(doubleTap)
+        view.addGestureRecognizer(tapGesture)
+        view.addGestureRecognizer(doubleTapGesture)
     }
     
     @objc func handlePiPDoubleTap(_ gesture: UITapGestureRecognizer) {

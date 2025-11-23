@@ -37,9 +37,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    //Pip gestures
+    internal var panGesture: UIPanGestureRecognizer!
+    internal var tapGesture: UITapGestureRecognizer!
+    internal var doubleTapGesture: UITapGestureRecognizer!
+    
     //The current state of our UI
     internal var screenMode: ScreenMode = .fullScreen {
         didSet {
+            updateGestureState(for: screenMode)
             createConstraints()
         }
     }
