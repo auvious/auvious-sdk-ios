@@ -42,6 +42,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal var tapGesture: UITapGestureRecognizer!
     internal var doubleTapGesture: UITapGestureRecognizer!
     
+    //Pip buttons
+    internal var pipMuteButton: UIButton = UIButton(frame: .zero)
+    internal var pipMaximiseButton: UIButton = UIButton(frame: .zero)
+    
     //The current state of our UI
     internal var screenMode: ScreenMode = .fullScreen {
         didSet {
@@ -362,6 +366,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         stopScreenSharingButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
         stopScreenSharingButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         stopScreenSharingButton.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        
+        //Setup PIP maximise button
+        view.addSubview(pipMaximiseButton)
+        pipMaximiseButton.alpha = 0
+        pipMaximiseButton.setImage(UIImage(systemName: "arrow.down.left.and.arrow.up.right")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        pipMaximiseButton.tintColor = .white
+        pipMaximiseButton.addTarget(self, action: #selector(self.maximisebuttonPressed(_:)), for: .touchUpInside)
+        pipMaximiseButton.translatesAutoresizingMaskIntoConstraints = false
+        pipMaximiseButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
+        pipMaximiseButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -5).isActive = true
+        pipMaximiseButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
     
     //Shows the toast notification view
@@ -1124,6 +1139,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
+            pipMaximiseButton.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 0
@@ -1141,6 +1157,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             networkIndicator.alpha = 0
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
+            pipMaximiseButton.alpha = 1
             let agentView = remoteViews[0]
             
             constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
@@ -1150,6 +1167,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         } else {
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 1
+            pipMaximiseButton.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 1
@@ -1600,12 +1618,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 // MARK: -
 extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     
-    @objc internal func screenSharePipModePressed(_ sender: Any) {
+    @objc internal func maximisebuttonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
-        
-        //sharingMyScreen = false
-        
-        //delegate?.onScreenSharingStop()
+        handlePiPDoubleTap(self.doubleTapGesture)
     }
     
     @objc internal func pipModeButtonPressed(_ sender: Any) {
