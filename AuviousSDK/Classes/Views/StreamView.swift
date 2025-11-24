@@ -179,6 +179,16 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         overlayView!.addSubview(overlayIcon!)
     }
     
+    func hideOverlay() {
+        overlayView?.alpha = 0
+        overlayIcon?.alpha = 0
+    }
+    
+    func restoreOverlay() {
+        overlayView?.alpha = 1
+        overlayIcon?.alpha = 1
+    }
+    
     private func handleOverlay() {
         guard !isScreen else {
             return
@@ -274,12 +284,19 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         handleOverlay()
     }
     
-    public func audioStreamRemoved(){
+    public func audioStreamRemoved(screenMode: ScreenMode){
         hasAudioStream = false
         
 //        if !hasVideoStream {
 //            resetStreamView()
 //        }
+        
+        
+        if screenMode == .expandedPip {
+            hasAudioStream = true
+            hasVideoStream = true
+        }
+        
         //Apply overlay
         handleOverlay()
     }

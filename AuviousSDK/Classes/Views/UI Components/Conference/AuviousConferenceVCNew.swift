@@ -8,34 +8,34 @@
 import UIKit
 import os
 
-public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDelegate {
+//Defines the possible UI modes
+public enum ScreenMode {
+    case fullScreen, pip, expandedPip
     
-    //Defines the possible UI modes
-    enum ScreenMode {
-        case fullScreen, pip, expandedPip
-        
-        var width: CGFloat {
-            switch self {
-            case .fullScreen:
-                return UIScreen.main.bounds.width
-            case .pip:
-                return 100
-            case .expandedPip:
-                return 130
-            }
-        }
-        
-        var height: CGFloat {
-            switch self {
-            case .fullScreen:
-                return UIScreen.main.bounds.height
-            case .pip:
-                return 160
-            case .expandedPip:
-                return 208
-            }
+    var width: CGFloat {
+        switch self {
+        case .fullScreen:
+            return UIScreen.main.bounds.width
+        case .pip:
+            return 100
+        case .expandedPip:
+            return 130
         }
     }
+    
+    var height: CGFloat {
+        switch self {
+        case .fullScreen:
+            return UIScreen.main.bounds.height
+        case .pip:
+            return 160
+        case .expandedPip:
+            return 208
+        }
+    }
+}
+
+public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDelegate {
     
     //Pip gestures
     internal var panGesture: UIPanGestureRecognizer!
@@ -687,7 +687,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
                     if index < maximumRemoteStreamsRendered {
                         if streamType == .mic {
-                            remoteView.audioStreamRemoved()
+                            remoteView.audioStreamRemoved(screenMode: screenMode)
                         } else if streamType == .cam {
                             remoteView.videoStreamRemoved()
                         } else if streamType == .micAndCam {
@@ -707,7 +707,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     if streamType == .cam {
                         remoteView.videoStreamRemoved()
                     } else if streamType == .mic {
-                        remoteView.audioStreamRemoved()
+                        remoteView.audioStreamRemoved(screenMode: screenMode)
                     } else if streamType == .micAndCam {
                         remoteView.avStreamRemoved()
                     }
@@ -899,7 +899,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                     //Hande muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
-                        remoteView.audioStreamRemoved()
+                        remoteView.audioStreamRemoved(screenMode: self.screenMode)
                         self.isAgentMuted = true
                     }
                     
@@ -910,7 +910,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     
                     //Handle muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
-                        remoteView.audioStreamRemoved()
+                        remoteView.audioStreamRemoved(screenMode: self.screenMode)
                         self.isAgentMuted = true
                     }
                 }
@@ -991,10 +991,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         // sync local view with call type
         switch (configuredStreamType){
             case .cam:
-                localView.audioStreamRemoved();
+                localView.audioStreamRemoved(screenMode: screenMode)
                 break;
             case .mic:
-                localView.videoStreamRemoved();
+                localView.videoStreamRemoved()
                 break;
             default:
                 // no changes
@@ -1034,7 +1034,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         if let index = remoteParticipantIndex {
             if type == .mic {
-                remoteViews[index].audioStreamRemoved()
+                remoteViews[index].audioStreamRemoved(screenMode: screenMode)
                 isAgentMuted = true
             } else if type == .cam {
                 remoteViews[index].videoStreamRemoved()
@@ -1145,7 +1145,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 stopScreenSharingButton.alpha = 0
             }
             buttonContainerView.alpha = 0
+            
             let agentView = remoteViews[0]
+            agentView.hideOverlay()
             
             constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
             constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
@@ -1158,7 +1160,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
             pipMaximiseButton.alpha = 1
+            
             let agentView = remoteViews[0]
+            agentView.hideOverlay()
             
             constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
             constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
@@ -1273,12 +1277,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     constraints.append(shareScreenContainer.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                     constraints.append(shareScreenContainer.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                     constraints.append(shareScreenContainer.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                    //constraints.append(localView.topAnchor.constraint(equalTo: shareScreenContainer.bottomAnchor, constant: 15))
                 }
             } else {
                 
                 //Local view, no screen sharing
                 if shareScreenContainerView == nil && remoteViews.count < maximumRemoteStreamsRendered {
+                    
+                    for r in remoteViews { r.restoreOverlay() }
                     
                     //Solo, no screen sharing
                     if remoteViews.count == 0 {
@@ -1801,7 +1806,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         } else {
             // close microphone
             button.type = .micDisabled
-            localView.audioStreamRemoved()
+            localView.audioStreamRemoved(screenMode: screenMode)
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .audio, onSuccess: {
                 AuviousNotification.shared.show(.microphoneOff)

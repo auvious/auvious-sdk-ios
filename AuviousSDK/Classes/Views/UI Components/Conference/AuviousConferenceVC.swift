@@ -448,7 +448,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                 
                 if let cell = self.collectionView.cellForItem(at: indexPath) as? ConferenceCell {
                     if streamType == .mic {
-                        cell.streamView.audioStreamRemoved()
+                        //cell.streamView.audioStreamRemoved()
                     } else if streamType == .cam {
                         cell.streamView.videoStreamRemoved()
                     } else if streamType == .micAndCam {
@@ -466,7 +466,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                     if streamType == .cam {
                         cell.streamView.videoStreamRemoved()
                     } else if streamType == .mic {
-                        cell.streamView.audioStreamRemoved()
+                        //cell.streamView.audioStreamRemoved()
                     } else if streamType == .micAndCam {
                         cell.streamView.avStreamRemoved()
                     }
