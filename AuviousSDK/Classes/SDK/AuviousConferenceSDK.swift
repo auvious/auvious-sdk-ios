@@ -348,6 +348,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             throw AuviousSDKError.notInConference
         }
         
+        if streamType == .screen {
+            rtcClient.stopScreenSharing()
+        }
+        
         let usRequest = UnpublishStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: endpointId, userId: userId)
         API2.sharedInstance.unpublishStream(usRequest, onSuccess: {(json) in
             

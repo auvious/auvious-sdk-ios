@@ -352,7 +352,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         createButtonBar()
         
         //Setup screen sharing stop button
-        stopScreenSharingButton.addTarget(self, action: #selector(screenSharePipModePressed), for: .touchUpInside)
+        stopScreenSharingButton.addTarget(self, action: #selector(stopScreenShareButtonPressed), for: .touchUpInside)
         stopScreenSharingButton.alpha = 0
         stopScreenSharingButton.backgroundColor = .red
         stopScreenSharingButton.translatesAutoresizingMaskIntoConstraints = false
@@ -1615,6 +1615,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         buttonContainerView.resetOptionsButton()
     }
     
+    //Stops screen sharing
     @objc internal func stopScreenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
@@ -1624,6 +1625,10 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         
         do {
             try AuviousConferenceSDK.sharedInstance.startUnpublishLocalStreamFlow(streamId: streamId, streamType: .screen)
+            
+            DispatchQueue.main.async {
+                self.stopScreenSharingButton.alpha = 0
+            }
         } catch let error {
             os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
@@ -1646,6 +1651,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    //Options button will toggle the popup presentation
     @objc internal func optionsButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
@@ -1668,6 +1674,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    //Terminates the conference
     @objc internal func hangupButtonPressed(_ sender: Any) {
         os_log("hangupButtonPressed", log: Log.conferenceUI, type: .debug)
         selectionFeedbackGenerator.impactOccurred()
@@ -1681,11 +1688,13 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         })
     }
     
+    //Toggles front/rear cam
     @objc internal func camSwitchButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         AuviousConferenceSDK.sharedInstance.switchCamera()
     }
     
+    //Toggles audio routing to speaker/earpiece
     @objc internal func speakerButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         let button = sender as! ConferenceButton
@@ -1699,6 +1708,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    //Toggles video stream
     @objc internal func cameraButtonPressed(_ sender: Any) {
         guard let localStreamId = localStreamId else {
             return
@@ -1744,6 +1754,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    //Toggles audio stream
     @objc internal func micButtonPressed(_ sender: Any) {
         guard let localStreamId = localStreamId else {
             return
