@@ -30,6 +30,7 @@ class ConferenceButton: UIButton {
             setup()
         }
     }
+    
     private var gradientLayer = CAGradientLayer()
     
     init(type: ConferenceButtonType) {
@@ -117,6 +118,46 @@ class ConferenceButton: UIButton {
             image = "moreOptionsPressed"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
+        }
+        
+        //Background image
+        setImage(UIImage(podAssetName: image), for: [])
+        contentMode = .center
+        imageView?.contentMode = .scaleAspectFit
+    }
+}
+
+enum PIPButtonType {
+    case micEnabled, micDisabled
+}
+
+final class PIPButton: UIButton {
+    var type: PIPButtonType {
+        didSet {
+            setup()
+        }
+    }
+    
+    init(type: PIPButtonType) {
+        self.type = type
+        
+        super.init(frame: .zero)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setup() {
+        translatesAutoresizingMaskIntoConstraints = false
+        var image: String = ""
+        
+        switch type {
+        case .micDisabled:
+            image = "micDisabled"
+        case .micEnabled:
+            image = "micEnabled"
         }
         
         //Background image

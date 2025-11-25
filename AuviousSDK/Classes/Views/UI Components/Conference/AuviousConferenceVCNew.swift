@@ -43,7 +43,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal var doubleTapGesture: UITapGestureRecognizer!
     
     //Pip buttons
-    internal var pipMuteButton: UIButton = UIButton(frame: .zero)
+    internal var pipMuteButton: PIPButton = PIPButton(type: .micEnabled)
     internal var pipMaximiseButton: UIButton = UIButton(frame: .zero)
     
     //The current state of our UI
@@ -358,7 +358,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Setup screen sharing stop button
         stopScreenSharingButton.addTarget(self, action: #selector(stopScreenShareButtonPressed), for: .touchUpInside)
         stopScreenSharingButton.alpha = 0
-        stopScreenSharingButton.backgroundColor = .red
         stopScreenSharingButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stopScreenSharingButton)
         stopScreenSharingButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
@@ -377,6 +376,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         pipMaximiseButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         pipMaximiseButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -5).isActive = true
         pipMaximiseButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        
+        //Setup PIP mute button
+        view.addSubview(pipMuteButton)
+        let initialPIPMuteImageName: PIPButtonType = configuredStreamType == .cam ? .micDisabled : .micEnabled
+        pipMuteButton.alpha = 0
+        pipMuteButton.type = initialPIPMuteImageName
+        pipMuteButton.addTarget(self, action: #selector(self.pipMicButtonPressed(_:)), for: .touchUpInside)
+        pipMuteButton.translatesAutoresizingMaskIntoConstraints = false
+        pipMuteButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
+        pipMuteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 10).isActive = true
+        pipMuteButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
     }
     
     //Shows the toast notification view
@@ -1140,6 +1150,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
             pipMaximiseButton.alpha = 0
+            pipMuteButton.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 0
@@ -1160,6 +1171,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
             pipMaximiseButton.alpha = 1
+            pipMuteButton.alpha = 1
             
             let agentView = remoteViews[0]
             agentView.hideOverlay()
@@ -1172,6 +1184,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 1
             pipMaximiseButton.alpha = 0
+            pipMuteButton.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 1
@@ -1781,12 +1794,12 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
         
         selectionFeedbackGenerator.impactOccurred()
-        
         let button = sender as! ConferenceButton
         
         // open microphone
         if button.type == .micDisabled {
             button.type = .micEnabled
+            pipMuteButton.type = .micEnabled
             localView.audioStreamAdded()
             
             if localStreamType == .cam {
@@ -1806,10 +1819,57 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         } else {
             // close microphone
             button.type = .micDisabled
+            pipMuteButton.type = .micDisabled
             localView.audioStreamRemoved(screenMode: screenMode)
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .audio, onSuccess: {
                 AuviousNotification.shared.show(.microphoneOff)
+                
+            }, onFailure: { error in
+            })
+        }
+    }
+    
+    @objc internal func pipMicButtonPressed(_ sender: Any) {
+        guard let localStreamId = localStreamId else {
+            return
+        }
+        
+        selectionFeedbackGenerator.impactOccurred()
+        let button = sender as! PIPButton
+        
+        // open microphone
+        if button.type == .micDisabled {
+            button.type = .micEnabled
+            buttonContainerView.micButton.type = .micEnabled
+            localView.audioStreamAdded()
+            
+            if localStreamType == .cam {
+                // cam is open, we need to unpublish and publish a micAndCam stream
+                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
+                configuredStreamType = .micAndCam
+                startLocalStream()
+                
+            } else {
+                AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
+                    
+                    //Don't show notification in PIP mode
+                    //AuviousNotification.shared.show(.microphoneOn)
+                    
+                }, onFailure: { error in
+                })
+            }
+            
+        } else {
+            // close microphone
+            button.type = .micDisabled
+            buttonContainerView.micButton.type = .micDisabled
+            localView.audioStreamRemoved(screenMode: screenMode)
+            
+            AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .audio, onSuccess: {
+                
+                //Don't show notification in PIP mode
+//                AuviousNotification.shared.show(.microphoneOff)
                 
             }, onFailure: { error in
             })
