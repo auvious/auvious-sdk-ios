@@ -58,7 +58,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var clientConfiguration = AuviousConferenceConfiguration()
     
     //Popover options (PIP, screen share)
-    private let popoverVC = ConferencePopoverVC()
+    private var popoverVC = ConferencePopoverVC(buttons: [])
     
     //Network indicator view
     private let networkIndicator = NetworkIndicatorView()
@@ -354,6 +354,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         //Button bar
         createButtonBar()
+        
+        //Create popover with remaining buttons
+        popoverVC = ConferencePopoverVC(buttons: buttonContainerView.popoverButtons)
         
         //Setup screen sharing stop button
         stopScreenSharingButton.addTarget(self, action: #selector(stopScreenShareButtonPressed), for: .touchUpInside)
@@ -1636,16 +1639,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 // MARK: -
 extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     
-    @objc internal func maximisebuttonPressed(_ sender: Any) {
-        selectionFeedbackGenerator.impactOccurred()
-        handlePiPDoubleTap(self.doubleTapGesture)
-    }
-    
-    @objc internal func pipModeButtonPressed(_ sender: Any) {
+    func pipButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
         
         minimizeToPiP()
         buttonContainerView.resetOptionsButton()
+    }
+    
+    @objc internal func maximisebuttonPressed(_ sender: Any) {
+        selectionFeedbackGenerator.impactOccurred()
+        handlePiPDoubleTap(self.doubleTapGesture)
     }
     
     //Stops screen sharing
@@ -1889,7 +1892,7 @@ extension AuviousConferenceVCNew: ConferencePopoverDelegate {
     //Calls the same handler as the button bar
     func didPressPIPButton() {
         popoverVC.dismiss(animated: true, completion: {
-            self.pipModeButtonPressed(self)
+            self.pipButtonPressed(self)
         })
     }
     

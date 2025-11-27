@@ -17,14 +17,19 @@ protocol ConferencePopoverDelegate: class {
 
 //Popover button (icon + text)
 final class ConferencePopoverButton: UIButton {
-    init(title: String, iconName: String, backgroundColor: UIColor) {
+    var type: ConferenceButtonType!
+    
+    init(type: ConferenceButtonType) {
+        self.type = type
+        
         super.init(frame: .zero)
 
-        setTitle(title, for: .normal)
-        setImage(UIImage(podAssetName: iconName), for: .normal)
+        setTitle(type.title, for: .normal)
+        let image = UIImage(podAssetName: type.imageName)?.withRenderingMode(.alwaysTemplate)
+        setImage(image, for: .normal)
 
-        self.backgroundColor = backgroundColor
-        self.tintColor = .white
+        self.backgroundColor = .clear
+        self.tintColor = .black
         setTitleColor(.systemBlue, for: .normal)
         titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
 
@@ -51,37 +56,33 @@ internal class ConferencePopoverVC: UIViewController {
     //Container of the buttons
     private var buttonStackView: UIStackView!
     
+    //Buttons
+    private var buttons: [ConferencePopoverButton] = []
+    
+    init(buttons: [ConferencePopoverButton]) {
+        self.buttons = buttons
+        super.init(nibName: nil, bundle: Bundle(for: ConferencePopoverVC.self))
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        let speakerButton = ConferencePopoverButton(
-            title: NSLocalizedString("Use earpiece", comment: ""),
-            iconName: "speakerON",
-            backgroundColor: .clear
-        )
-        
-        speakerButton.translatesAutoresizingMaskIntoConstraints = false
-        speakerButton.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
-        //
-        
-        let pipButton = ConferencePopoverButton(
-            title: NSLocalizedString("Floating window", comment: ""),
-            iconName: "pipDark",
-            backgroundColor: .clear
-        )
-        
-        pipButton.translatesAutoresizingMaskIntoConstraints = false
-        pipButton.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
-        
-        let shareScreenButton = ConferencePopoverButton(
-            title: NSLocalizedString("Share screen", comment: ""),
-            iconName: "screenShareON",
-            backgroundColor: .clear
-        )
-        
-        shareScreenButton.translatesAutoresizingMaskIntoConstraints = false
-        shareScreenButton.addTarget(self, action: #selector(self.shareScreenButtonPressed(_:)), for: .touchUpInside)
+        for b in buttons {
+            b.translatesAutoresizingMaskIntoConstraints = false
+            
+            if b.type == .speakerON {
+                b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
+            } else if b.type == .pip {
+                b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
+            } else if b.type == .screenShareDisabled {
+                b.addTarget(self, action: #selector(self.shareScreenButtonPressed(_:)), for: .touchUpInside)
+            }
+        }
         
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
@@ -95,12 +96,6 @@ internal class ConferencePopoverVC: UIViewController {
         //Stack view constraints
         buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         buttonStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        
-        //Add buttons according to the configuration
-        var buttons: [UIButton] = []
-        buttons.append(speakerButton)
-        buttons.append(shareScreenButton)
-        buttons.append(pipButton)
         
         //Add buttons to stack view
         for b in buttons {

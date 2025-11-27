@@ -15,10 +15,16 @@ internal protocol ConferenceButtonBarDelegate: class {
     func hangupButtonPressed(_ sender: Any)
     func screenShareButtonPressed(_ sender: Any)
     func optionsButtonPressed(_ sender: Any)
+    func pipButtonPressed(_ sender: Any)
 }
 
 class ConferenceButtonBar: UIView {
     private var configuration: AuviousConferenceConfiguration!
+    
+    let maxItems: Int = 4
+    
+    //Popover buttons
+    var popoverButtons: [ConferencePopoverButton] = []
     
     //Buttons
     let speakerButton = ConferenceButton(type: .speakerON)
@@ -28,6 +34,7 @@ class ConferenceButtonBar: UIView {
     let hangupButton = ConferenceButton(type: .hangup)
     let screenShareButton = ConferenceButton(type: .screenShareDisabled)
     let optionsButton = ConferenceButton(type: .options)
+    let pipButton = ConferenceButton(type: .pip)
     
     let buttonSeparator = UIView(frame: .zero)
     
@@ -66,6 +73,7 @@ class ConferenceButtonBar: UIView {
         speakerButton.addTarget(self, action: #selector(self.speakerButtonPressed(_:)), for: .touchUpInside)
         screenShareButton.addTarget(self, action: #selector(self.screenShareButtonPressed(_:)), for: .touchUpInside)
         optionsButton.addTarget(self, action: #selector(self.optionsButtonPressed(_:)), for: .touchUpInside)
+        pipButton.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
         
         //Add buttons according to the configuration
         var buttons: [ConferenceButton] = []
@@ -78,13 +86,36 @@ class ConferenceButtonBar: UIView {
             buttons.append(cameraButton)
             buttons.append(cameraSwitchButton)
         }
+
+        if configuration.speakerAvailable {
+            buttons.append(speakerButton)
+        }
         
-        buttons.append(optionsButton)
+        if configuration.pipAvailable {
+            buttons.append(pipButton)
+        }
         
-//        if configuration.speakerAvailable {
-//            buttons.append(speakerButton)
-//        }
-                
+        if  configuration.screenSharingAvailable {
+            buttons.append(screenShareButton)
+        }
+        
+        // Handle overflow with options button
+        popoverButtons.removeAll()
+
+        if buttons.count > maxItems {
+            // Reserve 1 slot for the options button
+            let visibleCount = maxItems - 1
+
+            // Split visible + overflow
+            let visibleButtons = buttons.prefix(visibleCount)
+            let overflowButtons = buttons.suffix(from: visibleCount)
+
+            // Update main and popover buttons
+            buttons = Array(visibleButtons)
+            buttons.append(optionsButton)
+            popoverButtons = overflowButtons.map { ConferencePopoverButton(type: $0.type) }
+        }
+        
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
         buttonStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -112,13 +143,6 @@ class ConferenceButtonBar: UIView {
         buttonStackView.addArrangedSubview(hangupButton)
         hangupButton.widthAnchor.constraint(equalToConstant: 55).isActive = true
         hangupButton.heightAnchor.constraint(equalToConstant: 55).isActive = true
-        
-        //Add hangup button
-//        addSubview(hangupButton)
-//        hangupButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
-//        hangupButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-//        hangupButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-//        hangupButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
     }
     
     private func makeSeparatorSpacer() -> UIView {
@@ -182,6 +206,10 @@ class ConferenceButtonBar: UIView {
     
     @objc func optionsButtonPressed(_ sender: Any) {
         delegate?.optionsButtonPressed(sender)
+    }
+    
+    @objc func pipButtonPressed(_ sender: Any) {
+        delegate?.pipButtonPressed(sender)
     }
     
     func resetOptionsButton() {

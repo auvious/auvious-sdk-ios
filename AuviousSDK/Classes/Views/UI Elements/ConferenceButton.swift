@@ -21,6 +21,53 @@ enum ConferenceButtonType {
     case screenShareDisabled
     case options
     case optionsTapped
+    case pip
+    
+    var title: String {
+        switch self {
+        case .speakerON:
+            return NSLocalizedString("Use earpiece", comment: "")
+        case .pip:
+            return NSLocalizedString("Floating window", comment: "")
+        case .screenShareDisabled:
+            return NSLocalizedString("Share screen", comment: "")
+        default:
+            return "Default title"
+        }
+    }
+    
+    var imageName: String {
+        switch self {
+        case .micEnabled:
+            return "micEnabled"
+        case .micDisabled:
+            return "micDisabledDark"
+        case .camEnabled:
+            return "camEnabled"
+        case .camDisabled:
+            return "camDisabledDark"
+        case .camSwitch:
+            return "camSwitch"
+        case .camSwitchDisabled:
+            return "camSwitch"
+        case .hangup:
+            return "hangup"
+        case .speakerON:
+            return "speakerON"
+        case .speakerOFF:
+            return "speakerOFF"
+        case .screenShareEnabled:
+            return "screenShareON"
+        case .screenShareDisabled:
+            return "screenShareOFF"
+        case .options:
+            return "moreOptions"
+        case .optionsTapped:
+            return "moreOptionsPressed"
+        case .pip:
+            return "pip"
+        }
+    }
 }
 
 class ConferenceButton: UIButton {
@@ -63,64 +110,55 @@ class ConferenceButton: UIButton {
         //Background gradient
         switch type {
         case .micEnabled:
-            image = "micEnabled"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .micDisabled:
-            image = "micDisabledDark"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .camEnabled:
-            image = "camEnabled"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .camDisabled:
-            image = "camDisabledDark"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .camSwitch:
-            image = "camSwitch"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 1
             super.isEnabled = true
         case .camSwitchDisabled:
-            image = "camSwitch"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.45).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.45).cgColor]
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 0.3
             super.isEnabled = false
         case .hangup:
-            image = "hangup"
             gradientLayer.colors = [UIColor(red: 245/255, green: 39/255, blue: 107/255, alpha: 0.85).cgColor, UIColor(red: 227/255, green: 23/255, blue: 23/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .speakerON:
-            image = "speakerON"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .speakerOFF:
-            image = "speakerOFF"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .screenShareEnabled:
-            image = "screenShareON"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .screenShareDisabled:
-            image = "screenShareOFF"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .options:
-            image = "moreOptions"
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         case .optionsTapped:
-            image = "moreOptionsPressed"
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
+            gradientLayer.setAngle(150)
+        case .pip:
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         }
         
         //Background image
+        image = type.imageName
         setImage(UIImage(podAssetName: image), for: [])
         contentMode = .center
         imageView?.contentMode = .scaleAspectFit
