@@ -43,8 +43,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal var doubleTapGesture: UITapGestureRecognizer!
     
     //Pip buttons
+    internal var pipBottomBar: UIStackView = UIStackView(frame: .zero)
     internal var pipMuteButton: PIPButton = PIPButton(type: .micEnabled)
     internal var pipMaximiseButton: UIButton = UIButton(frame: .zero)
+    internal var pipStopShareButton: UIButton = UIButton(frame: .zero)
     
     //The current state of our UI
     internal var screenMode: ScreenMode = .fullScreen {
@@ -380,16 +382,33 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         pipMaximiseButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -5).isActive = true
         pipMaximiseButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
+        //Setup PIP bottom bar
+        pipBottomBar.alpha = 0
+        pipBottomBar.translatesAutoresizingMaskIntoConstraints = false
+        pipBottomBar.distribution = .equalSpacing
+        pipBottomBar.alignment = .center
+        pipBottomBar.spacing = 15
+        pipBottomBar.axis = .horizontal
+        view.addSubview(pipBottomBar)
+        pipBottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
+        pipBottomBar.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0).isActive = true
+        pipBottomBar.heightAnchor.constraint(equalToConstant:55).isActive = true
+        
+        //PIP stop share button
+        pipStopShareButton.setImage(UIImage(podAssetName: "stopSharing")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        pipStopShareButton.tintColor = .white
+        pipStopShareButton.addTarget(self, action: #selector(self.stopScreenShareButtonPressed(_:)), for: .touchUpInside)
+        pipStopShareButton.translatesAutoresizingMaskIntoConstraints = false
+        pipStopShareButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        pipBottomBar.addArrangedSubview(pipStopShareButton)
+        
         //Setup PIP mute button
-        view.addSubview(pipMuteButton)
         let initialPIPMuteImageName: PIPButtonType = configuredStreamType == .cam ? .micDisabled : .micEnabled
-        pipMuteButton.alpha = 0
         pipMuteButton.type = initialPIPMuteImageName
         pipMuteButton.addTarget(self, action: #selector(self.pipMicButtonPressed(_:)), for: .touchUpInside)
         pipMuteButton.translatesAutoresizingMaskIntoConstraints = false
-        pipMuteButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0).isActive = true
-        pipMuteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 10).isActive = true
         pipMuteButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        pipBottomBar.addArrangedSubview(pipMuteButton)
     }
     
     //Shows the toast notification view
@@ -1153,7 +1172,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
             pipMaximiseButton.alpha = 0
-            pipMuteButton.alpha = 0
+            pipBottomBar.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 0
@@ -1174,7 +1193,20 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
             pipMaximiseButton.alpha = 1
-            pipMuteButton.alpha = 1
+            
+            let pipBarItems = pipBottomBar.arrangedSubviews
+            for p in pipBarItems {
+                pipBottomBar.removeArrangedSubview(p)
+                p.removeFromSuperview()
+            }
+            if !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                pipBottomBar.addArrangedSubview(pipMuteButton)
+            } else {
+                pipBottomBar.addArrangedSubview(pipStopShareButton)
+                pipBottomBar.addArrangedSubview(pipMuteButton)
+            }
+            
+            pipBottomBar.alpha = 1
             
             let agentView = remoteViews[0]
             agentView.hideOverlay()
@@ -1187,7 +1219,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 1
             pipMaximiseButton.alpha = 0
-            pipMuteButton.alpha = 0
+            pipBottomBar.alpha = 0
             
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                 stopScreenSharingButton.alpha = 1
@@ -1664,7 +1696,12 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             DispatchQueue.main.async {
                 self.stopScreenSharingButton.alpha = 0
+                
+                if self.screenMode == .expandedPip {
+                    self.minimizeToPiP()
+                }
             }
+            
         } catch let error {
             os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)

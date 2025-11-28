@@ -31,6 +31,7 @@
 		03A473EA2ECCFE4600BA07D5 /* ConferencePopoverVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A473E92ECCFE4600BA07D5 /* ConferencePopoverVC.swift */; };
 		03A474222ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A474212ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift */; };
 		03A474242ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A474232ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift */; };
+		03A475562ED9991F00BA07D5 /* ConferencePIPButtonBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A475552ED9991F00BA07D5 /* ConferencePIPButtonBar.swift */; };
 		03A87062A7136836EFF9A89FEC952A47 /* SentryCrashFileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 2BCBB598F1BD408EF8B319CF970FA63D /* SentryCrashFileUtils.c */; };
 		03F6635FFD20F4962092E441F5176C47 /* SentrySessionReplayIntegration-Hybrid.h in Headers */ = {isa = PBXBuildFile; fileRef = 36A8463AFFB07E1E4A292D7E523E8145 /* SentrySessionReplayIntegration-Hybrid.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		043DD44D5F05CBF63662C3DDA3DCAED2 /* SentrySdkInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 494535E36499BA342A9BD254A9083897 /* SentrySdkInfo.h */; settings = {ATTRIBUTES = (Project, ); }; };
@@ -1285,6 +1286,7 @@
 		03A473E92ECCFE4600BA07D5 /* ConferencePopoverVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencePopoverVC.swift; sourceTree = "<group>"; };
 		03A474212ECE390200BA07D5 /* AuviousConferenceVC+PIP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuviousConferenceVC+PIP.swift"; sourceTree = "<group>"; };
 		03A474232ECE3F3500BA07D5 /* AuviousConferenceVC+Gesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuviousConferenceVC+Gesture.swift"; sourceTree = "<group>"; };
+		03A475552ED9991F00BA07D5 /* ConferencePIPButtonBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencePIPButtonBar.swift; sourceTree = "<group>"; };
 		03F51009E2B3C67FB3F137C4BD5BE07E /* SentryDebugImageProvider.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentryDebugImageProvider.m; path = Sources/Sentry/SentryDebugImageProvider.m; sourceTree = "<group>"; };
 		0429E0BA81D93B8A8B7C5D3AC2232E1C /* SentrySpan.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SentrySpan.m; path = Sources/Sentry/SentrySpan.m; sourceTree = "<group>"; };
 		044EF4AD7C711272C93D5858BB04731B /* Pods-ExampleCall-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleCall-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -3549,6 +3551,7 @@
 				0ACA273382F57D1864E3C6C9A16F8881 /* ConferenceInitialHoldView.swift */,
 				220A94950B52D2E7BC9E7B600FF2E98B /* NetworkIndicatorView.swift */,
 				330B9DA86EFEA3584B1AC80BDD061F26 /* ZoomableUIView.swift */,
+				03A475552ED9991F00BA07D5 /* ConferencePIPButtonBar.swift */,
 			);
 			path = "UI Elements";
 			sourceTree = "<group>";
@@ -5122,6 +5125,7 @@
 				C0215E2D81D1240FDE830E22AC29C336 /* CallIceCandidatesRequest.swift in Sources */,
 				5614970544FED8F3E884EC2E0BB2C9B5 /* CallObserver.swift in Sources */,
 				C328657450D08E18620FBECA1E3A5CFC /* CallRejectedEvent.swift in Sources */,
+				03A475562ED9991F00BA07D5 /* ConferencePIPButtonBar.swift in Sources */,
 				E46349D29D7C8517ADA8D45A0243750E /* CallRejectRequest.swift in Sources */,
 				C603F716E100B655CD363081478A680B /* CallRequest.swift in Sources */,
 				96104E023E95A952738039A8E44951AD /* CallRingingEvent.swift in Sources */,

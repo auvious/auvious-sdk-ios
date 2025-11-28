@@ -100,10 +100,6 @@ extension AuviousConferenceVCNew {
         }
     }
     
-    enum Corner {
-        case topLeft, topRight, bottomLeft, bottomRight
-    }
-
     func closestCorner(for pipView: UIView) -> Corner {
         guard let container = pipView.superview else { return .bottomRight }
 
@@ -143,28 +139,58 @@ extension AuviousConferenceVCNew {
         }
     }
 
+    enum Corner {
+        case topLeft, topRight, bottomLeft, bottomRight
+    }
+    
+    func pipAnchorPoint(for corner: Corner, viewSize: CGSize, in containerView: UIView, margin: CGFloat = 20) -> CGPoint {
+        let insets = containerView.safeAreaInsets
+        let width = viewSize.width
+        let height = viewSize.height
+
+        let adjustedTopInset = insets.top * 0.5 // <- scale down top inset
+
+        switch corner {
+        case .topLeft:
+            return CGPoint(
+                x: margin + width / 2 + insets.left,
+                y: margin + height / 2 + adjustedTopInset
+            )
+        case .topRight:
+            return CGPoint(
+                x: containerView.bounds.width - margin - width / 2 - insets.right,
+                y: margin + height / 2 + adjustedTopInset
+            )
+        case .bottomLeft:
+            return CGPoint(
+                x: margin + width / 2 + insets.left,
+                y: containerView.bounds.height - margin - height / 2 - insets.bottom
+            )
+        case .bottomRight:
+            return CGPoint(
+                x: containerView.bounds.width - margin - width / 2 - insets.right,
+                y: containerView.bounds.height - margin - height / 2 - insets.bottom
+            )
+        }
+    }
+    
     func snapToNearestCorner(_ pipView: UIView) {
         guard let containerView = pipView.superview else { return }
 
-        let screenSize = containerView.bounds.size
-        let pipSize = pipView.frame.size
-        let margin: CGFloat = 16
-
-        let topLeft = CGPoint(x: margin + pipSize.width / 2, y: margin + pipSize.height / 2)
-        let topRight = CGPoint(x: screenSize.width - margin - pipSize.width / 2, y: margin + pipSize.height / 2)
-        let bottomLeft = CGPoint(x: margin + pipSize.width / 2, y: screenSize.height - margin - pipSize.height / 2)
-        let bottomRight = CGPoint(x: screenSize.width - margin - pipSize.width / 2, y: screenSize.height - margin - pipSize.height / 2)
-
-        let corners = [topLeft, topRight, bottomLeft, bottomRight]
+        let corners: [Corner] = [.topLeft, .topRight, .bottomLeft, .bottomRight]
         let currentCenter = pipView.center
+        let viewSize = pipView.bounds.size
 
         let nearest = corners.min(by: {
-            distance(from: currentCenter, to: $0) < distance(from: currentCenter, to: $1)
-        }) ?? bottomRight
+            distance(from: currentCenter, to: pipAnchorPoint(for: $0, viewSize: viewSize, in: containerView)) <
+            distance(from: currentCenter, to: pipAnchorPoint(for: $1, viewSize: viewSize, in: containerView))
+        }) ?? .bottomRight
 
-        UIView.animate(withDuration: 0.25) {
-            pipView.center = nearest
-        }
+        let newCenter = pipAnchorPoint(for: nearest, viewSize: viewSize, in: containerView)
+
+        UIView.animate(withDuration: 0.25, animations: {
+            pipView.center = newCenter
+        })
     }
 
     private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
