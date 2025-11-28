@@ -25,6 +25,8 @@ class ConferenceButtonBar: UIView {
     
     //Popover buttons
     var popoverButtons: [ConferencePopoverButton] = []
+    //Bar buttons
+    var buttons: [ConferenceButton] = []
     
     //Buttons
     let speakerButton = ConferenceButton(type: .speakerON)
@@ -32,7 +34,7 @@ class ConferenceButtonBar: UIView {
     let cameraButton = ConferenceButton(type: .camEnabled)
     let cameraSwitchButton = ConferenceButton(type: .camSwitch)
     let hangupButton = ConferenceButton(type: .hangup)
-    let screenShareButton = ConferenceButton(type: .screenShareDisabled)
+    let screenShareButton = ConferenceButton(type: .screenShare)
     let optionsButton = ConferenceButton(type: .options)
     let pipButton = ConferenceButton(type: .pip)
     
@@ -47,12 +49,32 @@ class ConferenceButtonBar: UIView {
         super.init(frame: .zero)
         
         self.configuration = configuration
+        
+        //Listen for agent screen share notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(self.agentStoppedScreenShare(_:)), name: NSNotification.Name(rawValue: AuviousNotification.shared.agentStoppedScreenShare), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.agentStartedScreenShare(_:)), name: NSNotification.Name(rawValue: AuviousNotification.shared.agentStartedScreenShare), object: nil)
+        
         setupView()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupView()
+    }
+    
+    //Enable screen share button
+    @objc func agentStoppedScreenShare(_ notification: Notification) {
+        toggleScreenShareButton(true)
+    }
+    
+    //Disable screen share button
+    @objc func agentStartedScreenShare(_ notification: Notification) {
+        toggleScreenShareButton(false)
     }
     
     private func setupView() {
@@ -75,9 +97,7 @@ class ConferenceButtonBar: UIView {
         optionsButton.addTarget(self, action: #selector(self.optionsButtonPressed(_:)), for: .touchUpInside)
         pipButton.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
         
-        //Add buttons according to the configuration
-        var buttons: [ConferenceButton] = []
-       
+        buttons.removeAll()
         if configuration.microphoneAvailable {
             buttons.append(micButton)
         }
@@ -228,5 +248,13 @@ class ConferenceButtonBar: UIView {
         cameraButton.isUserInteractionEnabled = !flag
         cameraSwitchButton.isUserInteractionEnabled = !flag
         screenShareButton.isUserInteractionEnabled = !flag
+    }
+    
+    internal func toggleScreenShareButton(_ flag: Bool) {
+        if let shareButton = buttons.filter({$0.type == .screenShare}).first {
+            shareButton.type = .screenShareDisabled
+        } else if let shareButton = buttons.filter({$0.type == .screenShareDisabled}).first {
+            shareButton.type = .screenShare
+        }
     }
 }

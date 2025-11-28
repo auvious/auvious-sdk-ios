@@ -242,6 +242,10 @@ internal class AuviousNotification {
     //Singleton instance
     static let shared = AuviousNotification()
     
+    //Notification center extensions
+    internal let agentStartedScreenShare = "agentStartedScreenShare"
+    internal let agentStoppedScreenShare = "agentStoppedScreenShare"
+    
     //The notification being displayed
     private var view: NotificationView!
     

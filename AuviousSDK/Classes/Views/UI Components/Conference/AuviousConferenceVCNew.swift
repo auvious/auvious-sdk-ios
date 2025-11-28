@@ -699,6 +699,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             shareScreenContainerView?.removeFromSuperview()
             shareScreenContainerView = nil
             
+            //Announce it
+            NotificationCenter.default.post(name: Notification.Name(rawValue: AuviousNotification.shared.agentStoppedScreenShare), object: nil, userInfo: nil)
+            
             //Refresh UI
             createConstraints()
         } else {
@@ -887,10 +890,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
         DispatchQueue.main.async {
             if type == .screen {
+                
+                //Announce it
+                NotificationCenter.default.post(name: Notification.Name(rawValue: AuviousNotification.shared.agentStartedScreenShare), object: nil, userInfo: nil)
+                
                 self.shareScreenContainerView = StreamView(frame: .zero)
                 self.shareScreenContainerView!.translatesAutoresizingMaskIntoConstraints = false
                 self.shareScreenContainerView!.setZoomable(true)
                 
+                #warning("potential mem leak")
                 let tap = UITapGestureRecognizer(target: self, action: #selector(self.shareScreenDoubleTapped))
                 tap.numberOfTapsRequired = 2
                 self.shareScreenContainerView?.addGestureRecognizer(tap)

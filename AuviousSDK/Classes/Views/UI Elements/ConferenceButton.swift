@@ -17,7 +17,8 @@ enum ConferenceButtonType {
     case hangup
     case speakerON
     case speakerOFF
-    case screenShareEnabled
+    case screenShareDark
+    case screenShare
     case screenShareDisabled
     case options
     case optionsTapped
@@ -29,7 +30,7 @@ enum ConferenceButtonType {
             return NSLocalizedString("Use earpiece", comment: "")
         case .pip:
             return NSLocalizedString("Floating window", comment: "")
-        case .screenShareDisabled:
+        case .screenShare:
             return NSLocalizedString("Share screen", comment: "")
         default:
             return "Default title"
@@ -56,10 +57,12 @@ enum ConferenceButtonType {
             return "speakerON"
         case .speakerOFF:
             return "speakerOFF"
-        case .screenShareEnabled:
+        case .screenShareDark:
             return "screenShareON"
-        case .screenShareDisabled:
+        case .screenShare:
             return "screenShareOFF"
+        case .screenShareDisabled:
+            return "screenShareON"
         case .options:
             return "moreOptions"
         case .optionsTapped:
@@ -140,12 +143,23 @@ class ConferenceButton: UIButton {
         case .speakerOFF:
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
-        case .screenShareEnabled:
+            
+        case .screenShareDisabled:
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.45).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.45).cgColor]
+            gradientLayer.setAngle(150)
+            imageView?.layer.opacity = 0.3
+            super.isEnabled = false
+        
+        case .screenShareDark:
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
-        case .screenShareDisabled:
+        
+        case .screenShare:
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
+            imageView?.layer.opacity = 1
+            super.isEnabled = true
+            
         case .options:
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)

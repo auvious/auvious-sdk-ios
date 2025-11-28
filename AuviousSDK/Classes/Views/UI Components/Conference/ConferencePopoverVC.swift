@@ -62,10 +62,19 @@ internal class ConferencePopoverVC: UIViewController {
     init(buttons: [ConferencePopoverButton]) {
         self.buttons = buttons
         super.init(nibName: nil, bundle: Bundle(for: ConferencePopoverVC.self))
+        
+        //Listen for agent screen share notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(self.agentStoppedScreenShare(_:)), name: NSNotification.Name(rawValue: AuviousNotification.shared.agentStoppedScreenShare), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.agentStartedScreenShare(_:)), name: NSNotification.Name(rawValue: AuviousNotification.shared.agentStartedScreenShare), object: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewDidLoad() {
@@ -79,7 +88,7 @@ internal class ConferencePopoverVC: UIViewController {
                 b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
             } else if b.type == .pip {
                 b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
-            } else if b.type == .screenShareDisabled {
+            } else if b.type == .screenShare {
                 b.addTarget(self, action: #selector(self.shareScreenButtonPressed(_:)), for: .touchUpInside)
             }
         }
@@ -105,6 +114,16 @@ internal class ConferencePopoverVC: UIViewController {
         }
     }
     
+    //Enable screen share button
+    @objc func agentStoppedScreenShare(_ notification: Notification) {
+        toggleScreenShareButton()
+    }
+    
+    //Disable screen share button
+    @objc func agentStartedScreenShare(_ notification: Notification) {
+        toggleScreenShareButton()
+    }
+    
     @objc private func speakerButtonPressed(_ sender: Any) {
         delegate?.didPressSpeakerButton()
     }
@@ -115,6 +134,18 @@ internal class ConferencePopoverVC: UIViewController {
     
     @objc private func shareScreenButtonPressed(_ sender: Any) {
         delegate?.didPressShareScreenButton()
+    }
+    
+    private func toggleScreenShareButton() {
+        if let shareButton = buttons.filter({$0.type == .screenShare}).first {
+            shareButton.type = .screenShareDisabled
+            shareButton.layer.opacity = 0.3
+            shareButton.isUserInteractionEnabled = false
+        } else if let shareButton = buttons.filter({$0.type == .screenShareDisabled}).first {
+            shareButton.type = .screenShare
+            shareButton.layer.opacity = 1
+            shareButton.isUserInteractionEnabled = true
+        }
     }
 }
 
