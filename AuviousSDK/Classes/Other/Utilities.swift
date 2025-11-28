@@ -20,4 +20,31 @@ internal final class Utilities {
             return formatter
         }
     }
+    
+    private static func getDeviceModel() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                String(validatingUTF8: $0) ?? "unknown"
+            }
+        }
+    }
+    
+    static func generateCustomUserAgent() -> String {
+        let device = UIDevice.current
+        let osVersion = device.systemVersion
+        let platform = device.systemName
+
+        let bundle = Bundle.main
+        let appName = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "UnknownApp"
+        let appVersion = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0"
+
+        let bundleSDK = Bundle(for: AuviousConferenceSDK.self)
+        let sdkVersion = bundleSDK.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+        
+        let deviceModel = Utilities.getDeviceModel()
+
+        return "\(appName)/\(appVersion) AuviousSDK/\(sdkVersion) (\(platform); \(platform)/\(osVersion); \(deviceModel))"
+    }
 }

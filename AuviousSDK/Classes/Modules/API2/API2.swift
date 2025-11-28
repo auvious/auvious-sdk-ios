@@ -49,15 +49,15 @@ internal final class API2 {
         let cookies = HTTPCookieStorage.shared
         cookies.removeCookies(since: Date())
         
+        let userAgent = Utilities.generateCustomUserAgent()
+        
         let cfg = URLSessionConfiguration.default
         cfg.httpCookieStorage = cookies
         cfg.httpMaximumConnectionsPerHost = 10
         cfg.timeoutIntervalForRequest = 24.0
+        cfg.httpAdditionalHeaders = ["User-Agent": userAgent]
 
         session = URLSession(configuration: cfg)
-//        let apiRequestHandler = APIRequestHandler()
-//        sessionManager.adapter = apiRequestHandler
-//        sessionManager.retrier = apiRequestHandler
     }
     
     private func synced(_ lock: AnyObject, closure: () -> ()) {
