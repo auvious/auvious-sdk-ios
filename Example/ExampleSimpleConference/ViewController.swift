@@ -164,7 +164,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     
     func onConferenceSuccess() {
         self.vc.showAlert(title: "Message", msg: "Conference completed successfully", onSuccess: {
-            self.dismiss(animated: true, completion: nil)
+            self.dismissAuviousUI(childVC: self.vc)
         })
     }
     
@@ -237,6 +237,23 @@ extension ViewController {
             childVC.view.frame = screenBounds
         }, completion: { _ in
             childVC.didMove(toParent: self)
+        })
+    }
+    
+    private func dismissAuviousUI(childVC: UIViewController) {
+        // Make sure it's really a child
+        guard childVC.parent == self else { return }
+
+        let screenBounds = view.bounds
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseIn], animations: {
+            // Slide the view down off screen
+            childVC.view.frame.origin.y = screenBounds.height
+        }, completion: { _ in
+            // Clean up after animation completes
+            childVC.willMove(toParent: nil)
+            childVC.view.removeFromSuperview()
+            childVC.removeFromParent()
         })
     }
 }
