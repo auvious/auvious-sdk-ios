@@ -92,6 +92,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Internal flag for handling the iOS ReplayKit permission dialog app resume
     internal var sharingMyScreen: Bool = false
     
+    /// Internal flag for handling the iOS Screenshot dialog app resume
+    internal var wasBackgroundedDueToScreenshot: Bool = false
+    
     //MARK: -
     //MARK: Pause/Resume handlers
     //MARK: -
@@ -143,8 +146,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         //Ensure we are not resuming due to ReplayKit permission dialog closure
-        guard !sharingMyScreen else {
-            print("onApplicationResume() called but we are sharing our screen so no rejoin")
+        guard !sharingMyScreen && !wasBackgroundedDueToScreenshot else {
+            print("onApplicationResume() called but we are sharing our screen / resuming from screenshot so no rejoin")
+            wasBackgroundedDueToScreenshot = false
             return
         }
         

@@ -245,6 +245,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     // MARK: -
     // MARK: VC Lifecycle
     // MARK: -
@@ -253,6 +257,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(userDidTakeScreenshot),
+            name: UIApplication.userDidTakeScreenshotNotification,
+            object: nil
+        )
         
         view.backgroundColor = clientConfiguration.conferenceBackgroundColor
         
@@ -409,6 +420,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         pipMuteButton.translatesAutoresizingMaskIntoConstraints = false
         pipMuteButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
         pipBottomBar.addArrangedSubview(pipMuteButton)
+    }
+    
+    @objc private func userDidTakeScreenshot() {
+        AuviousConferenceSDK.sharedInstance.wasBackgroundedDueToScreenshot = true
     }
     
     //Shows the toast notification view
