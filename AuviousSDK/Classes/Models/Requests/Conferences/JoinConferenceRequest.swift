@@ -47,7 +47,7 @@ internal final class JoinConferenceRequest {
             metaDataDictionary["capabilities"] = []
         }
         
-//        metaDataDictionary["language"] =
+        metaDataDictionary["language"] = Utilities.getApplicationLanguage()
         metaDataDictionary["type"] = "stream"
         metaDataDictionary["mediaDevices"] = NSNull()
         

@@ -251,7 +251,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
     override open func viewDidLoad() {
         super.viewDidLoad()
-
+        
         NotificationCenter.default.addObserver(self, selector: #selector(self.orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         
         view.backgroundColor = clientConfiguration.conferenceBackgroundColor

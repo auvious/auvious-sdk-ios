@@ -47,4 +47,8 @@ internal final class Utilities {
 
         return "\(appName)/\(appVersion) AuviousSDK/\(sdkVersion) (\(platform); \(platform)/\(osVersion); \(deviceModel))"
     }
+    
+    static func getApplicationLanguage() -> String {
+        return String(Locale.preferredLanguages.first?.prefix(2) ?? "en")
+    }
 }
