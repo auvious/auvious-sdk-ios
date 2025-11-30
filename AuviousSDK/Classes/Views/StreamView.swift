@@ -244,6 +244,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             constraints.append(overlayIcon!.centerXAnchor.constraint(equalTo: overlayView!.centerXAnchor, constant: 0))
             constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 40))
         case .none:
+            iconName = ""
             backgroundColor = .clear
             constraints.append(overlayView!.widthAnchor.constraint(equalToConstant: 0))
             constraints.append(overlayView!.heightAnchor.constraint(equalToConstant: 0))
