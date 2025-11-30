@@ -136,6 +136,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
     private var initialStreamsConnected: Bool = false
+    internal var isAnimatingPopover = false
     
     //Delegate
     private weak var delegate: AuviousSimpleConferenceDelegate?
@@ -152,6 +153,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             setScreenTitle()
         }
     }
+    
+    
     
     //Public constructor
     public init(configuration: AuviousConferenceConfiguration, delegate: AuviousSimpleConferenceDelegate) {
@@ -1749,6 +1752,12 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     
     //Options button will toggle the popup presentation
     @objc internal func optionsButtonPressed(_ sender: Any) {
+        // Ignore taps during transition
+        if isAnimatingPopover {
+            return
+        }
+        
+        isAnimatingPopover = true
         selectionFeedbackGenerator.impactOccurred()
         
         if let button = sender as? ConferenceButton {
@@ -1759,7 +1768,9 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 popoverVC.preferredContentSize = .init(width: 180, height: 185)
                 
                 let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
-                present(vc, animated: true, completion: nil)
+                present(vc, animated: true, completion: {
+                    self.isAnimatingPopover = false
+                })
                 
             } else {
                 button.type = .options
