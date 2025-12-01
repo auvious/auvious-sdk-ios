@@ -35,6 +35,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        usernameTextfield.delegate = self
+        passwordTextfield.delegate = self
+        conferenceTextfield.delegate = self
+        participantTextfield.delegate = self
+        
         usernameTextfield.attributedPlaceholder = NSAttributedString(string: "Username", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         passwordTextfield.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         conferenceTextfield.attributedPlaceholder = NSAttributedString(string: "Conference to create/join", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
@@ -51,7 +56,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "lrd-lnt"//"fav-xva"
+        usernameTextfield.text = "dnn-pvb"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -256,4 +261,12 @@ extension ViewController {
             childVC.removeFromParent()
         })
     }
+}
+
+extension ViewController: UITextFieldDelegate {
+    // Called when return key is pressed
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder() // dismiss keyboard
+            return true
+        }
 }
