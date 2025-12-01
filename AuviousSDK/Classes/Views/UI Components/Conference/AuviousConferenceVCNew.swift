@@ -154,6 +154,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    //Pip resizing
+    var currentCorner: Corner = .bottomRight
+    var currentKeyboardFrame: CGRect?
+    
     //Public constructor
     public init(configuration: AuviousConferenceConfiguration, delegate: AuviousSimpleConferenceDelegate) {
         self.clientConfiguration = configuration
@@ -263,6 +267,20 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self,
             selector: #selector(userDidTakeScreenshot),
             name: UIApplication.userDidTakeScreenshotNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
         
