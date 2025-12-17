@@ -136,8 +136,12 @@ extension AuviousConferenceVCNew {
             let kbFrameInView = container.convert(keyboardFrame, from: nil)
             bottomY = min(bottomY, kbFrameInView.origin.y - viewSize.height / 2 - margin)
         }
-
-        let topY = margin + viewSize.height / 2
+        
+        let safeTop = (container.window?.safeAreaInsets.top ?? container.safeAreaInsets.top)
+        let topY = safeTop + margin + viewSize.height / 2
+        
+        print("safeTop: \(safeTop), topY: \(topY)")
+        
         let leftX = margin + viewSize.width / 2
         let rightX = containerSize.width - margin - viewSize.width / 2
 
@@ -166,10 +170,13 @@ extension AuviousConferenceVCNew {
             bottomY = kbFrameInView.origin.y - viewSize.height / 2 - margin
         }
 
+        let safeTop = container.safeAreaInsets.top
+        let topY = safeTop + viewSize.height / 2
+        
         // All four snap points
         let cornerCenters: [(Corner, CGPoint)] = [
-            (.topLeft, CGPoint(x: margin + viewSize.width / 2, y: margin + viewSize.height / 2)),
-            (.topRight, CGPoint(x: containerSize.width - margin - viewSize.width / 2, y: margin + viewSize.height / 2)),
+            (.topLeft, CGPoint(x: margin + viewSize.width / 2, y: topY)),
+            (.topRight, CGPoint(x: containerSize.width - margin - viewSize.width / 2, y: topY)),
             (.bottomLeft, CGPoint(x: margin + viewSize.width / 2, y: bottomY)),
             (.bottomRight, CGPoint(x: containerSize.width - margin - viewSize.width / 2, y: bottomY))
         ]
