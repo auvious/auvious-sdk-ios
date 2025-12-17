@@ -1221,14 +1221,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
             buttonContainerView.alpha = 0
             
-            let agentView = remoteViews[0]
-            agentView.hideOverlay()
-            
-            constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
-            constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
-            constraints.append(agentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
-            constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
-            
+            if !remoteViews.isEmpty {
+                let agentView = remoteViews[0]
+                agentView.hideOverlay()
+                
+                constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
+                constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
+                constraints.append(agentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
+                constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
+            }
         } else if screenMode == .expandedPip {
             os_log("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             networkIndicator.alpha = 0
