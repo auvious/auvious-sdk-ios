@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.4.0-beta.2'
+  s.version          = '1.4.0-beta.3'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
@@ -33,6 +33,8 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
 
   s.source_files = 'AuviousSDK/Classes/**/*'
   s.exclude_files = 'AuviousSDK/Classes/Modules/API/**/*'
+  s.exclude_files = 'AuviousSDK/Classes/Modules/MQTTModule.swift'
+  
   
   s.resources = 'AuviousSDK/Assets/*.png'
   
