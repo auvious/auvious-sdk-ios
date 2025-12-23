@@ -56,7 +56,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "vug-yyt"//"fav-xva"
+        usernameTextfield.text = "666"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
@@ -158,15 +158,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     }
     
     // MARK: AuviousSimpleConferenceDelegate
-    
-    func onScreenSharingStart() {
-        //self.minimizeToPiP(childVC: self.vc)
-    }
-    
-    func onScreenSharingStop() {
-        //self.restoreFromPiP(childVC: self.vc)
-    }
-    
+        
     func onConferenceSuccess() {
         self.vc.showAlert(title: "Message", msg: "Conference completed successfully", onSuccess: {
             self.dismissAuviousUI(childVC: self.vc)
@@ -175,7 +167,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     
     func onConferenceError(_ error: AuviousSDKGenericError) {
         self.vc.showAlert(title: "Error", msg: error.localizedDescription, onSuccess: {
-            self.dismiss(animated: true, completion: nil)
+            self.dismissAuviousUI(childVC: self.vc)
         })
     }
     

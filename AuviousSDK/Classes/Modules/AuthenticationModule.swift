@@ -40,6 +40,13 @@ internal class AuthenticationModule {
                 self.loginResponse = LoginResponse(fromJson: data)
                 
                 if let userId = self.loginResponse?.userId {
+                    
+                    //Ensure no error was returned
+                    if let resp = self.loginResponse, let error = resp.errorDescription, !error.isEmpty {
+                        onFailure(AuviousSDKError.INVALID_TICKET(ticketId: username))
+                        return
+                    }
+                    
                     self.isLoggedIn = true
                     
                     os_log("Logged in as user id %@", log: Log.auth, type: .debug, userId)

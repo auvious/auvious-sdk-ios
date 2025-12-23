@@ -717,6 +717,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             delegate?.onConferenceError(.NETWORK_ERROR) // .noInternetConnection
         case .callNotAnswered:
             delegate?.onConferenceError(.CALL_REJECTED) // .callNotAnswered
+        case .INVALID_TICKET(let ticketId):
+            delegate?.onConferenceError(.INVALID_TICKET(ticketId: ticketId))
         default:
             delegate?.onConferenceError(.UNKNOWN_FAILURE) // .callError
         }
