@@ -103,6 +103,7 @@ extension AuviousConferenceVCNew {
     
     //MARK: Drag gesture
     @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+        guard screenMode != .fullScreen else { return }
         guard let pipView = gesture.view else { return }
         let translation = gesture.translation(in: view)
 
