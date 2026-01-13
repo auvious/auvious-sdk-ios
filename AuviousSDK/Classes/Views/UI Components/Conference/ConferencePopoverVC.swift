@@ -59,6 +59,22 @@ internal class ConferencePopoverVC: UIViewController {
     //Buttons
     private var buttons: [ConferencePopoverButton] = []
     
+    override var preferredContentSize: CGSize {
+        get {
+            //3 buttons
+            if buttons.count == 3 {
+                return CGSize(width: 200, height: 185)
+            }
+            
+            //2 buttons
+            return CGSize(width: 200, height: 112)//140)
+            //return view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        }
+        set {
+            super.preferredContentSize = newValue
+        }
+    }
+    
     init(buttons: [ConferencePopoverButton]) {
         self.buttons = buttons
         super.init(nibName: nil, bundle: Bundle(for: ConferencePopoverVC.self))
@@ -96,20 +112,23 @@ internal class ConferencePopoverVC: UIViewController {
         //Stack view to hold the buttons
         buttonStackView = UIStackView(frame: .zero)
         buttonStackView.translatesAutoresizingMaskIntoConstraints = false
-        buttonStackView.distribution = .fill
+        buttonStackView.distribution = .fillEqually
         buttonStackView.alignment = .center
         buttonStackView.spacing = 12
         buttonStackView.axis = .vertical
         view.addSubview(buttonStackView)
         
         //Stack view constraints
-        buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        buttonStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        buttonStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        buttonStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        //buttonStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
+        buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
         
         //Add buttons to stack view
         for b in buttons {
             buttonStackView.addArrangedSubview(b)
-            b.widthAnchor.constraint(equalToConstant: 170).isActive = true
+            b.widthAnchor.constraint(equalToConstant: 180).isActive = true
             b.heightAnchor.constraint(equalToConstant: 45).isActive = true
         }
     }

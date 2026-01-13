@@ -1784,7 +1784,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 button.type = .optionsTapped
                 
                 popoverVC.delegate = self
-                popoverVC.preferredContentSize = .init(width: 200, height: 185)
+//                popoverVC.preferredContentSize = .init(width: 200, height: 185)
                 
                 let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
                 present(vc, animated: true, completion: {

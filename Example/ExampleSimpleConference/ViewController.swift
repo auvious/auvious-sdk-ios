@@ -56,7 +56,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "666"//"fav-xva"
+        usernameTextfield.text = "cpy-sdl"//"fav-xva"
         passwordTextfield.text = "b"
         conferenceTextfield.text = "-"
         
