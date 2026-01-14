@@ -24,9 +24,9 @@ final class ConferencePopoverButton: UIButton {
         
         super.init(frame: .zero)
 
-        setTitle(type.title, for: .normal)
+        setTitle(type.title, for: [])
         let image = UIImage(podAssetName: type.imageName)?.withRenderingMode(.alwaysTemplate)
-        setImage(image, for: .normal)
+        setImage(image, for: [])
 
         self.backgroundColor = .clear
         self.tintColor = .black
@@ -143,6 +143,23 @@ internal class ConferencePopoverVC: UIViewController {
         toggleScreenShareButton()
     }
     
+    //Toggle screen share button
+    func updateScreenShareButtonState() {
+        if let shareButton = buttons.filter({$0.type == .screenShare}).first {
+            
+            //Normally, we should just change the type of the button, but it seems to ignore - so we're manually updating UI
+            if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                shareButton.setTitle(ConferenceButtonType.stopScreenShare.title, for: .normal)
+                let image = UIImage(podAssetName: ConferenceButtonType.stopScreenShare.imageName)?.withRenderingMode(.alwaysTemplate)
+                shareButton.setImage(image, for: [])
+            } else {
+                shareButton.setTitle(ConferenceButtonType.screenShare.title, for: .normal)
+                let image = UIImage(podAssetName: ConferenceButtonType.screenShare.imageName)?.withRenderingMode(.alwaysTemplate)
+                shareButton.setImage(image, for: [])
+            }
+        }
+    }
+    
     @objc private func speakerButtonPressed(_ sender: Any) {
         delegate?.didPressSpeakerButton()
     }
@@ -155,7 +172,7 @@ internal class ConferencePopoverVC: UIViewController {
         delegate?.didPressShareScreenButton()
     }
     
-    private func toggleScreenShareButton() {
+    func toggleScreenShareButton() {
         if let shareButton = buttons.filter({$0.type == .screenShare}).first {
             shareButton.type = .screenShareDisabled
             shareButton.layer.opacity = 0.3

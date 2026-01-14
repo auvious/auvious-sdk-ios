@@ -23,6 +23,7 @@ enum ConferenceButtonType {
     case options
     case optionsTapped
     case pip
+    case stopScreenShare
     
     var title: String {
         switch self {
@@ -32,6 +33,8 @@ enum ConferenceButtonType {
             return NSLocalizedString("Floating window", comment: "")
         case .screenShare:
             return NSLocalizedString("Share screen", comment: "")
+        case .stopScreenShare:
+            return NSLocalizedString("Stop sharing", comment: "")
         default:
             return "Default title"
         }
@@ -69,6 +72,8 @@ enum ConferenceButtonType {
             return "moreOptionsPressed"
         case .pip:
             return "pip"
+        case .stopScreenShare:
+            return "stopSharing"
         }
     }
 }
@@ -167,6 +172,9 @@ class ConferenceButton: UIButton {
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .pip:
+            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.setAngle(150)
+        case .stopScreenShare:
             gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
             gradientLayer.setAngle(150)
         }

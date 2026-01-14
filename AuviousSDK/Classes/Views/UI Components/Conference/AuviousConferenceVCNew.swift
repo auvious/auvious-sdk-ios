@@ -1784,9 +1784,9 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 button.type = .optionsTapped
                 
                 popoverVC.delegate = self
-//                popoverVC.preferredContentSize = .init(width: 200, height: 185)
                 
                 let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
+                popoverVC.updateScreenShareButtonState()
                 present(vc, animated: true, completion: {
                     self.isAnimatingPopover = false
                 })
@@ -1989,7 +1989,13 @@ extension AuviousConferenceVCNew: ConferencePopoverDelegate {
     //Calls the same handler as the button bar
     func didPressShareScreenButton() {
         popoverVC.dismiss(animated: true, completion: {
-            self.screenShareButtonPressed(self)
+            
+            if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                self.buttonContainerView.resetOptionsButton()
+                self.stopScreenShareButtonPressed(self)
+            } else {
+                self.screenShareButtonPressed(self)
+            }
         })
     }
 }
