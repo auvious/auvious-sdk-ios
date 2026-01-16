@@ -990,6 +990,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         self.isAgentMuted = true
                     }
                 }
+                
+                remoteView.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
+                remoteView.layer.borderWidth = 1
             }
             
             //Keep track of this stream addition
