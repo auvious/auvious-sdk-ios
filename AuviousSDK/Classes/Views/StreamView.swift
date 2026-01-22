@@ -189,6 +189,10 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         overlayIcon?.alpha = 1
     }
     
+    func overlayInPIP() {
+        overlayIcon?.layer.opacity = 0.6
+    }
+    
     private func handleOverlay() {
         guard !isScreen else {
             return

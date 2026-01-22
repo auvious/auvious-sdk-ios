@@ -118,7 +118,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private let serviceGroup = DispatchGroup()
     
     //Configuration
-    private var videoViewBackgroundColor: UIColor = UIColor.gray
+    private var videoViewBackgroundColor: UIColor!
     
     //Conference properties
     private var username: String = ""
@@ -260,6 +260,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
     override open func viewDidLoad() {
         super.viewDidLoad()
+        
+        videoViewBackgroundColor = clientConfiguration.conferenceBackgroundColor
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         
@@ -1228,7 +1230,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             
             if !remoteViews.isEmpty {
                 let agentView = remoteViews[0]
-                agentView.hideOverlay()
+                agentView.overlayInPIP()
                 
                 constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
                 constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
@@ -1257,7 +1259,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             pipBottomBar.alpha = 1
             
             let agentView = remoteViews[0]
-            agentView.hideOverlay()
+            agentView.overlayInPIP()
             
             constraints.append(agentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0))
             constraints.append(agentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0))
