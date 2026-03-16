@@ -265,6 +265,7 @@ final class LargeButton: UIButton {
         stack.axis = .horizontal
         stack.spacing = 8
         stack.alignment = .center
+        stack.isUserInteractionEnabled = false
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         
