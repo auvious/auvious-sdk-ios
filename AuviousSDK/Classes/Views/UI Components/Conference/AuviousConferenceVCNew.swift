@@ -301,7 +301,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator
         view.addSubview(networkIndicator)
         networkIndicator.alpha = 0.7
-        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 6).isActive = true
+        networkIndicator.leftAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leftAnchor, constant: 6).isActive = true
         networkIndicator.widthAnchor.constraint(equalToConstant: 30).isActive = true
         networkIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))

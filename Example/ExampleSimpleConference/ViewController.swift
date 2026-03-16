@@ -56,13 +56,12 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         participantTextfield.textColor = .white
     
         // hard code values for faster debugging
-        usernameTextfield.text = "uvk-ffn"//"fav-xva"
-        passwordTextfield.text = "b"
-        conferenceTextfield.text = "-"
+        usernameTextfield.text = "uvk-ffn"
+        passwordTextfield.text = "" // optional
+        conferenceTextfield.text = "" // optional
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
-//        view.layer.insertSublayer(gradientLayer, at: 0)
         
         checkPermissions()
         callButton.layer.cornerRadius = 5.0
@@ -70,8 +69,6 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-//        gradientLayer.frame = view.bounds
     }
     
     //MARK: Actions
@@ -82,23 +79,17 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     
     @IBAction func callButtonPressed(_ sender: Any) {
         if validateForm() {
-            let username = usernameTextfield.text!
-            let password = passwordTextfield.text!
-            let conferenceName = ""//conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let ticket = usernameTextfield.text!
+            let password = "b"
+            let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             let participantName = participantTextfield.text
             
-            //TEST-RTC
-//            let clientId: String = "auvious"
-//            let baseEndpoint: String = "https://test-rtc.auvious.video/"
-//            let mqttEndpoint: String = "wss://events.test-rtc.auvious.video/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
 //
             //GENESYS DEV (customer)
-            let clientId: String = "customer" //dev.auvious.video/t/vyn-kym <-----
+            let clientId: String = "customer"
             let baseEndpoint: String = "https://dev.auvious.video/"
-//            let mqttEndpoint: String = "wss://dev.auvious.video/ws"
             let mqttEndpoint: String = "dev.auvious.video"
-            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+            let params: [String: String] = ["ticket" : ticket, "password" : password, "grant_type" : "password"]
 
             //GENESYS DEV (test-agent)
 //            let clientId: String = "test-agent"
@@ -120,7 +111,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
             //New configuration approach
             var conf = AuviousConferenceConfiguration()
-            conf.username = username
+            conf.username = ticket
             conf.password = password
             conf.clientId = clientId
             
@@ -131,7 +122,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.conference = conferenceName
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
-            conf.conferenceBackgroundColor = .systemGreen
+//            conf.conferenceBackgroundColor = .systemGreen
             conf.enableSpeaker = self.speakerEnabledSwitch.isOn
             switch (self.callMode.selectedSegmentIndex){
             case 0:
@@ -175,19 +166,19 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
     private func validateForm() -> Bool {
         guard let username = usernameTextfield.text, !username.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter your username")
+            showAlert(title: "Warning", msg: "Please enter your ticket")
             return false
         }
         
-        guard let password = passwordTextfield.text, !password.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter your password")
-            return false
-        }
+//        guard let password = passwordTextfield.text, !password.isEmpty else {
+//            showAlert(title: "Warning", msg: "Please enter your password")
+//            return false
+//        }
         
-        guard let conferenceName = conferenceTextfield.text, !conferenceName.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter a conference name")
-            return false
-        }
+//        guard let conferenceName = conferenceTextfield.text, !conferenceName.isEmpty else {
+//            showAlert(title: "Warning", msg: "Please enter a conference name")
+//            return false
+//        }
         
         return true
     }
