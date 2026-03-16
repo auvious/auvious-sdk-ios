@@ -1793,6 +1793,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 
                 let vc = preparePopUp(sourceRect: button.bounds, sourceView: button, vc: popoverVC)
                 popoverVC.updateScreenShareButtonState()
+                popoverVC.updateSpeakerButtonState(currentType: buttonContainerView.speakerButton.type)
                 present(vc, animated: true, completion: {
                     self.isAnimatingPopover = false
                 })
@@ -1829,7 +1830,14 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     //Toggles audio routing to speaker/earpiece
     @objc internal func speakerButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
-        let button = sender as! ConferenceButton
+        
+        // Get the button - either from sender or from buttonContainerView
+        let button: ConferenceButton
+        if let senderButton = sender as? ConferenceButton {
+            button = senderButton
+        } else {
+            button = buttonContainerView.speakerButton
+        }
         
         if button.type == .speakerON {
             button.type = .speakerOFF
@@ -1981,6 +1989,8 @@ extension AuviousConferenceVCNew: ConferencePopoverDelegate {
     //Calls the same handler as the button bar
     func didPressSpeakerButton() {
         popoverVC.dismiss(animated: true, completion: {
+            self.buttonContainerView.resetOptionsButton()
+            self.isAnimatingPopover = false
             self.speakerButtonPressed(self)
         })
     }
@@ -1988,6 +1998,8 @@ extension AuviousConferenceVCNew: ConferencePopoverDelegate {
     //Calls the same handler as the button bar
     func didPressPIPButton() {
         popoverVC.dismiss(animated: true, completion: {
+            self.buttonContainerView.resetOptionsButton()
+            self.isAnimatingPopover = false
             self.pipButtonPressed(self)
         })
     }

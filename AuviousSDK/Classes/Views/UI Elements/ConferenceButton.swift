@@ -29,6 +29,8 @@ enum ConferenceButtonType {
         switch self {
         case .speakerON:
             return NSLocalizedString("Use earpiece", comment: "")
+        case .speakerOFF:
+            return NSLocalizedString("Use speaker", comment: "")
         case .pip:
             return NSLocalizedString("Floating window", comment: "")
         case .screenShare:

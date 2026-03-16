@@ -101,7 +101,7 @@ internal class ConferencePopoverVC: UIViewController {
             b.translatesAutoresizingMaskIntoConstraints = false
             
             if b.type == .speakerON {
-                b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
+                b.addTarget(self, action: #selector(self.speakerButtonPressed(_:)), for: .touchUpInside)
             } else if b.type == .pip {
                 b.addTarget(self, action: #selector(self.pipButtonPressed(_:)), for: .touchUpInside)
             } else if b.type == .screenShare {
@@ -156,6 +156,27 @@ internal class ConferencePopoverVC: UIViewController {
                 shareButton.setTitle(ConferenceButtonType.screenShare.title, for: .normal)
                 let image = UIImage(podAssetName: ConferenceButtonType.screenShare.imageName)?.withRenderingMode(.alwaysTemplate)
                 shareButton.setImage(image, for: [])
+            }
+        }
+    }
+    
+    //Update speaker button to reflect current state
+    func updateSpeakerButtonState(currentType: ConferenceButtonType) {
+        // Find the speaker button (could be .speakerON or .speakerOFF)
+        if let speakerButton = buttons.first(where: { $0.type == .speakerON || $0.type == .speakerOFF }) {
+            // Update title and icon based on current state
+            if currentType == .speakerON {
+                // Speaker is ON, so show "Use earpiece"
+                speakerButton.setTitle(ConferenceButtonType.speakerON.title, for: .normal)
+                let image = UIImage(podAssetName: ConferenceButtonType.speakerON.imageName)?.withRenderingMode(.alwaysTemplate)
+                speakerButton.setImage(image, for: .normal)
+                speakerButton.type = .speakerON
+            } else {
+                // Speaker is OFF, so show "Use speaker"
+                speakerButton.setTitle(ConferenceButtonType.speakerOFF.title, for: .normal)
+                let image = UIImage(podAssetName: ConferenceButtonType.speakerOFF.imageName)?.withRenderingMode(.alwaysTemplate)
+                speakerButton.setImage(image, for: .normal)
+                speakerButton.type = .speakerOFF
             }
         }
     }
