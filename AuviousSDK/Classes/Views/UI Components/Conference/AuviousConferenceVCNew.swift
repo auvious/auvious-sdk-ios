@@ -1164,7 +1164,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         toggleSharingBorder(mode: true)
     }
     
-    public func auviousSDK(screenSharingStopped: Bool) {}
+    public func auviousSDK(screenSharingStopped: Bool) {
+        localScreenShareStreamId = nil
+    }
     
     // MARK: -
     // MARK: UI
@@ -1763,15 +1765,19 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     //UI changes will occur once delegation ensures sharing started
     @objc internal func screenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
-        
-        do {
-            localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
-            
-            buttonContainerView.resetOptionsButton()
-            
-        } catch let error {
-            os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
-            handleError(error)
+        buttonContainerView.resetOptionsButton()
+        isAnimatingPopover = false
+
+        AuviousConferenceSDK.sharedInstance.requestScreenSharePermission { [weak self] granted in
+            guard let self = self, granted else { return }
+            DispatchQueue.main.async {
+                do {
+                    self.localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
+                } catch let error {
+                    os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                    self.handleError(error)
+                }
+            }
         }
     }
     
@@ -2007,9 +2013,9 @@ extension AuviousConferenceVCNew: ConferencePopoverDelegate {
     //Calls the same handler as the button bar
     func didPressShareScreenButton() {
         popoverVC.dismiss(animated: true, completion: {
-            
+            self.buttonContainerView.resetOptionsButton()
+            self.isAnimatingPopover = false
             if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                self.buttonContainerView.resetOptionsButton()
                 self.stopScreenShareButtonPressed(self)
             } else {
                 self.screenShareButtonPressed(self)

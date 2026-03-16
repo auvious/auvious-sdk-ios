@@ -25,6 +25,7 @@ internal protocol RTCDelegate {
     func rtcClient(recorderStateChanged toActive: Bool)
     func rtcClient(didStopScreenSharing: Bool)
     func rtcClient(didStartScreenSharing: Bool)
+    func rtcClient(didFailToStartScreenSharing: Bool)
     
     //rest call
     func rtcClient(call streamId: String, sdpOffer: String, target: String)
@@ -89,6 +90,7 @@ internal extension RTCDelegate {
     func rtcClient(addPublishStreamIceCandidates candidates: [RTCIceCandidate], streamId: String, streamType: StreamType) {}
     func rtcClient(addRemoteStreamIceCandidates candidates: [RTCIceCandidate], userId: String, endpointId: String, streamId: String, streamType: StreamType) {}
     func rtcClient(recorderStateChanged toActive: Bool){}
+    func rtcClient(didFailToStartScreenSharing: Bool){}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
@@ -107,6 +109,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     private var localScreenVideoSource: RTCVideoSource?
     private var localScreenVideoTrack: RTCVideoTrack?
     private var localScreenStream: RTCMediaStream?
+
+    // Pending capturer created during the permission phase (reused in createScreenSharingStream)
+    private var pendingScreenVideoSource: RTCVideoSource?
+    private var pendingScreenCapturer: ScreenCapturer?
     
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
@@ -291,19 +297,47 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
     }
     
+    /// Starts ReplayKit capture to trigger the permission dialog.
+    /// The capturer is stored as pending and reused in createScreenSharingStream.
+    internal func startScreenCapture(completion: @escaping (Bool) -> Void) {
+        pendingScreenVideoSource = factory.videoSource()
+        let capturer = ScreenCapturer(videoSource: pendingScreenVideoSource!)
+        capturer.delegate = self
+        pendingScreenCapturer = capturer
+        capturer.permissionCompletion = { [weak self] granted in
+            guard let self = self else { return }
+            if !granted {
+                self.pendingScreenCapturer = nil
+                self.pendingScreenVideoSource = nil
+            }
+            completion(granted)
+        }
+        capturer.start()
+    }
+
     internal func createScreenSharingStream(streamId: String) -> RTCMediaStream {
         os_log("createLocalMediaStream() for type screen and stream %@", log: Log.rtc, type: .debug, streamId)
         localScreenStream = factory.mediaStream(withStreamId: streamId)
-        
-        localScreenVideoSource = factory.videoSource()
-        screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
-        screenCapturer.delegate = self
-        screenCapturer.start()
-        
+
+        if let pending = pendingScreenCapturer, let pendingSource = pendingScreenVideoSource {
+            // Reuse the capturer that was already started during the permission phase
+            screenCapturer = pending
+            localScreenVideoSource = pendingSource
+            pendingScreenCapturer = nil
+            pendingScreenVideoSource = nil
+            // Capture is already running; notify delegate directly
+            delegate?.rtcClient(didStartScreenSharing: true)
+        } else {
+            localScreenVideoSource = factory.videoSource()
+            screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
+            screenCapturer.delegate = self
+            screenCapturer.start()
+        }
+
         localScreenVideoTrack = factory.videoTrack(with: localScreenVideoSource!, trackId: "screenVideo")
         localScreenVideoTrack!.isEnabled = true
         localScreenStream!.addVideoTrack(localScreenVideoTrack!)
-        
+
         return localScreenStream!
     }
     
@@ -1073,10 +1107,12 @@ extension RTCModule: ScreenCapturerDelegate {
     func onScreenSharingStart() {
         delegate?.rtcClient(didStartScreenSharing: true)
     }
-    
+
     func onScreenSharingStop() {
-        
+
     }
-    
-    
+
+    func onScreenSharingFailed() {
+        delegate?.rtcClient(didFailToStartScreenSharing: true)
+    }
 }

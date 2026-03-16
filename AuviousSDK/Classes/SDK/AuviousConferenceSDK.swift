@@ -91,7 +91,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     
     /// Internal flag for handling the iOS ReplayKit permission dialog app resume
     internal var sharingMyScreen: Bool = false
-    
+
+    /// Set to true while the ReplayKit permission dialog is being shown, cleared inside onApplicationResume.
+    /// This prevents a conference rejoin when the app briefly backgrounds during the dialog,
+    /// regardless of whether the completion handler fires before or after applicationDidBecomeActive.
+    internal var isPendingScreenSharePermission: Bool = false
+
     /// Internal flag for handling the iOS Screenshot dialog app resume
     internal var wasBackgroundedDueToScreenshot: Bool = false
     
@@ -146,9 +151,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         //Ensure we are not resuming due to ReplayKit permission dialog closure
-        guard !sharingMyScreen && !wasBackgroundedDueToScreenshot else {
-            print("onApplicationResume() called but we are sharing our screen / resuming from screenshot so no rejoin")
+        guard !sharingMyScreen && !wasBackgroundedDueToScreenshot && !isPendingScreenSharePermission else {
+            print("onApplicationResume() called but we are sharing our screen / resuming from screenshot / pending screen share permission so no rejoin")
             wasBackgroundedDueToScreenshot = false
+            isPendingScreenSharePermission = false
             return
         }
         
@@ -274,6 +280,17 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Returns: The id of the stream that you are about to publish
      - Throws: AuviousSDKError detailing the error
      */
+    /// Requests screen share permission by starting ReplayKit capture.
+    /// The completion is called on the ReplayKit callback thread with true if the user allowed, false if denied.
+    /// On success, the pending capturer is reused when startPublishLocalStreamFlow(type: .screen) is called.
+    public func requestScreenSharePermission(completion: @escaping (Bool) -> Void) {
+        // Set flag before the dialog appears. It is cleared inside onApplicationResume,
+        // so the guard there fires regardless of whether the ReplayKit completion
+        // handler runs before or after applicationDidBecomeActive.
+        isPendingScreenSharePermission = true
+        rtcClient.startScreenCapture(completion: completion)
+    }
+
     public func startPublishLocalStreamFlow(type: StreamType) throws -> String? {
         
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
@@ -1229,5 +1246,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     
     internal func rtcClient(didStartScreenSharing: Bool) {
         delegate?.auviousSDK(screenSharingStarted: true)
+    }
+
+    internal func rtcClient(didFailToStartScreenSharing: Bool) {
+        sharingMyScreen = false
     }
 }
