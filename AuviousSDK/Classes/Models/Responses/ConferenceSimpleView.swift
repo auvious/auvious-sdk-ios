@@ -21,6 +21,8 @@ public final class ConferenceSimpleView: NSObject {
     var mutedAudioTracks: [String] = []
     //Conference on hold
     var onHold: Bool = false
+    //Recording active at join time
+    var isRecording: Bool = false
     
     init(fromJson json: JSON!) {
         if json == JSON.null {
@@ -55,6 +57,8 @@ public final class ConferenceSimpleView: NSObject {
                 }
             } else if key.starts(with: "ON_HOLD") {
                 onHold = true
+            } else if key.starts(with: "RECORDER") {
+                isRecording = true
             }
         }
     }

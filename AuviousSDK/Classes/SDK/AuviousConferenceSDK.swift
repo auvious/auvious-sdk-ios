@@ -587,9 +587,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                                 #warning("TODO: Extra val here")
                                 self.delegateConferenceMessage(msg: m)
                             }
-                            
+
                             os_log("Finished processing of %d cached messages", log: Log.conferenceSDK, type: .debug, self.mqttCachedMessages.count)
                             self.mqttCachedMessages.removeAll()
+                        }
+
+                        //Notify if recording was already active when we joined
+                        if self.currentConference?.isRecording == true {
+                            self.delegate?.auviousSDK(recorderStateChanged: true)
                         }
                     }
                 }, onFailure: {(error) in
