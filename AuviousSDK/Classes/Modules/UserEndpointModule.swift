@@ -25,7 +25,7 @@ internal class UserEndpointModule {
     internal static let sharedInstance = UserEndpointModule()
     
     /// Configuration setting for the keep alive timer
-    private let keepAliveSeconds: Double = 15
+    internal let keepAliveSeconds: Double = 15
     
     /// Endpoint keep alive timer
     internal var keepAliveTimer: Timer?
@@ -93,10 +93,15 @@ internal class UserEndpointModule {
     
     //Keep alive timer tick
     @objc private func onKeepAliveTick(timer: Timer) {
+        performKeepAlive()
+    }
+
+    /// Fires a keep-alive request. Called by the RunLoop timer and also by the GCD background timer.
+    internal func performKeepAlive() {
         guard let userEndpointId = userEndpointId, let loginResponse = AuthenticationModule.sharedInstance.loginResponse else {
             return
         }
-        
+
         if let request = keepAliveRequest {
             fireKeepAliveRequest(request)
         } else {

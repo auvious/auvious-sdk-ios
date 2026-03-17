@@ -1070,6 +1070,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         handleExistingConferenceStreams()
         startLocalStream()
     }
+
+    public func auviousSDK(didResumeFromBackground withActiveAudio: Bool) {
+        // Audio route and peer connections are still active — just refresh video layout
+        createConstraints()
+    }
     
     public func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {
         switch newState {

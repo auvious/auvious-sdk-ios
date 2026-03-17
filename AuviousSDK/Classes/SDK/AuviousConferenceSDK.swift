@@ -99,7 +99,19 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
 
     /// Internal flag for handling the iOS Screenshot dialog app resume
     internal var wasBackgroundedDueToScreenshot: Bool = false
-    
+
+    /// True when peer connections are kept alive in background with audio still running
+    internal var isBackgroundAudioActive: Bool = false
+
+    /// GCD timer used for keep-alive while in background (RunLoop timers don't fire in background)
+    private var backgroundKeepAliveTimer: DispatchSourceTimer?
+
+    /// Whether the host app has declared the "audio" background mode in Info.plist
+    private var hostAppSupportsBackgroundAudio: Bool {
+        guard let modes = Bundle.main.infoDictionary?["UIBackgroundModes"] as? [String] else { return false }
+        return modes.contains("audio")
+    }
+
     //MARK: -
     //MARK: Pause/Resume handlers
     //MARK: -
@@ -110,24 +122,75 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         UIApplication.shared.endBackgroundTask(backgroundTask)
         backgroundTask = UIBackgroundTaskIdentifier.invalid
     }
+
+    /// Starts a GCD-based keep-alive timer for use in background (RunLoop timers don't fire).
+    private func startBackgroundKeepAliveTimer() {
+        let interval = UserEndpointModule.sharedInstance.keepAliveSeconds - 5
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global())
+        timer.schedule(deadline: .now() + interval, repeating: interval)
+        timer.setEventHandler {
+            UserEndpointModule.sharedInstance.performKeepAlive()
+        }
+        timer.resume()
+        backgroundKeepAliveTimer = timer
+    }
+
+    /// Cancels the GCD-based background keep-alive timer.
+    private func stopBackgroundKeepAliveTimer() {
+        backgroundKeepAliveTimer?.cancel()
+        backgroundKeepAliveTimer = nil
+    }
     
     /**
      Should be called when the application is backgrounded in order to gracefully
      disconnect from remote streams.
      */
     public func onApplicationPause(){
+        // Background audio path: keep peer connections alive, pause only video
+        if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil && !sharingMyScreen {
+            isBackgroundAudioActive = true
+            rtcClient?.pauseVideoForBackground()
+
+            // Switch from RunLoop timer (won't fire in background) to GCD timer
+            UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
+            startBackgroundKeepAliveTimer()
+
+            backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
+                // OS is about to kill us — fall back to full teardown
+                self?.stopBackgroundKeepAliveTimer()
+                self?.isBackgroundAudioActive = false
+                if let conf = self?.currentConference {
+                    self?.leaveConference(conferenceId: conf.id, onSuccess: {
+                        self?.endBackgroundTask()
+                    }, onFailure: { _ in
+                        self?.endBackgroundTask()
+                    })
+                } else {
+                    self?.endBackgroundTask()
+                }
+            }
+
+            os_log("Background audio active — keeping peer connections alive", log: Log.conferenceSDK, type: .debug)
+            return
+        }
+
+        if uiConfiguration.backgroundAudioEnabled && !hostAppSupportsBackgroundAudio {
+            os_log("backgroundAudioEnabled is true but UIBackgroundModes 'audio' is missing from Info.plist — falling back to full teardown", log: Log.conferenceSDK, type: .error)
+        }
+
+        // Existing full teardown path
         backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
             self?.endBackgroundTask()
         }
-        
+
         //Pause the keepAlive timer
         UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
-        
+
         if let conf = currentConference {
             leaveConference(conferenceId: conf.id, onSuccess: {
-                
+
                 self.endBackgroundTask()
-                
+
             }, onFailure: {(error) in
                 self.endBackgroundTask()
             })
@@ -141,15 +204,27 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      rejoin the conference and reconnect to remote streams.
      */
     public func onApplicationResume(){
+        // Background audio path: connections are still alive, just resume video
+        if isBackgroundAudioActive {
+            os_log("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
+            isBackgroundAudioActive = false
+            stopBackgroundKeepAliveTimer()
+            UserEndpointModule.sharedInstance.startKeepAliveTimer()
+            rtcClient?.resumeVideoForForeground()
+            endBackgroundTask()
+            delegate?.auviousSDK(didResumeFromBackground: true)
+            return
+        }
+
         //Ensure we have logged in, and have created an endpoint
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
             return
         }
-        
+
         guard let userEndpointId = UserEndpointModule.sharedInstance.userEndpointId else {
             return
         }
-        
+
         //Ensure we are not resuming due to ReplayKit permission dialog closure
         guard !sharingMyScreen && !wasBackgroundedDueToScreenshot && !isPendingScreenSharePermission else {
             print("onApplicationResume() called but we are sharing our screen / resuming from screenshot / pending screen share permission so no rejoin")
@@ -615,7 +690,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Parameter onFailure: Called in case of failure with the designated Error
      */
     public func leaveConference(conferenceId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
-        
+        // Clean up background audio state if active
+        isBackgroundAudioActive = false
+        stopBackgroundKeepAliveTimer()
+
         //Step 1 - Close all streams
         removeAllStreams()
         

@@ -1034,6 +1034,52 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
     }
     
+    // MARK: - Background audio support
+
+    /// Pauses video capture and disables remote video tracks while keeping audio and peer connections alive.
+    internal func pauseVideoForBackground() {
+        // Pause local video capture (keep capturer reference alive for resume)
+        localVideoTrack?.isEnabled = false
+        if capturer != nil {
+            capturer.stopCapture()
+        }
+
+        // Disable remote video tracks to prevent GPU work in background
+        for container in peerConnections where !container.isLocal {
+            for receiver in container.connection.receivers {
+                if receiver.track?.kind == "video" {
+                    receiver.track?.isEnabled = false
+                }
+            }
+        }
+
+        // Ensure audio session stays active
+        try? AVAudioSession.sharedInstance().setActive(true)
+    }
+
+    /// Resumes video capture and re-enables remote video tracks after returning from background.
+    internal func resumeVideoForForeground() {
+        // Re-enable local video track and restart capture
+        localVideoTrack?.isEnabled = true
+        if capturer != nil {
+            let position = usingFrontCamera ? AVCaptureDevice.Position.front : AVCaptureDevice.Position.back
+            if let device = findDeviceForPosition(position: position) {
+                let format = selectFormatForDevice(device: device)
+                let fps = selectFpsForFormat(format: format)
+                capturer.startCapture(with: device, format: format, fps: fps)
+            }
+        }
+
+        // Re-enable remote video tracks
+        for container in peerConnections where !container.isLocal {
+            for receiver in container.connection.receivers {
+                if receiver.track?.kind == "video" {
+                    receiver.track?.isEnabled = true
+                }
+            }
+        }
+    }
+
     @discardableResult
     internal func switchCamera(fromRemoteAgent: Bool = false) -> CameraResponse {
         //#warning("Feature Idea: Change mic direction when user is switching camera (https://www.twilio.com/docs/video/ios-v2-configuring-audio-video-inputs-and-outputs)")

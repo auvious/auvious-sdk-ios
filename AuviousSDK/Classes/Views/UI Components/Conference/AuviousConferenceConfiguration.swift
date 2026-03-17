@@ -29,6 +29,11 @@ public struct AuviousConferenceConfiguration {
     public var pipAvailable: Bool = true
     public var screenSharingAvailable: Bool = true
     
+    //Background
+    /// When true, audio continues in background instead of leaving the conference.
+    /// Host app must add UIBackgroundModes "audio" to Info.plist.
+    public var backgroundAudioEnabled: Bool = false
+
     //Other
     public var participantName: String? = nil
     
