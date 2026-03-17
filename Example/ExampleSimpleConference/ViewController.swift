@@ -13,7 +13,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
     //UI components
     @IBOutlet weak var usernameTextfield: UITextField!
-    @IBOutlet weak var passwordTextfield: UITextField!
+    @IBOutlet weak var environmentControl: UISegmentedControl!
     @IBOutlet weak var conferenceTextfield: UITextField!
     @IBOutlet weak var participantTextfield: UITextField!
     @IBOutlet weak var createConferenceSwitch: UISwitch!
@@ -36,28 +36,25 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         super.viewDidLoad()
         
         usernameTextfield.delegate = self
-        passwordTextfield.delegate = self
         conferenceTextfield.delegate = self
         participantTextfield.delegate = self
-        
+
+        usernameTextfield.autocorrectionType = .no
+
         usernameTextfield.attributedPlaceholder = NSAttributedString(string: "Username", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
-        passwordTextfield.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         conferenceTextfield.attributedPlaceholder = NSAttributedString(string: "Conference to create/join", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         participantTextfield.attributedPlaceholder = NSAttributedString(string: "Participant name (optional)", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
-        
+
         usernameTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        passwordTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         conferenceTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         participantTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        
+
         usernameTextfield.textColor = .white
-        passwordTextfield.textColor = .white
         conferenceTextfield.textColor = .white
         participantTextfield.textColor = .white
-    
+
         // hard code values for faster debugging
-        usernameTextfield.text = "uvk-ffn"
-        passwordTextfield.text = "" // optional
+        usernameTextfield.text = ""
         conferenceTextfield.text = "" // optional
         
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
@@ -83,31 +80,13 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             let password = "b"
             let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             let participantName = participantTextfield.text
-            
-//
-            //GENESYS DEV (customer)
-            let clientId: String = "customer"
-            let baseEndpoint: String = "https://dev.auvious.video/"
-            let mqttEndpoint: String = "dev.auvious.video"
-            let params: [String: String] = ["ticket" : ticket, "password" : password, "grant_type" : "password"]
 
-            //GENESYS DEV (test-agent)
-//            let clientId: String = "test-agent"
-//            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-            
-            //GENESYS STAGING (customer)
-//            let clientId: String = "customer"
-//            let baseEndpoint: String = "https://genesys.stg.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.stg.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-            
-            //GENESYS PROD (customer)
-//            let clientId: String = "customer"
-//            let baseEndpoint: String = "https://genesys.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
+            let clientId: String = "customer"
+            let environments = ["auvious.video", "dev.auvious.video", "stg.auvious.video"]
+            let selectedEnv = environments[environmentControl.selectedSegmentIndex]
+            let baseEndpoint: String = "https://\(selectedEnv)/"
+            let mqttEndpoint: String = selectedEnv
+            let _: [String: String] = ["ticket" : ticket, "password" : password, "grant_type" : "password"]
 
             //New configuration approach
             var conf = AuviousConferenceConfiguration()
@@ -122,7 +101,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.conference = conferenceName
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
-//            conf.conferenceBackgroundColor = .systemGreen
+//            conf.conferenceBackgroundColor = .black
             conf.enableSpeaker = self.speakerEnabledSwitch.isOn
             switch (self.callMode.selectedSegmentIndex){
             case 0:
@@ -169,17 +148,6 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             showAlert(title: "Warning", msg: "Please enter your ticket")
             return false
         }
-        
-//        guard let password = passwordTextfield.text, !password.isEmpty else {
-//            showAlert(title: "Warning", msg: "Please enter your password")
-//            return false
-//        }
-        
-//        guard let conferenceName = conferenceTextfield.text, !conferenceName.isEmpty else {
-//            showAlert(title: "Warning", msg: "Please enter a conference name")
-//            return false
-//        }
-        
         return true
     }
     
