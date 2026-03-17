@@ -130,12 +130,18 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var clientId: String = ""
     private var params: [String: String] = [:]
     private var configuredStreamType: StreamType = .unknown
-    
+    // Tracks the user's preferred audio route so it survives backgrounding.
+    // Updated both from the speaker button and from AVAudioSession route-change
+    // notifications (e.g. Bluetooth removed → system switches to speaker without
+    // touching the button).
+    private var prefersSpeaker: Bool = false
+
     //Control flags
     private var performedInitialValidations: Bool = false
     private var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
     private var initialStreamsConnected: Bool = false
+    private var hasAppliedInitialAudioRoute: Bool = false
     internal var isAnimatingPopover = false
     
     //Delegate
@@ -264,6 +270,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         videoViewBackgroundColor = clientConfiguration.conferenceBackgroundColor
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(self.audioRouteChanged(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
         
         NotificationCenter.default.addObserver(
             self,
@@ -1021,8 +1029,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             //Refresh UI
             self.createConstraints()
             
-            //Respect client configuration for audio routing
-            let result = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: self.clientConfiguration.enableSpeaker)
+            //Respect client configuration for audio routing (only on first join, not rejoin)
+            if !self.hasAppliedInitialAudioRoute {
+                self.hasAppliedInitialAudioRoute = true
+                self.prefersSpeaker = self.clientConfiguration.enableSpeaker
+                let result = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: self.prefersSpeaker)
+            }
         }
     }
     
@@ -1030,10 +1042,30 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Clear the streams from the UI
         _ = remoteViews.map{ $0.removeFromSuperview() }
         remoteViews.removeAll()
-        
+
         currentConference = conference
         conferenceParticipants = currentConference.participants.count
-        
+
+        // Restore stream type from button state so camera/mic remain
+        // in whatever state the user left them before backgrounding
+        let camOn = buttonContainerView.cameraButton.type == .camEnabled
+        let micOn = buttonContainerView.micButton.type == .micEnabled
+
+        if camOn && micOn {
+            configuredStreamType = .micAndCam
+        } else if camOn {
+            configuredStreamType = .cam
+        } else {
+            configuredStreamType = .mic
+        }
+
+        // Reapply speaker/earpiece route — AVAudioSession resets on rejoin.
+        // Use prefersSpeaker rather than the button state: the button can be
+        // stale if the system changed the route (e.g. Bluetooth removed, or the
+        // user picked an output from the iOS audio-route popup) without going
+        // through our speaker button handler.
+        let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: prefersSpeaker)
+
         //Reconnect to conference streams
         handleExistingConferenceStreams()
         startLocalStream()
@@ -1049,6 +1081,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             os_log("Remote Stream Is Connecting", log: Log.conferenceUI, type: .debug)
         case .remoteStreamConnected:
             os_log("Remote Stream Connected", log: Log.conferenceUI, type: .debug)
+            let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: prefersSpeaker)
         case .localStreamIsDisconnecting:
             os_log("Local Stream Is Disonnecting", log: Log.conferenceUI, type: .debug)
         case .localStreamDisconnected:
@@ -1847,13 +1880,34 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         
         if button.type == .speakerON {
             button.type = .speakerOFF
+            prefersSpeaker = false
             let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: false)
         } else {
             button.type = .speakerON
+            prefersSpeaker = true
             let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: true)
         }
     }
-    
+
+    // Keeps prefersSpeaker in sync when the system changes the audio route
+    // (e.g. Bluetooth device removed → iOS switches to speaker, or the user
+    // picks an output from the system audio-route picker popup).
+    @objc private func audioRouteChanged(_ notification: Notification) {
+        guard let reasonValue = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
+
+        switch reason {
+        case .newDeviceAvailable, .oldDeviceUnavailable:
+            // Device plugged/unplugged — update to reflect actual route
+            let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+            prefersSpeaker = outputs.contains { $0.portType == .builtInSpeaker }
+        default:
+            // .override is fired by our own changeAudioRoot calls and by
+            // checkCurrentAudioRoute() — ignore to avoid corrupting prefersSpeaker
+            break
+        }
+    }
+
     //Toggles video stream
     @objc internal func cameraButtonPressed(_ sender: Any) {
         guard let localStreamId = localStreamId else {

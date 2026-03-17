@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(brew upgrade:*)"
+      "Bash(brew upgrade:*)",
+      "Bash(find:*)"
     ]
   }
 }

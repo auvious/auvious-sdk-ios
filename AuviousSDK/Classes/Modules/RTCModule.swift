@@ -132,6 +132,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     //Latest local captured frame
     private var lastLocalFrame: RTCVideoFrame?
     private var capturingScreenshot: Bool = false
+
+    /// Stores the last speaker preference set via changeAudioRoot().
+    /// Used by checkCurrentAudioRoute() so it doesn't override the user's choice.
+    private var audioPrefersSpeaker: Bool = true
     
     //Local tracks (for muting/unmuting)
     internal var localVideoTrack: RTCVideoTrack?
@@ -812,12 +816,12 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             if description.portType == AVAudioSession.Port.headphones || description.portType == AVAudioSession.Port.bluetoothHFP {
                 os_log("headphone plugged in", log: Log.rtc, type: .debug)
             } else {
-                os_log("headphone pulled out", log: Log.rtc, type: .debug)
-                changeAudioRoot(toSpeaker: true)
+                os_log("headphone pulled out, flag:%{public}@", log: Log.rtc, type: .debug, String(audioPrefersSpeaker))
+                changeAudioRoot(toSpeaker: audioPrefersSpeaker)
             }
         }
     }
-    
+
     @objc func handleRouteChange(notification: Notification) {
         guard let userInfo = notification.userInfo,
             let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
@@ -1081,6 +1085,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     @discardableResult
     internal func changeAudioRoot(toSpeaker: Bool) -> Bool {
+        audioPrefersSpeaker = toSpeaker
         //#warning("Feature Idea: Change audio session type for better audio quality (https://www.twilio.com/docs/video/ios-v2-configuring-audio-video-inputs-and-outputs)")
         if toSpeaker {
             do {
