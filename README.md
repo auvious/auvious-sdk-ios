@@ -405,6 +405,7 @@ pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
 - Bug fix / MQTT Fails if wrong ticket is used
 - Bug fix / if agent changes from MIC to MIC_AND_CAM while PiP, app crashed
 - Bug fix / Add participant and stream metadata when joining the call
+- Bug fix / Do not rejoin conference if notification center is shown
 
 ### 1.3.1
 
