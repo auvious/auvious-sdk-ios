@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import UIKit
+import AVFoundation
 
 internal final class Utilities {
     
@@ -50,5 +52,100 @@ internal final class Utilities {
     
     static func getApplicationLanguage() -> String {
         return String(Locale.preferredLanguages.first?.prefix(2) ?? "en")
+    }
+
+    static func getMediaDevices() -> [[String: Any]] {
+        var devices = [[String: Any]]()
+
+        // Video inputs (cameras)
+        let videoDevices = AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInWideAngleCamera],
+            mediaType: .video,
+            position: .unspecified
+        ).devices
+        for camera in videoDevices {
+            devices.append([
+                "deviceId": camera.uniqueID,
+                "kind": "videoinput",
+                "label": camera.localizedName,
+                "groupId": ""
+            ])
+        }
+
+        // Audio inputs
+        if let audioInputs = AVAudioSession.sharedInstance().availableInputs {
+            for input in audioInputs {
+                devices.append([
+                    "deviceId": input.uid,
+                    "kind": "audioinput",
+                    "label": input.portName,
+                    "groupId": ""
+                ])
+            }
+        }
+
+        // Audio outputs
+        let audioOutputs = AVAudioSession.sharedInstance().currentRoute.outputs
+        for output in audioOutputs {
+            devices.append([
+                "deviceId": output.uid,
+                "kind": "audiooutput",
+                "label": output.portName,
+                "groupId": ""
+            ])
+        }
+
+        return devices
+    }
+
+    static func getDeviceInfo() -> [String: Any] {
+        let device = UIDevice.current
+        let deviceModel = getDeviceModel()
+        let ua = generateCustomUserAgent()
+
+        let bundleSDK = Bundle(for: AuviousConferenceSDK.self)
+        let sdkVersion = bundleSDK.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+        let sdkMajor = sdkVersion.components(separatedBy: ".").first ?? "0"
+
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let cpuArchitecture = withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                String(validatingUTF8: $0) ?? "unknown"
+            }
+        }
+
+        let deviceType: String
+        switch device.userInterfaceIdiom {
+        case .pad:
+            deviceType = "tablet"
+        default:
+            deviceType = "mobile"
+        }
+
+        return [
+            "browser": [
+                "name": "AuviousSDK",
+                "version": sdkVersion,
+                "major": sdkMajor
+            ],
+            "cpu": [
+                "architecture": cpuArchitecture
+            ],
+            "device": [
+                "vendor": "Apple",
+                "model": deviceModel,
+                "type": deviceType
+            ],
+            "engine": [
+                "name": "WebKit",
+                "version": ""
+            ],
+            "os": [
+                "name": device.systemName,
+                "version": device.systemVersion
+            ],
+            "ua": ua
+        ]
     }
 }

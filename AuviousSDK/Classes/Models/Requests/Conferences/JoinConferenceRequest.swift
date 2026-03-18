@@ -49,7 +49,7 @@ internal final class JoinConferenceRequest {
         
         metaDataDictionary["language"] = Utilities.getApplicationLanguage()
         metaDataDictionary["type"] = "stream"
-        metaDataDictionary["mediaDevices"] = NSNull()
+        metaDataDictionary["mediaDevices"] = Utilities.getMediaDevices()
         
         if let participantName = participantName {
             metaDataDictionary["name"] = participantName
@@ -58,7 +58,7 @@ internal final class JoinConferenceRequest {
         }
         
         metaDataDictionary["avatarUrl"] = NSNull()
-        metaDataDictionary["deviceInfo"] = NSNull()
+        metaDataDictionary["deviceInfo"] = Utilities.getDeviceInfo()
         
         dictionary["metadata"] = metaDataDictionary
         
