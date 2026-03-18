@@ -357,9 +357,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
         networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
         networkIndicatorDetailsTop.isActive = true
-        networkIndicatorDetails.closeButton.addTarget(self, action: #selector(self.hideNetworkDetailsPressed), for: .touchUpInside)
+        networkIndicatorDetails.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.hideNetworkDetailsPressed)))
         view.bringSubviewToFront(networkIndicatorDetails)
-        
+
         //Generic dismissable notification
         view.addSubview(notification)
         notification.layer.zPosition = 2101
@@ -369,7 +369,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         notification.heightAnchor.constraint(equalToConstant: 60).isActive = true
         notificationTop = notification.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
         notificationTop.isActive = true
-        notification.closeButton.addTarget(self, action: #selector(self.hideNotificationPressed), for: .touchUpInside)
+        notification.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.hideNotificationPressed)))
         view.bringSubviewToFront(notification)
         
         hideNotificationBlock = DispatchWorkItem {
