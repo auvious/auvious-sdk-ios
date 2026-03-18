@@ -103,6 +103,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// True when peer connections are kept alive in background with audio still running
     internal var isBackgroundAudioActive: Bool = false
 
+    /// True when onApplicationPause() was called, so onApplicationResume() only runs after a real background transition
+    private var didPauseForBackground: Bool = false
+
     /// GCD timer used for keep-alive while in background (RunLoop timers don't fire in background)
     private var backgroundKeepAliveTimer: DispatchSourceTimer?
 
@@ -146,6 +149,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      disconnect from remote streams.
      */
     public func onApplicationPause(){
+        didPauseForBackground = true
+
         // Background audio path: keep peer connections alive, pause only video
         if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil && !sharingMyScreen {
             isBackgroundAudioActive = true
@@ -208,6 +213,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         if isBackgroundAudioActive {
             os_log("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
             isBackgroundAudioActive = false
+            didPauseForBackground = false
             stopBackgroundKeepAliveTimer()
             UserEndpointModule.sharedInstance.startKeepAliveTimer()
             rtcClient?.resumeVideoForForeground()
@@ -215,6 +221,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             delegate?.auviousSDK(didResumeFromBackground: true)
             return
         }
+
+        // Only rejoin if onApplicationPause() was actually called (real background transition).
+        // Notification center / widgets center only trigger willResignActive → didBecomeActive,
+        // which would otherwise cause a spurious rejoin and duplicate stream publishing.
+        guard didPauseForBackground else { return }
+        didPauseForBackground = false
 
         //Ensure we have logged in, and have created an endpoint
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
