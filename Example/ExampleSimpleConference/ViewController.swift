@@ -184,23 +184,17 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBAction func callButtonPressed(_ sender: Any) {
         if validateForm() {
             let ticket = usernameTextfield.text!
-            let password = "b"
             let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             let participantName = participantTextfield.text
-
-            let clientId: String = "customer"
             let environments = ["auvious.video", "dev.auvious.video", "stg.auvious.video"]
             let selectedEnv = environments[environmentControl.selectedSegmentIndex]
             let baseEndpoint: String = "https://\(selectedEnv)/"
             let mqttEndpoint: String = selectedEnv
-            let _: [String: String] = ["ticket" : ticket, "password" : password, "grant_type" : "password"]
-
+           
             //New configuration approach
             var conf = AuviousConferenceConfiguration()
             conf.username = ticket
-            conf.password = password
-            conf.clientId = clientId
-
+          
             if let name = participantName, !name.isEmpty {
                 conf.participantName = name
             }

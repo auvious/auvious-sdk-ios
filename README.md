@@ -95,10 +95,7 @@ class ViewController: UIViewController {
     func joinConference() {
         // 1. Build the configuration
         let config = AuviousConferenceConfiguration()
-        config.username = "<ticket>" // set the auvious ticket 
-        config.password = "<password>" // set it to 'b'
-        config.clientId = "<client-id>" // set it to 'customer'
-        config.conference = "<conference-name>"
+        config.username = "<ticket>" // set the auvious ticket
         config.baseEndpoint = "https://auvious.video/"
         config.mqttEndpoint = "auvious.video"
 
@@ -254,83 +251,87 @@ Used when presenting `AuviousConferenceVCNew` for the built-in conference UI.
 
 #### Authentication & Connection
 
-| Property | Type | Description |
-|---|---|---|
-| `username` | `String` | Username (or ticket) used to authenticate with the Auvious platform. |
-| `password` | `String` | Password used to authenticate. |
-| `grantType` | `String` | OAuth grant type. Default: `"password"`. |
-| `clientId` | `String` | Client identifier registered on the Auvious platform. |
-| `conference` | `String` | Name of the conference room to join or create. |
-| `baseEndpoint` | `String` | Base URL of the Auvious API (e.g. `"https://auvious.video/"`). |
-| `mqttEndpoint` | `String` | Hostname of the MQTT WebSocket broker (e.g. `"auvious.video"`). |
+| Property       | Type     | Description                                                          |
+| -------------- | -------- | -------------------------------------------------------------------- |
+| `username`     | `String` | Username (or ticket) used to authenticate with the Auvious platform. |
+| `password`     | `String` | Password used to authenticate.                                       |
+| `grantType`    | `String` | OAuth grant type. Default: `"password"`.                             |
+| `clientId`     | `String` | Client identifier registered on the Auvious platform. Default: `"customer"`               |
+| `conference`   | `String` | Name of the conference room to join or create.                       |
+| `baseEndpoint` | `String` | Base URL of the Auvious API (e.g. `"https://auvious.video/"`).       |
+| `mqttEndpoint` | `String` | Hostname of the MQTT WebSocket broker (e.g. `"auvious.video"`).      |
 
 #### Call Behaviour
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `callMode` | `AuviousCallMode` | `.audioVideo` | Stream mode for the call. Use `.audio` for audio-only, `.video` for video-only, or `.audioVideo` for both. |
-| `enableSpeaker` | `Bool` | `true` | Route audio to the loudspeaker on join. |
-| `backgroundAudioEnabled` | `Bool` | `false` | Keep audio running when the app moves to the background. Requires the `audio` UIBackgroundMode in `Info.plist`. |
-| `participantName` | `String?` | `nil` | Optional display name shown to other participants. |
+| Property                 | Type              | Default       | Description                                                                                                     |
+| ------------------------ | ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
+| `callMode`               | `AuviousCallMode` | `.audioVideo` | Stream mode for the call. Use `.audio` for audio-only, `.video` for video-only, or `.audioVideo` for both.      |
+| `enableSpeaker`          | `Bool`            | `true`        | Route audio to the loudspeaker on join.                                                                         |
+| `backgroundAudioEnabled` | `Bool`            | `false`       | Keep audio running when the app moves to the background. Requires the `audio` UIBackgroundMode in `Info.plist`. |
+| `participantName`        | `String?`         | `nil`         | Optional display name shown to other participants.                                                              |
 
 #### UI Controls
 
-| Property | Type | Default | Description |
-|---|---|---|---|
+| Property                    | Type      | Default     | Description                               |
+| --------------------------- | --------- | ----------- | ----------------------------------------- |
 | `conferenceBackgroundColor` | `UIColor` | `.darkGray` | Background colour of the conference view. |
-| `cameraAvailable` | `Bool` | `true` | Show the camera toggle button. |
-| `microphoneAvailable` | `Bool` | `true` | Show the microphone mute/unmute button. |
-| `speakerAvailable` | `Bool` | `true` | Show the speaker toggle button. |
-| `pipAvailable` | `Bool` | `true` | Show the Picture-in-Picture button. |
-| `screenSharingAvailable` | `Bool` | `true` | Show the screen-sharing button. |
+| `cameraAvailable`           | `Bool`    | `true`      | Show the camera toggle button.            |
+| `microphoneAvailable`       | `Bool`    | `true`      | Show the microphone mute/unmute button.   |
+| `speakerAvailable`          | `Bool`    | `true`      | Show the speaker toggle button.           |
+| `pipAvailable`              | `Bool`    | `true`      | Show the Picture-in-Picture button.       |
+| `screenSharingAvailable`    | `Bool`    | `true`      | Show the screen-sharing button.           |
 
 ---
 
 ### AuviousConferenceSDK — Key Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `delegate` | `AuviousSDKConferenceDelegate?` | Receives stream, state, and error events. |
-| `publishVideoResolution` | `PublishVideoResolution` | Video quality for the outgoing stream. `.min` (640×480), `.mid` (960×720), `.max` (1920×1080). |
-| `isLoggedIn` | `Bool` | Whether the SDK is currently authenticated. Read-only. |
-| `userEndpointId` | `String?` | The current user's endpoint identifier. Read-only. |
+| Property                 | Type                            | Description                                                                                    |
+| ------------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `delegate`               | `AuviousSDKConferenceDelegate?` | Receives stream, state, and error events.                                                      |
+| `publishVideoResolution` | `PublishVideoResolution`        | Video quality for the outgoing stream. `.min` (640×480), `.mid` (960×720), `.max` (1920×1080). |
+| `isLoggedIn`             | `Bool`                          | Whether the SDK is currently authenticated. Read-only.                                         |
+| `userEndpointId`         | `String?`                       | The current user's endpoint identifier. Read-only.                                             |
 
 ---
 
 ### Enumerations
 
 #### AuviousCallMode
-| Value | Description |
-|---|---|
-| `.audio` | Audio-only call. |
-| `.video` | Video-only call. |
+
+| Value         | Description           |
+| ------------- | --------------------- |
+| `.audio`      | Audio-only call.      |
+| `.video`      | Video-only call.      |
 | `.audioVideo` | Audio and video call. |
 
 #### StreamType
-| Value | Description |
-|---|---|
-| `.mic` | Audio stream only. |
-| `.cam` | Video stream only. |
+
+| Value        | Description             |
+| ------------ | ----------------------- |
+| `.mic`       | Audio stream only.      |
+| `.cam`       | Video stream only.      |
 | `.micAndCam` | Audio and video stream. |
-| `.screen` | Screen-sharing stream. |
+| `.screen`    | Screen-sharing stream.  |
 
 #### PublishVideoResolution
-| Value | Resolution |
-|---|---|
-| `.min` | 640 × 480 |
-| `.mid` | 960 × 720 |
+
+| Value  | Resolution  |
+| ------ | ----------- |
+| `.min` | 640 × 480   |
+| `.mid` | 960 × 720   |
 | `.max` | 1920 × 1080 |
 
 #### AuviousSDKGenericError
-| Value | Description |
-|---|---|
-| `.AUTHENTICATION_FAILURE` | Credentials were rejected by the platform. |
-| `.PERMISSION_REQUIRED` | Camera or microphone permission was denied by the user. |
-| `.NETWORK_ERROR` | A network-level failure occurred. |
-| `.CALL_REJECTED` | The call was rejected by the remote party. |
-| `.CONFERENCE_MISSING` | The specified conference room does not exist. |
-| `.INVALID_TICKET(ticketId)` | The provided ticket is invalid or expired. |
-| `.UNKNOWN_FAILURE` | An unexpected error occurred. |
+
+| Value                       | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| `.AUTHENTICATION_FAILURE`   | Credentials were rejected by the platform.              |
+| `.PERMISSION_REQUIRED`      | Camera or microphone permission was denied by the user. |
+| `.NETWORK_ERROR`            | A network-level failure occurred.                       |
+| `.CALL_REJECTED`            | The call was rejected by the remote party.              |
+| `.CONFERENCE_MISSING`       | The specified conference room does not exist.           |
+| `.INVALID_TICKET(ticketId)` | The provided ticket is invalid or expired.              |
+| `.UNKNOWN_FAILURE`          | An unexpected error occurred.                           |
 
 ---
 
@@ -350,12 +351,12 @@ There is also a separate repository with examples available at https://github.co
 - [SimpleConference](https://github.com/auvious/ios-examples/tree/master/SimpleConference) Similar to ExampleSimpleConference written in SwiftUI.
 - [GenesysCloudSimpleConference](https://github.com/auvious/ios-examples/tree/master/GenesysCloudSimpleConference) Demonstrates how to quickly add video call capability to your iOS application, utilizing Genesys Cloud webChat channel for ACD routing.
 
-
 ## Publish version
 
 Follow the steps below to publish a new version
 
 ### Publish to git
+
 Increase the version in `AuviousSDK.podspec`
 
 Tag git with the version (ex `1.2.0`)
@@ -363,6 +364,7 @@ Tag git with the version (ex `1.2.0`)
 Push the version and the tag to github
 
 ### Publish Pod
+
 If this is the first time you do this process in your machine, you need to have cocoapods installed. Follow the instructions in http://cocoapods.org on how to install it in your machine.
 
 Once you have the pod command ready, add the auvious podspec repo to your pod repos by running this command. This will add a repo that requires SSH authentication so be sure that you have setup an SSH key with gitHub.
@@ -384,11 +386,25 @@ pod repo push <your-pod-name> AuviousSDK.podspec --verbose --allow-warnings
 ```
 
 Example:
+
 ```
 pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
 ```
 
 ## Release notes
+
+### 1.4.0
+
+- Feature / screen sharing. Only works within app
+- Feature / Picture in Picture. Can work as standalone or while screen sharing
+- Feature / Support background audio. If app is in background, call continues with audio only
+- Feature / add 'user-agent' to headers to track usage
+- Feature / 3 dots menu (more) if more than 4 actions are available
+- Bug fix / If recording started before app joins the call, the indicator was not shown
+- Bug fix / Use icon instead of 'audio only' if camera is off
+- Bug fix / MQTT Fails if wrong ticket is used
+- Bug fix / if agent changes from MIC to MIC_AND_CAM while PiP, app crashed
+- Bug fix / Add participant and stream metadata when joining the call
 
 ### 1.3.1
 

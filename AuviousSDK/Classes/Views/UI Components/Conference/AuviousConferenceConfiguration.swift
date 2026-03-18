@@ -15,7 +15,7 @@ public struct AuviousConferenceConfiguration {
     public var grantType: String = "password"
     
     //Conference
-    public var clientId: String = ""
+    public var clientId: String = "customer"
     public var conference: String = ""
     public var baseEndpoint: String = ""
     public var mqttEndpoint: String = ""

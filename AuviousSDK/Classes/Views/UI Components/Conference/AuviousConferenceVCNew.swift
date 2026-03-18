@@ -553,7 +553,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
             
             //Check credentials
-            if username.isEmpty || password.isEmpty || clientId.isEmpty {
+            if username.isEmpty || clientId.isEmpty {
                 os_log("Username/password/clientId empty, returning error", log: Log.conferenceUI, type: .debug)
                 handleError(AuviousSDKError.missingSDKCredentials)
                 return
