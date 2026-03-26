@@ -778,8 +778,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                         
                     remoteView.removeFromSuperview()
-                    
+
                     //Refresh UI
+                    if remoteViews.isEmpty && (screenMode == .pip || screenMode == .expandedPip) {
+                        screenMode = .fullScreen
+                    }
                     createConstraints()
 
                 } else if (participant?.streams!.count)! > 1 {
@@ -1298,7 +1301,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
             
             pipBottomBar.alpha = 1
-            
+
+            guard !remoteViews.isEmpty else { return }
             let agentView = remoteViews[0]
             agentView.overlayInPIP()
             
