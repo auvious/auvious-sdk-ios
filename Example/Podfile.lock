@@ -1,12 +1,12 @@
 PODS:
   - AuviousGoogleWebRTC (84.4147.4)
-  - AuviousSDK (1.3.2-beta.0):
+  - AuviousSDK (1.4.0-rc.3):
     - AuviousGoogleWebRTC (~> 84.4147.4)
     - CocoaMQTTWebsocket_IOS13
     - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
+    - Sentry (~> 8.0)
     - Starscream_IOS13 (~> 4.0.4)
     - SwiftyJSON (~> 5.0)
-  - BEMCheckBox (1.4.1)
   - CocoaMQTTWebsocket_IOS13 (3.0.7):
     - MqttCocoaAsyncSocket_IOS13 (= 14.0.0)
     - Starscream_IOS13 (= 4.0.4)
@@ -14,32 +14,20 @@ PODS:
   - Sentry (8.46.0):
     - Sentry/Core (= 8.46.0)
   - Sentry/Core (8.46.0)
-  - SPPermissions/Camera (4.1.4):
-    - SPPermissions/Core
-  - SPPermissions/Core (4.1.4)
-  - SPPermissions/Microphone (4.1.4):
-    - SPPermissions/Core
   - Starscream_IOS13 (4.0.4)
-  - SVProgressHUD (2.2.5)
   - SwiftyJSON (5.0.2)
 
 DEPENDENCIES:
   - AuviousSDK (from `../`)
-  - BEMCheckBox (~> 1.4)
   - CocoaMQTTWebsocket_IOS13 (from `https://github.com/jkritikos/CocoaMQTT_Fixed.git`)
   - MqttCocoaAsyncSocket_IOS13 (from `https://github.com/jkritikos/MqttCocoaAsyncSocket.git`, tag `14.0.0`)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `8.46.0`)
-  - SPPermissions/Camera (~> 4.1)
-  - SPPermissions/Microphone (~> 4.1)
   - Starscream_IOS13 (from `https://github.com/jkritikos/Starscream.git`, tag `4.0.4`)
-  - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
 
 SPEC REPOS:
   https://github.com/auvious/CocoaPodSpecs.git:
     - AuviousGoogleWebRTC
-  https://github.com/CocoaPods/Specs:
-    - BEMCheckBox
-    - SPPermissions
+  https://github.com/CocoaPods/Specs.git:
     - SwiftyJSON
 
 EXTERNAL SOURCES:
@@ -56,9 +44,6 @@ EXTERNAL SOURCES:
   Starscream_IOS13:
     :git: https://github.com/jkritikos/Starscream.git
     :tag: 4.0.4
-  SVProgressHUD:
-    :branch: patch-1
-    :git: https://github.com/mmdock/SVProgressHUD.git
 
 CHECKOUT OPTIONS:
   CocoaMQTTWebsocket_IOS13:
@@ -73,22 +58,16 @@ CHECKOUT OPTIONS:
   Starscream_IOS13:
     :git: https://github.com/jkritikos/Starscream.git
     :tag: 4.0.4
-  SVProgressHUD:
-    :commit: 41afba447103c44c55482db1174569172607c1e6
-    :git: https://github.com/mmdock/SVProgressHUD.git
 
 SPEC CHECKSUMS:
   AuviousGoogleWebRTC: 146e1bcb5423fbef3796d1e2cd28c7c592ae575a
-  AuviousSDK: eedc8393e54ceeb11f50d2a2ee85e9fd8f4ae81d
-  BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
+  AuviousSDK: 5060a398949417b8fbe0ad5210373e20d5098dc0
   CocoaMQTTWebsocket_IOS13: cb657e8cfc7a0729b58f37a01f4cdf67b2fe259a
   MqttCocoaAsyncSocket_IOS13: a32f9a761890366c28d22a6383e2389ff2a5a312
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
-  SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
   Starscream_IOS13: 71409ad6351f8df04b4a5814a01fc70f1a0bed7c
-  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
 
-PODFILE CHECKSUM: e21217845dd074d552231c5410092d20c05508d8
+PODFILE CHECKSUM: 1f447bdd21aff855dbfdb6c10316af68fe901502
 
 COCOAPODS: 1.16.2

@@ -1,6 +1,6 @@
 {
   "name": "AuviousSDK",
-  "version": "1.3.2-beta.0",
+  "version": "1.4.0-rc.3",
   "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
   "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
   "homepage": "https://github.com/auvious/auvious-sdk-ios.git",
@@ -13,12 +13,16 @@
   },
   "source": {
     "git": "https://github.com/auvious/auvious-sdk-ios.git",
-    "tag": "1.3.2-beta.0"
+    "tag": "1.4.0-rc.3"
   },
   "platforms": {
     "ios": "13.0"
   },
   "source_files": "AuviousSDK/Classes/**/*",
+  "exclude_files": [
+    "AuviousSDK/AuviousSDK/Classes/Modules/API/**/*",
+    "AuviousSDK/AuviousSDK/Classes/Modules/MQTTModule.swift"
+  ],
   "resources": "AuviousSDK/Assets/*.png",
   "resource_bundles": {
     "AuviousSDKAssets": [
@@ -40,6 +44,9 @@
     ],
     "Starscream_IOS13": [
       "~> 4.0.4"
+    ],
+    "Sentry": [
+      "~> 8.0"
     ]
   },
   "swift_versions": "4.2",
