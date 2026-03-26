@@ -48,7 +48,9 @@ class ScreenCapturer: NSObject {
                 return
             }
 
-            let timestampNs = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) * Double(NSEC_PER_SEC)
+            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            guard CMTimeIsValid(pts) else { return }
+            let timestampNs = CMTimeGetSeconds(pts) * Double(NSEC_PER_SEC)
             let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
             let videoFrame = RTCVideoFrame(buffer: rtcPixelBuffer, rotation: ._0, timeStampNs: Int64(timestampNs))
 
