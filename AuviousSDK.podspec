@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.4.0-rc.3'
+  s.version          = '1.4.0-rc.4'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
