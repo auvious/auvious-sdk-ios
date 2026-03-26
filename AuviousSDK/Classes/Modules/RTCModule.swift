@@ -302,6 +302,13 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
     }
     
+    /// Returns the device's native screen pixel dimensions (always portrait-ordered).
+    /// Used to size the screen-share output to match the actual screen aspect ratio.
+    private func nativeScreenSize() -> (width: Int32, height: Int32) {
+        let bounds = UIScreen.main.nativeBounds
+        return (Int32(bounds.width), Int32(bounds.height))
+    }
+
     /// Starts ReplayKit capture to trigger the permission dialog.
     /// The capturer is stored as pending and reused in createScreenSharingStream.
     internal func startScreenCapture(completion: @escaping (Bool) -> Void) {
@@ -310,7 +317,8 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         SentrySDK.addBreadcrumb(crumb)
 
         pendingScreenVideoSource = factory.videoSource()
-        pendingScreenVideoSource?.adaptOutputFormat(toWidth: 1280, height: 720, fps: 15)
+        let pendingDims = nativeScreenSize()
+        pendingScreenVideoSource?.adaptOutputFormat(toWidth: pendingDims.width, height: pendingDims.height, fps: 15)
         let capturer = ScreenCapturer(videoSource: pendingScreenVideoSource!)
         capturer.delegate = self
         pendingScreenCapturer = capturer
@@ -345,7 +353,8 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             delegate?.rtcClient(didStartScreenSharing: true)
         } else {
             localScreenVideoSource = factory.videoSource()
-            localScreenVideoSource?.adaptOutputFormat(toWidth: 1280, height: 720, fps: 15)
+            let freshDims = nativeScreenSize()
+            localScreenVideoSource?.adaptOutputFormat(toWidth: freshDims.width, height: freshDims.height, fps: 15)
             screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
             screenCapturer.delegate = self
 
