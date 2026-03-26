@@ -304,7 +304,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     /// Starts ReplayKit capture to trigger the permission dialog.
     /// The capturer is stored as pending and reused in createScreenSharingStream.
     internal func startScreenCapture(completion: @escaping (Bool) -> Void) {
-        pendingScreenVideoSource = factory.videoSource()
+        pendingScreenVideoSource = factory.videoSource(forScreenCast: true)
         let capturer = ScreenCapturer(videoSource: pendingScreenVideoSource!)
         capturer.delegate = self
         pendingScreenCapturer = capturer
@@ -332,7 +332,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             // Capture is already running; notify delegate directly
             delegate?.rtcClient(didStartScreenSharing: true)
         } else {
-            localScreenVideoSource = factory.videoSource()
+            localScreenVideoSource = factory.videoSource(forScreenCast: true)
             screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
             screenCapturer.delegate = self
             screenCapturer.start()
