@@ -8,6 +8,7 @@
 
 import UIKit
 import AuviousSDK
+import Sentry
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +20,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //Prevent device locking
         UIApplication.shared.isIdleTimerDisabled = true
+
+        SentrySDK.start { options in
+            options.dsn = "https://74765e10688d4f828efd5bc5320c607c@sentry.auvious.com/9"
+            options.debug = false
+            options.environment = "development"
+        }
+
         return true
     }
 
