@@ -48,6 +48,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.dependency 'CocoaMQTTWebsocket_IOS13'
   s.dependency 'MqttCocoaAsyncSocket_IOS13', '~> 14.0.0'
   s.dependency 'Starscream_IOS13', '~> 4.0.4'
+  s.dependency 'Sentry', '~> 8.0'
   
   s.swift_versions = '4.2'
   s.pod_target_xcconfig = {
