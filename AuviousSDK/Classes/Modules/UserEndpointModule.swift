@@ -80,6 +80,7 @@ internal class UserEndpointModule {
     
     //Schedules the keep alive timer
     internal func startKeepAliveTimer() {
+        keepAliveTimer?.invalidate()
         let interval = keepAliveSeconds - 5
         keepAliveTimer = Timer(timeInterval: interval, target: self, selector: #selector(onKeepAliveTick), userInfo: nil, repeats: true)
         RunLoop.current.add(keepAliveTimer!, forMode: .common)
