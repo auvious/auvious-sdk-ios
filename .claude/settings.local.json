@@ -3,7 +3,10 @@
     "allow": [
       "Bash(brew upgrade:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
