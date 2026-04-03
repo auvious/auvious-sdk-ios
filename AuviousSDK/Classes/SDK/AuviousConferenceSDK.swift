@@ -1346,4 +1346,27 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     internal func rtcClient(didFailToStartScreenSharing: Bool) {
         sharingMyScreen = false
     }
+
+    internal func rtcClient(screenShareICEConnectionFailed streamId: String) {
+        sharingMyScreen = false
+        rtcClient.stopScreenSharing()
+        _ = rtcClient.removePublishStreams(streamId: streamId)
+
+        guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse,
+              let userId = loginResponse.userId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId,
+              let conference = currentConference else { return }
+
+        let usRequest = UnpublishStreamRequest(
+            conferenceId: conference.id,
+            streamId: streamId,
+            userEndpointId: endpointId,
+            userId: userId
+        )
+        API2.sharedInstance.unpublishStream(usRequest, onSuccess: { [weak self] _ in
+            self?.delegate?.auviousSDK(screenSharingStopped: true)
+        }, onFailure: { [weak self] _ in
+            self?.delegate?.auviousSDK(screenSharingStopped: true)
+        })
+    }
 }

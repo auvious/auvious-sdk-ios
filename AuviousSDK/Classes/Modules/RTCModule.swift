@@ -27,6 +27,7 @@ internal protocol RTCDelegate {
     func rtcClient(didStopScreenSharing: Bool)
     func rtcClient(didStartScreenSharing: Bool)
     func rtcClient(didFailToStartScreenSharing: Bool)
+    func rtcClient(screenShareICEConnectionFailed streamId: String)
     
     //rest call
     func rtcClient(call streamId: String, sdpOffer: String, target: String)
@@ -92,6 +93,7 @@ internal extension RTCDelegate {
     func rtcClient(addRemoteStreamIceCandidates candidates: [RTCIceCandidate], userId: String, endpointId: String, streamId: String, streamType: StreamType) {}
     func rtcClient(recorderStateChanged toActive: Bool){}
     func rtcClient(didFailToStartScreenSharing: Bool){}
+    func rtcClient(screenShareICEConnectionFailed streamId: String) {}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
@@ -965,6 +967,10 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             event.message = SentryMessage(formatted: "Screen share ICE connection failed")
             event.extra = ["streamId": container.streamId ?? "unknown", "isLocal": container.isLocal]
             SentrySDK.capture(event: event)
+
+            if container.isLocal, let streamId = container.streamId {
+                delegate?.rtcClient(screenShareICEConnectionFailed: streamId)
+            }
         }
     }
     
