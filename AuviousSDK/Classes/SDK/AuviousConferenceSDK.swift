@@ -704,6 +704,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     public func leaveConference(conferenceId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         // Clean up background audio state if active
         isBackgroundAudioActive = false
+        if sharingMyScreen {
+            rtcClient.stopScreenSharing()
+        }
+        sharingMyScreen = false
         stopBackgroundKeepAliveTimer()
 
         //Step 1 - Close all streams

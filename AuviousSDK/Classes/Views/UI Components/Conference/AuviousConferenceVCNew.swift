@@ -736,6 +736,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     private func handleConferenceEndedEvent(){
+        let sdk = AuviousConferenceSDK.sharedInstance
+        if sdk.sharingMyScreen {
+            sdk.rtcClient?.stopScreenSharing()
+        }
+        sdk.sharingMyScreen = false
+        localScreenShareStreamId = nil
+        stopScreenSharingButton.alpha = 0
         delegate?.onConferenceSuccess()
     }
     
@@ -780,7 +787,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     remoteView.removeFromSuperview()
 
                     //Refresh UI
-                    if remoteViews.isEmpty && (screenMode == .pip || screenMode == .expandedPip) {
+                    if remoteViews.isEmpty && (screenMode == .pip || screenMode == .expandedPip) && !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
                         screenMode = .fullScreen
                     }
                     createConstraints()
