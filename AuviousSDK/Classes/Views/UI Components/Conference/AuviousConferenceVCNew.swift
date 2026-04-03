@@ -1943,10 +1943,16 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .video, onSuccess: {
-                    
+
                     AuviousNotification.shared.show(.cameraOn)
-                    
-                }, onFailure: { error in
+
+                }, onFailure: { [weak self] error in
+                    guard let self = self else { return }
+                    DispatchQueue.main.async {
+                        button.type = .camDisabled
+                        self.localView.videoStreamRemoved()
+                        self.buttonContainerView.cameraSwitchButton.type = .camSwitchDisabled
+                    }
                 })
             }
             
@@ -1958,7 +1964,13 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .video, onSuccess: {
                 AuviousNotification.shared.show(.cameraOff)
-            }, onFailure: { error in
+            }, onFailure: { [weak self] error in
+                guard let self = self else { return }
+                DispatchQueue.main.async {
+                    button.type = .camEnabled
+                    self.localView.videoStreamAdded()
+                    self.buttonContainerView.cameraSwitchButton.type = .camSwitch
+                }
             })
         }
     }
@@ -1987,8 +1999,14 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
                     AuviousNotification.shared.show(.microphoneOn)
-                    
-                }, onFailure: { error in
+
+                }, onFailure: { [weak self] error in
+                    guard let self = self else { return }
+                    DispatchQueue.main.async {
+                        button.type = .micDisabled
+                        self.pipMuteButton.type = .micDisabled
+                        self.localView.audioStreamRemoved(screenMode: self.screenMode)
+                    }
                 })
             }
             
@@ -2000,8 +2018,14 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .audio, onSuccess: {
                 AuviousNotification.shared.show(.microphoneOff)
-                
-            }, onFailure: { error in
+
+            }, onFailure: { [weak self] error in
+                guard let self = self else { return }
+                DispatchQueue.main.async {
+                    button.type = .micEnabled
+                    self.pipMuteButton.type = .micEnabled
+                    self.localView.audioStreamAdded()
+                }
             })
         }
     }
@@ -2028,11 +2052,17 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
-                    
+
                     //Don't show notification in PIP mode
                     //AuviousNotification.shared.show(.microphoneOn)
-                    
-                }, onFailure: { error in
+
+                }, onFailure: { [weak self] error in
+                    guard let self = self else { return }
+                    DispatchQueue.main.async {
+                        button.type = .micDisabled
+                        self.buttonContainerView.micButton.type = .micDisabled
+                        self.localView.audioStreamRemoved(screenMode: self.screenMode)
+                    }
                 })
             }
             
@@ -2043,11 +2073,17 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             localView.audioStreamRemoved(screenMode: screenMode)
             
             AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .set, type: .audio, onSuccess: {
-                
+
                 //Don't show notification in PIP mode
 //                AuviousNotification.shared.show(.microphoneOff)
-                
-            }, onFailure: { error in
+
+            }, onFailure: { [weak self] error in
+                guard let self = self else { return }
+                DispatchQueue.main.async {
+                    button.type = .micEnabled
+                    self.buttonContainerView.micButton.type = .micEnabled
+                    self.localView.audioStreamAdded()
+                }
             })
         }
     }

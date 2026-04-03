@@ -756,38 +756,24 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     //------------------------------------------
     internal func removePublishStreams(streamId: String) -> Bool{
-        
-        var objects = peerConnections.filter {$0.streamId == streamId}
-        for (index, obj) in objects.enumerated() {
-            if(obj.streamId == streamId){
-                let peerConnection = obj.connection
-                
-                if(obj.streamType == .cam || obj.streamType == .micAndCam){
-                    stopCapture(type: obj.streamType, streamId: obj.streamId)
-                }
-                
-                peerConnection?.close()
-                objects.remove(at: index)
-                
-                return true
-            }
+        guard let obj = peerConnections.first(where: { $0.streamId == streamId }) else {
+            return false
         }
-        return false
+        if obj.streamType == .cam || obj.streamType == .micAndCam {
+            stopCapture(type: obj.streamType, streamId: obj.streamId)
+        }
+        obj.connection?.close()
+        peerConnections.removeAll { $0.streamId == streamId }
+        return true
     }
-    
+
     internal func removeRemoteStreams(streamId: String) -> Bool{
-        
-        var objects = peerConnections.filter {$0.streamId == streamId}
-        for (index, obj) in objects.enumerated() {
-            if(obj.streamId == streamId){
-                let peerConnection = obj.connection
-                peerConnection?.close()
-                objects.remove(at: index)
-                
-                return true
-            }
+        guard let obj = peerConnections.first(where: { $0.streamId == streamId }) else {
+            return false
         }
-        return false
+        obj.connection?.close()
+        peerConnections.removeAll { $0.streamId == streamId }
+        return true
     }
     
     internal func removeAllStreams() {
