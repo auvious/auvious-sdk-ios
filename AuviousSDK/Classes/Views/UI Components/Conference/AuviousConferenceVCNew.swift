@@ -769,9 +769,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
             if let index = remoteParticipantIndex {
                 let participant = remoteViews[index].participantEndpoint
-                
+
+                // Remove the disconnected stream from tracking before checking count,
+                // so a concurrent stream addition (e.g. CAM → MIC_AND_CAM race) doesn't
+                // inflate the count and trigger the wrong branch.
+                participant?.streams.removeAll { $0.id == streamId }
+
                 //We only had 1 stream from this participant, therefore we should remove the cell from the collection view
-                if participant?.streams.count == 1 {
+                if participant?.streams.count == 0 {
                     let remoteView = remoteViews.remove(at: index)
 
                     if index < maximumRemoteStreamsRendered {
@@ -792,7 +797,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                     createConstraints()
 
-                } else if (participant?.streams!.count)! > 1 {
+                } else if (participant?.streams!.count)! > 0 {
 
                     let remoteView = remoteViews[index]
                     //Remove the video if needed
