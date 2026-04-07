@@ -40,15 +40,23 @@ extension AuviousConferenceVCNew {
     
     @objc func handlePiPDoubleTap(_ gesture: UITapGestureRecognizer) {
         guard let pipView = gesture.view else { return }
-        guard pipView.superview != nil else { return }
+        guard let container = pipView.superview else { return }
 
-        //Remove sharing border and corner radius before layout transition
+        //Remove sharing border
         view.layer.borderWidth = 0
-        pipView.layer.cornerRadius = 0
 
-        //Setting screenMode triggers createConstraints() which animates
-        //the layout transition to fullScreen via constraints
-        screenMode = .fullScreen
+        //Set mode and apply fullScreen constraints immediately (no animation)
+        //so they animate together with the frame expansion in a single pass
+        _screenMode = .fullScreen
+        updateGestureState(for: .fullScreen)
+        createConstraints(animated: false)
+
+        //Animate frame expansion and constraint layout together
+        UIView.animate(withDuration: 0.3) {
+            pipView.frame = container.bounds
+            pipView.layer.cornerRadius = 0
+            pipView.layoutIfNeeded()
+        }
     }
     
     @objc func handlePiPTap(_ gesture: UITapGestureRecognizer) {

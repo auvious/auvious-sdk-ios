@@ -48,10 +48,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal var pipMaximiseButton: UIButton = UIButton(frame: .zero)
     internal var pipStopShareButton: UIButton = UIButton(frame: .zero)
     
-    //The current state of our UI
-    internal var screenMode: ScreenMode = .fullScreen {
-        didSet {
-            updateGestureState(for: screenMode)
+    //The current state of our UI (backing store accessible from extensions)
+    internal var _screenMode: ScreenMode = .fullScreen
+
+    internal var screenMode: ScreenMode {
+        get { _screenMode }
+        set {
+            _screenMode = newValue
+            updateGestureState(for: newValue)
             createConstraints()
         }
     }
@@ -1262,7 +1266,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         createConstraints()
     }
     
-    private func createConstraints() {
+    internal func createConstraints(animated: Bool = true) {
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
@@ -1765,17 +1769,23 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: {
+        let applyConstraints = {
             //Clear existing constraints
             if !self.existingConstraints.isEmpty {
                 NSLayoutConstraint.deactivate(self.existingConstraints)
             }
-            
+
             NSLayoutConstraint.activate(constraints)
             self.existingConstraints = constraints
-            
+
             self.view.layoutIfNeeded()
-        })
+        }
+
+        if animated {
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: applyConstraints)
+        } else {
+            applyConstraints()
+        }
     }
 }
 
