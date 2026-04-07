@@ -1219,6 +1219,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     public func auviousSDK(screenSharingStopped: Bool) {
         localScreenShareStreamId = nil
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.stopScreenSharingButton.alpha = 0
+            self.toggleSharingBorder(mode: false)
+        }
     }
     
     // MARK: -

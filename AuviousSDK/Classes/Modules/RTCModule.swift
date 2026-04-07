@@ -382,7 +382,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         crumb.data = ["streamId": localScreenStream?.streamId ?? "nil"]
         SentrySDK.addBreadcrumb(crumb)
         delegate?.rtcClient(didStopScreenSharing: true)
+
         screenCapturer?.stop()
+        screenCapturer = nil
+        localScreenVideoTrack = nil
+        localScreenVideoSource = nil
+        localScreenStream = nil
+
+        pendingScreenCapturer?.stop()
+        pendingScreenCapturer = nil
+        pendingScreenVideoSource = nil
     }
     
     internal func createLocalMediaStream(type: StreamType, streamId: String) -> RTCMediaStream {
