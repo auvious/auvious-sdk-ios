@@ -313,8 +313,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator
         view.addSubview(networkIndicator)
         networkIndicator.alpha = 0.7
-        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 6).isActive = true
-        networkIndicator.leftAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leftAnchor, constant: 6).isActive = true
+        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
+        //Leading constraint managed dynamically in createConstraints()
         networkIndicator.widthAnchor.constraint(equalToConstant: 30).isActive = true
         networkIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
@@ -346,8 +346,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         recorderIndicator.widthAnchor.constraint(equalToConstant: 50).isActive = true
         recorderIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
-        recorderIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 5).isActive = true
-        recorderIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 45).isActive = true
+        recorderIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
+        //Leading constraint managed dynamically in createConstraints() — positioned after networkIndicator
        
         let recTapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.recorderIndicatorPressed))
         recorderIndicator.addGestureRecognizer(recTapRecogniser)
@@ -1160,6 +1160,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             
         )
         recorderIndicator.alpha = toActive ? 1 : 0
+        createConstraints()
     }
     
     public func auviousSDK(trackMuted type: StreamType, endpointId: String) {
@@ -1273,7 +1274,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         var safeLeadingConstraint = view.leadingAnchor
         
         //Network indicator placement
-        var networkIndicatorLeadingConstant: CGFloat = 0
+        var networkIndicatorLeadingConstant: CGFloat = 6
         
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
@@ -1768,7 +1769,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
         
         constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
-        
+        constraints.append(recorderIndicator.leadingAnchor.constraint(equalTo: networkIndicator.trailingAnchor, constant: 5))
+
         let applyConstraints = {
             //Clear existing constraints
             if !self.existingConstraints.isEmpty {
