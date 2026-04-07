@@ -923,6 +923,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Cleanup state
     private func cleanState(){
         UserEndpointModule.sharedInstance.stopKeepAliveTimer()
+        API2.sharedInstance.stopTokenRefreshTimer()
         MQTTModule2.sharedInstance.disconnect()
         self.currentConference = nil
     }

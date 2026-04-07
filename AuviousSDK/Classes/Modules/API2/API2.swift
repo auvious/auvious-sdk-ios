@@ -73,8 +73,13 @@ internal final class API2 {
         if authTokenExpiresIn! - 40 > executeIn {
             executeIn = authTokenExpiresIn! - 40
         }
-        
+
         tokenRefreshTimer = Timer.scheduledTimer(timeInterval: Double(executeIn), target: self, selector: #selector(self.handleTokenRefresh), userInfo: nil, repeats: false)
+    }
+
+    func stopTokenRefreshTimer() {
+        tokenRefreshTimer?.invalidate()
+        tokenRefreshTimer = nil
     }
     
     @objc func handleTokenRefresh() {
@@ -103,9 +108,9 @@ internal final class API2 {
                 self.refreshToken = data["refresh_token"].stringValue
                 self.authTokenExpiresIn = data["expires_in"].intValue
                 
-                //Trigger a reconnect by disconnecting
+                //Trigger a reconnect with the new token
                 ServerConfiguration.mqttPass = self.authenticationToken
-                MQTTModule2.sharedInstance.disconnect()
+                MQTTModule2.sharedInstance.disconnectAndReconnect()
                 
                 //self.consumePendingTransactions()
                 completion?(true)

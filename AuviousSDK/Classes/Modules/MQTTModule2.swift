@@ -68,8 +68,16 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         print("MQTT2 connect()")
     }
     
+    /// Clean disconnect — will not auto-reconnect.
     func disconnect() {
-        os_log("MQTT2 disconnecting", log: Log.mqtt, type: .debug)
+        os_log("MQTT2 disconnecting (permanent)", log: Log.mqtt, type: .debug)
+        self.mqtt.autoReconnect = false
+        self.mqtt.disconnect()
+    }
+
+    /// Disconnect and reconnect with updated credentials (used by token refresh).
+    func disconnectAndReconnect() {
+        os_log("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
         self.mqtt.disconnect()
     }
     
@@ -218,8 +226,10 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
-        print("MQTT2 mqttDidDisconnect")
-        self.reconnect()
+        print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect))")
+        if mqtt.autoReconnect {
+            self.reconnect()
+        }
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
