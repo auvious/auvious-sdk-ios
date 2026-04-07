@@ -28,6 +28,7 @@ internal protocol RTCDelegate {
     func rtcClient(didStartScreenSharing: Bool)
     func rtcClient(didFailToStartScreenSharing: Bool)
     func rtcClient(screenShareICEConnectionFailed streamId: String)
+    func rtcClient(screenShareICEConnectionNeedsRestart streamId: String)
     
     //rest call
     func rtcClient(call streamId: String, sdpOffer: String, target: String)
@@ -94,6 +95,7 @@ internal extension RTCDelegate {
     func rtcClient(recorderStateChanged toActive: Bool){}
     func rtcClient(didFailToStartScreenSharing: Bool){}
     func rtcClient(screenShareICEConnectionFailed streamId: String) {}
+    func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
@@ -266,7 +268,8 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     internal func initialisePeerConnection(streamId: String, endpointId: String, userId: String, type: StreamType, isLocal: Bool, callId: String? = nil) {
         let configuration = RTCConfiguration()
         configuration.iceServers = iceServers
-        
+        configuration.continualGatheringPolicy = .gatherContinually
+
         let connection = factory.peerConnection(with: configuration, constraints: self.defaultConnectionConstraint, delegate: self)
         let connectionContainer = RTCPeerConnectionContainer(conn: connection, streamId: streamId, endpointId: endpointId, userId: userId, type: type, isLocal: isLocal)
         
@@ -375,6 +378,18 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         return localScreenStream!
     }
     
+    /// Moves the running screen capturer back to pending state so it can be
+    /// reused by a subsequent `configurePublishStream(.screen, ...)` call
+    /// without requesting ReplayKit permission again.
+    internal func prepareScreenCaptureForRetry() {
+        pendingScreenCapturer = screenCapturer
+        pendingScreenVideoSource = localScreenVideoSource
+        screenCapturer = nil
+        localScreenVideoSource = nil
+        localScreenVideoTrack = nil
+        localScreenStream = nil
+    }
+
     internal func stopScreenSharing() {
         os_log("stopScreenSharing() for type screen and stream %@", log: Log.rtc, type: .debug, localScreenStream ?? "nil")
         let crumb = Breadcrumb(level: .info, category: "screen_share")
@@ -754,12 +769,24 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: streamId))
             return
         }
-        
-        if isPublish {
-            delegate?.rtcClient(addPublishStreamIceCandidates: container.iceCandidates, streamId:streamId, streamType: container.streamType)
-        }
-        else{
-            delegate?.rtcClient(addRemoteStreamIceCandidates: container.iceCandidates, userId:container.userId, endpointId:container.endpointId, streamId:streamId, streamType: container.streamType)
+
+        container.remoteDescriptionSet = true
+
+        // Flush any candidates that were gathered before the remote description was set.
+        // Further candidates will be trickled from peerConnection(_:didGenerate:).
+        sendUnsentCandidates(for: container)
+    }
+
+    /// Sends any ICE candidates that have not yet been delivered to the server.
+    private func sendUnsentCandidates(for container: RTCPeerConnectionContainer) {
+        guard container.candidatesSentCount < container.iceCandidates.count else { return }
+        let unsent = Array(container.iceCandidates[container.candidatesSentCount...])
+        container.candidatesSentCount = container.iceCandidates.count
+
+        if container.isLocal {
+            delegate?.rtcClient(addPublishStreamIceCandidates: unsent, streamId: container.streamId, streamType: container.streamType)
+        } else {
+            delegate?.rtcClient(addRemoteStreamIceCandidates: unsent, userId: container.userId, endpointId: container.endpointId, streamId: container.streamId, streamType: container.streamType)
         }
     }
     
@@ -896,7 +923,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     //Setup an IceCandidate listener to gather candidates
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        
+
         //Find the appropriate connection
         var targetContainer: RTCPeerConnectionContainer?
         for item in peerConnections {
@@ -905,11 +932,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 break
             }
         }
-        
+
         //And set the ICE candidates
         if let container = targetContainer {
             if !container.iceCandidates.contains(candidate){
                 container.iceCandidates.append(candidate)
+            }
+
+            // Trickle ICE: if remote description is already set, send new candidates immediately
+            if container.remoteDescriptionSet {
+                sendUnsentCandidates(for: container)
             }
         }
     }
@@ -954,16 +986,25 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         let crumb = Breadcrumb(level: newState == .failed ? .error : .info, category: "screen_share")
         crumb.message = "ICE connection state changed"
-        crumb.data = ["state": stateName, "streamId": container.streamId ?? "unknown", "isLocal": container.isLocal]
+        crumb.data = ["state": stateName, "streamId": container.streamId ?? "unknown", "isLocal": container.isLocal, "restartAttempted": container.iceRestartAttempted]
         SentrySDK.addBreadcrumb(crumb)
 
-        if newState == .failed {
-            let event = Event(level: .error)
-            event.message = SentryMessage(formatted: "Screen share ICE connection failed")
-            event.extra = ["streamId": container.streamId ?? "unknown", "isLocal": container.isLocal]
-            SentrySDK.capture(event: event)
+        if newState == .failed, container.isLocal, let streamId = container.streamId {
+            if !container.iceRestartAttempted {
+                container.iceRestartAttempted = true
 
-            if container.isLocal, let streamId = container.streamId {
+                let restartCrumb = Breadcrumb(level: .warning, category: "screen_share")
+                restartCrumb.message = "Attempting ICE restart for screen share"
+                restartCrumb.data = ["streamId": streamId]
+                SentrySDK.addBreadcrumb(restartCrumb)
+
+                delegate?.rtcClient(screenShareICEConnectionNeedsRestart: streamId)
+            } else {
+                let event = Event(level: .error)
+                event.message = SentryMessage(formatted: "Screen share ICE connection failed after restart")
+                event.extra = ["streamId": streamId, "isLocal": container.isLocal]
+                SentrySDK.capture(event: event)
+
                 delegate?.rtcClient(screenShareICEConnectionFailed: streamId)
             }
         }

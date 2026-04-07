@@ -611,6 +611,12 @@ public final class AuviousCallSDK: MQTTCallDelegate, RTCDelegate, UserEndpointDe
     }
     
     internal func rtcClient(didStopScreenSharing: Bool) {}
-    
+
     internal func rtcClient(didStartScreenSharing: Bool) {}
+
+    internal func rtcClient(didFailToStartScreenSharing: Bool) {}
+
+    internal func rtcClient(screenShareICEConnectionFailed streamId: String) {}
+
+    internal func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {}
 }

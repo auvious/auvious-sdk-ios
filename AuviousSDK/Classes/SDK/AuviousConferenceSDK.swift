@@ -1351,6 +1351,49 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         sharingMyScreen = false
     }
 
+    internal func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {
+        // Tear down the failed peer connection and unpublish, but keep the
+        // screen capturer running so we can re-publish without asking for
+        // ReplayKit permission again.
+        _ = rtcClient.removePublishStreams(streamId: streamId)
+
+        guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse,
+              let userId = loginResponse.userId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId,
+              let conference = currentConference else {
+            // Cannot retry — fall through to permanent failure.
+            rtcClient.stopScreenSharing()
+            sharingMyScreen = false
+            delegate?.auviousSDK(screenSharingStopped: true)
+            return
+        }
+
+        let usRequest = UnpublishStreamRequest(
+            conferenceId: conference.id,
+            streamId: streamId,
+            userEndpointId: endpointId,
+            userId: userId
+        )
+
+        API2.sharedInstance.unpublishStream(usRequest, onSuccess: { [weak self] _ in
+            self?.retryScreenSharePublish(endpointId: endpointId, userId: userId)
+        }, onFailure: { [weak self] _ in
+            // Unpublish failed, but still attempt the re-publish
+            self?.retryScreenSharePublish(endpointId: endpointId, userId: userId)
+        })
+    }
+
+    /// Re-publishes the screen share stream using the still-running ReplayKit capturer.
+    private func retryScreenSharePublish(endpointId: String, userId: String) {
+        // Move the running capturer to pending state so configurePublishStream reuses it
+        // instead of creating a new one (which would trigger the permission dialog again).
+        rtcClient.prepareScreenCaptureForRetry()
+
+        let newStreamId = UUID().uuidString
+        delegate?.auviousSDK(didChangeState: .localStreamIsConnecting, streamId: newStreamId, streamType: .screen, endpointId: endpointId)
+        rtcClient.configurePublishStream(type: .screen, streamId: newStreamId, endpointId: endpointId, userId: userId)
+    }
+
     internal func rtcClient(screenShareICEConnectionFailed streamId: String) {
         sharingMyScreen = false
         rtcClient.stopScreenSharing()
