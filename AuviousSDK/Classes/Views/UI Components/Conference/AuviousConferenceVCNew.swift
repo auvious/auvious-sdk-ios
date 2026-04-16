@@ -453,9 +453,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         pipMuteButton.addTarget(self, action: #selector(self.pipMicButtonPressed(_:)), for: .touchUpInside)
         pipMuteButton.translatesAutoresizingMaskIntoConstraints = false
         pipMuteButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        pipBottomBar.addArrangedSubview(pipMuteButton)
+        if clientConfiguration.microphoneAvailable {
+            pipBottomBar.addArrangedSubview(pipMuteButton)
+        }
     }
-    
+
     @objc private func userDidTakeScreenshot() {
         AuviousConferenceSDK.sharedInstance.wasBackgroundedDueToScreenshot = true
     }
@@ -1317,10 +1319,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 p.removeFromSuperview()
             }
             if !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                pipBottomBar.addArrangedSubview(pipMuteButton)
+                if clientConfiguration.microphoneAvailable {
+                    pipBottomBar.addArrangedSubview(pipMuteButton)
+                }
             } else {
                 pipBottomBar.addArrangedSubview(pipStopShareButton)
-                pipBottomBar.addArrangedSubview(pipMuteButton)
+                if clientConfiguration.microphoneAvailable {
+                    pipBottomBar.addArrangedSubview(pipMuteButton)
+                }
             }
             
             pipBottomBar.alpha = 1
