@@ -152,9 +152,35 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         didPauseForBackground = true
 
         // Background audio path: keep peer connections alive, pause only video
-        if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil && !sharingMyScreen {
+        if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil {
             isBackgroundAudioActive = true
             rtcClient?.pauseVideoForBackground()
+
+            // Stop screen sharing if active — ReplayKit capture cannot continue in background
+            if sharingMyScreen, let conference = currentConference,
+               let loginResponse = AuthenticationModule.sharedInstance.loginResponse,
+               let userId = loginResponse.userId,
+               let endpointId = UserEndpointModule.sharedInstance.userEndpointId {
+
+                // Find the screen share stream before tearing it down
+                let screenStreamId = rtcClient.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
+
+                rtcClient.stopScreenSharing()
+                sharingMyScreen = false
+
+                if let streamId = screenStreamId {
+                    _ = rtcClient.removePublishStreams(streamId: streamId)
+                    let usRequest = UnpublishStreamRequest(
+                        conferenceId: conference.id,
+                        streamId: streamId,
+                        userEndpointId: endpointId,
+                        userId: userId
+                    )
+                    API2.sharedInstance.unpublishStream(usRequest, onSuccess: { _ in }, onFailure: { _ in })
+                }
+
+                delegate?.auviousSDK(screenSharingStopped: true)
+            }
 
             // Switch from RunLoop timer (won't fire in background) to GCD timer
             UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()

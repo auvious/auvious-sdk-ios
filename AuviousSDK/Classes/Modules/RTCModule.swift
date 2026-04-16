@@ -998,14 +998,18 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 restartCrumb.data = ["streamId": streamId]
                 SentrySDK.addBreadcrumb(restartCrumb)
 
-                delegate?.rtcClient(screenShareICEConnectionNeedsRestart: streamId)
+                DispatchQueue.main.async { [weak self] in
+                    self?.delegate?.rtcClient(screenShareICEConnectionNeedsRestart: streamId)
+                }
             } else {
                 let event = Event(level: .error)
                 event.message = SentryMessage(formatted: "Screen share ICE connection failed after restart")
                 event.extra = ["streamId": streamId, "isLocal": container.isLocal]
                 SentrySDK.capture(event: event)
 
-                delegate?.rtcClient(screenShareICEConnectionFailed: streamId)
+                DispatchQueue.main.async { [weak self] in
+                    self?.delegate?.rtcClient(screenShareICEConnectionFailed: streamId)
+                }
             }
         }
     }
