@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import os
 
 public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, UserEndpointDelegate {
@@ -100,6 +101,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// Internal flag for handling the iOS Screenshot dialog app resume
     internal var wasBackgroundedDueToScreenshot: Bool = false
 
+    /// Cancels the screenshot reset timer if the app actually backgrounds before it fires
+    private var screenshotResetWorkItem: DispatchWorkItem?
+
     /// True when peer connections are kept alive in background with audio still running
     internal var isBackgroundAudioActive: Bool = false
 
@@ -113,6 +117,31 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     private var hostAppSupportsBackgroundAudio: Bool {
         guard let modes = Bundle.main.infoDictionary?["UIBackgroundModes"] as? [String] else { return false }
         return modes.contains("audio")
+    }
+
+    private init() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleScreenshotTaken),
+            name: UIApplication.userDidTakeScreenshotNotification,
+            object: nil
+        )
+    }
+
+    /// Called when the user takes a screenshot. Sets the flag so that if the user taps
+    /// the thumbnail and the app briefly backgrounds, we skip the conference rejoin.
+    /// A fallback timer resets the flag after 15 seconds if the app never backgrounds.
+    @objc private func handleScreenshotTaken() {
+        wasBackgroundedDueToScreenshot = true
+        os_log("Screenshot detected — suppressing next app resume rejoin", log: Log.conferenceSDK, type: .debug)
+
+        screenshotResetWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.wasBackgroundedDueToScreenshot = false
+            self?.screenshotResetWorkItem = nil
+        }
+        screenshotResetWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7, execute: workItem)
     }
 
     //MARK: -
@@ -150,6 +179,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      */
     public func onApplicationPause(){
         didPauseForBackground = true
+
+        // App is entering real background — cancel the screenshot fallback timer so it doesn't
+        // reset wasBackgroundedDueToScreenshot while we are backgrounded. onApplicationResume()
+        // will clear the flag once the user returns.
+        screenshotResetWorkItem?.cancel()
+        screenshotResetWorkItem = nil
 
         // Background audio path: keep peer connections alive, pause only video
         if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil {
@@ -255,6 +290,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             if isPendingScreenSharePermission {
                 isPendingScreenSharePermission = false
             }
+            // App became active without a real background transition (e.g. screenshot thumbnail
+            // auto-dismissed, notification centre briefly shown). Clear the screenshot flag now
+            // so it doesn't suppress a future real-background rejoin.
+            if wasBackgroundedDueToScreenshot {
+                wasBackgroundedDueToScreenshot = false
+                screenshotResetWorkItem?.cancel()
+                screenshotResetWorkItem = nil
+            }
             return
             
         }
@@ -273,6 +316,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         guard !sharingMyScreen && !wasBackgroundedDueToScreenshot && !isPendingScreenSharePermission else {
             print("onApplicationResume() called but we are sharing our screen / resuming from screenshot / pending screen share permission so no rejoin")
             wasBackgroundedDueToScreenshot = false
+            screenshotResetWorkItem?.cancel()
+            screenshotResetWorkItem = nil
             isPendingScreenSharePermission = false
             return
         }
