@@ -197,8 +197,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
 
             if cameraWasEnabledBeforeBackground,
                let conference = currentConference,
+               let endpointId = UserEndpointModule.sharedInstance.userEndpointId,
                let videoStreamId = rtcClient.peerConnections.first(where: { ($0.streamType == .cam || $0.streamType == .micAndCam) && $0.isLocal })?.streamId {
-                toggleLocalStream(conferenceId: conference.id, streamId: videoStreamId, operation: .set, type: .video, onSuccess: {}, onFailure: { _ in })
+                let request = UpdateMetadataRequest(conferenceId: conference.id, streamId: videoStreamId, userEndpointId: endpointId, operation: .set, type: .video, value: "true")
+                API2.sharedInstance.updateConferenceMetadata(request, onSuccess: { _ in }, onFailure: { _ in })
             }
 
             // Stop screen sharing if active — ReplayKit capture cannot continue in background
@@ -291,8 +293,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
 
             if cameraWasEnabledBeforeBackground,
                let conference = currentConference,
+               let endpointId = UserEndpointModule.sharedInstance.userEndpointId,
                let videoStreamId = rtcClient.peerConnections.first(where: { ($0.streamType == .cam || $0.streamType == .micAndCam) && $0.isLocal })?.streamId {
-                toggleLocalStream(conferenceId: conference.id, streamId: videoStreamId, operation: .remove, type: .video, onSuccess: {}, onFailure: { _ in })
+                let request = UpdateMetadataRequest(conferenceId: conference.id, streamId: videoStreamId, userEndpointId: endpointId, operation: .remove, type: .video, value: "false")
+                API2.sharedInstance.updateConferenceMetadata(request, onSuccess: { _ in }, onFailure: { _ in })
             }
             cameraWasEnabledBeforeBackground = false
 
