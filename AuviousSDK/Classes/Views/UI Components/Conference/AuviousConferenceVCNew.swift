@@ -1064,6 +1064,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         _ = remoteViews.map{ $0.removeFromSuperview() }
         remoteViews.removeAll()
 
+        // Reset local view so the stale video track is detached from the renderer
+        // before the republished stream arrives. Without this, the old frozen frame
+        // can linger even after the new video track is attached.
+        localView.resetStreamView()
+
         currentConference = conference
         conferenceParticipants = currentConference.participants.count
 

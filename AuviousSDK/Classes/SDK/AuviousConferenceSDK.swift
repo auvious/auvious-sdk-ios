@@ -251,7 +251,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         // Only rejoin if onApplicationPause() was actually called (real background transition).
         // Notification center / widgets center only trigger willResignActive → didBecomeActive,
         // which would otherwise cause a spurious rejoin and duplicate stream publishing.
-        guard didPauseForBackground else { return }
+        guard didPauseForBackground else {
+            if isPendingScreenSharePermission {
+                isPendingScreenSharePermission = false
+            }
+            return
+            
+        }
         didPauseForBackground = false
 
         //Ensure we have logged in, and have created an endpoint
@@ -348,14 +354,17 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      */
     private func rejoinConference(conferenceId: String) {
         joinConference(conferenceId: conferenceId, onSuccess: {conference in
-            
+
             if let conf = conference {
                 self.delegate?.auviousSDK(didRejoinConference: conf)
             }
         }, onFailure: {(error) in
             os_log("Unable to rejoin conference %@ - error %@", log: Log.conferenceSDK, type: .error, conferenceId, error.localizedDescription)
+            // Notify the delegate so the UI can surface the error rather than leaving
+            // the user with a frozen stream and no feedback.
+            self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
         })
-        
+
         lastConferenceJoined = nil
     }
     
@@ -415,9 +424,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
         
         if type == .screen {
+            guard currentConference != nil else {
+                throw AuviousSDKError.notInConference
+            }
+            isPendingScreenSharePermission = false
             sharingMyScreen = true
         }
-        
+
         let streamId = UUID().uuidString
         delegate?.auviousSDK(didChangeState: .localStreamIsConnecting, streamId: streamId, streamType: type, endpointId:endpointId)
         rtcClient.configurePublishStream(type: type, streamId: streamId, endpointId: endpointId, userId: userId)
@@ -728,6 +741,21 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Parameter onFailure: Called in case of failure with the designated Error
      */
     public func leaveConference(conferenceId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
+        guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
+            onFailure(AuviousSDKError.notLoggedIn)
+            return
+        }
+
+        guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            onFailure(AuviousSDKError.endpointNotCreated)
+            return
+        }
+
+        guard self.currentConference != nil else {
+            onFailure(AuviousSDKError.notInConference)
+            return
+        }
+
         // Clean up background audio state if active
         isBackgroundAudioActive = false
         if sharingMyScreen {
@@ -738,42 +766,29 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
 
         //Step 1 - Close all streams
         removeAllStreams()
-        
-        //Step 2 - Unpublish all local streams
+
+        //Step 2 - Unpublish all local streams (needs currentConference, must run before nil-ing it)
         unpublishAllLocalStreams()
-        
-        //Step 3 - Stop all remote streams
+
+        //Step 3 - Stop all remote streams (needs currentConference, must run before nil-ing it)
         stopAllRemoteStreams()
-        
+
         //Step 4 - Empty peer connections
         emptyPeerConnections()
-        
+
+        // Nil currentConference synchronously before the HTTP call. The HTTP callback below
+        // must not touch client state — a concurrent rejoin may already have set a new
+        // currentConference for the same conferenceId, and overwriting it would cause the
+        // UI's subsequent leave to fail with notInConference.
+        self.currentConference = nil
+
         //Step 5 - Leave conference
-        guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
-            onFailure(AuviousSDKError.notLoggedIn)
-            return
-        }
-        
-        guard let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
-            onFailure(AuviousSDKError.endpointNotCreated)
-            return
-        }
-        
-        guard let _ = self.currentConference else {
-            onFailure(AuviousSDKError.notInConference)
-            return
-        }
-        
         let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: "", userEndpointId: endpointId, userId: userId)
         API2.sharedInstance.leaveConference(lcRequest, onSuccess: {(json) in
-            
             if let _ = json {
-                self.currentConference = nil
                 onSuccess()
             }
-            
         }, onFailure: {(error) in
-            self.currentConference = nil
             onFailure(error)
         })
     }

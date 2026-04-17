@@ -42,8 +42,14 @@ class StreamViewNew: UIView, RTCVideoViewDelegate {
     
     public func videoStreamAdded(_ videoTrack:RTCVideoTrack){
         hasVideoStream = true
-        
-        //statusLabel.alpha = 0.0
+
+        // Remove the old track from the renderer before attaching the new one.
+        // Without this, the frozen last frame from the previous (dead) track
+        // can persist on screen after a background/foreground cycle.
+        if self.videoTrack != nil {
+            self.videoTrack.remove(videoView)
+        }
+
         self.videoTrack = videoTrack
         self.videoTrack.add(videoView)
         videoView.frame = bounds

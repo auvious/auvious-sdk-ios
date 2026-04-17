@@ -309,20 +309,26 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     public func videoStreamAdded(_ videoTrack: RTCVideoTrack, isScreen: Bool = false){
         hasVideoStream = true
         self.isScreen = isScreen
-        
+
         #if arch(i386) || arch(x86_64) || arch(arm)
         #else
         if isScreen {
             videoView.videoContentMode = .scaleAspectFit
         }
         #endif
-        
+
+        // Remove the old track from the renderer before attaching the new one
+        // so the frozen last frame doesn't persist after a rejoin.
+        if self.videoTrack != nil {
+            self.videoTrack.remove(videoView)
+        }
+
         statusLabel.alpha = 0.0
         self.videoTrack = videoTrack
         self.videoTrack.add(videoView)
         videoView.frame = bounds
         videoView.alpha = 1.0
-        
+
         //Apply overlay
         handleOverlay()
     }

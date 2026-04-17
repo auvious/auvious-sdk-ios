@@ -830,6 +830,14 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     internal func emptyPeerConnections() {
         peerConnections.removeAll()
+
+        // Clear stale local media references so the next createLocalMediaStream()
+        // starts completely fresh and doesn't interfere with old (dead) objects.
+        // capturer is already nilled by stopCapture() inside removeAllStreams().
+        localVideoTrack = nil
+        localVideoSource = nil
+        localAudioTrack = nil
+        localStream = nil
     }
     
     // MARK: -
