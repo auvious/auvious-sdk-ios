@@ -204,6 +204,17 @@ internal class ConferencePopoverVC: UIViewController {
             shareButton.isUserInteractionEnabled = true
         }
     }
+
+    func setOnHold(_ isOnHold: Bool) {
+        guard let shareButton = buttons.first(where: { $0.type == .screenShare || $0.type == .screenShareDisabled }) else { return }
+        if isOnHold {
+            shareButton.isUserInteractionEnabled = false
+            shareButton.layer.opacity = 0.3
+        } else if shareButton.type != .screenShareDisabled {
+            shareButton.isUserInteractionEnabled = true
+            shareButton.layer.opacity = 1
+        }
+    }
 }
 
 extension AuviousConferenceVCNew: UIPopoverPresentationControllerDelegate {

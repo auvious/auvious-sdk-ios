@@ -887,13 +887,22 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 
                 blurredOverlayView = ConferenceHoldView(frame: .zero)
                 blurredOverlayView!.image = screenshot
-                view.addSubview(blurredOverlayView!)
-                
+                blurredOverlayView?.configurePiP(screenMode != .fullScreen)
+                view.insertSubview(blurredOverlayView!, belowSubview: pipMaximiseButton)
+
                 blurredOverlayView?.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
                 blurredOverlayView?.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
                 blurredOverlayView?.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
                 blurredOverlayView?.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
-                
+
+                pipMuteButton.isUserInteractionEnabled = false
+                pipMuteButton.alpha = 0.5
+                stopScreenSharingButton.isUserInteractionEnabled = false
+                if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                    stopScreenSharingButton.alpha = 0.5
+                }
+                popoverVC.setOnHold(true)
+
                 UIView.animate(withDuration: effectDuration, animations: {
                     self.blurredOverlayView?.blurView.alpha = 0.9
                 }, completion: { _ in
@@ -908,10 +917,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     blurredOverlayView.alpha = 0
                 }, completion: { _ in
                     self.buttonContainerView.conferenceOnHold(false)
-                    
+                    self.pipMuteButton.isUserInteractionEnabled = true
+                    self.pipMuteButton.alpha = 1
+                    self.stopScreenSharingButton.isUserInteractionEnabled = true
+                    if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+                        self.stopScreenSharingButton.alpha = 1
+                    }
+                    self.popoverVC.setOnHold(false)
+
                     AuviousConferenceSDK.sharedInstance.addLocalAudioStream()
                     AuviousConferenceSDK.sharedInstance.addLocalVideoStream()
-                    
+
                     blurredOverlayView.removeFromSuperview()
                     self.blurredOverlayView = nil
                 })
@@ -1293,6 +1309,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //PIP mode
         if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            blurredOverlayView?.configurePiP(true)
             networkIndicator.alpha = 0
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
@@ -1313,6 +1330,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         } else if screenMode == .expandedPip {
             os_log("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            blurredOverlayView?.configurePiP(true)
             networkIndicator.alpha = 0
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
@@ -1346,6 +1364,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
         } else {
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
+            blurredOverlayView?.configurePiP(false)
             networkIndicator.alpha = 1
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
