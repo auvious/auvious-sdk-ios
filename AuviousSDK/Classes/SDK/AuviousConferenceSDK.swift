@@ -110,6 +110,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// True when onApplicationPause() was called, so onApplicationResume() only runs after a real background transition
     private var didPauseForBackground: Bool = false
 
+    /// True if the camera was active when the app went to background (background audio path only)
+    private var cameraWasEnabledBeforeBackground: Bool = false
+
     /// GCD timer used for keep-alive while in background (RunLoop timers don't fire in background)
     private var backgroundKeepAliveTimer: DispatchSourceTimer?
 
@@ -189,7 +192,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         // Background audio path: keep peer connections alive, pause only video
         if uiConfiguration.backgroundAudioEnabled && hostAppSupportsBackgroundAudio && currentConference != nil {
             isBackgroundAudioActive = true
+            cameraWasEnabledBeforeBackground = rtcClient?.localVideoTrack?.isEnabled == true
             rtcClient?.pauseVideoForBackground()
+
+            if cameraWasEnabledBeforeBackground,
+               let conference = currentConference,
+               let videoStreamId = rtcClient.peerConnections.first(where: { ($0.streamType == .cam || $0.streamType == .micAndCam) && $0.isLocal })?.streamId {
+                toggleLocalStream(conferenceId: conference.id, streamId: videoStreamId, operation: .set, type: .video, onSuccess: {}, onFailure: { _ in })
+            }
 
             // Stop screen sharing if active — ReplayKit capture cannot continue in background
             if sharingMyScreen, let conference = currentConference,
@@ -278,6 +288,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             stopBackgroundKeepAliveTimer()
             UserEndpointModule.sharedInstance.startKeepAliveTimer()
             rtcClient?.resumeVideoForForeground()
+
+            if cameraWasEnabledBeforeBackground,
+               let conference = currentConference,
+               let videoStreamId = rtcClient.peerConnections.first(where: { ($0.streamType == .cam || $0.streamType == .micAndCam) && $0.isLocal })?.streamId {
+                toggleLocalStream(conferenceId: conference.id, streamId: videoStreamId, operation: .remove, type: .video, onSuccess: {}, onFailure: { _ in })
+            }
+            cameraWasEnabledBeforeBackground = false
+
             endBackgroundTask()
             delegate?.auviousSDK(didResumeFromBackground: true)
             return
