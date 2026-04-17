@@ -87,6 +87,8 @@ class ConferenceHoldView: UIImageView {
         bottomLabel.isHidden = isPiP
         pauseImageCenterYConstraint.constant = isPiP ? 0 : -50
         pauseImageHeightConstraint.constant = isPiP ? 20 : 50
+        layer.cornerRadius = isPiP ? 12 : 0
+        clipsToBounds = isPiP
         layoutIfNeeded()
     }
 }

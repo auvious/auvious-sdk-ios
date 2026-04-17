@@ -897,9 +897,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
                 pipMuteButton.isUserInteractionEnabled = false
                 pipMuteButton.alpha = 0.5
-                stopScreenSharingButton.isUserInteractionEnabled = false
                 if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                    stopScreenSharingButton.alpha = 0.5
+                    pipStopShareButton.isUserInteractionEnabled = false
+                    pipStopShareButton.alpha = 0.5
                 }
                 popoverVC.setOnHold(true)
 
@@ -919,10 +919,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     self.buttonContainerView.conferenceOnHold(false)
                     self.pipMuteButton.isUserInteractionEnabled = true
                     self.pipMuteButton.alpha = 1
-                    self.stopScreenSharingButton.isUserInteractionEnabled = true
-                    if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                        self.stopScreenSharingButton.alpha = 1
-                    }
+                    self.pipStopShareButton.isUserInteractionEnabled = true
+                    self.pipStopShareButton.alpha = 1
                     self.popoverVC.setOnHold(false)
 
                     AuviousConferenceSDK.sharedInstance.addLocalAudioStream()
@@ -1314,9 +1312,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
             
-            if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                stopScreenSharingButton.alpha = 0
-            }
+            stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
             
             if !remoteViews.isEmpty {
