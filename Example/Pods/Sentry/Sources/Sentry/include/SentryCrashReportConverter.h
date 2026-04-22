@@ -1,24 +1,21 @@
-//
-//  SentryCrashReportConverter.h
-//  Sentry
-//
-//  Created by Daniel Griesser on 10/05/2017.
-//  Copyright © 2017 Sentry. All rights reserved.
-//
-
 #import <Foundation/Foundation.h>
 
 @class SentryEvent;
+@class SentryInAppLogic;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SentryCrashReportConverter : NSObject
 
-@property(nonatomic, strong) NSDictionary *userContext;
+@property (nonatomic, strong) NSDictionary *userContext;
 
-- (instancetype)initWithReport:(NSDictionary *)report;
+- (instancetype)initWithReport:(NSDictionary *)report inAppLogic:(SentryInAppLogic *)inAppLogic;
 
-- (SentryEvent *)convertReportToEvent;
+/**
+ * Converts the report to an @c SentryEvent.
+ * @return The converted event or nil if an error occurred during the conversion.
+ */
+- (SentryEvent *_Nullable)convertReportToEvent;
 
 @end
 

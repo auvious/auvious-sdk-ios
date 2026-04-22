@@ -59,5 +59,15 @@ public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
      - Parameter flag: The current state of the portrait mode
      */
     func auviousSDK(agentPortraitMode flag: Bool, endpointId: String)
+    
+    func auviousSDK(screenSharingStarted: Bool)
+    func auviousSDK(screenSharingStopped: Bool)
+
+    /// Called when the app returns from background with audio still active (no rejoin needed).
+    func auviousSDK(didResumeFromBackground withActiveAudio: Bool)
+}
+
+public extension AuviousSDKConferenceDelegate {
+    func auviousSDK(didResumeFromBackground withActiveAudio: Bool) {}
 }
 

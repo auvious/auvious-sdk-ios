@@ -21,11 +21,16 @@ internal final class LoginResponse {
     var userId: String!
     var deviceId: String!
     var conferenceId: String?
+    var error: String?
+    var errorDescription: String?
     
     init(fromJson json: JSON!) {
         if json == JSON.null {
             return
         }
+        
+        error = json["error"].stringValue
+        errorDescription = json["error_description"].stringValue
         
         conferenceId = json["conference_id"].string
         accessToken = json["access_token"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -37,12 +42,14 @@ internal final class LoginResponse {
         userId = json["sub"].stringValue
         deviceId = json["DEVICE_ID"].stringValue
         
-        API.sharedInstance.authenticationToken = accessToken
-        API.sharedInstance.refreshToken = refreshToken
-        API.sharedInstance.authTokenExpiresIn = expiresIn
-        ServerConfiguration.mqttUser = userId
-        ServerConfiguration.mqttPass = accessToken
-        
-        os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)
+        if let errorDesc = errorDescription, errorDesc.isEmpty {
+            API2.sharedInstance.authenticationToken = accessToken
+            API2.sharedInstance.refreshToken = refreshToken
+            API2.sharedInstance.authTokenExpiresIn = expiresIn
+            ServerConfiguration.mqttUser = userId
+            ServerConfiguration.mqttPass = accessToken
+            
+            os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)
+        }
     }
 }

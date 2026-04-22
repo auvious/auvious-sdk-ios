@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Alamofire
-import SwiftyJSON
+//import Alamofire
+//import SwiftyJSON
 import os
 
 internal class AuthenticationModule {
@@ -35,11 +35,18 @@ internal class AuthenticationModule {
         
         let loginRequest = LoginRequest(clientId: ServerConfiguration.clientId, username: username, password: password, params: params)
         
-        API.sharedInstance.loginUser(loginRequest, onSuccess: {(json) in
+        API2.sharedInstance.loginUser(loginRequest, onSuccess: {(json) in
             if let data = json {
                 self.loginResponse = LoginResponse(fromJson: data)
                 
                 if let userId = self.loginResponse?.userId {
+                    
+                    //Ensure no error was returned
+                    if let resp = self.loginResponse, let error = resp.errorDescription, !error.isEmpty {
+                        onFailure(AuviousSDKError.INVALID_TICKET(ticketId: username))
+                        return
+                    }
+                    
                     self.isLoggedIn = true
                     
                     os_log("Logged in as user id %@", log: Log.auth, type: .debug, userId)
@@ -48,7 +55,7 @@ internal class AuthenticationModule {
                     UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
                         
                         //Obtain RTC server configuration
-                        API.sharedInstance.getIceServers(onSuccess: {json in
+                        API2.sharedInstance.getIceServers(onSuccess: {json in
                             for iceServer in json!["iceServers"].array! {
                                 let urlStrings = iceServer["urls"].array?.map({ (url) -> String in
                                     url.stringValue

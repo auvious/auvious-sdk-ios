@@ -1,36 +1,31 @@
-//
-//  SentryCrashExceptionApplication.m
-//  Sentry
-//
-//  Created by Daniel Griesser on 31.08.17.
-//  Copyright © 2017 Sentry. All rights reserved.
-//
-
-
-#if __has_include(<Sentry/Sentry.h>)
-
-#import <Sentry/SentryDefines.h>
-#import <Sentry/SentryCrashExceptionApplication.h>
-#import <Sentry/SentryCrash.h>
-
-#else
-#import "SentryDefines.h"
-#import "SentryCrashExceptionApplication.h"
-#import "SentryCrash.h"
-#endif
-
-
-@implementation SentryCrashExceptionApplication
+#import <Foundation/Foundation.h>
 
 #if TARGET_OS_OSX
 
-- (void)reportException:(NSException *)exception {
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
-    if (nil != SentryCrash.sharedInstance.uncaughtExceptionHandler && nil != exception) {
-        SentryCrash.sharedInstance.uncaughtExceptionHandler(exception);
+#    import "SentryCrash.h"
+#    import "SentryCrashExceptionApplication.h"
+#    import "SentryDependencyContainer.h"
+#    import "SentrySDK.h"
+#    import "SentryUncaughtNSExceptions.h"
+
+@implementation SentryCrashExceptionApplication
+
+- (void)reportException:(NSException *)exception
+{
+    [SentryUncaughtNSExceptions configureCrashOnExceptions];
+    SentryCrash *crash = SentryDependencyContainer.sharedInstance.crashReporter;
+    if (nil != crash.uncaughtExceptionHandler && nil != exception) {
+        crash.uncaughtExceptionHandler(exception);
     }
     [super reportException:exception];
 }
-#endif
+
+- (void)_crashOnException:(NSException *)exception
+{
+    [SentrySDK captureException:exception];
+    abort();
+}
 
 @end
+
+#endif // TARGET_OS_OSX

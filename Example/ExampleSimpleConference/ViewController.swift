@@ -13,8 +13,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
     //UI components
     @IBOutlet weak var usernameTextfield: UITextField!
-    @IBOutlet weak var passwordTextfield: UITextField!
+    @IBOutlet weak var environmentControl: UISegmentedControl!
     @IBOutlet weak var conferenceTextfield: UITextField!
+    @IBOutlet weak var participantTextfield: UITextField!
     @IBOutlet weak var createConferenceSwitch: UISwitch!
     @IBOutlet weak var conferenceLabel: UILabel!
     @IBOutlet weak var callButton: UIButton!
@@ -23,97 +24,185 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     @IBOutlet weak var speakerEnabledSwitch: UISwitch!
     @IBOutlet weak var micSwitch: UISwitch!
     @IBOutlet weak var speakerSwitch: UISwitch!
-    
+    @IBOutlet weak var pipSwitch: UISwitch!
+    @IBOutlet weak var screenSharingSwitch: UISwitch!
+
+    //Background audio switch (created programmatically)
+    private let backgroundAudioSwitch = UISwitch()
+
     //Gradient
     private var gradientLayer = CAGradientLayer()
-    
+
     var vc: AuviousConferenceVCNew!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        usernameTextfield.delegate = self
+        conferenceTextfield.delegate = self
+        participantTextfield.delegate = self
+
+        usernameTextfield.autocorrectionType = .no
+
         usernameTextfield.attributedPlaceholder = NSAttributedString(string: "Username", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
-        passwordTextfield.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
         conferenceTextfield.attributedPlaceholder = NSAttributedString(string: "Conference to create/join", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
-        
+        participantTextfield.attributedPlaceholder = NSAttributedString(string: "Participant name (optional)", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.7)])
+
         usernameTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        passwordTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         conferenceTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        
+        participantTextfield.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+
         usernameTextfield.textColor = .white
-        passwordTextfield.textColor = .white
         conferenceTextfield.textColor = .white
-    
+        participantTextfield.textColor = .white
+
         // hard code values for faster debugging
-        usernameTextfield.text = "fav-xva"
-        passwordTextfield.text = "b"
-        conferenceTextfield.text = "-"
-        
+        usernameTextfield.text = ""
+        conferenceTextfield.text = "" // optional
+
         gradientLayer.colors = [UIColor(red: 0/255, green: 31/255, blue: 122/255, alpha: 1).cgColor, UIColor(red: 51/255, green: 102/255, blue: 255/255, alpha: 1).cgColor]
         gradientLayer.setAngle(150)
-//        view.layer.insertSublayer(gradientLayer, at: 0)
-        
+
         checkPermissions()
         callButton.layer.cornerRadius = 5.0
+
+        setupConferenceOptionsScrollView()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-//        gradientLayer.frame = view.bounds
     }
-    
+
+    // MARK: - Conference options scroll view
+
+    /// Moves the conference control switches (camera … screen sharing) from the
+    /// storyboard layout into a scrollable list between the "audio output" row and
+    /// the "Call Now" button, and appends the programmatic "background audio" row.
+    private func setupConferenceOptionsScrollView() {
+        // Find storyboard labels by their text so we can reparent them
+        let storyboardLabels = view.subviews.compactMap { $0 as? UILabel }
+        let headerLabel = storyboardLabels.first { $0.text == "Conference controls" }
+        let cameraLabel = storyboardLabels.first { $0.text == "camera" }
+        let micLabel = storyboardLabels.first { $0.text == "microphone" }
+        let speakerLabel = storyboardLabels.first { $0.text == "speaker" }
+        let pipLabel = storyboardLabels.first { $0.text == "pip" }
+        let screenSharingLabel = storyboardLabels.first { $0.text == "screen sharing" }
+
+        // Collect all items to move (removing from superview deactivates their storyboard constraints)
+        let viewsToMove: [UIView?] = [
+            headerLabel,
+            cameraLabel, cameraSwitch,
+            micLabel, micSwitch,
+            speakerLabel, speakerSwitch,
+            pipLabel, pipSwitch,
+            screenSharingLabel, screenSharingSwitch,
+        ]
+        for v in viewsToMove { v?.removeFromSuperview() }
+
+        // Build option rows: (label text, switch)
+        let rows: [(String, UISwitch)] = [
+            ("camera", cameraSwitch),
+            ("microphone", micSwitch),
+            ("speaker", speakerSwitch),
+            ("pip", pipSwitch),
+            ("screen sharing", screenSharingSwitch),
+            ("background audio", backgroundAudioSwitch),
+        ]
+
+        // -- Scroll view --
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: speakerEnabledSwitch.bottomAnchor, constant: 15),
+            scrollView.bottomAnchor.constraint(equalTo: callButton.topAnchor, constant: -10),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+        ])
+
+        // -- Stack view inside scroll view --
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 20
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            stack.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+        ])
+
+        // -- Header --
+        let header = headerLabel ?? {
+            let l = UILabel()
+            l.text = "Conference controls"
+            l.font = .systemFont(ofSize: 19)
+            l.textColor = .systemGray2
+            return l
+        }()
+        header.translatesAutoresizingMaskIntoConstraints = false
+        stack.addArrangedSubview(header)
+
+        // -- Option rows --
+        for (title, toggle) in rows {
+            let row = UIView()
+            row.translatesAutoresizingMaskIntoConstraints = false
+
+            let label = UILabel()
+            label.text = title
+            label.font = .systemFont(ofSize: 17)
+            label.textColor = .black
+            label.translatesAutoresizingMaskIntoConstraints = false
+
+            toggle.translatesAutoresizingMaskIntoConstraints = false
+
+            row.addSubview(label)
+            row.addSubview(toggle)
+
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: row.leadingAnchor),
+                label.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+                toggle.trailingAnchor.constraint(equalTo: row.trailingAnchor),
+                toggle.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+                row.heightAnchor.constraint(equalToConstant: 31),
+            ])
+
+            stack.addArrangedSubview(row)
+        }
+    }
+
     //MARK: Actions
-    
+
     @IBAction func switchToggled(_ sender: Any) {
         conferenceLabel.text = createConferenceSwitch.isOn ? "Create conference" : "Join conference"
     }
-    
+
     @IBAction func callButtonPressed(_ sender: Any) {
         if validateForm() {
-            let username = usernameTextfield.text!
-            let password = passwordTextfield.text!
-            let conferenceName = ""//conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            //TEST-RTC
-//            let clientId: String = "auvious"
-//            let baseEndpoint: String = "https://test-rtc.auvious.video/"
-//            let mqttEndpoint: String = "wss://events.test-rtc.auvious.video/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password", "conference" : conferenceName]
-//
-            //GENESYS DEV (customer)
-            let clientId: String = "customer" //dev.auvious.video/t/vyn-kym <-----
-            let baseEndpoint: String = "https://dev.auvious.video/"
-            let mqttEndpoint: String = "wss://dev.auvious.video/ws"
-            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-
-            //GENESYS DEV (test-agent)
-//            let clientId: String = "test-agent"
-//            let baseEndpoint: String = "https://genesys.dev.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.dev.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-            
-            //GENESYS STAGING (customer)
-//            let clientId: String = "customer"
-//            let baseEndpoint: String = "https://genesys.stg.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.stg.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-            
-            //GENESYS PROD (customer)
-//            let clientId: String = "customer"
-//            let baseEndpoint: String = "https://genesys.auvious.com/"
-//            let mqttEndpoint: String = "wss://events.genesys.auvious.com/ws"
-//            let params: [String: String] = ["username" : username, "password" : password, "grant_type" : "password"]
-
+            let ticket = usernameTextfield.text!
+            let conferenceName = conferenceTextfield.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let participantName = participantTextfield.text
+            let environments = ["auvious.video", "dev.auvious.video", "stg.auvious.video"]
+            let selectedEnv = environments[environmentControl.selectedSegmentIndex]
+            let baseEndpoint: String = "https://\(selectedEnv)/"
+            let mqttEndpoint: String = selectedEnv
+           
             //New configuration approach
             var conf = AuviousConferenceConfiguration()
-            conf.username = username
-            conf.password = password
-            conf.clientId = clientId
+            conf.username = ticket
+          
+            if let name = participantName, !name.isEmpty {
+                conf.participantName = name
+            }
+
             conf.conference = conferenceName
             conf.baseEndpoint = baseEndpoint
             conf.mqttEndpoint = mqttEndpoint
-            conf.conferenceBackgroundColor = .systemGreen
+//            conf.conferenceBackgroundColor = .black
             conf.enableSpeaker = self.speakerEnabledSwitch.isOn
             switch (self.callMode.selectedSegmentIndex){
             case 0:
@@ -131,49 +220,39 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.cameraAvailable = self.cameraSwitch.isOn
             conf.microphoneAvailable = self.micSwitch.isOn
             conf.speakerAvailable = self.speakerSwitch.isOn
-            
-//            self.vc = AuviousConferenceVCNew(clientId: clientId, params: params, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint, delegate: self, callMode: .audio)
+            conf.pipAvailable = self.pipSwitch.isOn
+            conf.screenSharingAvailable = self.screenSharingSwitch.isOn
+            conf.backgroundAudioEnabled = self.backgroundAudioSwitch.isOn
+
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
-            self.vc.modalPresentationStyle = .fullScreen
-            self.navigationController?.present(vc, animated: true, completion: nil)
+            presentAuviousUI(childVC: self.vc)
         }
     }
-    
+
     // MARK: AuviousSimpleConferenceDelegate
-    
+
     func onConferenceSuccess() {
         self.vc.showAlert(title: "Message", msg: "Conference completed successfully", onSuccess: {
-            self.dismiss(animated: true, completion: nil)
+            self.dismissAuviousUI(childVC: self.vc)
         })
     }
-    
+
     func onConferenceError(_ error: AuviousSDKGenericError) {
         self.vc.showAlert(title: "Error", msg: error.localizedDescription, onSuccess: {
-            self.dismiss(animated: true, completion: nil)
+            self.dismissAuviousUI(childVC: self.vc)
         })
     }
-    
+
     // MARK: Helpers
-    
+
     private func validateForm() -> Bool {
         guard let username = usernameTextfield.text, !username.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter your username")
+            showAlert(title: "Warning", msg: "Please enter your ticket")
             return false
         }
-        
-        guard let password = passwordTextfield.text, !password.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter your password")
-            return false
-        }
-        
-        guard let conferenceName = conferenceTextfield.text, !conferenceName.isEmpty else {
-            showAlert(title: "Warning", msg: "Please enter a conference name")
-            return false
-        }
-        
         return true
     }
-    
+
     //Request for camera/mic permissions if needed
     private func checkPermissions() {
         let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
@@ -185,7 +264,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
                 }
             })
         }
-        
+
         let micPermission = AVAudioSession.sharedInstance().recordPermission
         if micPermission != .granted {
             AVAudioSession.sharedInstance().requestRecordPermission({ accessGranted in
@@ -198,43 +277,49 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     }
 }
 
-extension UIViewController {
-    
-    func showAlert(title:String, msg:String, onSuccess: (()->())? = nil){
-        let alert = UIAlertController(title: title, message: msg, preferredStyle: UIAlertController.Style.alert)
-        alert.view.tintColor = UIColor.black
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK",comment:""), style: .default, handler: { (action: UIAlertAction!) in
-            
-            if let callback = onSuccess {
-                callback()
-            }
-        }))
-        
-        present(alert, animated: true, completion: nil)
+//Various UI helper functions for PIP etc.
+extension ViewController {
+    private func presentAuviousUI(childVC: UIViewController) {
+        // Add as child
+        addChild(childVC)
+
+        // Set initial frame off-screen (bottom)
+        let screenBounds = view.bounds
+        childVC.view.frame = CGRect(x: 0, y: screenBounds.height, width: screenBounds.width, height: screenBounds.height)
+
+        // Add the view
+        view.addSubview(childVC.view)
+
+        // Animate into position
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
+            childVC.view.frame = screenBounds
+        }, completion: { _ in
+            childVC.didMove(toParent: self)
+        })
+    }
+
+    private func dismissAuviousUI(childVC: UIViewController) {
+        // Make sure it's really a child
+        guard childVC.parent == self else { return }
+
+        let screenBounds = view.bounds
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseIn], animations: {
+            // Slide the view down off screen
+            childVC.view.frame.origin.y = screenBounds.height
+        }, completion: { _ in
+            // Clean up after animation completes
+            childVC.willMove(toParent: nil)
+            childVC.view.removeFromSuperview()
+            childVC.removeFromParent()
+        })
     }
 }
 
-extension CAGradientLayer {
-    func setAngle(_ angle: Float = 0) {
-        let alpha: Float = angle / 360
-        let startPointX = powf(
-            sinf(2 * Float.pi * ((alpha + 0.75) / 2)),
-            2
-        )
-        let startPointY = powf(
-            sinf(2 * Float.pi * ((alpha + 0) / 2)),
-            2
-        )
-        let endPointX = powf(
-            sinf(2 * Float.pi * ((alpha + 0.25) / 2)),
-            2
-        )
-        let endPointY = powf(
-            sinf(2 * Float.pi * ((alpha + 0.5) / 2)),
-            2
-        )
-
-        endPoint = CGPoint(x: CGFloat(endPointX),y: CGFloat(endPointY))
-        startPoint = CGPoint(x: CGFloat(startPointX), y: CGFloat(startPointY))
-    }
+extension ViewController: UITextFieldDelegate {
+    // Called when return key is pressed
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder() // dismiss keyboard
+            return true
+        }
 }

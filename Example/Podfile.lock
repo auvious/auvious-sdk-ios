@@ -1,73 +1,73 @@
 PODS:
-  - Alamofire (4.9.1)
-  - AuviousGoogleWebRTC (84.4147.2)
-  - AuviousSDK (1.1.1):
-    - Alamofire (~> 4.7)
-    - AuviousGoogleWebRTC (~> 84.4147.2)
-    - MQTTClient/Websocket (~> 0.15)
-    - SocketRocket (~> 0.5.1)
+  - AuviousGoogleWebRTC (84.4147.4)
+  - AuviousSDK (1.4.0-rc.3):
+    - AuviousGoogleWebRTC (~> 84.4147.4)
+    - CocoaMQTTWebsocket_IOS13
+    - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
+    - Sentry (~> 8.0)
+    - Starscream_IOS13 (~> 4.0.4)
     - SwiftyJSON (~> 5.0)
-  - BEMCheckBox (1.4.1)
-  - MQTTClient/Min (0.15.3)
-  - MQTTClient/Websocket (0.15.3):
-    - MQTTClient/Min
-    - SocketRocket
-  - Sentry (4.5.0):
-    - Sentry/Core (= 4.5.0)
-  - Sentry/Core (4.5.0)
-  - SocketRocket (0.5.1)
-  - SPPermissions/Camera (4.1.4):
-    - SPPermissions/Core
-  - SPPermissions/Core (4.1.4)
-  - SPPermissions/Microphone (4.1.4):
-    - SPPermissions/Core
-  - SVProgressHUD (2.2.5)
-  - SwiftyJSON (5.0.1)
+  - CocoaMQTTWebsocket_IOS13 (3.0.7):
+    - MqttCocoaAsyncSocket_IOS13 (= 14.0.0)
+    - Starscream_IOS13 (= 4.0.4)
+  - MqttCocoaAsyncSocket_IOS13 (14.0.0)
+  - Sentry (8.46.0):
+    - Sentry/Core (= 8.46.0)
+  - Sentry/Core (8.46.0)
+  - Starscream_IOS13 (4.0.4)
+  - SwiftyJSON (5.0.2)
 
 DEPENDENCIES:
   - AuviousSDK (from `../`)
-  - BEMCheckBox (~> 1.4)
-  - Sentry (~> 4.4)
-  - SPPermissions/Camera (~> 4.1)
-  - SPPermissions/Microphone (~> 4.1)
-  - SVProgressHUD (from `https://github.com/mmdock/SVProgressHUD.git`, branch `patch-1`)
+  - CocoaMQTTWebsocket_IOS13 (from `https://github.com/jkritikos/CocoaMQTT_Fixed.git`)
+  - MqttCocoaAsyncSocket_IOS13 (from `https://github.com/jkritikos/MqttCocoaAsyncSocket.git`, tag `14.0.0`)
+  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `8.46.0`)
+  - Starscream_IOS13 (from `https://github.com/jkritikos/Starscream.git`, tag `4.0.4`)
 
 SPEC REPOS:
   https://github.com/auvious/CocoaPodSpecs.git:
     - AuviousGoogleWebRTC
-  trunk:
-    - Alamofire
-    - BEMCheckBox
-    - MQTTClient
-    - Sentry
-    - SocketRocket
-    - SPPermissions
+  https://github.com/CocoaPods/Specs.git:
     - SwiftyJSON
 
 EXTERNAL SOURCES:
   AuviousSDK:
     :path: "../"
-  SVProgressHUD:
-    :branch: patch-1
-    :git: https://github.com/mmdock/SVProgressHUD.git
+  CocoaMQTTWebsocket_IOS13:
+    :git: https://github.com/jkritikos/CocoaMQTT_Fixed.git
+  MqttCocoaAsyncSocket_IOS13:
+    :git: https://github.com/jkritikos/MqttCocoaAsyncSocket.git
+    :tag: 14.0.0
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 8.46.0
+  Starscream_IOS13:
+    :git: https://github.com/jkritikos/Starscream.git
+    :tag: 4.0.4
 
 CHECKOUT OPTIONS:
-  SVProgressHUD:
-    :commit: 41afba447103c44c55482db1174569172607c1e6
-    :git: https://github.com/mmdock/SVProgressHUD.git
+  CocoaMQTTWebsocket_IOS13:
+    :commit: 37a0af611ef35ca0fabfb6cdb0f4ab60d2d627ae
+    :git: https://github.com/jkritikos/CocoaMQTT_Fixed.git
+  MqttCocoaAsyncSocket_IOS13:
+    :git: https://github.com/jkritikos/MqttCocoaAsyncSocket.git
+    :tag: 14.0.0
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 8.46.0
+  Starscream_IOS13:
+    :git: https://github.com/jkritikos/Starscream.git
+    :tag: 4.0.4
 
 SPEC CHECKSUMS:
-  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AuviousGoogleWebRTC: e5a8ede1fb2e5e7a3e75f9a871c08dff7678f963
-  AuviousSDK: 3f414765efccb5ffbef5948fb69fe92049e4f9f3
-  BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
-  MQTTClient: 0dfa04e789479c2e461786464969895c1fcb0875
-  Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
-  SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
-  SPPermissions: 9fafa3125a66ec00e36a4c8e3ad8684f5499afbc
-  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
-  SwiftyJSON: 2f33a42c6fbc52764d96f13368585094bfd8aa5e
+  AuviousGoogleWebRTC: 146e1bcb5423fbef3796d1e2cd28c7c592ae575a
+  AuviousSDK: 5060a398949417b8fbe0ad5210373e20d5098dc0
+  CocoaMQTTWebsocket_IOS13: cb657e8cfc7a0729b58f37a01f4cdf67b2fe259a
+  MqttCocoaAsyncSocket_IOS13: a32f9a761890366c28d22a6383e2389ff2a5a312
+  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
+  Starscream_IOS13: 71409ad6351f8df04b4a5814a01fc70f1a0bed7c
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
 
-PODFILE CHECKSUM: 1ae56e192be0e084974f1f9235783f41ae1979ae
+PODFILE CHECKSUM: 1f447bdd21aff855dbfdb6c10316af68fe901502
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.16.2

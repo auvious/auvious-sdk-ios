@@ -1,45 +1,75 @@
 platform :ios, '13.0'
 
+#source 'https://cdn.cocoapods.org/'
+source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/auvious/CocoaPodSpecs.git'
-source 'https://cdn.cocoapods.org/'
+source 'https://github.com/jkritikos/Podspec.git'
 
 use_frameworks!
 
-target 'ExampleConference' do
-  pod 'AuviousSDK', :path => '../'
-  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
-  pod 'SPPermissions/Camera', '~> 4.1'
-  pod 'SPPermissions/Microphone', '~> 4.1'
-  pod 'BEMCheckBox', '~> 1.4'
-  pod 'Sentry', '~> 4.4'
-end
+#target 'ExampleConference' do
+#  pod 'AuviousSDK', :path => '../'
+#  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
+#  pod 'SPPermissions/Camera', '~> 4.1'
+#  pod 'SPPermissions/Microphone', '~> 4.1'
+#  pod 'BEMCheckBox', '~> 1.4'
+#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
+#end
 
-target 'ExampleCall' do
-  pod 'AuviousSDK', :path => '../'
-  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
-  pod 'SPPermissions/Camera', '~> 4.1'
-  pod 'SPPermissions/Microphone', '~> 4.1'
-  pod 'BEMCheckBox', '~> 1.4'
-  pod 'Sentry', '~> 4.4'
-end
+#target 'ExampleCall' do
+#  pod 'AuviousSDK', :path => '../'
+#  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
+#  pod 'SPPermissions/Camera', '~> 4.1'
+#  pod 'SPPermissions/Microphone', '~> 4.1'
+#  pod 'BEMCheckBox', '~> 1.4'
+#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
+#end
 
-target 'ExampleSimpleCall' do
-  pod 'AuviousSDK', :path => '../'
-  pod 'Sentry', '~> 4.4'
-end
+#target 'ExampleSimpleCall' do
+#  pod 'AuviousSDK', :path => '../'
+#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
+#end
 
 target 'ExampleSimpleConference' do
   pod 'AuviousSDK', :path => '../'
-  pod 'Sentry', '~> 4.4'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
+  #pod 'CocoaMQTT_IOS13/Core', :git => 'https://github.com/jkritikos/CocoaMQTT_Fixed.git'
+  pod 'CocoaMQTTWebsocket_IOS13', :git => 'https://github.com/jkritikos/CocoaMQTT_Fixed.git'
+  pod 'MqttCocoaAsyncSocket_IOS13', :git => 'https://github.com/jkritikos/MqttCocoaAsyncSocket.git', :tag => '14.0.0'
+  pod 'Starscream_IOS13', :git => 'https://github.com/jkritikos/Starscream.git', :tag => '4.0.4'
 end
 
 post_install do |installer|
+  installer.generated_projects.each do |project|
+      project.targets.each do |target|
+          target.build_configurations.each do |config|
+              config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+          end
+      end
+  end
+  
+  # fix xcode 15 DT_TOOLCHAIN_DIR - remove after fix oficially - https://github.com/CocoaPods/CocoaPods/issues/12065
+  installer.aggregate_targets.each do |target|
+      target.xcconfigs.each do |variant, xcconfig|
+      xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
+      IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+  end
+  
   installer.pods_project.targets.each do |target|
-    if ['Alamofire', 'SwiftyJSON'].include? target.name
-      target.build_configurations.each do |config|
-        config.build_settings['SWIFT_VERSION'] = '4.2'
+    target.build_configurations.each do |config|
+      if config.base_configuration_reference.is_a? Xcodeproj::Project::Object::PBXFileReference
+          xcconfig_path = config.base_configuration_reference.real_path
+          IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
       end
     end
   end
+  
+#  installer.pods_project.targets.each do |target|
+#    if ['Alamofire', 'SwiftyJSON'].include? target.name
+#      target.build_configurations.each do |config|
+#        config.build_settings['SWIFT_VERSION'] = '5.0'
+#      end
+#    end
+#  end
 end
-

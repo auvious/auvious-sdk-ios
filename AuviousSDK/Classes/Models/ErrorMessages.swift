@@ -63,6 +63,7 @@ public enum AuviousSDKGenericError: Error {
     case NETWORK_ERROR
     case UNKNOWN_FAILURE
     case CONFERENCE_MISSING
+    case INVALID_TICKET(ticketId: String)
 }
 
 extension AuviousSDKGenericError: LocalizedError {
@@ -80,6 +81,8 @@ extension AuviousSDKGenericError: LocalizedError {
             return NSLocalizedString("An error has occurred during your call", comment: "Error description")
         case .CONFERENCE_MISSING:
             return NSLocalizedString("Conference name not specified", comment: "Error description")
+        case .INVALID_TICKET(let ticketId):
+            return NSLocalizedString("Ticket \(ticketId) not found", comment: "Error description")
         }
     }
 }
@@ -144,6 +147,7 @@ public enum AuviousSDKError: Error {
     
     case callError
     
+    case INVALID_TICKET(ticketId: String)
 }
 
 /**
@@ -188,6 +192,8 @@ extension AuviousSDKError: LocalizedError {
             return NSLocalizedString("An internal error has occurred", comment: "Error description")
         case .callError:
             return NSLocalizedString("An error has occurred during your call", comment: "Error description")
+        case .INVALID_TICKET(let ticketId):
+            return NSLocalizedString("Ticket \(ticketId) not found", comment: "Error description")
         }
     }
 }

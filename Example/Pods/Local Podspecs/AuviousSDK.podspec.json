@@ -1,6 +1,6 @@
 {
   "name": "AuviousSDK",
-  "version": "1.1.1",
+  "version": "1.4.0-rc.3",
   "summary": "AuviousSDK makes it easy to use Auvious services in your app.",
   "description": "AuviousSDK makes it easy to use Auvious services in your app. Add now video call,\nmultiparty video conferencing, snapshot, and many more things are coming your way!",
   "homepage": "https://github.com/auvious/auvious-sdk-ios.git",
@@ -13,12 +13,16 @@
   },
   "source": {
     "git": "https://github.com/auvious/auvious-sdk-ios.git",
-    "tag": "1.1.1"
+    "tag": "1.4.0-rc.3"
   },
   "platforms": {
-    "ios": "10.0"
+    "ios": "13.0"
   },
   "source_files": "AuviousSDK/Classes/**/*",
+  "exclude_files": [
+    "AuviousSDK/AuviousSDK/Classes/Modules/API/**/*",
+    "AuviousSDK/AuviousSDK/Classes/Modules/MQTTModule.swift"
+  ],
   "resources": "AuviousSDK/Assets/*.png",
   "resource_bundles": {
     "AuviousSDKAssets": [
@@ -26,20 +30,23 @@
     ]
   },
   "dependencies": {
-    "Alamofire": [
-      "~> 4.7"
-    ],
     "SwiftyJSON": [
       "~> 5.0"
     ],
     "AuviousGoogleWebRTC": [
-      "~> 84.4147.2"
+      "~> 84.4147.4"
     ],
-    "MQTTClient/Websocket": [
-      "~> 0.15"
+    "CocoaMQTTWebsocket_IOS13": [
+
     ],
-    "SocketRocket": [
-      "~> 0.5.1"
+    "MqttCocoaAsyncSocket_IOS13": [
+      "~> 14.0.0"
+    ],
+    "Starscream_IOS13": [
+      "~> 4.0.4"
+    ],
+    "Sentry": [
+      "~> 8.0"
     ]
   },
   "swift_versions": "4.2",

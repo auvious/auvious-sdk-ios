@@ -27,6 +27,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     private var username: String = ""
     private var password: String = ""
     private var conference: String = ""
+    private var participantName: String = ""
     private var baseEndpoint: String = ""
     private var mqttEndpoint: String = ""
 
@@ -110,7 +111,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
-            AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+            AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             os_log("UI Conference component: Configured ConferenceSDK")
 //
 //            //Get access to the local video stream immediately
@@ -288,6 +289,9 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
     }
     
+    public func auviousSDK(screenSharingStarted: Bool) {}
+    public func auviousSDK(screenSharingStopped: Bool) {}
+    
     //MARK: Collection view
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -444,7 +448,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                 
                 if let cell = self.collectionView.cellForItem(at: indexPath) as? ConferenceCell {
                     if streamType == .mic {
-                        cell.streamView.audioStreamRemoved()
+                        //cell.streamView.audioStreamRemoved()
                     } else if streamType == .cam {
                         cell.streamView.videoStreamRemoved()
                     } else if streamType == .micAndCam {
@@ -462,7 +466,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                     if streamType == .cam {
                         cell.streamView.videoStreamRemoved()
                     } else if streamType == .mic {
-                        cell.streamView.audioStreamRemoved()
+                        //cell.streamView.audioStreamRemoved()
                     } else if streamType == .micAndCam {
                         cell.streamView.avStreamRemoved()
                     }

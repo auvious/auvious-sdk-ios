@@ -179,6 +179,20 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         overlayView!.addSubview(overlayIcon!)
     }
     
+    func hideOverlay() {
+        overlayView?.alpha = 0
+        overlayIcon?.alpha = 0
+    }
+    
+    func restoreOverlay() {
+        overlayView?.alpha = 1
+        overlayIcon?.alpha = 1
+    }
+    
+    func overlayInPIP() {
+        overlayIcon?.layer.opacity = 0.6
+    }
+    
     private func handleOverlay() {
         guard !isScreen else {
             return
@@ -234,6 +248,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             constraints.append(overlayIcon!.centerXAnchor.constraint(equalTo: overlayView!.centerXAnchor, constant: 0))
             constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 40))
         case .none:
+            iconName = ""
             backgroundColor = .clear
             constraints.append(overlayView!.widthAnchor.constraint(equalToConstant: 0))
             constraints.append(overlayView!.heightAnchor.constraint(equalToConstant: 0))
@@ -274,12 +289,19 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         handleOverlay()
     }
     
-    public func audioStreamRemoved(){
+    public func audioStreamRemoved(screenMode: ScreenMode){
         hasAudioStream = false
         
 //        if !hasVideoStream {
 //            resetStreamView()
 //        }
+        
+        
+        if screenMode == .expandedPip {
+            hasAudioStream = true
+            hasVideoStream = true
+        }
+        
         //Apply overlay
         handleOverlay()
     }
@@ -287,20 +309,26 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     public func videoStreamAdded(_ videoTrack: RTCVideoTrack, isScreen: Bool = false){
         hasVideoStream = true
         self.isScreen = isScreen
-        
+
         #if arch(i386) || arch(x86_64) || arch(arm)
         #else
         if isScreen {
             videoView.videoContentMode = .scaleAspectFit
         }
         #endif
-        
+
+        // Remove the old track from the renderer before attaching the new one
+        // so the frozen last frame doesn't persist after a rejoin.
+        if self.videoTrack != nil {
+            self.videoTrack.remove(videoView)
+        }
+
         statusLabel.alpha = 0.0
         self.videoTrack = videoTrack
         self.videoTrack.add(videoView)
         videoView.frame = bounds
         videoView.alpha = 1.0
-        
+
         //Apply overlay
         handleOverlay()
     }

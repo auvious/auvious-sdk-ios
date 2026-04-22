@@ -1,0 +1,51 @@
+
+/* Class = "UILabel"; text = "audio output to speaker"; ObjectID = "3S7-Mz-9dx"; */
+"3S7-Mz-9dx.text" = "audio output to speaker";
+
+/* Class = "UITextField"; placeholder = "Participant name (optional)"; ObjectID = "FgT-0x-XwB"; */
+"FgT-0x-XwB.placeholder" = "Participant name (optional)";
+
+/* Class = "UITextField"; placeholder = "Conference to create/join"; ObjectID = "HuS-Dz-UHn"; */
+"HuS-Dz-UHn.placeholder" = "Conference to create/join";
+
+/* Class = "UILabel"; text = "camera"; ObjectID = "JDj-vj-foA"; */
+"JDj-vj-foA.text" = "camera";
+
+/* Class = "UITextField"; placeholder = "Password"; ObjectID = "La5-PO-s99"; */
+"La5-PO-s99.placeholder" = "Κωδικός";
+
+/* Class = "UILabel"; text = "speaker"; ObjectID = "Mob-6o-RiW"; */
+"Mob-6o-RiW.text" = "speaker";
+
+/* Class = "UINavigationItem"; title = "Conference Demo"; ObjectID = "WbQ-Fs-hIc"; */
+"WbQ-Fs-hIc.title" = "Conference Demo";
+
+/* Class = "UILabel"; text = "Conference controls"; ObjectID = "XFH-Hx-eus"; */
+"XFH-Hx-eus.text" = "Conference controls";
+
+/* Class = "UIButton"; normalTitle = "Call Now"; ObjectID = "dQ3-M4-u74"; */
+"dQ3-M4-u74.normalTitle" = "Κλήση";
+
+/* Class = "UILabel"; text = "screen sharing"; ObjectID = "dVh-mj-XMF"; */
+"dVh-mj-XMF.text" = "Διαμοιρασμός οθόνης";
+
+/* Class = "UISegmentedControl"; e19-5V-vqT.segmentTitles[0] = "mic"; ObjectID = "e19-5V-vqT"; */
+"e19-5V-vqT.segmentTitles[0]" = "mic";
+
+/* Class = "UISegmentedControl"; e19-5V-vqT.segmentTitles[1] = "cam"; ObjectID = "e19-5V-vqT"; */
+"e19-5V-vqT.segmentTitles[1]" = "cam";
+
+/* Class = "UISegmentedControl"; e19-5V-vqT.segmentTitles[2] = "mic & cam"; ObjectID = "e19-5V-vqT"; */
+"e19-5V-vqT.segmentTitles[2]" = "mic & cam";
+
+/* Class = "UITextField"; placeholder = "Username"; ObjectID = "rix-GS-rEx"; */
+"rix-GS-rEx.placeholder" = "Χρήστης";
+
+/* Class = "UILabel"; text = "mode"; ObjectID = "rnA-w7-UHI"; */
+"rnA-w7-UHI.text" = "mode";
+
+/* Class = "UILabel"; text = "microphone"; ObjectID = "rsn-VD-x29"; */
+"rsn-VD-x29.text" = "Μικρόφωνο";
+
+/* Class = "UILabel"; text = "pip"; ObjectID = "syp-Gq-BR7"; */
+"syp-Gq-BR7.text" = "pip";

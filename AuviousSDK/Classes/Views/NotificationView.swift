@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 import os
 
 //Notification types
@@ -40,57 +41,60 @@ internal enum NotificationType {
 }
 
 internal class DismissableNotificationView: UIView {
-    
+
     //UI components
     internal var titleLabel: UILabel = UILabel(frame: .zero)
     internal var subtitleLabel: UILabel = UILabel(frame: .zero)
-    internal var closeButton: UIButton = UIButton(frame: .zero)
-    
-    
+
     init(title: String, subtitle: String?) {
         super.init(frame: .zero)
         setupUI()
         updateUI(withTitle: title, subtitle: subtitle)
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(frame: .zero)
         setupUI()
     }
-    
+
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 10
-        backgroundColor = UIColor.white.withAlphaComponent(0.9)
-        
+        backgroundColor = .clear
+        layer.cornerRadius = 14
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.12
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 12
+
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.layer.cornerRadius = 14
+        blurView.layer.masksToBounds = true
+        addSubview(blurView)
+        blurView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        blurView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        blurView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        blurView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+
+        let content = blurView.contentView
+
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(titleLabel)
-        titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        titleLabel.textColor = UIColor.black
+        content.addSubview(titleLabel)
+        titleLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 12).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
+        titleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
+        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        titleLabel.textColor = .label
 
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(subtitleLabel)
-        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5).isActive = true
-        subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        subtitleLabel.textColor = UIColor.black.withAlphaComponent(0.8)
-        
-        closeButton.isUserInteractionEnabled = true
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(closeButton)
-        closeButton.backgroundColor = .clear
-        closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
-        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
-        closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.layer.zPosition = 2199
-
-//        updateUI(with: statistics)
+        content.addSubview(subtitleLabel)
+        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
+        subtitleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
+        subtitleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
+        subtitleLabel.font = UIFont.systemFont(ofSize: 13)
+        subtitleLabel.textColor = .secondaryLabel
     }
-    
+
     internal func updateUI(withTitle: String, subtitle: String?) {
         titleLabel.text = withTitle
         if let subtitle = subtitle {
@@ -100,77 +104,81 @@ internal class DismissableNotificationView: UIView {
 }
 
 internal class NetworkDetailsNotificationView: UIView {
-    
+
     //UI components
     internal var titleLabel: UILabel = UILabel(frame: .zero)
     internal var subtitleLabel: UILabel = UILabel(frame: .zero)
-    internal var closeButton: UIButton = UIButton(frame: .zero)
-    
+
     private var statistics: NetworkStatistics?
-    
+
     init(with details: NetworkStatistics?) {
         super.init(frame: .zero)
-        
         self.statistics = details
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(frame: .zero)
         setupUI()
     }
-    
+
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 10
-        backgroundColor = UIColor.white.withAlphaComponent(0.9)
-        
+        backgroundColor = .clear
+        layer.cornerRadius = 14
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.12
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 12
+
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.layer.cornerRadius = 14
+        blurView.layer.masksToBounds = true
+        addSubview(blurView)
+        blurView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        blurView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        blurView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        blurView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+
+        let content = blurView.contentView
+
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(titleLabel)
-        titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        titleLabel.text =  NSLocalizedString("Network indicator (beta)", comment: "Notification")
-        titleLabel.textColor = UIColor.black
-        
+        content.addSubview(titleLabel)
+        titleLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 12).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
+        titleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
+        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        titleLabel.textColor = .label
+
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(subtitleLabel)
-        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5).isActive = true
-        subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        subtitleLabel.textColor = UIColor.black.withAlphaComponent(0.8)
-        
-        closeButton.isUserInteractionEnabled = true
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(closeButton)
-        closeButton.backgroundColor = .clear
-        closeButton.setBackgroundImage(UIImage(podAssetName: "closeButton"), for: [])
-        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
-        closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.layer.zPosition = 2199
+        content.addSubview(subtitleLabel)
+        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
+        subtitleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
+        subtitleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
+        subtitleLabel.font = UIFont.systemFont(ofSize: 13)
+        subtitleLabel.textColor = .secondaryLabel
 
         updateUI(with: statistics)
     }
-    
+
     internal func updateUI(with data: NetworkStatistics?) {
         self.statistics = data
-            
+
         let detailsText = "Jitter: %@   Packet loss: %@   Round-trip time: %@"
         var detailsMsg = ""
-        
+
         if let data = statistics {
             let packetLoss = String(100 - data.avgNetworkQuality)
             detailsMsg = String(format: detailsText, String(data.avgJitter), "\(packetLoss)%", String(data.avgRtt))
         } else {
             detailsMsg = String(format: detailsText, "n/a", "n/a", "n/a")
         }
-        
+
         titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
         subtitleLabel.text = detailsMsg
     }
-    
+
     internal func updateUI(with title: String, subtitle: String) {
         titleLabel.text = title
         subtitleLabel.text = subtitle
@@ -241,6 +249,10 @@ internal class AuviousNotification {
     
     //Singleton instance
     static let shared = AuviousNotification()
+    
+    //Notification center extensions
+    internal let agentStartedScreenShare = "agentStartedScreenShare"
+    internal let agentStoppedScreenShare = "agentStoppedScreenShare"
     
     //The notification being displayed
     private var view: NotificationView!

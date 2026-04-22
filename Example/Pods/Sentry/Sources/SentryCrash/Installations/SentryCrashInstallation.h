@@ -1,3 +1,4 @@
+// Adapted from: https://github.com/kstenerud/KSCrash
 //
 //  SentryCrashInstallation.h
 //
@@ -24,11 +25,10 @@
 // THE SOFTWARE.
 //
 
-
-#import <Foundation/Foundation.h>
 #import "SentryCrashReportFilter.h"
 #import "SentryCrashReportWriter.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Crash system installation which handles backend-specific details.
@@ -39,33 +39,27 @@
  */
 @interface SentryCrashInstallation : NSObject
 
-/** C Function to call during a crash report to give the callee an opportunity to
- * add to the report. NULL = ignore.
- *
- * WARNING: Only call async-safe functions from this function! DO NOT call
- * Objective-C methods!!!
+/** Install this installation. Call this instead of -[SentryCrash install] to
+ * install with everything needed for your particular backend.
  */
-@property(atomic,readwrite,assign) SentryCrashReportWriteCallback onCrash;
+- (void)install:(NSString *)customCacheDirectory;
 
-/** Install this installation. Call this instead of -[SentryCrash install] to install
- * with everything needed for your particular backend.
+/**
+ * Call this instead of `-[SentryCrash uninstall]`.
  */
-- (void) install;
+- (void)uninstall;
 
 /** Convenience method to call -[SentryCrash sendAllReportsWithCompletion:].
- * This method will set the SentryCrash sink and then send all outstanding reports.
+ * This method will set the SentryCrash sink and then send all outstanding
+ * reports.
  *
- * Note: Pay special attention to SentryCrash's "deleteBehaviorAfterSendAll" property.
+ * Note: Pay special attention to SentryCrash's "deleteBehaviorAfterSendAll"
+ * property.
  *
  * @param onCompletion Called when sending is complete (nil = ignore).
  */
-- (void) sendAllReportsWithCompletion:(SentryCrashReportFilterCompletion) onCompletion;
-
-/** Add a filter that gets executed before all normal filters.
- * Prepended filters will be executed in the order in which they were added.
- *
- * @param filter the filter to prepend.
- */
-- (void) addPreFilter:(id<SentryCrashReportFilter>) filter;
+- (void)sendAllReportsWithCompletion:(nullable SentryCrashReportFilterCompletion)onCompletion;
 
 @end
+
+NS_ASSUME_NONNULL_END
