@@ -30,6 +30,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     //Background audio switch (created programmatically)
     private let backgroundAudioSwitch = UISwitch()
 
+    //Video call or co-browse (created programmatically)
+    private let modeControl = UISegmentedControl(items: ["Video call", "Co-browse"])
+
     //Gradient
     private var gradientLayer = CAGradientLayer()
 
@@ -67,6 +70,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         callButton.layer.cornerRadius = 5.0
 
         setupConferenceOptionsScrollView()
+        setupModeControl()
     }
 
     override func viewDidLayoutSubviews() {
@@ -116,7 +120,8 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: speakerEnabledSwitch.bottomAnchor, constant: 15),
-            scrollView.bottomAnchor.constraint(equalTo: callButton.topAnchor, constant: -10),
+            //Leaves room for the "Video call | Co-browse" switch above the call button
+            scrollView.bottomAnchor.constraint(equalTo: callButton.topAnchor, constant: -52),
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
             scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
         ])
@@ -175,6 +180,30 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         }
     }
 
+    // MARK: - Mode
+
+    /// Adds the "Video call | Co-browse" switch above the call button
+    private func setupModeControl() {
+        modeControl.selectedSegmentIndex = 0
+        modeControl.translatesAutoresizingMaskIntoConstraints = false
+        modeControl.addTarget(self, action: #selector(modeChanged), for: .valueChanged)
+        view.addSubview(modeControl)
+
+        NSLayoutConstraint.activate([
+            modeControl.bottomAnchor.constraint(equalTo: callButton.topAnchor, constant: -10),
+            modeControl.leadingAnchor.constraint(equalTo: callButton.leadingAnchor),
+            modeControl.trailingAnchor.constraint(equalTo: callButton.trailingAnchor),
+        ])
+    }
+
+    private var isCobrowseMode: Bool {
+        return modeControl.selectedSegmentIndex == 1
+    }
+
+    @objc private func modeChanged() {
+        callButton.setTitle(isCobrowseMode ? "Start co-browse" : "Call Now", for: .normal)
+    }
+
     //MARK: Actions
 
     @IBAction func switchToggled(_ sender: Any) {
@@ -190,6 +219,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             let selectedEnv = environments[environmentControl.selectedSegmentIndex]
             let baseEndpoint: String = "https://\(selectedEnv)/"
             let mqttEndpoint: String = selectedEnv
+
+            if isCobrowseMode {
+                startCobrowse(ticket: ticket, participantName: participantName, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+                return
+            }
            
             //New configuration approach
             var conf = AuviousConferenceConfiguration()
@@ -241,6 +275,25 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         self.vc.showAlert(title: "Error", msg: error.localizedDescription, onSuccess: {
             self.dismissAuviousUI(childVC: self.vc)
         })
+    }
+
+    // MARK: Co-browse
+
+    private func startCobrowse(ticket: String, participantName: String?, baseEndpoint: String, mqttEndpoint: String) {
+        var configuration = AuviousCobrowseConfiguration(ticket: ticket, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
+        if let name = participantName, !name.isEmpty {
+            configuration.participantName = name
+        }
+
+        //Mask by name: any view with these identifiers, and every CardNumberField
+        configuration.masking.accessibilityIdentifiers = ["payment.iban", "card.*"]
+        configuration.masking.viewClasses = [CardNumberField.self]
+
+        view.endEditing(true)
+        AuviousCobrowse.shared.start(configuration: configuration, delegate: self)
+
+        //Open a sample screen with masked fields; the session keeps running while navigating
+        navigationController?.pushViewController(CobrowseDemoViewController(), animated: true)
     }
 
     // MARK: Helpers
@@ -313,6 +366,24 @@ extension ViewController {
             childVC.view.removeFromSuperview()
             childVC.removeFromParent()
         })
+    }
+}
+
+extension ViewController: AuviousCobrowseDelegate {
+
+    func cobrowse(didChangeState state: AuviousCobrowseState) {
+        print("Co-browse state: \(state)")
+    }
+
+    func cobrowse(didFailWith error: AuviousSDKGenericError) {
+        navigationController?.popToRootViewController(animated: true)
+        showAlert(title: "Co-browse", msg: error.localizedDescription)
+    }
+
+    func cobrowseDidEnd(reason: AuviousCobrowseEndReason) {
+        if reason != .failed {
+            navigationController?.popToRootViewController(animated: true)
+        }
     }
 }
 

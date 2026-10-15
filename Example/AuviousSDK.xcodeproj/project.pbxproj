@@ -13,6 +13,7 @@
 		0336380F249CA435009A08AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0336380E249CA435009A08AA /* Assets.xcassets */; };
 		03363812249CA435009A08AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03363810249CA435009A08AA /* LaunchScreen.storyboard */; };
 		03CA4E872EA8EE54008A54F2 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA4E862EA8EE54008A54F2 /* Extensions.swift */; };
+		4885A30BA29F524FE044BB7B /* CobrowseDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AD2314E90A2129C13CF6C4 /* CobrowseDemoViewController.swift */; };
 		5D094461BABDD45E3747DF6D /* Pods_ExampleSimpleConference.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -49,6 +50,7 @@
 		68C7EF0423784742004C962E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 68C7EF0223784742004C962E /* LaunchScreen.storyboard */; };
 		68F7D075237B1C3900CAA140 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F7D074237B1C3900CAA140 /* Extensions.swift */; };
 		68FAB308237AFA4E00932E10 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FAB303237AFA4D00932E10 /* Extensions.swift */; };
+		727DABBE468710CF8E918021 /* CobrowseSwiftUIDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD499D09746A036F1D2B6B6B /* CobrowseSwiftUIDemo.swift */; };
 		BB4F3820CC0D838801D1B86E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -109,6 +111,8 @@
 		68FAB304237AFA4D00932E10 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A212939C3BE9894018B11468 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		A48D85C772829C1D3F3B8B32 /* Pods-ExampleSimpleConference.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleSimpleConference.release.xcconfig"; path = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.release.xcconfig"; sourceTree = "<group>"; };
+		A5AD2314E90A2129C13CF6C4 /* CobrowseDemoViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CobrowseDemoViewController.swift; sourceTree = "<group>"; };
+		DD499D09746A036F1D2B6B6B /* CobrowseSwiftUIDemo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CobrowseSwiftUIDemo.swift; sourceTree = "<group>"; };
 		E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		EAD7F8C969A3AAD8318CE086 /* Pods-ExampleSimpleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleSimpleConference.debug.xcconfig"; path = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +162,8 @@
 				03363813249CA435009A08AA /* Info.plist */,
 				03CA4E862EA8EE54008A54F2 /* Extensions.swift */,
 				E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */,
+				A5AD2314E90A2129C13CF6C4 /* CobrowseDemoViewController.swift */,
+				DD499D09746A036F1D2B6B6B /* CobrowseSwiftUIDemo.swift */,
 			);
 			path = ExampleSimpleConference;
 			sourceTree = "<group>";
@@ -558,6 +564,8 @@
 				03CA4E872EA8EE54008A54F2 /* Extensions.swift in Sources */,
 				03363808249CA434009A08AA /* AppDelegate.swift in Sources */,
 				BB4F3820CC0D838801D1B86E /* SceneDelegate.swift in Sources */,
+				4885A30BA29F524FE044BB7B /* CobrowseDemoViewController.swift in Sources */,
+				727DABBE468710CF8E918021 /* CobrowseSwiftUIDemo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
