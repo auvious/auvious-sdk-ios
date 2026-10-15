@@ -33,7 +33,10 @@ internal final class CobrowseDockView: UIView {
 
     private(set) var mode: Mode = .connecting
 
+    private let background = UIVisualEffectView(effect: nil)
     private let stack = UIStackView()
+    private var penButton: UIButton?
+    private var arrowButton: UIButton?
     private var clearButton: UIButton?
     private var isConfirmingClear = false
     private var clearConfirmWorkItem: DispatchWorkItem?
@@ -41,20 +44,25 @@ internal final class CobrowseDockView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        backgroundColor = CobrowseTheme.dock
-        layer.cornerRadius = (CobrowseTheme.dockButtonHeight + 12) / 2
+        backgroundColor = .clear
+        setUpBackground()
 
         stack.axis = .horizontal
         stack.alignment = .center
         stack.spacing = 6
         stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        background.contentView.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6)
+            background.topAnchor.constraint(equalTo: topAnchor),
+            background.bottomAnchor.constraint(equalTo: bottomAnchor),
+            background.leadingAnchor.constraint(equalTo: leadingAnchor),
+            background.trailingAnchor.constraint(equalTo: trailingAnchor),
+
+            stack.topAnchor.constraint(equalTo: background.contentView.topAnchor, constant: 6),
+            stack.bottomAnchor.constraint(equalTo: background.contentView.bottomAnchor, constant: -6),
+            stack.leadingAnchor.constraint(equalTo: background.contentView.leadingAnchor, constant: 6),
+            stack.trailingAnchor.constraint(equalTo: background.contentView.trailingAnchor, constant: -6)
         ])
 
         accessibilityHint = CobrowseStrings.moveControls
@@ -67,14 +75,50 @@ internal final class CobrowseDockView: UIView {
 
     func setMode(_ mode: Mode) {
         guard mode != self.mode else { return }
+        let previous = self.mode
         self.mode = mode
-        rebuild()
+
+        //Switching tools only restyles the buttons, so they stay put
+        if case .drawing = previous, case .drawing(let tool, let inkColor) = mode, let pen = penButton, let arrow = arrowButton {
+            styleTool(pen, selected: tool == .pen, inkColor: inkColor)
+            styleTool(arrow, selected: tool == .arrow, inkColor: inkColor)
+            return
+        }
+
+        //New buttons are laid out in place right away, never animated in from a zero frame
+        UIView.performWithoutAnimation {
+            rebuild()
+            layoutIfNeeded()
+        }
     }
 
     //MARK: Layout
 
+    /// Dark Liquid Glass on iOS 26 and later, a dark blur before that
+    private func setUpBackground() {
+        background.translatesAutoresizingMaskIntoConstraints = false
+        background.overrideUserInterfaceStyle = .dark
+        background.clipsToBounds = true
+        background.layer.cornerRadius = (CobrowseTheme.dockButtonHeight + 12) / 2
+        background.layer.cornerCurve = .continuous
+
+        if #available(iOS 26.0, *) {
+            let glass = UIGlassEffect(style: .regular)
+            glass.tintColor = CobrowseTheme.dock.withAlphaComponent(0.55)
+            glass.isInteractive = true
+            background.effect = glass
+            background.cornerConfiguration = .capsule()
+        } else {
+            background.effect = UIBlurEffect(style: .systemThickMaterialDark)
+            background.backgroundColor = CobrowseTheme.dock.withAlphaComponent(0.35)
+        }
+        addSubview(background)
+    }
+
     private func rebuild() {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        penButton = nil
+        arrowButton = nil
         clearButton = nil
         isConfirmingClear = false
         clearConfirmWorkItem?.cancel()
@@ -82,18 +126,18 @@ internal final class CobrowseDockView: UIView {
         switch mode {
         case .connecting:
             stack.spacing = 6
-            stack.addArrangedSubview(labelButton(CobrowseStrings.cancel, image: nil, background: CobrowseTheme.dockButton, foreground: .white, action: #selector(cancelTapped)))
+            stack.addArrangedSubview(labelButton(CobrowseStrings.cancel, image: nil, background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(cancelTapped)))
 
         case .sharing(let canDraw):
             stack.spacing = 6
             if canDraw {
-                stack.addArrangedSubview(labelButton(CobrowseStrings.draw, image: CobrowseTheme.symbol("pencil.tip"), background: CobrowseTheme.dockButton, foreground: .white, action: #selector(drawTapped)))
+                stack.addArrangedSubview(labelButton(CobrowseStrings.draw, image: CobrowseTheme.symbol("pencil.tip"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(drawTapped)))
             }
             stack.addArrangedSubview(labelButton(CobrowseStrings.end, image: nil, background: accentColor, foreground: .white, action: #selector(endTapped)))
 
         case .notSharing:
             stack.spacing = 6
-            stack.addArrangedSubview(labelButton(CobrowseStrings.shareScreen, image: CobrowseTheme.symbol("iphone"), background: CobrowseTheme.dockButton, foreground: .white, action: #selector(shareTapped)))
+            stack.addArrangedSubview(labelButton(CobrowseStrings.shareScreen, image: CobrowseTheme.symbol("iphone"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(shareTapped)))
             stack.addArrangedSubview(labelButton(CobrowseStrings.end, image: nil, background: accentColor, foreground: .white, action: #selector(endTapped)))
 
         case .drawing(let tool, let inkColor):
@@ -102,13 +146,15 @@ internal final class CobrowseDockView: UIView {
             let arrow = iconButton("arrow.up.right", label: CobrowseStrings.arrow, action: #selector(arrowTapped))
             styleTool(pen, selected: tool == .pen, inkColor: inkColor)
             styleTool(arrow, selected: tool == .arrow, inkColor: inkColor)
+            penButton = pen
+            arrowButton = arrow
 
             let undo = iconButton("arrow.uturn.left", label: CobrowseStrings.undo, action: #selector(undoTapped))
             let clear = iconButton("trash", label: CobrowseStrings.clearDrawings, action: #selector(clearTapped))
             clearButton = clear
 
             let divider = UIView()
-            divider.backgroundColor = CobrowseTheme.dockDivider
+            divider.backgroundColor = UIColor.white.withAlphaComponent(0.2)
             divider.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 divider.widthAnchor.constraint(equalToConstant: 1),

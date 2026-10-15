@@ -13,14 +13,11 @@ internal enum CobrowseTheme {
     /// Sharing border, status pill and End button (#D91F36, 4.9:1 with white text)
     static let defaultAccent = UIColor(red: 217/255, green: 31/255, blue: 54/255, alpha: 1)
 
-    /// Dock background (#1F2433)
+    /// Dock tint and dark chrome (#1F2433)
     static let dock = UIColor(red: 31/255, green: 36/255, blue: 51/255, alpha: 1)
 
-    /// Secondary dock buttons (#343A4D)
-    static let dockButton = UIColor(red: 52/255, green: 58/255, blue: 77/255, alpha: 1)
-
-    /// Dock separator (#4A5168)
-    static let dockDivider = UIColor(red: 74/255, green: 81/255, blue: 104/255, alpha: 1)
+    /// Secondary dock buttons on the glass dock (translucent, so the glass shows through)
+    static let dockGlassButton = UIColor.white.withAlphaComponent(0.14)
 
     /// Neutral pill, used while connecting or not sharing (#3A3F4F)
     static let neutralPill = UIColor(red: 58/255, green: 63/255, blue: 79/255, alpha: 1)
