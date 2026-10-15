@@ -217,6 +217,12 @@ internal final class SketchSession {
         laser.clear()
     }
 
+    /// Leaves the sketch and removes every drawing locally, including the customer's own (nothing is broadcast)
+    func reset() {
+        stop()
+        canvas.removeAll()
+    }
+
     //MARK: Membership
 
     private func join(_ id: String, attempt: Int = 1) {

@@ -319,6 +319,10 @@ internal final class CobrowseSessionController: NSObject {
     /// Stops the screen share, the session stays connected
     private func stopSharing() {
         isDrawing = false
+        //Drawings belong to the shared screen; they go when it stops being shared
+        sketch?.reset()
+        overlay.canvas.removeAll()
+        overlay.laser.clear()
         stopCapture()
         sharingSince = nil
         state = .notSharing
@@ -392,7 +396,10 @@ internal final class CobrowseSessionController: NSObject {
         isEnding = true
 
         overlay.dismissSheet()
-        sketch?.stop()
+        //Nothing is shared anymore, so no drawings either
+        sketch?.reset()
+        overlay.canvas.removeAll()
+        overlay.laser.clear()
 
         let leaveReason = reason == .customerEnded ? customerTerminatedReason : ""
         stopCapture { [weak self] in
