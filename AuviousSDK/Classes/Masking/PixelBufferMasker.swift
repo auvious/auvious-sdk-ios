@@ -23,6 +23,27 @@ internal enum PixelBufferMasker {
     /// Snapshots older than this are not trusted
     static let maxSnapshotAge: CFTimeInterval = 0.25
 
+    /// The frame's presentation time on the `CACurrentMediaTime()` clock.
+    /// ReplayKit stamps frames with host time; anything implausible falls back to now.
+    static func frameTime(of sampleBuffer: CMSampleBuffer, now: CFTimeInterval = CACurrentMediaTime()) -> CFTimeInterval {
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard pts.isValid else { return now }
+        let seconds = CMTimeGetSeconds(pts)
+        return abs(seconds - now) < 1 ? seconds : now
+    }
+
+    /// Frame processor for `ScreenCapturer`: masks the frame with the layout around its capture time.
+    static func process(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, registry: MaskRegistry) -> Bool {
+        let now = CACurrentMediaTime()
+        let time = frameTime(of: sampleBuffer, now: now)
+        guard let snapshot = registry.snapshot(forFrameAt: time) else {
+            //Nothing recorded for that moment: only safe when masking isn't running at all
+            return !registry.isRunning
+        }
+        //Stale when the layout hasn't been read for a while around this frame (e.g. main thread stalled)
+        return process(sampleBuffer: sampleBuffer, pixelBuffer: pixelBuffer, snapshot: snapshot, now: time)
+    }
+
     /// Frame processor for `ScreenCapturer`. Returns false to drop the frame.
     static func process(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, snapshot: MaskSnapshot, now: CFTimeInterval = CACurrentMediaTime()) -> Bool {
         guard !snapshot.rects.isEmpty else {

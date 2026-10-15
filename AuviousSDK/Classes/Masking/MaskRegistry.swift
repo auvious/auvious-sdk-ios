@@ -28,6 +28,61 @@ internal struct MaskSnapshot {
 }
 
 /**
+ The recent mask snapshots, so a captured frame can be masked with the layout it actually shows.
+
+ ReplayKit hands frames over some milliseconds after they were rendered. While content moves (scrolling,
+ transitions) the latest snapshot is already ahead of the frame, so masking with it leaves the real
+ position uncovered. Instead every position a masked view had around the frame's timestamp is masked:
+ the boxes stretch along the motion, but never miss.
+ */
+internal struct MaskHistory {
+
+    /// How long snapshots are kept
+    static let retention: CFTimeInterval = 1
+
+    /// How far back from the frame timestamp the shown layout may be (render + capture latency)
+    static let lookBehind: CFTimeInterval = 0.15
+
+    /// How far after the frame timestamp a snapshot may still describe it (snapshots trail layout by a refresh)
+    static let lookAhead: CFTimeInterval = 0.05
+
+    private(set) var snapshots: [MaskSnapshot] = []
+
+    mutating func append(_ snapshot: MaskSnapshot) {
+        snapshots.append(snapshot)
+        let oldest = snapshot.timestamp - MaskHistory.retention
+        if let firstKept = snapshots.firstIndex(where: { $0.timestamp >= oldest }), firstKept > 0 {
+            snapshots.removeFirst(firstKept)
+        }
+    }
+
+    mutating func removeAll() {
+        snapshots.removeAll()
+    }
+
+    /// Every masked rect around `frameTime`, or nil when the history doesn't reach back to the frame
+    func snapshot(forFrameAt frameTime: CFTimeInterval) -> MaskSnapshot? {
+        guard let latest = snapshots.last else { return nil }
+
+        let start = frameTime - MaskHistory.lookBehind
+        let end = frameTime + MaskHistory.lookAhead
+        var used = snapshots.filter { $0.timestamp >= start && $0.timestamp <= end }
+
+        //The layout that was on screen when the window opened
+        if let before = snapshots.last(where: { $0.timestamp < start }) {
+            used.insert(before, at: 0)
+        }
+
+        //A frame from before our history: we can't tell what it shows
+        guard !used.isEmpty else { return nil }
+
+        return MaskSnapshot(rects: used.flatMap { $0.rects },
+                            screenSize: latest.screenSize,
+                            timestamp: used.map { $0.timestamp }.max() ?? latest.timestamp)
+    }
+}
+
+/**
  Finds the masked views on every display refresh and publishes their screen rects for the capture queue.
 
  Matching walks the app's windows each tick (no swizzling), so views that appear or get an identifier later
@@ -59,6 +114,7 @@ internal final class MaskRegistry {
     private var displayLink: CADisplayLink?
     private let lock = NSLock()
     private var currentSnapshot = MaskSnapshot.empty
+    private var history = MaskHistory()
     private var lastRegions: [MaskRegion] = []
     private weak var focusedInput: UIView?
     private var keyboardFrame: CGRect = .zero
@@ -71,6 +127,13 @@ internal final class MaskRegistry {
         lock.lock()
         defer { lock.unlock() }
         return currentSnapshot
+    }
+
+    /// Every masked rect around the given frame time (`CACurrentMediaTime()` clock). Thread safe.
+    func snapshot(forFrameAt frameTime: CFTimeInterval) -> MaskSnapshot? {
+        lock.lock()
+        defer { lock.unlock() }
+        return history.snapshot(forFrameAt: frameTime)
     }
 
     //MARK: Lifecycle
@@ -108,7 +171,8 @@ internal final class MaskRegistry {
         ]
 
         let link = CADisplayLink(target: DisplayLinkProxy(self), selector: #selector(DisplayLinkProxy.tick))
-        link.preferredFramesPerSecond = 60
+        //Track layout at the display's full rate (120 Hz on ProMotion) to keep up with scrolling
+        link.preferredFramesPerSecond = 0
         link.add(to: .main, forMode: .common)
         displayLink = link
         refresh()
@@ -128,6 +192,7 @@ internal final class MaskRegistry {
 
         lock.lock()
         currentSnapshot = .empty
+        history.removeAll()
         lock.unlock()
     }
 
@@ -154,8 +219,10 @@ internal final class MaskRegistry {
         let padding = MaskRegistry.padding
         let rects = regions.map { $0.rect.insetBy(dx: -padding, dy: -padding) }
 
+        let snapshot = MaskSnapshot(rects: rects, screenSize: screenBounds.size, timestamp: CACurrentMediaTime())
         lock.lock()
-        currentSnapshot = MaskSnapshot(rects: rects, screenSize: screenBounds.size, timestamp: CACurrentMediaTime())
+        currentSnapshot = snapshot
+        history.append(snapshot)
         lock.unlock()
 
         if regions != lastRegions {

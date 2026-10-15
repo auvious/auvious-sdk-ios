@@ -67,6 +67,7 @@
 		BE770D3241407AAAB9268CE8 /* CobrowseStatusPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43678E40A7E15635DFFF5D0 /* CobrowseStatusPillView.swift */; };
 		C25CCCF28FBB33F3C7DEA6B3 /* MaskingRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A421B96FC7A0E8F5D426640 /* MaskingRulesTests.swift */; };
 		C48DC02F743A110C61C6C5F8 /* CobrowseOverlaySnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE32EEB7FB09B95CD8494498 /* CobrowseOverlaySnapshotTests.swift */; };
+		D4841F9A5A36CC66D825E655 /* MaskHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */; };
 		DD1BA23983BD6AE9B38B5CF8 /* PixelBufferMaskerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816563A8A1786A22A8977BDE /* PixelBufferMaskerTests.swift */; };
 		E6D6EAE3EBDA7406001EE4B5 /* CobrowseStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F352865021054B949D39D9 /* CobrowseStrings.swift */; };
 		E7D0CC2A9A6AF636A9C6E760 /* SketchGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE48E7311236223D9A14F72 /* SketchGeometryTests.swift */; };
@@ -149,6 +150,7 @@
 		A4BE40D3FF2E7D2523F4DE1C /* SketchCanvasView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SketchCanvasView.swift; path = Sketch/SketchCanvasView.swift; sourceTree = "<group>"; };
 		A5AD2314E90A2129C13CF6C4 /* CobrowseDemoViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CobrowseDemoViewController.swift; sourceTree = "<group>"; };
 		AC94748FB31440813FFCB765 /* AuviousSDKLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AuviousSDKLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaskHistoryTests.swift; sourceTree = "<group>"; };
 		B26AD72A25FC673B6C54C36D /* CobrowseOverlayWindow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseOverlayWindow.swift; path = Cobrowse/UI/CobrowseOverlayWindow.swift; sourceTree = "<group>"; };
 		BA7EA8DBD21B3F114BD1E604 /* LaserPointerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LaserPointerView.swift; path = Sketch/LaserPointerView.swift; sourceTree = "<group>"; };
 		C4B4CCA7284FD27B28FD23CA /* AuviousMasking.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AuviousMasking.swift; path = Masking/AuviousMasking.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				816563A8A1786A22A8977BDE /* PixelBufferMaskerTests.swift */,
 				6EE48E7311236223D9A14F72 /* SketchGeometryTests.swift */,
 				26FC1BD18D84C8F5149194B4 /* SDK sources */,
+				B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */,
 			);
 			name = AuviousSDKLogicTests;
 			path = AuviousSDKLogicTests;
@@ -721,6 +724,7 @@
 				9D041FA20B9C2D7EEFBE25BE /* PaperCodec.swift in Sources */,
 				510667D798D367D61EE0F19A /* SketchCanvasView.swift in Sources */,
 				65BE1B8B5DEC52291F5889DC /* SketchGeometry.swift in Sources */,
+				D4841F9A5A36CC66D825E655 /* MaskHistoryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
