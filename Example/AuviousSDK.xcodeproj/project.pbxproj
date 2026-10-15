@@ -61,6 +61,7 @@
 		747AED17E19D640ED6F49F8B /* CobrowseEdgeGlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3D1B476965D09CD235C918 /* CobrowseEdgeGlowView.swift */; };
 		7668C94D458E553DC43AAE8A /* CobrowseDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79CD973249BD8A58DD70D831 /* CobrowseDockView.swift */; };
 		7E00E8C5DA3C3E465AA59506 /* CobrowseSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A911F356789D276B431799 /* CobrowseSheetView.swift */; };
+		888BCA713D5BC99780960DDD /* AuviousBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */; };
 		9D041FA20B9C2D7EEFBE25BE /* PaperCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98456C07A7AFA7BFED18DB26 /* PaperCodec.swift */; };
 		AB8ABDF68633B55825D50C04 /* AuviousMasking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B4CCA7284FD27B28FD23CA /* AuviousMasking.swift */; };
 		AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */; };
@@ -167,6 +168,7 @@
 		EAD7F8C969A3AAD8318CE086 /* Pods-ExampleSimpleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleSimpleConference.debug.xcconfig"; path = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		EC3D1B476965D09CD235C918 /* CobrowseEdgeGlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseEdgeGlowView.swift; path = Cobrowse/UI/CobrowseEdgeGlowView.swift; sourceTree = "<group>"; };
 		F43678E40A7E15635DFFF5D0 /* CobrowseStatusPillView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseStatusPillView.swift; path = Cobrowse/UI/CobrowseStatusPillView.swift; sourceTree = "<group>"; };
+		F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AuviousBannerView.swift; path = Views/AuviousBannerView.swift; sourceTree = "<group>"; };
 		F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8CD4D2F47C03670A4463825 /* PaperCodecTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaperCodecTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -273,6 +275,7 @@
 				439F35CD3C8C843DAD8DF380 /* SketchGeometry.swift */,
 				254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */,
 				215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */,
+				F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */,
 			);
 			name = "SDK sources";
 			path = ../../AuviousSDK/Classes;
@@ -740,6 +743,7 @@
 				045AFA70D1F824D926C6C523 /* PixelBufferCopierTests.swift in Sources */,
 				4CC57D953426A9030F939D4F /* PixelBufferCopier.swift in Sources */,
 				AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */,
+				888BCA713D5BC99780960DDD /* AuviousBannerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

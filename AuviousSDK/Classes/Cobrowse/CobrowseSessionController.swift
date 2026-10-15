@@ -313,7 +313,7 @@ internal final class CobrowseSessionController: NSObject {
 
     private func shareFailed() {
         stopSharing()
-        overlay.showToast(style: .info, title: nil, message: CobrowseStrings.shareFailed)
+        overlay.showToast(style: .warning, title: nil, message: CobrowseStrings.shareFailed)
     }
 
     /// Stops the screen share, the session stays connected
@@ -424,7 +424,7 @@ internal final class CobrowseSessionController: NSObject {
             overlay.setPhase(.notSharing)
             overlay.pill.isHidden = true
             overlay.dock.isHidden = true
-            overlay.showToast(style: .confirmation, title: CobrowseStrings.sessionEnded, message: CobrowseStrings.sessionEndedBody(agent?.name), duration: 2.5) { [weak self] in
+            overlay.showToast(style: .ended, title: CobrowseStrings.sessionEnded, message: CobrowseStrings.sessionEndedBody(agent?.name), duration: 2.5) { [weak self] in
                 self?.finish(reason: reason)
             }
         } else {

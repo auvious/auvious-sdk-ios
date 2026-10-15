@@ -89,7 +89,7 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
         overlay.setPhase(.notSharing)
         overlay.pill.isHidden = true
         overlay.dock.isHidden = true
-        overlay.showToast(style: .confirmation, title: CobrowseStrings.sessionEnded, message: CobrowseStrings.sessionEndedBody("Anna"))
+        overlay.showToast(style: .ended, title: CobrowseStrings.sessionEnded, message: CobrowseStrings.sessionEndedBody("Anna"))
         snapshot("7-ended")
     }
 

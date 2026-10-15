@@ -358,7 +358,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         networkIndicatorDetails.alpha = 0
         networkIndicatorDetails.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
         networkIndicatorDetails.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
-        networkIndicatorDetails.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        networkIndicatorDetails.heightAnchor.constraint(greaterThanOrEqualToConstant: 60).isActive = true
         networkIndicatorDetailsTop = networkIndicatorDetails.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
         networkIndicatorDetailsTop.isActive = true
         networkIndicatorDetails.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.hideNetworkDetailsPressed)))
@@ -370,7 +370,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         notification.alpha = 0
         notification.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 10).isActive = true
         notification.trailingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
-        notification.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        notification.heightAnchor.constraint(greaterThanOrEqualToConstant: 60).isActive = true
         notificationTop = notification.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: -150)
         notificationTop.isActive = true
         notification.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.hideNotificationPressed)))
@@ -463,8 +463,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     //Shows the toast notification view
-    @objc private func showNotification(with title: String, subtitle: String?) {
-        notification.updateUI(withTitle: title, subtitle: subtitle)
+    private func showNotification(with title: String, subtitle: String?, symbol: String? = nil, tint: UIColor? = nil) {
+        notification.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, tint: tint)
         
         UIView.animate(withDuration: 0.2, animations: {
             self.notification.alpha = 1
@@ -531,7 +531,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     @objc private func recorderIndicatorPressed() {
         showNotification(
             with: NSLocalizedString("Recording", comment: "Notification"),
-            subtitle: NSLocalizedString("Session is being recorded", comment: "Notification")
+            subtitle: NSLocalizedString("Session is being recorded", comment: "Notification"),
+            symbol: "record.circle.fill",
+            tint: .systemRed
         )
     }
 
@@ -865,8 +867,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             
             //If we can't show remote video due to UI limits, notify the user
             if initialStreamsConnected && remoteViews.count > maximumRemoteStreamsRendered {
-                self.networkIndicatorDetails.titleLabel.text = "A new participant has joined"
-                self.networkIndicatorDetails.subtitleLabel.text = "Due to current limitations, you can only listen"
+                self.networkIndicatorDetails.updateUI(with: "A new participant has joined", subtitle: "Due to current limitations, you can only listen")
                 self.showNetworkDetails()
             }
             
@@ -1054,8 +1055,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     if self.remoteViews.count > self.maximumRemoteStreamsRendered {
                         let title = "Limited visibility"
                         let subtitle = "You can only see \(self.maximumRemoteStreamsRendered)/\(self.remoteViews.count) participants"
-                        self.networkIndicatorDetails.titleLabel.text = title
-                        self.networkIndicatorDetails.subtitleLabel.text = subtitle
+                        self.networkIndicatorDetails.updateUI(with: title, subtitle: subtitle)
                         self.showNetworkDetails()
                     }
                 }
@@ -1177,8 +1177,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             with: NSLocalizedString("Recording", comment: "Notification"),
             subtitle: toActive
             ? NSLocalizedString("Session is being recorded", comment: "Notification")
-            : NSLocalizedString("Session is no longer recorded", comment: "Notification")
-            
+            : NSLocalizedString("Session is no longer recorded", comment: "Notification"),
+            symbol: toActive ? "record.circle.fill" : "record.circle",
+            tint: toActive ? .systemRed : .secondaryLabel
         )
         recorderIndicator.alpha = toActive ? 1 : 0
         createConstraints()
