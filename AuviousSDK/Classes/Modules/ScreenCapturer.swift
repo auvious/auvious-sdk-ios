@@ -26,6 +26,24 @@ class ScreenCapturer: NSObject {
     /// When set, `onScreenSharingStart` is NOT called on success (deferred to the caller).
     var permissionCompletion: ((Bool) -> Void)?
 
+    /// Optional hook that runs on every captured video frame before it is handed to WebRTC
+    /// (used to black out masked regions). Return false to drop the frame.
+    /// Called on the ReplayKit capture queue.
+    var frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+        get {
+            frameProcessorLock.lock()
+            defer { frameProcessorLock.unlock() }
+            return _frameProcessor
+        }
+        set {
+            frameProcessorLock.lock()
+            _frameProcessor = newValue
+            frameProcessorLock.unlock()
+        }
+    }
+    private var _frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)?
+    private let frameProcessorLock = NSLock()
+
     init(videoSource: RTCVideoSource) {
         self.videoSource = videoSource
         self.capturer = RTCVideoCapturer(delegate: videoSource) // <- create dummy capturer
@@ -70,6 +88,10 @@ class ScreenCapturer: NSObject {
                     "pixelFormat": String(format: "0x%08X", pixelFormat)
                 ]
                 SentrySDK.addBreadcrumb(frameCrumb)
+            }
+
+            if let processor = self.frameProcessor, !processor(sampleBuffer, pixelBuffer) {
+                return
             }
 
             let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)

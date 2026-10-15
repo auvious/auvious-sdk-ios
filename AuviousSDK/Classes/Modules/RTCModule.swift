@@ -118,6 +118,14 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     // Pending capturer created during the permission phase (reused in createScreenSharingStream)
     private var pendingScreenVideoSource: RTCVideoSource?
     private var pendingScreenCapturer: ScreenCapturer?
+
+    /// Per-frame hook applied to every screen capturer (e.g. co-browse masking)
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+        didSet {
+            screenCapturer?.frameProcessor = screenFrameProcessor
+            pendingScreenCapturer?.frameProcessor = screenFrameProcessor
+        }
+    }
     
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
@@ -326,6 +334,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         pendingScreenVideoSource?.adaptOutputFormat(toWidth: pendingDims.width, height: pendingDims.height, fps: 15)
         let capturer = ScreenCapturer(videoSource: pendingScreenVideoSource!)
         capturer.delegate = self
+        capturer.frameProcessor = screenFrameProcessor
         pendingScreenCapturer = capturer
         capturer.permissionCompletion = { [weak self] granted in
             guard let self = self else { return }
@@ -362,6 +371,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             localScreenVideoSource?.adaptOutputFormat(toWidth: freshDims.width, height: freshDims.height, fps: 15)
             screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
             screenCapturer.delegate = self
+            screenCapturer.frameProcessor = screenFrameProcessor
 
             let crumb = Breadcrumb(level: .warning, category: "screen_share")
             crumb.message = "Screen stream created (no pending capturer — starting fresh)"
@@ -388,6 +398,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         localScreenVideoSource = nil
         localScreenVideoTrack = nil
         localScreenStream = nil
+    }
+
+    /// True while a ReplayKit capture is running or pending publication
+    internal var isScreenCapturing: Bool {
+        return screenCapturer != nil || pendingScreenCapturer != nil
+    }
+
+    /// Pauses/resumes the outgoing screen track without tearing down the capture (e.g. while on hold).
+    internal func setScreenTrackEnabled(_ enabled: Bool) {
+        localScreenVideoTrack?.isEnabled = enabled
     }
 
     internal func stopScreenSharing() {

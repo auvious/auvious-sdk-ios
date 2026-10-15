@@ -131,7 +131,9 @@ internal final class API2 {
         completion?(false)
     }
     
-    private func fireRequest(_ transaction: TransactionElementNew) {
+    /// - Parameter validateStatus: when true, non-2xx responses are reported through `onFailure` with
+    ///   `AuviousSDKError.httpError(code:)` even if the response body is valid JSON.
+    private func fireRequest(_ transaction: TransactionElementNew, validateStatus: Bool = false) {
         
         let cachedRequest = transaction
 //        if self.isRefreshing && transaction.needsToken == true {
@@ -191,6 +193,11 @@ internal final class API2 {
 //                }
                 
                 DispatchQueue.main.async {
+                    if validateStatus && !(200..<300).contains(responseCode) {
+                        transaction.onFailure(AuviousSDKError.httpError(code: responseCode))
+                        return
+                    }
+
                     if let responseData = data {
                         
                         do {
@@ -368,13 +375,35 @@ internal final class API2 {
         fireRequest(transaction)
     }
     
-    func keepAlive(_ object: KeepAliveRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+    func keepAlive(_ object: KeepAliveRequest, validateStatus: Bool = false, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
         let transaction: TransactionElementNew = (Router.keepAlive(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
+        fireRequest(transaction, validateStatus: validateStatus)
     }
     
     func unregisterEndpoint(_ object: UnregisterEndpointRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
         let transaction: TransactionElementNew = (Router.unregisterEndpoint(object: object), onSuccess, onFailure, true)
         fireRequest(transaction)
+    }
+
+    func sendEvent(_ object: SendEventRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.sendEvent(object: object), onSuccess, onFailure, true)
+        fireRequest(transaction, validateStatus: true)
+    }
+
+    //Tickets
+    func getTicket(_ id: String, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.getTicket(id: id), onSuccess, onFailure, false)
+        fireRequest(transaction, validateStatus: true)
+    }
+
+    //Sketch
+    func joinSketch(_ id: String, object: SketchMemberRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.joinSketch(id: id, object: object), onSuccess, onFailure, true)
+        fireRequest(transaction, validateStatus: true)
+    }
+
+    func broadcastSketch(_ id: String, body: [String: Any], onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
+        let transaction: TransactionElementNew = (Router.broadcastSketch(id: id, body: body), onSuccess, onFailure, true)
+        fireRequest(transaction, validateStatus: true)
     }
 }

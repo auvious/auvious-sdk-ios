@@ -23,6 +23,8 @@ public final class ConferenceSimpleView: NSObject {
     var onHold: Bool = false
     //Recording active at join time
     var isRecording: Bool = false
+    //Raw conference metadata values at join time (key -> value as sent by the server)
+    var metadataValues: [String: String] = [:]
     
     init(fromJson json: JSON!) {
         if json == JSON.null {
@@ -45,7 +47,14 @@ public final class ConferenceSimpleView: NSObject {
         version = json["version"].intValue
         
         //Parse metadata
-        for (key, _): (String, JSON) in json["metadata"] {
+        for (key, entry): (String, JSON) in json["metadata"] {
+            //Entries are either the plain value or an object holding it under "value"
+            if let value = entry["value"].string ?? entry.string {
+                metadataValues[key] = value
+            } else if entry["value"].exists() {
+                metadataValues[key] = entry["value"].rawString()
+            }
+            
             if key.starts(with: "TRACK_MUTED") {
                 let parts = key.split(separator: "/")
                 if parts.count == 3 {

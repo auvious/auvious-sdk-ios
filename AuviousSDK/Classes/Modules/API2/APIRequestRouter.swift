@@ -49,7 +49,15 @@ enum Router: URLRequestConvertible2 {
     case getEndpointDetails(id: String)
     case keepAlive(object: KeepAliveRequest)
     case unregisterEndpoint(object: UnregisterEndpointRequest)
-    
+    case sendEvent(object: SendEventRequest)
+
+    //Tickets
+    case getTicket(id: String)
+
+    //Sketch
+    case joinSketch(id: String, object: SketchMemberRequest)
+    case broadcastSketch(id: String, body: [String: Any])
+
     func encodeWithURLComponents(_ parameters: [String: Any]) -> String {
         var components = URLComponents()
         components.queryItems = parameters.map { key, value in
@@ -241,6 +249,27 @@ enum Router: URLRequestConvertible2 {
             query = "rtc-api/users/endpoints/unregister"
             httpMethod = "POST"
             bodyParams = object.toDictionary() as [String : AnyObject]
+
+        case .sendEvent(let object):
+            query = "rtc-api/users/endpoints/sendEvent"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary()
+
+        //Tickets
+        case .getTicket(let id):
+            sendAuthenticationHeader = false
+            query = "security/ticket/" + id
+
+        //Sketch
+        case .joinSketch(let id, let object):
+            query = "api/sketch/" + id
+            httpMethod = "PUT"
+            bodyParams = object.toDictionary()
+
+        case .broadcastSketch(let id, let body):
+            query = "api/sketch/" + id
+            httpMethod = "POST"
+            bodyParams = body
         }
         
         var urlRequest = URLRequest(url: url.appendingPathComponent(query))

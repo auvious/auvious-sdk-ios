@@ -8,6 +8,16 @@
 
 import Foundation
 
+/// Determines how this endpoint presents itself to the other participants when joining a conference.
+internal enum JoinProfile {
+
+    /// Regular audio/video call participant
+    case stream
+
+    /// Co-browse customer sharing their app screen (agent side treats it as a display-capture participant)
+    case displayCapture(originUrl: String, customerMetadata: [String: Any]?)
+}
+
 internal final class JoinConferenceRequest {
     
     var conferenceId: String!
@@ -40,15 +50,25 @@ internal final class JoinConferenceRequest {
         //Metadata
         var metaDataDictionary = [String:Any]()
         metaDataDictionary["roles"] = ["CUSTOMER"]
-        
-        if AuviousConferenceSDK.sharedInstance.uiConfiguration.screenSharingAvailable {
-            metaDataDictionary["capabilities"] = ["display-capture"]
-        } else {
-            metaDataDictionary["capabilities"] = []
+
+        switch AuviousConferenceSDK.sharedInstance.joinProfile {
+        case .stream:
+            if AuviousConferenceSDK.sharedInstance.uiConfiguration.screenSharingAvailable {
+                metaDataDictionary["capabilities"] = ["display-capture"]
+            } else {
+                metaDataDictionary["capabilities"] = []
+            }
+            metaDataDictionary["type"] = "stream"
+
+        case .displayCapture(let originUrl, let customerMetadata):
+            //"co-browse" is deliberately not advertised, it would offer the web-only DOM co-browse to the agent
+            metaDataDictionary["capabilities"] = ["display-capture", "ar-pointer"]
+            metaDataDictionary["type"] = "displayCapture"
+            metaDataDictionary["originUrl"] = originUrl
+            metaDataDictionary["customerMetadata"] = customerMetadata ?? NSNull()
         }
-        
+
         metaDataDictionary["language"] = Utilities.getApplicationLanguage()
-        metaDataDictionary["type"] = "stream"
         metaDataDictionary["mediaDevices"] = Utilities.getMediaDevices()
         
         if let participantName = participantName {

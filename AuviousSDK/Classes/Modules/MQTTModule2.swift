@@ -21,8 +21,13 @@ internal protocol MQTTCallDelegate {
 }
 
 internal protocol MQTTSnapshotDelegate {
-    
+
     func snapshotMessageReceived(_ object: SnapshotEvent)
+}
+
+internal protocol MQTTUserEventDelegate: AnyObject {
+
+    func userEventReceived(_ type: RtcUserEventType, json: JSON)
 }
 
 internal final class MQTTModule2: CocoaMQTTDelegate {
@@ -39,7 +44,8 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     var callDelegate: MQTTCallDelegate?
     var conferenceDelegate: MQTTConferenceDelegate?
     var snapshotDelegate: MQTTSnapshotDelegate?
-    
+    weak var userEventDelegate: MQTTUserEventDelegate?
+
     func configure(endpointId: String) {
         self.endpointId = endpointId
     }
@@ -126,7 +132,13 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         if let payload = message.string {
             let jsonObject = JSON(parseJSON: payload)
             os_log("%@", log: Log.mqtt, type: .debug, jsonObject.debugDescription)
-            
+
+            //User events (co-browse, sketch, laser) are not conference versioned, route them directly
+            if let userEventType = RtcUserEventType(rawValue: jsonObject["type"].stringValue) {
+                userEventDelegate?.userEventReceived(userEventType, json: jsonObject)
+                return
+            }
+
             if let eventType = ConferenceEventType(rawValue: jsonObject["type"].stringValue) {
                 
                 var model: ConferenceEvent!

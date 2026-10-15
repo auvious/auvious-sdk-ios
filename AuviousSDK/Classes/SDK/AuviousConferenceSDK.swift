@@ -8,13 +8,41 @@
 
 import Foundation
 import UIKit
+import CoreMedia
+import SwiftyJSON
 import os
 
-public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, UserEndpointDelegate {
-    
+/// Receives the co-browse specific signalling that does not go through `AuviousSDKConferenceDelegate`.
+internal protocol CobrowseSignallingDelegate: AnyObject {
+
+    /// A non-versioned user event (co-browse request/terminate, sketch, laser pointer)
+    func cobrowseUserEventReceived(_ type: RtcUserEventType, json: JSON)
+
+    /// A SKETCH / AR_POINTER / AR_POINTER_COLORS conference metadata change from another participant
+    func cobrowseMetadataChanged(_ event: ConferenceMetadataUpdatedEvent)
+}
+
+public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDelegate, RTCDelegate, UserEndpointDelegate {
+
     /// Singleton instance
     public static let sharedInstance = AuviousConferenceSDK()
-    
+
+    /// How this endpoint presents itself when joining a conference
+    internal var joinProfile: JoinProfile = .stream
+
+    /// Co-browse signalling sink, set while a co-browse session is active
+    internal weak var cobrowseDelegate: CobrowseSignallingDelegate?
+
+    /// When true, the co-browse session manages app lifecycle itself and the public pause/resume calls are ignored
+    internal var isCobrowseActive: Bool = false
+
+    /// Per-frame hook for the screen share capture (co-browse masking). Return false to drop a frame.
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+        didSet {
+            rtcClient?.screenFrameProcessor = screenFrameProcessor
+        }
+    }
+
     /// The username property, used for logging in
     internal var username: String?
     
@@ -181,6 +209,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      disconnect from remote streams.
      */
     public func onApplicationPause(){
+        //Co-browse sessions observe the app lifecycle themselves
+        guard !isCobrowseActive else { return }
+        
         didPauseForBackground = true
 
         // App is entering real background — cancel the screenshot fallback timer so it doesn't
@@ -282,6 +313,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      rejoin the conference and reconnect to remote streams.
      */
     public func onApplicationResume(){
+        //Co-browse sessions observe the app lifecycle themselves
+        guard !isCobrowseActive else { return }
+        
         // Background audio path: connections are still alive, just resume video
         if isBackgroundAudioActive {
             os_log("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
@@ -410,6 +444,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         rtcClient.iceServers = ServerConfiguration.iceServers
         
         rtcClient.publishVideoResolution = publishVideoResolution
+        rtcClient.screenFrameProcessor = screenFrameProcessor
         rtcClient.delegate = self
         rtcClient.initialisePeerConnectionFactory()
     }
@@ -807,7 +842,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Parameter onSuccess: Called after successfully leaving the conference
      - Parameter onFailure: Called in case of failure with the designated Error
      */
-    public func leaveConference(conferenceId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
+    public func leaveConference(conferenceId: String, reason: String = "", onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
             onFailure(AuviousSDKError.notLoggedIn)
             return
@@ -850,7 +885,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.currentConference = nil
 
         //Step 5 - Leave conference
-        let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: "", userEndpointId: endpointId, userId: userId)
+        let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: reason, userEndpointId: endpointId, userId: userId)
         API2.sharedInstance.leaveConference(lcRequest, onSuccess: {(json) in
             if let _ = json {
                 onSuccess()
@@ -944,6 +979,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 
                 MQTTModule2.sharedInstance.configure(endpointId: endpoint)
                 MQTTModule2.sharedInstance.conferenceDelegate = self
+                MQTTModule2.sharedInstance.userEventDelegate = self
                 MQTTModule2.sharedInstance.connect(onSubscription: {
                     onLoginSuccess(endpointId, conferenceId)
                     //We no longer want the closure to be called
@@ -1113,6 +1149,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     //MARK: MQTT Client Delegate
     //MARK: -
     
+    internal func userEventReceived(_ type: RtcUserEventType, json: JSON) {
+        cobrowseDelegate?.cobrowseUserEventReceived(type, json: json)
+    }
+    
     internal func conferenceMessageReceived(_ object: ConferenceEvent) {
         //Ensure we're in a conference
         guard let _ = currentConference else {
@@ -1202,12 +1242,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             let object = msg as! ConferenceMetadataUpdatedEvent
             let isEnabled = object.operation == .set ? false : true
             
+            //Co-browse annotations (sketch / laser pointer discovery)
+            if object.isSketch || object.isArPointer || object.isArPointerColors {
+                cobrowseDelegate?.cobrowseMetadataChanged(object)
+                
             //Conference on hold
-            if object.isHold {
+            } else if object.isHold {
                 
                 //Mute/unmute local audio and video
                 rtcClient.localVideoTrack?.isEnabled = isEnabled
                 rtcClient.localAudioTrack?.isEnabled = isEnabled
+                //Never keep streaming the screen while on hold
+                rtcClient.setScreenTrackEnabled(isEnabled)
                 
                 //Delegate back to client
                 delegate?.auviousSDK(conferenceOnHold: !isEnabled)
@@ -1523,6 +1569,105 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             self?.delegate?.auviousSDK(screenSharingStopped: true)
         }, onFailure: { [weak self] _ in
             self?.delegate?.auviousSDK(screenSharingStopped: true)
+        })
+    }
+}
+
+//MARK: -
+//MARK: Co-browse helpers
+//MARK: -
+
+extension AuviousConferenceSDK {
+    
+    /// The logged in user id ('sub' claim)
+    internal var currentUserId: String? {
+        return AuthenticationModule.sharedInstance.loginResponse?.userId
+    }
+    
+    /// The conference we are currently joined to
+    internal var currentConferenceId: String? {
+        return currentConference?.id
+    }
+    
+    /// Raw conference metadata values (key -> value) as received when joining
+    internal var joinedConferenceMetadata: [String: String] {
+        return currentConference?.metadataValues ?? [:]
+    }
+    
+    /// The id of our published screen stream, if any (changes after an ICE re-publish)
+    internal var localScreenStreamId: String? {
+        return rtcClient?.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
+    }
+    
+    /// Stops the screen capture and unpublishes the screen stream, if any.
+    internal func stopLocalScreenShare(completion: (() -> Void)? = nil) {
+        guard rtcClient != nil else {
+            completion?()
+            return
+        }
+        
+        let streamId = localScreenStreamId
+        sharingMyScreen = false
+        isPendingScreenSharePermission = false
+        
+        if rtcClient.isScreenCapturing {
+            rtcClient.stopScreenSharing()
+        }
+        
+        guard let screenStreamId = streamId,
+              rtcClient.removePublishStreams(streamId: screenStreamId),
+              let conference = currentConference,
+              let userId = currentUserId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            completion?()
+            return
+        }
+        
+        let request = UnpublishStreamRequest(conferenceId: conference.id, streamId: screenStreamId, userEndpointId: endpointId, userId: userId)
+        API2.sharedInstance.unpublishStream(request, onSuccess: { _ in
+            completion?()
+        }, onFailure: { error in
+            os_log("Co-browse unpublish screen failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            completion?()
+        })
+    }
+    
+    /// Restores connectivity after the app returns to the foreground during a co-browse session.
+    /// Re-registers the endpoint and rejoins the conference if the server dropped us while suspended.
+    internal func restoreCobrowseConnection(onSuccess: @escaping () -> Void, onFailure: @escaping (Error) -> Void) {
+        guard let userId = currentUserId, let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            onFailure(AuviousSDKError.notLoggedIn)
+            return
+        }
+        
+        let conferenceId = currentConference?.id ?? lastConferenceJoined
+        let request = KeepAliveRequest(userEndpointId: endpointId, userId: userId)
+        UserEndpointModule.sharedInstance.keepAliveRequest = request
+        
+        API2.sharedInstance.keepAlive(request, validateStatus: true, onSuccess: { _ in
+            UserEndpointModule.sharedInstance.startKeepAliveTimer()
+            MQTTModule2.sharedInstance.reconnect()
+            onSuccess()
+        }, onFailure: { _ in
+            os_log("Co-browse endpoint expired while in background, re-registering", log: Log.conferenceSDK, type: .debug)
+            
+            UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: { newEndpointId in
+                MQTTModule2.sharedInstance.configure(endpointId: newEndpointId)
+                MQTTModule2.sharedInstance.disconnectAndReconnect()
+                
+                guard let rejoinId = conferenceId else {
+                    onFailure(AuviousSDKError.notInConference)
+                    return
+                }
+                
+                //Our previous membership is gone, rejoin as a fresh endpoint
+                self.removeAllStreams()
+                self.emptyPeerConnections()
+                self.currentConference = nil
+                self.joinConference(conferenceId: rejoinId, onSuccess: { _ in
+                    onSuccess()
+                }, onFailure: onFailure)
+            }, onFailure: onFailure)
         })
     }
 }

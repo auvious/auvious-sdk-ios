@@ -174,3 +174,28 @@ public enum PublishVideoResolution: String {
     /// Maximum resolution of 1024 * 768 (always maintain a 1/3 ratio)
     case max = "1920x1080"//"1280x720"
 }
+
+/**
+    Peer-to-peer user events (sent through `rtc-api/users/endpoints/sendEvent` or by the sketch server)
+    that are not conference versioned and are routed outside of the conference event pipeline.
+ */
+internal enum RtcUserEventType: String {
+    
+    /// The agent asks the customer to share their screen
+    case cobrowseDisplayCaptureRequest = "CobrowseDisplayCaptureRequestEvent"
+    
+    /// The agent stops viewing the customer's screen (the session stays open)
+    case cobrowseDisplayCaptureTerminate = "CobrowseDisplayCaptureTerminateEvent"
+    
+    /// Sketch operations broadcast by another sketch member
+    case sketchCanvasUpdated = "SketchCanvasUpdatedEvent"
+    
+    /// A new member joined the sketch and expects everyone's items
+    case sketchUserJoined = "SketchUserJoinedEvent"
+    
+    /// A sketch was made available/unavailable for this endpoint
+    case sketchAvailabilityChanged = "SketchAvailabilityChangedEvent"
+    
+    /// Laser pointer indication from the agent
+    case arPointerIndicated = "ArPointerIndicatedEvent"
+}
