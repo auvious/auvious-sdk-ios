@@ -50,7 +50,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.dependency 'Starscream_IOS13', '~> 4.0.4'
   s.dependency 'Sentry', '~> 8.0'
   
-  s.swift_versions = '4.2'
+  s.swift_versions = '5.0'
   s.pod_target_xcconfig = {
     'ENABLE_BITCODE' => 'NO',
     'GCC_PREPROCESSOR_DEFINITIONS' => 'AUVIOUSSDK',

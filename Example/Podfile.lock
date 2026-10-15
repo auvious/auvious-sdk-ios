@@ -1,6 +1,6 @@
 PODS:
   - AuviousGoogleWebRTC (84.4147.4)
-  - AuviousSDK (1.4.0-rc.3):
+  - AuviousSDK (1.4.0):
     - AuviousGoogleWebRTC (~> 84.4147.4)
     - CocoaMQTTWebsocket_IOS13
     - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
@@ -61,7 +61,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   AuviousGoogleWebRTC: 146e1bcb5423fbef3796d1e2cd28c7c592ae575a
-  AuviousSDK: 5060a398949417b8fbe0ad5210373e20d5098dc0
+  AuviousSDK: 32a25126935d74ab7de794fc64f956670ef569e6
   CocoaMQTTWebsocket_IOS13: cb657e8cfc7a0729b58f37a01f4cdf67b2fe259a
   MqttCocoaAsyncSocket_IOS13: a32f9a761890366c28d22a6383e2389ff2a5a312
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
