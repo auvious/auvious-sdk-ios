@@ -29,7 +29,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.source           = { :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '15.0'
 
   s.source_files = 'AuviousSDK/Classes/**/*'
   s.exclude_files = 'AuviousSDK/AuviousSDK/Classes/Modules/API/**/*', 'AuviousSDK/AuviousSDK/Classes/Modules/MQTTModule.swift'

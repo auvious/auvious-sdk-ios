@@ -4981,23 +4981,6 @@
 			};
 			name = Debug;
 		};
-		35D5F6997860E2F17B9068A06E7BE907 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CCD7668AB1D8F2932D256908838A324C /* AuviousSDK.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
-				IBSC_MODULE = AuviousSDK;
-				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				PRODUCT_NAME = AuviousSDKAssets;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Release;
-		};
 		459FE580E2A526CBD8BB97CDD05B7C30 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7304E930B4F33DA17B212FFB2C1DA706 /* CocoaMQTTWebsocket_IOS13.release.xcconfig */;
@@ -5088,7 +5071,7 @@
 			};
 			name = Release;
 		};
-		567B132FEE88299606EB01015F3E5A52 /* Debug */ = {
+		574871B8DB4411193351709D0804EF8C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4E407B532B0589050510704DB3A72E3 /* AuviousSDK.debug.xcconfig */;
 			buildSettings = {
@@ -5122,6 +5105,42 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
+		};
+		583CEACEA424E2BFF407092A99A1416A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CCD7668AB1D8F2932D256908838A324C /* AuviousSDK.release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREFIX_HEADER = "Target Support Files/AuviousSDK/AuviousSDK-prefix.pch";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/AuviousSDK/AuviousSDK-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/AuviousSDK/AuviousSDK.modulemap";
+				PRODUCT_MODULE_NAME = AuviousSDK;
+				PRODUCT_NAME = AuviousSDK;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
 		};
 		5CA0639DFB62ECD2E39D1B01A7A63E2B /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -5232,23 +5251,6 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
-		};
-		83A47B83C1F532FEABED735F6534DF8B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = E4E407B532B0589050510704DB3A72E3 /* AuviousSDK.debug.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = NO;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
-				IBSC_MODULE = AuviousSDK;
-				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				PRODUCT_NAME = AuviousSDKAssets;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Debug;
 		};
 		90D4D09BCB6A4660E43ACBE9ECB6FE9A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -5378,6 +5380,23 @@
 			};
 			name = Release;
 		};
+		95BD64740F123ACE60C5D7466B454E4E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4E407B532B0589050510704DB3A72E3 /* AuviousSDK.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
+				IBSC_MODULE = AuviousSDK;
+				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_NAME = AuviousSDKAssets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
 		96C108F565BD85B5BB4B7FA92A40904D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F410A6FBC4175150E3144B921F27F129 /* Starscream_IOS13.debug.xcconfig */;
@@ -5431,6 +5450,23 @@
 			};
 			name = Debug;
 		};
+		9E4E9D133E9CE6157457AFB1FE4F93F4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CCD7668AB1D8F2932D256908838A324C /* AuviousSDK.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/AuviousSDK";
+				IBSC_MODULE = AuviousSDK;
+				INFOPLIST_FILE = "Target Support Files/AuviousSDK/ResourceBundle-AuviousSDKAssets-AuviousSDK-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_NAME = AuviousSDKAssets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 		A2CB3F1AB556C372E63671FEBA116255 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F88525320AD1F363B5E3A97DC798FDDD /* AuviousGoogleWebRTC.release.xcconfig */;
@@ -5445,42 +5481,6 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		A4AF89F6011B706E06F79FB97F161E52 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CCD7668AB1D8F2932D256908838A324C /* AuviousSDK.release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_MODULE_VERIFIER = NO;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GCC_PREFIX_HEADER = "Target Support Files/AuviousSDK/AuviousSDK-prefix.pch";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Target Support Files/AuviousSDK/AuviousSDK-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/AuviousSDK/AuviousSDK.modulemap";
-				PRODUCT_MODULE_NAME = AuviousSDK;
-				PRODUCT_NAME = AuviousSDK;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_INSTALL_OBJC_HEADER = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
@@ -5729,8 +5729,8 @@
 		5D508C8AAE24690E55F9055D0758D077 /* Build configuration list for PBXNativeTarget "AuviousSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				567B132FEE88299606EB01015F3E5A52 /* Debug */,
-				A4AF89F6011B706E06F79FB97F161E52 /* Release */,
+				574871B8DB4411193351709D0804EF8C /* Debug */,
+				583CEACEA424E2BFF407092A99A1416A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -5738,8 +5738,8 @@
 		64A312E28972DD3DD421D383345EDF27 /* Build configuration list for PBXNativeTarget "AuviousSDK-AuviousSDKAssets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				83A47B83C1F532FEABED735F6534DF8B /* Debug */,
-				35D5F6997860E2F17B9068A06E7BE907 /* Release */,
+				95BD64740F123ACE60C5D7466B454E4E /* Debug */,
+				9E4E9D133E9CE6157457AFB1FE4F93F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

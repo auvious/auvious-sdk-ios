@@ -16,7 +16,7 @@
     "tag": "1.4.0"
   },
   "platforms": {
-    "ios": "13.0"
+    "ios": "15.0"
   },
   "source_files": "AuviousSDK/Classes/**/*",
   "exclude_files": [
