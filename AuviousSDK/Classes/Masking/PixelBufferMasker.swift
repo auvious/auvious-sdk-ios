@@ -32,16 +32,28 @@ internal enum PixelBufferMasker {
         return abs(seconds - now) < 1 ? seconds : now
     }
 
-    /// Frame processor for `ScreenCapturer`: masks the frame with the layout around its capture time.
-    static func process(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, registry: MaskRegistry) -> Bool {
-        let now = CACurrentMediaTime()
-        let time = frameTime(of: sampleBuffer, now: now)
-        guard let snapshot = registry.snapshot(forFrameAt: time) else {
-            //Nothing recorded for that moment: only safe when masking isn't running at all
-            return !registry.isRunning
+    /// Frame copies handed to WebRTC (ReplayKit's own buffers are recycled while the encoder still reads them)
+    static let copier = PixelBufferCopier()
+
+    /**
+     Frame processor for `ScreenCapturer`: returns the frame to send, or nil to drop it.
+
+     While masking runs, the frame is copied into an SDK-owned buffer and the copy is masked with the
+     layout around the frame's capture time. ReplayKit's buffer is never modified.
+     */
+    static func maskedFrame(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, registry: MaskRegistry) -> CVPixelBuffer? {
+        guard registry.isRunning else {
+            return pixelBuffer
         }
+
+        let time = frameTime(of: sampleBuffer)
+        //Nothing recorded for that moment: we can't tell what the frame shows
+        guard let snapshot = registry.snapshot(forFrameAt: time), let copy = copier.copy(pixelBuffer) else {
+            return nil
+        }
+
         //Stale when the layout hasn't been read for a while around this frame (e.g. main thread stalled)
-        return process(sampleBuffer: sampleBuffer, pixelBuffer: pixelBuffer, snapshot: snapshot, now: time)
+        return process(sampleBuffer: sampleBuffer, pixelBuffer: copy, snapshot: snapshot, now: time) ? copy : nil
     }
 
     /// Frame processor for `ScreenCapturer`. Returns false to drop the frame.

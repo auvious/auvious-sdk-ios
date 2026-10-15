@@ -88,7 +88,7 @@ internal final class CobrowseSessionController: NSObject {
         sdk.delegate = self
         sdk.cobrowseDelegate = self
         sdk.screenFrameProcessor = { sampleBuffer, pixelBuffer in
-            return PixelBufferMasker.process(sampleBuffer: sampleBuffer, pixelBuffer: pixelBuffer, registry: MaskRegistry.shared)
+            return PixelBufferMasker.maskedFrame(sampleBuffer: sampleBuffer, pixelBuffer: pixelBuffer, registry: MaskRegistry.shared)
         }
 
         var uiConfiguration = AuviousConferenceConfiguration()

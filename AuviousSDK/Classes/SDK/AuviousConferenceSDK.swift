@@ -36,8 +36,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     /// When true, the co-browse session manages app lifecycle itself and the public pause/resume calls are ignored
     internal var isCobrowseActive: Bool = false
 
-    /// Per-frame hook for the screen share capture (co-browse masking). Return false to drop a frame.
-    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+    /// Per-frame hook for the screen share capture (co-browse masking). Returns the buffer to send, or nil to drop the frame.
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)? {
         didSet {
             rtcClient?.screenFrameProcessor = screenFrameProcessor
         }

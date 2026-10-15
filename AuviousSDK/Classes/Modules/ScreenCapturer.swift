@@ -27,9 +27,9 @@ class ScreenCapturer: NSObject {
     var permissionCompletion: ((Bool) -> Void)?
 
     /// Optional hook that runs on every captured video frame before it is handed to WebRTC
-    /// (used to black out masked regions). Return false to drop the frame.
+    /// (used to black out masked regions). Returns the buffer to send, or nil to drop the frame.
     /// Called on the ReplayKit capture queue.
-    var frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+    var frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)? {
         get {
             frameProcessorLock.lock()
             defer { frameProcessorLock.unlock() }
@@ -41,7 +41,7 @@ class ScreenCapturer: NSObject {
             frameProcessorLock.unlock()
         }
     }
-    private var _frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)?
+    private var _frameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)?
     private let frameProcessorLock = NSLock()
 
     init(videoSource: RTCVideoSource) {
@@ -90,14 +90,16 @@ class ScreenCapturer: NSObject {
                 SentrySDK.addBreadcrumb(frameCrumb)
             }
 
-            if let processor = self.frameProcessor, !processor(sampleBuffer, pixelBuffer) {
-                return
+            var outputBuffer = pixelBuffer
+            if let processor = self.frameProcessor {
+                guard let processed = processor(sampleBuffer, pixelBuffer) else { return }
+                outputBuffer = processed
             }
 
             let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             guard pts.isValid else { return }
             let timestampNs = CMTimeGetSeconds(pts) * Double(NSEC_PER_SEC)
-            let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+            let rtcPixelBuffer = RTCCVPixelBuffer(pixelBuffer: outputBuffer)
             let videoFrame = RTCVideoFrame(buffer: rtcPixelBuffer, rotation: ._0, timeStampNs: Int64(timestampNs))
 
             self.videoSource.capturer(self.capturer, didCapture: videoFrame) // ✅ Pass valid capturer

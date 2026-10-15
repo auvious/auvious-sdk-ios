@@ -120,7 +120,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     private var pendingScreenCapturer: ScreenCapturer?
 
     /// Per-frame hook applied to every screen capturer (e.g. co-browse masking)
-    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> Bool)? {
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)? {
         didSet {
             screenCapturer?.frameProcessor = screenFrameProcessor
             pendingScreenCapturer?.frameProcessor = screenFrameProcessor

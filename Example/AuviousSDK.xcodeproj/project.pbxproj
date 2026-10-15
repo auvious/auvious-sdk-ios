@@ -13,9 +13,11 @@
 		0336380F249CA435009A08AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0336380E249CA435009A08AA /* Assets.xcassets */; };
 		03363812249CA435009A08AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03363810249CA435009A08AA /* LaunchScreen.storyboard */; };
 		03CA4E872EA8EE54008A54F2 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA4E862EA8EE54008A54F2 /* Extensions.swift */; };
+		045AFA70D1F824D926C6C523 /* PixelBufferCopierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */; };
 		1884377E5685D6E163C4A07F /* PixelBufferMasker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DE00C1C3DAB79BA1D593D01 /* PixelBufferMasker.swift */; };
 		28B1220216FE425E4E55E14B /* LaserPointerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7EA8DBD21B3F114BD1E604 /* LaserPointerView.swift */; };
 		4885A30BA29F524FE044BB7B /* CobrowseDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AD2314E90A2129C13CF6C4 /* CobrowseDemoViewController.swift */; };
+		4CC57D953426A9030F939D4F /* PixelBufferCopier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */; };
 		510667D798D367D61EE0F19A /* SketchCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4BE40D3FF2E7D2523F4DE1C /* SketchCanvasView.swift */; };
 		5D094461BABDD45E3747DF6D /* Pods_ExampleSimpleConference.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
@@ -94,9 +96,11 @@
 		1859B21A77B6EAED5F9ED751 /* AuviousSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = AuviousSDK.podspec; path = ../AuviousSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		2002B43ACF531215E31093BB /* CobrowseMaskHintsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseMaskHintsView.swift; path = Cobrowse/UI/CobrowseMaskHintsView.swift; sourceTree = "<group>"; };
 		21C15FB9DB94C5B9B6A453FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelBufferCopier.swift; path = Masking/PixelBufferCopier.swift; sourceTree = "<group>"; };
 		28986940F0965661721BC376 /* CobrowseToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseToastView.swift; path = Cobrowse/UI/CobrowseToastView.swift; sourceTree = "<group>"; };
 		439F35CD3C8C843DAD8DF380 /* SketchGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SketchGeometry.swift; path = Sketch/SketchGeometry.swift; sourceTree = "<group>"; };
 		5C290A7D5BAD089DC515900E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PixelBufferCopierTests.swift; sourceTree = "<group>"; };
 		5DE00C1C3DAB79BA1D593D01 /* PixelBufferMasker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelBufferMasker.swift; path = Masking/PixelBufferMasker.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* ExampleSimpleCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExampleSimpleCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -241,8 +245,8 @@
 				6EE48E7311236223D9A14F72 /* SketchGeometryTests.swift */,
 				26FC1BD18D84C8F5149194B4 /* SDK sources */,
 				B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */,
+				5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */,
 			);
-			name = AuviousSDKLogicTests;
 			path = AuviousSDKLogicTests;
 			sourceTree = "<group>";
 		};
@@ -265,6 +269,7 @@
 				98456C07A7AFA7BFED18DB26 /* PaperCodec.swift */,
 				A4BE40D3FF2E7D2523F4DE1C /* SketchCanvasView.swift */,
 				439F35CD3C8C843DAD8DF380 /* SketchGeometry.swift */,
+				254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */,
 			);
 			name = "SDK sources";
 			path = ../../AuviousSDK/Classes;
@@ -527,7 +532,7 @@
 				TargetAttributes = {
 					03363804249CA434009A08AA = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = 2WYS7Y8JDD;
+						DevelopmentTeam = ZMFJDSL6BM;
 						ProvisioningStyle = Automatic;
 					};
 					607FACCF1AFB9204008FA782 = {
@@ -542,6 +547,10 @@
 					};
 					68C7EEF62378473F004C962E = {
 						CreatedOnToolsVersion = 10.3;
+						DevelopmentTeam = 2WYS7Y8JDD;
+						ProvisioningStyle = Automatic;
+					};
+					87DC5E452E08E0C752DE0057 = {
 						DevelopmentTeam = 2WYS7Y8JDD;
 						ProvisioningStyle = Automatic;
 					};
@@ -725,6 +734,8 @@
 				510667D798D367D61EE0F19A /* SketchCanvasView.swift in Sources */,
 				65BE1B8B5DEC52291F5889DC /* SketchGeometry.swift in Sources */,
 				D4841F9A5A36CC66D825E655 /* MaskHistoryTests.swift in Sources */,
+				045AFA70D1F824D926C6C523 /* PixelBufferCopierTests.swift in Sources */,
+				4CC57D953426A9030F939D4F /* PixelBufferCopier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -843,15 +854,15 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 2WYS7Y8JDD;
+				DEVELOPMENT_TEAM = ZMFJDSL6BM;
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = ExampleSimpleConference/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.auvious.examples.ExampleSimpleConference;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.auvious.example.SimpleConference;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -873,14 +884,14 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2WYS7Y8JDD;
+				DEVELOPMENT_TEAM = ZMFJDSL6BM;
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = ExampleSimpleConference/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.auvious.examples.ExampleSimpleConference;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.auvious.example.SimpleConference;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
