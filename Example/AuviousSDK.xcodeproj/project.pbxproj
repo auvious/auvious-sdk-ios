@@ -49,6 +49,7 @@
 		68C7EF0423784742004C962E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 68C7EF0223784742004C962E /* LaunchScreen.storyboard */; };
 		68F7D075237B1C3900CAA140 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F7D074237B1C3900CAA140 /* Extensions.swift */; };
 		68FAB308237AFA4E00932E10 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FAB303237AFA4D00932E10 /* Extensions.swift */; };
+		BB4F3820CC0D838801D1B86E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -108,6 +109,7 @@
 		68FAB304237AFA4D00932E10 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A212939C3BE9894018B11468 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		A48D85C772829C1D3F3B8B32 /* Pods-ExampleSimpleConference.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleSimpleConference.release.xcconfig"; path = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.release.xcconfig"; sourceTree = "<group>"; };
+		E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		EAD7F8C969A3AAD8318CE086 /* Pods-ExampleSimpleConference.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleSimpleConference.debug.xcconfig"; path = "Target Support Files/Pods-ExampleSimpleConference/Pods-ExampleSimpleConference.debug.xcconfig"; sourceTree = "<group>"; };
 		F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -155,6 +157,7 @@
 				03363810249CA435009A08AA /* LaunchScreen.storyboard */,
 				03363813249CA435009A08AA /* Info.plist */,
 				03CA4E862EA8EE54008A54F2 /* Extensions.swift */,
+				E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */,
 			);
 			path = ExampleSimpleConference;
 			sourceTree = "<group>";
@@ -554,6 +557,7 @@
 				0336380A249CA434009A08AA /* ViewController.swift in Sources */,
 				03CA4E872EA8EE54008A54F2 /* Extensions.swift in Sources */,
 				03363808249CA434009A08AA /* AppDelegate.swift in Sources */,
+				BB4F3820CC0D838801D1B86E /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
