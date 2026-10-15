@@ -40,11 +40,12 @@ internal struct MaskHistory {
     /// How long snapshots are kept
     static let retention: CFTimeInterval = 1
 
-    /// How far back from the frame timestamp the shown layout may be (render + capture latency)
-    static let lookBehind: CFTimeInterval = 0.15
+    /// How far back from the frame timestamp the shown layout may be: the frame shows the layout committed
+    /// on the previous refresh, so two 60 Hz refreshes cover it (four on ProMotion)
+    static let lookBehind: CFTimeInterval = 0.034
 
     /// How far after the frame timestamp a snapshot may still describe it (snapshots trail layout by a refresh)
-    static let lookAhead: CFTimeInterval = 0.05
+    static let lookAhead: CFTimeInterval = 0.017
 
     private(set) var snapshots: [MaskSnapshot] = []
 

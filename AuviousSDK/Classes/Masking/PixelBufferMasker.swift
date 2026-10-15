@@ -47,6 +47,10 @@ internal enum PixelBufferMasker {
         }
 
         let time = frameTime(of: sampleBuffer)
+        #if DEBUG
+        latencyMeter.record(sampleBuffer: sampleBuffer)
+        #endif
+
         //Nothing recorded for that moment: we can't tell what the frame shows
         guard let snapshot = registry.snapshot(forFrameAt: time), let copy = copier.copy(pixelBuffer) else {
             return nil
@@ -229,3 +233,54 @@ internal enum PixelBufferMasker {
         }
     }
 }
+
+#if DEBUG
+extension PixelBufferMasker {
+    
+    /// Debug builds log how late ReplayKit frames arrive compared to their timestamp, to tune `MaskHistory`
+    static let latencyMeter = CaptureLatencyMeter()
+}
+
+/// Prints the delay between a frame's presentation timestamp and its delivery, every 2 seconds
+internal final class CaptureLatencyMeter {
+    
+    private let lock = NSLock()
+    private var samples: [CFTimeInterval] = []
+    private var foreignClockFrames = 0
+    private var windowStart: CFTimeInterval = 0
+    
+    func record(sampleBuffer: CMSampleBuffer, now: CFTimeInterval = CACurrentMediaTime()) {
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard pts.isValid else { return }
+        let delay = now - CMTimeGetSeconds(pts)
+        
+        lock.lock()
+        defer { lock.unlock() }
+        
+        if abs(delay) < 1 {
+            samples.append(delay)
+        } else {
+            foreignClockFrames += 1
+        }
+        
+        if windowStart == 0 {
+            windowStart = now
+        }
+        guard now - windowStart >= 2 else { return }
+        
+        let sorted = samples.sorted()
+        if let max = sorted.last {
+            let average = sorted.reduce(0, +) / Double(sorted.count)
+            let p95 = sorted[min(sorted.count - 1, Int(Double(sorted.count) * 0.95))]
+            print(String(format: "[Auvious masking] frame delay over %d frames: avg %.1f ms, p95 %.1f ms, max %.1f ms (window %.0f ms back / %.0f ms ahead)",
+                         sorted.count, average * 1000, p95 * 1000, max * 1000, MaskHistory.lookBehind * 1000, MaskHistory.lookAhead * 1000))
+        }
+        if foreignClockFrames > 0 {
+            print("[Auvious masking] \(foreignClockFrames) frames had timestamps on another clock; they were matched to the current time")
+        }
+        samples.removeAll(keepingCapacity: true)
+        foreignClockFrames = 0
+        windowStart = now
+    }
+}
+#endif
