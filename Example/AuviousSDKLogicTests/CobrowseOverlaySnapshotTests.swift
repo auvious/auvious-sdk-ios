@@ -44,7 +44,6 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
     func testExplainer() {
         overlay.setPhase(.awaitingConsent)
         overlay.showSheet(CobrowseSheetView.Content(iconSymbol: "iphone",
-                                                    caption: CobrowseStrings.explainerCaption("Anna"),
                                                     title: CobrowseStrings.explainerTitle("Anna"),
                                                     body: nil,
                                                     bullets: [CobrowseStrings.explainerAppOnly("Anna"), CobrowseStrings.explainerPrivate, CobrowseStrings.explainerDraw],
@@ -81,7 +80,7 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
 
     func testEndConfirmation() {
         overlay.setPhase(.sharing(since: Date().addingTimeInterval(-478)))
-        overlay.showSheet(CobrowseSheetView.Content(iconSymbol: nil, caption: nil, title: CobrowseStrings.endTitle, body: CobrowseStrings.endBody("Anna"), bullets: [], primaryTitle: CobrowseStrings.endSession, secondaryTitle: CobrowseStrings.keepSharing, footnote: nil),
+        overlay.showSheet(CobrowseSheetView.Content(iconSymbol: nil, title: CobrowseStrings.endTitle, body: CobrowseStrings.endBody("Anna"), bullets: [], primaryTitle: CobrowseStrings.endSession, secondaryTitle: CobrowseStrings.keepSharing, footnote: nil),
                           onPrimary: {}, onSecondary: {})
         snapshot("6-end-confirm")
     }

@@ -13,7 +13,6 @@ internal final class CobrowseSheetView: UIView {
 
     struct Content {
         var iconSymbol: String?
-        var caption: String?
         var title: String
         var body: String?
         var bullets: [String] = []
@@ -64,7 +63,7 @@ internal final class CobrowseSheetView: UIView {
         ])
         stack.addArrangedSubview(grabberRow)
 
-        //Header: optional icon + caption + title
+        //Header: optional icon + title
         let titleLabel = UILabel()
         titleLabel.text = content.title
         titleLabel.font = CobrowseTheme.font(21, .bold)
@@ -96,13 +95,6 @@ internal final class CobrowseSheetView: UIView {
             let titles = UIStackView()
             titles.axis = .vertical
             titles.spacing = 2
-            if let caption = content.caption {
-                let captionLabel = UILabel()
-                captionLabel.text = caption
-                captionLabel.font = CobrowseTheme.font(13)
-                captionLabel.textColor = .secondaryLabel
-                titles.addArrangedSubview(captionLabel)
-            }
             titles.addArrangedSubview(titleLabel)
 
             header.addArrangedSubview(iconBackground)
@@ -148,12 +140,10 @@ internal final class CobrowseSheetView: UIView {
         }
 
         //Buttons
-        let primary = UIButton(type: .system)
+        let primary = CobrowseAccentButton(type: .custom)
+        primary.accentColor = accentColor
         primary.setTitle(content.primaryTitle, for: .normal)
         primary.titleLabel?.font = CobrowseTheme.font(17, .semibold)
-        primary.setTitleColor(.white, for: .normal)
-        primary.backgroundColor = accentColor
-        primary.layer.cornerRadius = 27
         primary.heightAnchor.constraint(equalToConstant: 54).isActive = true
         primary.addTarget(self, action: #selector(primaryTapped), for: .touchUpInside)
 

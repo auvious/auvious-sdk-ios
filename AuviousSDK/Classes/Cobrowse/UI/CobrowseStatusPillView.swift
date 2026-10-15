@@ -31,6 +31,7 @@ internal final class CobrowseStatusPillView: UIView {
 
     private(set) var mode: Mode = .connecting
 
+    private let gradient = CAGradientLayer()
     private let stack = UIStackView()
     private let dot = UIView()
     private let spinner = UIActivityIndicatorView(style: .medium)
@@ -50,6 +51,11 @@ internal final class CobrowseStatusPillView: UIView {
 
         layer.cornerRadius = 16
         layer.masksToBounds = true
+
+        //Sharing uses the SDK's red gradient, like the End button
+        CobrowseTheme.applyRedGradient(to: gradient)
+        gradient.isHidden = true
+        layer.insertSublayer(gradient, at: 0)
 
         stack.axis = .horizontal
         stack.alignment = .center
@@ -116,6 +122,11 @@ internal final class CobrowseStatusPillView: UIView {
         timer?.invalidate()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradient.frame = bounds
+    }
+
     func setMode(_ mode: Mode) {
         self.mode = mode
         applyMode()
@@ -125,6 +136,7 @@ internal final class CobrowseStatusPillView: UIView {
         timer?.invalidate()
         timer = nil
         spinner.stopAnimating()
+        gradient.isHidden = true
 
         dot.isHidden = true
         iconView.isHidden = true
@@ -141,6 +153,7 @@ internal final class CobrowseStatusPillView: UIView {
 
         case .sharing:
             backgroundColor = accentColor
+            gradient.isHidden = !CobrowseTheme.usesRedGradient(accentColor)
             dot.isHidden = false
             dot.backgroundColor = .white
             dot.layer.borderWidth = 0

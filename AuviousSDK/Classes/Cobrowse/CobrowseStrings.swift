@@ -55,9 +55,6 @@ internal enum CobrowseStrings {
     static var moveControls: String { return text("auvious.cobrowse.moveControls", "Drag to move the controls") }
 
     //Explainer sheet
-    static func explainerCaption(_ name: String?) -> String {
-        return String(format: text("auvious.cobrowse.explainer.caption", "%@ from support"), agentCapitalized(name))
-    }
     static func explainerTitle(_ name: String?) -> String {
         return String(format: text("auvious.cobrowse.explainer.title", "Share your screen with %@?"), agent(name))
     }

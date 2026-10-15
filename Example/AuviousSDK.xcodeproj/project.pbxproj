@@ -63,6 +63,7 @@
 		7E00E8C5DA3C3E465AA59506 /* CobrowseSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A911F356789D276B431799 /* CobrowseSheetView.swift */; };
 		9D041FA20B9C2D7EEFBE25BE /* PaperCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98456C07A7AFA7BFED18DB26 /* PaperCodec.swift */; };
 		AB8ABDF68633B55825D50C04 /* AuviousMasking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B4CCA7284FD27B28FD23CA /* AuviousMasking.swift */; };
+		AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */; };
 		B3111BC1A072E6217D2AAE75 /* PaperCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CD4D2F47C03670A4463825 /* PaperCodecTests.swift */; };
 		B5D687872EF23C4DF977D597 /* CobrowseToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28986940F0965661721BC376 /* CobrowseToastView.swift */; };
 		BB4F3820CC0D838801D1B86E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */; };
@@ -95,6 +96,7 @@
 		16F352865021054B949D39D9 /* CobrowseStrings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseStrings.swift; path = Cobrowse/CobrowseStrings.swift; sourceTree = "<group>"; };
 		1859B21A77B6EAED5F9ED751 /* AuviousSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = AuviousSDK.podspec; path = ../AuviousSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		2002B43ACF531215E31093BB /* CobrowseMaskHintsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseMaskHintsView.swift; path = Cobrowse/UI/CobrowseMaskHintsView.swift; sourceTree = "<group>"; };
+		215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseAccentButton.swift; path = Cobrowse/UI/CobrowseAccentButton.swift; sourceTree = "<group>"; };
 		21C15FB9DB94C5B9B6A453FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelBufferCopier.swift; path = Masking/PixelBufferCopier.swift; sourceTree = "<group>"; };
 		28986940F0965661721BC376 /* CobrowseToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseToastView.swift; path = Cobrowse/UI/CobrowseToastView.swift; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 				A4BE40D3FF2E7D2523F4DE1C /* SketchCanvasView.swift */,
 				439F35CD3C8C843DAD8DF380 /* SketchGeometry.swift */,
 				254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */,
+				215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */,
 			);
 			name = "SDK sources";
 			path = ../../AuviousSDK/Classes;
@@ -736,6 +739,7 @@
 				D4841F9A5A36CC66D825E655 /* MaskHistoryTests.swift in Sources */,
 				045AFA70D1F824D926C6C523 /* PixelBufferCopierTests.swift in Sources */,
 				4CC57D953426A9030F939D4F /* PixelBufferCopier.swift in Sources */,
+				AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

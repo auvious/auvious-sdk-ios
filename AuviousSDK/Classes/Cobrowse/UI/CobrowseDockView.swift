@@ -133,12 +133,12 @@ internal final class CobrowseDockView: UIView {
             if canDraw {
                 stack.addArrangedSubview(labelButton(CobrowseStrings.draw, image: CobrowseTheme.symbol("pencil.tip"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(drawTapped)))
             }
-            stack.addArrangedSubview(labelButton(CobrowseStrings.end, image: nil, background: accentColor, foreground: .white, action: #selector(endTapped)))
+            stack.addArrangedSubview(endButton())
 
         case .notSharing:
             stack.spacing = 6
             stack.addArrangedSubview(labelButton(CobrowseStrings.shareScreen, image: CobrowseTheme.symbol("iphone"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(shareTapped)))
-            stack.addArrangedSubview(labelButton(CobrowseStrings.end, image: nil, background: accentColor, foreground: .white, action: #selector(endTapped)))
+            stack.addArrangedSubview(endButton())
 
         case .drawing(let tool, let inkColor):
             stack.spacing = 4
@@ -188,6 +188,18 @@ internal final class CobrowseDockView: UIView {
         }
         button.heightAnchor.constraint(equalToConstant: CobrowseTheme.dockButtonHeight).isActive = true
         button.addTarget(self, action: action, for: .touchUpInside)
+        return button
+    }
+
+    /// End, in the SDK's red gradient
+    private func endButton() -> UIButton {
+        let button = CobrowseAccentButton(type: .custom)
+        button.accentColor = accentColor
+        button.setTitle(CobrowseStrings.end, for: .normal)
+        button.titleLabel?.font = CobrowseTheme.font(15, .semibold)
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        button.heightAnchor.constraint(equalToConstant: CobrowseTheme.dockButtonHeight).isActive = true
+        button.addTarget(self, action: #selector(endTapped), for: .touchUpInside)
         return button
     }
 

@@ -253,7 +253,6 @@ internal final class CobrowseSessionController: NSObject {
             bullets.append(CobrowseStrings.explainerDraw)
         }
         let content = CobrowseSheetView.Content(iconSymbol: "iphone",
-                                                caption: CobrowseStrings.explainerCaption(name),
                                                 title: CobrowseStrings.explainerTitle(name),
                                                 body: nil,
                                                 bullets: bullets,
@@ -370,7 +369,6 @@ internal final class CobrowseSessionController: NSObject {
 
     private func confirmEnd() {
         let content = CobrowseSheetView.Content(iconSymbol: nil,
-                                                caption: nil,
                                                 title: CobrowseStrings.endTitle,
                                                 body: CobrowseStrings.endBody(agent?.name),
                                                 bullets: [],

@@ -283,7 +283,8 @@ final class LargeButton: UIButton {
             iconView.heightAnchor.constraint(equalToConstant: 25)
         ])
 
-        layer.cornerRadius = 8
+        //Capsule, like the co-browse End button
+        layer.cornerCurve = .continuous
         clipsToBounds = true
         translatesAutoresizingMaskIntoConstraints = false
     }
@@ -291,6 +292,7 @@ final class LargeButton: UIButton {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = gradientView.bounds
+        layer.cornerRadius = bounds.height / 2
     }
 
     override var isHighlighted: Bool {

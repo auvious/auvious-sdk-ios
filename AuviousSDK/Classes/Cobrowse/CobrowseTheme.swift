@@ -10,8 +10,24 @@ import UIKit
 /// Colors and metrics of the co-browse overlay (direction B: edge glow and dock)
 internal enum CobrowseTheme {
 
-    /// Sharing border, status pill and End button (#D91F36, 4.9:1 with white text)
-    static let defaultAccent = UIColor(red: 217/255, green: 31/255, blue: 54/255, alpha: 1)
+    /// The SDK's red gradient, shared with the video call's "Stop sharing" button (150°)
+    static let redGradientStart = UIColor(red: 245/255, green: 39/255, blue: 107/255, alpha: 1)
+    static let redGradientEnd = UIColor(red: 227/255, green: 23/255, blue: 23/255, alpha: 1)
+
+    /// Solid stand-in for the gradient (its midpoint), used for the sharing border and as the default accent
+    static let defaultAccent = UIColor(red: 236/255, green: 31/255, blue: 65/255, alpha: 1)
+
+    /// Fills a layer with the red gradient at 150° (same as `CAGradientLayer.setAngle(150)`)
+    static func applyRedGradient(to gradient: CAGradientLayer) {
+        gradient.colors = [redGradientStart.cgColor, redGradientEnd.cgColor]
+        gradient.startPoint = CGPoint(x: 0.25, y: 0.933)
+        gradient.endPoint = CGPoint(x: 0.75, y: 0.067)
+    }
+
+    /// The gradient is used unless the host app picked its own accent color
+    static func usesRedGradient(_ accentColor: UIColor) -> Bool {
+        return accentColor == defaultAccent
+    }
 
     /// Dock tint and dark chrome (#1F2433)
     static let dock = UIColor(red: 31/255, green: 36/255, blue: 51/255, alpha: 1)
