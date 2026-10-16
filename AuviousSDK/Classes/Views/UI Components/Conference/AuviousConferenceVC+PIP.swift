@@ -102,7 +102,9 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func keyboardWillShow(_ notification: Notification) {
-        guard let pipView = self.view,
+        //Only the floating PiP window moves out of the keyboard's way, never the full screen call
+        guard screenMode != .fullScreen,
+              let pipView = self.view,
               currentCorner == .bottomLeft || currentCorner == .bottomRight,
               let userInfo = notification.userInfo,
               let keyboardFrameScreen = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
@@ -122,10 +124,14 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
-        guard let pipView = self.view,
+        currentKeyboardFrame = nil
+
+        //iOS also sends this when the app comes back (e.g. after a screenshot). Snapping a full
+        //screen call to a PiP corner would offset it by the PiP margin.
+        guard screenMode != .fullScreen,
+              let pipView = self.view,
               let container = pipView.superview else { return }
 
-        currentKeyboardFrame = nil
         let newOrigin = pipOrigin(for: currentCorner, viewSize: pipView.frame.size, in: container)
 
         UIView.animate(withDuration: 0.3) {
