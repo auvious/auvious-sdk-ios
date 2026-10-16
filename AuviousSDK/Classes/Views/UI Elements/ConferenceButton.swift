@@ -89,11 +89,20 @@ class ConferenceButton: UIButton {
     }
     
     private var gradientLayer = CAGradientLayer()
+
+    //Before iOS 26: black at 60% to 80%, the web client's --av-color-primary
+    private static let darkGradient = [UIColor.black.withAlphaComponent(0.6).cgColor, UIColor.black.withAlphaComponent(0.8).cgColor]
+    private static let darkGradientDisabled = [UIColor.black.withAlphaComponent(0.3).cgColor, UIColor.black.withAlphaComponent(0.4).cgColor]
+
+    //Liquid Glass background on iOS 26 and later (the gradient is used before that)
+    private let glassView = UIVisualEffectView()
     
     init(type: ConferenceButtonType) {
         self.type = type
         
         super.init(frame: .zero)
+        glassView.isUserInteractionEnabled = false
+        insertSubview(glassView, at: 0)
         setup()
         layer.insertSublayer(gradientLayer, at: 0)
     }
@@ -107,6 +116,7 @@ class ConferenceButton: UIButton {
         super.layoutSubviews()
         
         gradientLayer.frame = bounds
+        glassView.frame = bounds
         layer.cornerRadius = bounds.width / 2
         clipsToBounds = true
         layer.zPosition = 300
@@ -120,24 +130,24 @@ class ConferenceButton: UIButton {
         //Background gradient
         switch type {
         case .micEnabled:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
         case .micDisabled:
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .camEnabled:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
         case .camDisabled:
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .camSwitch:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 1
             super.isEnabled = true
         case .camSwitchDisabled:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.45).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.45).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradientDisabled
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 0.3
             super.isEnabled = false
@@ -148,11 +158,11 @@ class ConferenceButton: UIButton {
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .speakerOFF:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
             
         case .screenShareDisabled:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.45).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.45).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradientDisabled
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 0.3
             super.isEnabled = false
@@ -162,23 +172,27 @@ class ConferenceButton: UIButton {
             gradientLayer.setAngle(150)
         
         case .screenShare:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
             imageView?.layer.opacity = 1
             super.isEnabled = true
             
         case .options:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
         case .optionsTapped:
             gradientLayer.colors = [UIColor(red: 225/255, green: 224/255, blue: 230/255, alpha: 0.85).cgColor, UIColor.white.cgColor]
             gradientLayer.setAngle(150)
         case .pip:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
         case .stopScreenShare:
-            gradientLayer.colors = [UIColor(red: 55/255, green: 60/255, blue: 96/255, alpha: 0.85).cgColor, UIColor(red: 27/255, green: 30/255, blue: 47/255, alpha: 0.85).cgColor]
+            gradientLayer.colors = ConferenceButton.darkGradient
             gradientLayer.setAngle(150)
+        }
+        
+        if #available(iOS 26.0, *) {
+            applyGlass()
         }
         
         //Background image
@@ -186,6 +200,37 @@ class ConferenceButton: UIButton {
         setImage(UIImage(podAssetName: image), for: [])
         contentMode = .center
         imageView?.contentMode = .scaleAspectFit
+        if let imageView = imageView {
+            bringSubviewToFront(imageView)
+        }
+    }
+
+    /// Almost black glass for the controls, white glass while a control is toggled (mic or camera
+    /// off, speaker on, options open) and the SDK red for hang up
+    @available(iOS 26.0, *)
+    private func applyGlass() {
+        let tint: UIColor
+        //Dark glass picks up less of the video behind it, so the dark buttons stay almost black
+        var style: UIUserInterfaceStyle = .dark
+        switch type {
+        case .hangup:
+            tint = UIColor(red: 236/255, green: 31/255, blue: 65/255, alpha: 0.7)
+        case .micDisabled, .camDisabled, .speakerON, .screenShareDark, .optionsTapped:
+            tint = UIColor.white.withAlphaComponent(0.85)
+            style = .light
+        case .camSwitchDisabled, .screenShareDisabled:
+            tint = UIColor(white: 0.02, alpha: 0.3)
+        default:
+            //Light enough for the glass to show, dark enough to read as almost black
+            tint = UIColor(white: 0.02, alpha: 0.5)
+        }
+
+        let glass = UIGlassEffect(style: .regular)
+        glass.tintColor = tint
+        glassView.overrideUserInterfaceStyle = style
+        glassView.effect = glass
+        glassView.cornerConfiguration = .capsule()
+        gradientLayer.colors = nil
     }
 }
 
