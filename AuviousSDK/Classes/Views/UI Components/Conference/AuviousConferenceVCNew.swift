@@ -377,8 +377,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Agent muted (PiP only): the mute icon of the call buttons
         remoteMutedIcon.image = UIImage(podAssetName: "micDisabled")
         remoteMutedIcon.contentMode = .scaleAspectFit
-        remoteMutedIcon.widthAnchor.constraint(equalToConstant: 12).isActive = true
-        remoteMutedIcon.heightAnchor.constraint(equalToConstant: 12).isActive = true
+        //Same size as PiP's resize icon (the default 17pt symbol)
+        remoteMutedIcon.widthAnchor.constraint(equalToConstant: 17).isActive = true
+        remoteMutedIcon.heightAnchor.constraint(equalToConstant: 17).isActive = true
         remoteMutedIcon.isAccessibilityElement = true
         remoteMutedIcon.accessibilityLabel = NSLocalizedString("Remote participant muted", comment: "Remote participant muted")
         statusStack.addArrangedSubview(remoteMutedIcon)
@@ -1418,9 +1419,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
 
         //White dot on a red circle
-        recorderIndicator.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: inPiP ? 12 : 18, weight: .regular)
+        recorderIndicator.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: inPiP ? 15 : 18, weight: .regular)
             .applying(UIImage.SymbolConfiguration(paletteColors: [.white, .systemRed]))
-        statusStack.spacing = inPiP ? 4 : 10
+        statusStack.spacing = inPiP ? 6 : 10
         //Tighter when the network bars are alone, so the capsule stays compact
         let networkOnly = recorderIndicator.isHidden
         let leading: CGFloat = inPiP ? 6 : (networkOnly ? 10 : 12)
@@ -1430,15 +1431,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //In PiP taps belong to the PiP window (drag, double tap to expand)
         statusCapsule.isUserInteractionEnabled = !inPiP
 
-        let height: CGFloat = inPiP ? 22 : 34
+        let height: CGFloat = inPiP ? 26 : 34
         statusCapsule.layer.cornerRadius = height / 2
 
         NSLayoutConstraint.deactivate(statusCapsuleConstraints)
         statusCapsuleConstraints = [
             statusCapsule.heightAnchor.constraint(equalToConstant: height),
             //As wide as the symbol, like the network bars
-            recorderIndicator.widthAnchor.constraint(equalToConstant: inPiP ? 12 : 20),
-            recorderIndicator.heightAnchor.constraint(equalToConstant: inPiP ? 14 : 30),
+            recorderIndicator.widthAnchor.constraint(equalToConstant: inPiP ? 17 : 20),
+            recorderIndicator.heightAnchor.constraint(equalToConstant: inPiP ? 17 : 30),
         ]
         if inPiP {
             statusCapsuleConstraints += [
