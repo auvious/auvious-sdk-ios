@@ -93,7 +93,20 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //UI constraints
     private var existingConstraints: [NSLayoutConstraint] = []
-    private var recorderIndicatorConstraints: [NSLayoutConstraint] = []
+    private var statusCapsuleConstraints: [NSLayoutConstraint] = []
+
+    //Top left status capsule: network, recording and the remote participant's mute, each in a fixed slot
+    private let statusCapsule = UIVisualEffectView()
+    private let statusStack = UIStackView()
+    //The agent's mute, only in PiP (in full screen every participant's video shows its own badge)
+    private let remoteMutedIcon = UIImageView()
+    private var isRecording = false
+    //The capsule's glass or blur, kept so it can materialize when the capsule appears
+    private var statusCapsuleEffect: UIVisualEffect?
+    private var isStatusCapsuleRevealed = false
+
+    //Banner shown over the host app while the call is in PiP
+    private weak var windowNotification: DismissableNotificationView?
     private let viewPadding: CGFloat = 10
     private let viewSize: CGFloat = 80
     private var networkIndicatorDetailsTop: NSLayoutConstraint!
@@ -311,28 +324,67 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         streamContainerView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0).isActive = true
         streamContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
         
-        //Network indicator
-        view.addSubview(networkIndicator)
-        networkIndicator.alpha = 0.7
-        networkIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
-        //Leading constraint managed dynamically in createConstraints()
-        networkIndicator.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        //Status capsule (top left): dark glass holding the network indicator, the recording dot and the
+        //remote participant's mute state. Items only appear or disappear inside it, so nothing else moves.
+        statusCapsule.translatesAutoresizingMaskIntoConstraints = false
+        statusCapsule.overrideUserInterfaceStyle = .dark
+        statusCapsule.clipsToBounds = true
+        statusCapsule.layer.zPosition = 2000
+        if #available(iOS 26.0, *) {
+            let glass = UIGlassEffect(style: .regular)
+            glass.tintColor = UIColor(white: 0.02, alpha: 0.5)
+            statusCapsuleEffect = glass
+            statusCapsule.cornerConfiguration = .capsule()
+        } else {
+            statusCapsuleEffect = UIBlurEffect(style: .systemThinMaterialDark)
+        }
+        //Hidden until someone joins, then it materializes (revealStatusCapsule())
+        statusCapsule.isHidden = true
+        view.addSubview(statusCapsule)
+
+        statusStack.axis = .horizontal
+        statusStack.alignment = .center
+        statusStack.isLayoutMarginsRelativeArrangement = true
+        statusStack.translatesAutoresizingMaskIntoConstraints = false
+        statusCapsule.contentView.addSubview(statusStack)
+        NSLayoutConstraint.activate([
+            statusStack.topAnchor.constraint(equalTo: statusCapsule.contentView.topAnchor),
+            statusStack.bottomAnchor.constraint(equalTo: statusCapsule.contentView.bottomAnchor),
+            statusStack.leadingAnchor.constraint(equalTo: statusCapsule.contentView.leadingAnchor),
+            statusStack.trailingAnchor.constraint(equalTo: statusCapsule.contentView.trailingAnchor),
+        ])
+
+        //Network indicator (the capsule is its background now). As wide as its bars, so the gaps
+        //between the items are even; a tap anywhere on the capsule but the dot opens its details.
+        networkIndicator.backgroundColor = .clear
+        networkIndicator.widthAnchor.constraint(equalToConstant: 16).isActive = true
         networkIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
-        networkIndicator.addGestureRecognizer(tapRecogniser)
-        
+        statusStack.addArrangedSubview(networkIndicator)
+
         //Recorder indicator: the same red record symbol as the recording notification
         recorderIndicator.image = UIImage(systemName: "record.circle.fill")
         recorderIndicator.contentMode = .center
         recorderIndicator.isUserInteractionEnabled = true
-        recorderIndicator.alpha = 0
         recorderIndicator.accessibilityLabel = NSLocalizedString("Recording", comment: "Notification")
-        recorderIndicator.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(recorderIndicator)
-        //Position and size managed in layoutRecorderIndicator()
-
         let recTapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.recorderIndicatorPressed))
         recorderIndicator.addGestureRecognizer(recTapRecogniser)
+        statusStack.addArrangedSubview(recorderIndicator)
+
+        let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
+        tapRecogniser.require(toFail: recTapRecogniser)
+        statusCapsule.addGestureRecognizer(tapRecogniser)
+
+
+        //Agent muted (PiP only): the mute icon of the call buttons
+        remoteMutedIcon.image = UIImage(podAssetName: "micDisabled")
+        remoteMutedIcon.contentMode = .scaleAspectFit
+        remoteMutedIcon.widthAnchor.constraint(equalToConstant: 12).isActive = true
+        remoteMutedIcon.heightAnchor.constraint(equalToConstant: 12).isActive = true
+        remoteMutedIcon.isAccessibilityElement = true
+        remoteMutedIcon.accessibilityLabel = NSLocalizedString("Remote participant muted", comment: "Remote participant muted")
+        statusStack.addArrangedSubview(remoteMutedIcon)
+        //Position and contents managed in layoutStatusCapsule(); start with the right sizes and colors
+        layoutStatusCapsule()
         
         //Network indicator details
         view.addSubview(networkIndicatorDetails)
@@ -446,6 +498,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //Shows the toast notification view
     private func showNotification(with title: String, subtitle: String?, symbol: String? = nil, tint: UIColor? = nil) {
+        //PiP is too small for a banner: show it over the host app instead
+        if screenMode != .fullScreen, let window = view.window {
+            showWindowNotification(with: title, subtitle: subtitle, symbol: symbol, tint: tint, in: window)
+            return
+        }
+
         notification.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, tint: tint)
         
         UIView.animate(withDuration: 0.2, animations: {
@@ -461,6 +519,56 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         })
     }
     
+    /// The same notification banner, added to the window above the host app while the call is in PiP
+    private func showWindowNotification(with title: String, subtitle: String?, symbol: String?, tint: UIColor?, in window: UIWindow) {
+        if let previous = windowNotification {
+            Self.dismissWindowNotification(previous)
+        }
+
+        let banner = DismissableNotificationView(title: title, subtitle: subtitle)
+        banner.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, tint: tint)
+        banner.alpha = 0
+        banner.layer.zPosition = 2101
+        window.addSubview(banner)
+
+        let top = banner.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: -150)
+        NSLayoutConstraint.activate([
+            banner.leadingAnchor.constraint(equalTo: window.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            banner.trailingAnchor.constraint(equalTo: window.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            banner.heightAnchor.constraint(greaterThanOrEqualToConstant: 60),
+            top,
+        ])
+        window.layoutIfNeeded()
+        banner.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.hideWindowNotificationPressed)))
+        windowNotification = banner
+
+        UIView.animate(withDuration: 0.2) {
+            banner.alpha = 1
+            top.constant = 10
+            window.layoutIfNeeded()
+        }
+        //Holds the banner itself, so it still goes away if the call ends meanwhile
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            Self.dismissWindowNotification(banner)
+        }
+    }
+
+    @objc private func hideWindowNotificationPressed() {
+        if let banner = windowNotification {
+            Self.dismissWindowNotification(banner)
+        }
+    }
+
+    private static func dismissWindowNotification(_ banner: DismissableNotificationView) {
+        guard banner.superview != nil else { return }
+        UIView.animate(withDuration: 0.2, animations: {
+            banner.alpha = 0
+            banner.transform = CGAffineTransform(translationX: 0, y: -40)
+        }, completion: { _ in
+            banner.removeFromSuperview()
+        })
+    }
+
     //Hides the toast notification view
     @objc private func hideNotification() {
         UIView.animate(withDuration: 0.2, animations: {
@@ -768,6 +876,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 //We only had 1 stream from this participant, therefore we should remove the cell from the collection view
                 if participant?.streams.count == 0 {
                     let remoteView = remoteViews.remove(at: index)
+                    if index == 0 {
+                        isAgentMuted = false
+                    }
 
                     if index < maximumRemoteStreamsRendered {
                         if streamType == .mic {
@@ -843,6 +954,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             remoteView.translatesAutoresizingMaskIntoConstraints = false
             remoteView.participantEndpoint = participantEndpoint
             remoteView.backgroundColor = videoViewBackgroundColor
+            //Keeps the mute badge clear of the call buttons
+            remoteView.audioMutedBadgeBottomLimit = buttonContainerView.topAnchor
             self.remoteViews.append(remoteView)
             streamContainerView.addSubview(remoteView)
             view.bringSubviewToFront(buttonContainerView)
@@ -1005,7 +1118,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Hande muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved(screenMode: self.screenMode)
-                        self.isAgentMuted = true
+                        if remoteViewIndex == 0 {
+                            self.isAgentMuted = true
+                        }
                     }
                     
                     os_log("Remote stream added", log: Log.conferenceUI, type: .debug)
@@ -1016,7 +1131,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     //Handle muted audio tracks
                     if self.currentConference.mutedAudioTracks.contains(streamId) {
                         remoteView.audioStreamRemoved(screenMode: self.screenMode)
-                        self.isAgentMuted = true
+                        if remoteViewIndex == 0 {
+                            self.isAgentMuted = true
+                        }
                     }
                 }
                 
@@ -1059,6 +1176,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Clear the streams from the UI
         _ = remoteViews.map{ $0.removeFromSuperview() }
         remoteViews.removeAll()
+        isAgentMuted = false
 
         // Reset local view so the stale video track is detached from the renderer
         // before the republished stream arrives. Without this, the old frozen frame
@@ -1163,7 +1281,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             symbol: toActive ? "record.circle.fill" : "record.circle",
             tint: toActive ? .systemRed : .secondaryLabel
         )
-        recorderIndicator.alpha = toActive ? 1 : 0
+        isRecording = toActive
         createConstraints()
     }
     
@@ -1179,7 +1297,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamRemoved(screenMode: screenMode)
-                isAgentMuted = true
+                //The agent's mute also shows in the PiP status capsule
+                if index == 0 {
+                    isAgentMuted = true
+                }
             } else if type == .cam {
                 remoteViews[index].videoStreamRemoved()
             }
@@ -1198,7 +1319,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if let index = remoteParticipantIndex {
             if type == .mic {
                 remoteViews[index].audioStreamAdded()
-                isAgentMuted = false
+                if index == 0 {
+                    isAgentMuted = false
+                }
             } else if type == .cam {
                 remoteViews[index].videoStreamAdded()
             }
@@ -1271,49 +1394,90 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         createConstraints()
     }
     
-    /// Full screen: next to the network indicator, centred on it. PiP: a smaller dot in the top left
-    /// corner (the network indicator is hidden there and the maximise button sits top right).
-    private func layoutRecorderIndicator() {
+    /// Full screen: network and recording dot in the capsule below the status bar; each participant's
+    /// video shows its own mute badge. PiP: a small capsule in the top left corner with the recording
+    /// and the agent's mute icons, in place of the agent's badge.
+    private func layoutStatusCapsule() {
         let inPiP = screenMode != .fullScreen
-        let pointSize: CGFloat = inPiP ? 14 : 20
+
+        networkIndicator.isHidden = inPiP
+        recorderIndicator.isHidden = !isRecording
+        remoteMutedIcon.isHidden = !inPiP || !isAgentMuted
+        if let agentView = remoteViews.first, agentView.showsAudioMutedBadge == inPiP {
+            agentView.showsAudioMutedBadge = !inPiP
+        }
+        //Shown once someone has joined, and only with something in it
+        let showsCapsule = !remoteViews.isEmpty && !statusStack.arrangedSubviews.allSatisfy { $0.isHidden }
+        if showsCapsule && !isStatusCapsuleRevealed {
+            revealStatusCapsule()
+        } else if !showsCapsule {
+            isStatusCapsuleRevealed = false
+            statusCapsule.isHidden = true
+            statusCapsule.effect = nil
+        }
 
         //White dot on a red circle
-        recorderIndicator.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
+        recorderIndicator.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: inPiP ? 12 : 18, weight: .regular)
             .applying(UIImage.SymbolConfiguration(paletteColors: [.white, .systemRed]))
+        statusStack.spacing = inPiP ? 4 : 10
+        //Tighter when the network bars are alone, so the capsule stays compact
+        let networkOnly = recorderIndicator.isHidden
+        let leading: CGFloat = inPiP ? 6 : (networkOnly ? 10 : 12)
+        //With the dot last, the same space on its right as above and below it ((34 - 20) / 2)
+        let trailing: CGFloat = inPiP ? 6 : (networkOnly ? 10 : 7)
+        statusStack.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: leading, bottom: 0, trailing: trailing)
         //In PiP taps belong to the PiP window (drag, double tap to expand)
-        recorderIndicator.isUserInteractionEnabled = !inPiP
+        statusCapsule.isUserInteractionEnabled = !inPiP
 
-        NSLayoutConstraint.deactivate(recorderIndicatorConstraints)
+        let height: CGFloat = inPiP ? 22 : 34
+        statusCapsule.layer.cornerRadius = height / 2
+
+        NSLayoutConstraint.deactivate(statusCapsuleConstraints)
+        statusCapsuleConstraints = [
+            statusCapsule.heightAnchor.constraint(equalToConstant: height),
+            //As wide as the symbol, like the network bars
+            recorderIndicator.widthAnchor.constraint(equalToConstant: inPiP ? 12 : 20),
+            recorderIndicator.heightAnchor.constraint(equalToConstant: inPiP ? 14 : 30),
+        ]
         if inPiP {
-            recorderIndicatorConstraints = [
-                recorderIndicator.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
-                recorderIndicator.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
-                recorderIndicator.widthAnchor.constraint(equalToConstant: 20),
-                recorderIndicator.heightAnchor.constraint(equalToConstant: 20),
+            statusCapsuleConstraints += [
+                statusCapsule.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+                statusCapsule.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
             ]
         } else {
-            recorderIndicatorConstraints = [
-                recorderIndicator.centerYAnchor.constraint(equalTo: networkIndicator.centerYAnchor),
-                recorderIndicator.leadingAnchor.constraint(equalTo: networkIndicator.trailingAnchor, constant: 5),
-                //Keeps a comfortable tap target around the dot
-                recorderIndicator.widthAnchor.constraint(equalToConstant: 30),
-                recorderIndicator.heightAnchor.constraint(equalToConstant: 30),
+            statusCapsuleConstraints += [
+                statusCapsule.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2),
+                statusCapsule.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: 6),
             ]
         }
-        NSLayoutConstraint.activate(recorderIndicatorConstraints)
+        NSLayoutConstraint.activate(statusCapsuleConstraints)
+    }
+
+    /// Materializes the capsule's glass and fades its icons in. It waits for the layout animation that
+    /// placed the first participant, so the capsule never morphs from an unplaced frame.
+    private func revealStatusCapsule() {
+        isStatusCapsuleRevealed = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            guard self.isStatusCapsuleRevealed else { return }
+            self.statusCapsule.effect = nil
+            self.statusStack.alpha = 0
+            self.statusCapsule.isHidden = false
+            UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseOut], animations: {
+                self.statusCapsule.effect = self.statusCapsuleEffect
+                self.statusStack.alpha = 1
+            })
+        }
     }
 
     internal func createConstraints(animated: Bool = true) {
         //Before the mode specific layout below, which can return early
-        layoutRecorderIndicator()
+        layoutStatusCapsule()
 
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
         var safeLeadingConstraint = view.leadingAnchor
-        
-        //Network indicator placement
-        var networkIndicatorLeadingConstant: CGFloat = 6
         
         //For landscape left we use the safe area leading constraint - otherwise superview
         if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
@@ -1326,7 +1490,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if screenMode == .pip {
             os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(true)
-            networkIndicator.alpha = 0
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
             
@@ -1345,7 +1508,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         } else if screenMode == .expandedPip {
             os_log("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(true)
-            networkIndicator.alpha = 0
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
             pipMaximiseButton.alpha = 1
@@ -1379,7 +1541,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         } else {
             os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(false)
-            networkIndicator.alpha = 1
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
             
@@ -1601,10 +1762,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                                 constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                                 constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
                                 constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
-                                
-                                if isAgentMuted {
-                                    networkIndicatorLeadingConstant = 40
-                                }
+
                             } else {
                                 //4:3 centered video
                                 constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
@@ -1812,7 +1970,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         }
         
-        constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
 
         let applyConstraints = {
             //Clear existing constraints

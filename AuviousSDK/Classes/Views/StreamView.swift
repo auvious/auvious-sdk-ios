@@ -40,6 +40,21 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private var overlayState: OverlayState = .none
     private var existingOverlayConstraints: [NSLayoutConstraint] = []
 
+    /// The round mic-off badge in the video's bottom left corner. Off for the agent while the call is
+    /// in PiP, where the status capsule shows it instead.
+    var showsAudioMutedBadge: Bool = true {
+        didSet {
+            handleOverlay()
+        }
+    }
+
+    /// The badge stays above this anchor (the call buttons), for videos that run to the bottom of the screen
+    var audioMutedBadgeBottomLimit: NSLayoutYAxisAnchor? {
+        didSet {
+            handleOverlay()
+        }
+    }
+
     //Shown from the moment a video track is attached until its first frame is rendered,
     //so the view never sits there empty
     private let loadingIndicator = UIActivityIndicatorView(style: .medium)
@@ -124,7 +139,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         
         if let o = overlayView {
             if overlayState == .audioMuted {
-                o.cornerRadius(usingCorners: [.bottomRight, .bottomLeft, .topRight, .topLeft], cornerRadii: CGSize(width: 16, height: 16))
+                //Round badge
+                o.cornerRadius(usingCorners: [.bottomRight, .bottomLeft, .topRight, .topLeft], cornerRadii: CGSize(width: o.bounds.height / 2, height: o.bounds.height / 2))
             } else {
                 o.layer.mask = nil
             }
@@ -227,17 +243,29 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             }
         }
         
+        if overlayState == .audioMuted && !showsAudioMutedBadge {
+            overlayState = .none
+        }
+        
         switch overlayState {
         case .audioMuted:
-            iconName = "notificationMicrophoneOff"
-            backgroundColor = UIColor.black.withAlphaComponent(0.4)
-            constraints.append(overlayView!.topAnchor.constraint(equalTo: self.topAnchor, constant: 2))
-            constraints.append(overlayView!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 2))
+            //The mute icon of the call buttons, in a round badge
+            iconName = "micDisabled"
+            backgroundColor = UIColor.black.withAlphaComponent(0.5)
+            //Bottom left, clear of the status capsule and PiP's top corners
+            let atVideoBottom = overlayView!.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6)
+            atVideoBottom.priority = .defaultHigh
+            constraints.append(atVideoBottom)
+            if let limit = audioMutedBadgeBottomLimit {
+                constraints.append(overlayView!.bottomAnchor.constraint(lessThanOrEqualTo: limit, constant: -12))
+            }
+            constraints.append(overlayView!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 6))
             constraints.append(overlayView!.widthAnchor.constraint(equalToConstant: 30))
             constraints.append(overlayView!.heightAnchor.constraint(equalToConstant: 30))
             constraints.append(overlayIcon!.centerYAnchor.constraint(equalTo: overlayView!.centerYAnchor, constant: 0))
             constraints.append(overlayIcon!.centerXAnchor.constraint(equalTo: overlayView!.centerXAnchor, constant: 0))
-            constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 20))
+            constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 18))
+            constraints.append(overlayIcon!.heightAnchor.constraint(equalToConstant: 18))
         case .videoMuted:
             iconName = "notificationMicrophoneOn"
             backgroundColor = .black
