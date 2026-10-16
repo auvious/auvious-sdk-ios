@@ -39,6 +39,10 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private var overlayIcon: UIImageView?
     private var overlayState: OverlayState = .none
     private var existingOverlayConstraints: [NSLayoutConstraint] = []
+
+    //Shown from the moment a video track is attached until its first frame is rendered,
+    //so the view never sits there empty
+    private let loadingIndicator = UIActivityIndicatorView(style: .medium)
     
     //Switch from OpenGL to Metal if we can
     #if arch(i386) || arch(x86_64) || arch(arm)
@@ -155,6 +159,13 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         videoView.videoContentMode = .scaleAspectFill
         #endif
         
+        loadingIndicator.color = .white
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(loadingIndicator)
+        loadingIndicator.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        loadingIndicator.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+
         createOverlay()
         resetStreamView()
     }
@@ -325,6 +336,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
 
         statusLabel.alpha = 0.0
         self.videoTrack = videoTrack
+        //Until the first frame of the new track arrives
+        loadingIndicator.startAnimating()
         self.videoTrack.add(videoView)
         videoView.frame = bounds
         videoView.alpha = 1.0
@@ -347,6 +360,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         hasVideoStream = false
         
         videoView.alpha = 0.0
+        loadingIndicator.stopAnimating()
 //        if videoTrack != nil {
 //            self.videoTrack.remove(videoView)
 //        }
@@ -382,6 +396,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         
         statusLabel.alpha = 0.0
         videoView.alpha = 0.0
+        loadingIndicator.stopAnimating()
         
         if videoTrack != nil {
             videoTrack.remove(videoView)
@@ -392,6 +407,11 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     
     public func videoView(_ videoView: RTCVideoRenderer, didChangeVideoSize size: CGSize) {
         self.size = size
+
+        //The first frame has been rendered
+        DispatchQueue.main.async {
+            self.loadingIndicator.stopAnimating()
+        }
     }
     
     public func viewForZooming() -> UIView {
