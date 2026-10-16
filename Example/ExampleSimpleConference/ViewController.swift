@@ -463,7 +463,11 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
 //Various UI helper functions for PIP etc.
 extension ViewController {
+    /// The navigation bar is hidden while the call is up, so the call's safe area starts at the
+    /// top of the screen and its banners sit under the status bar, not under the bar.
     private func presentAuviousUI(childVC: UIViewController) {
+        navigationController?.setNavigationBarHidden(true, animated: true)
+
         // Add as child
         addChild(childVC)
 
@@ -485,6 +489,8 @@ extension ViewController {
     private func dismissAuviousUI(childVC: UIViewController) {
         // Make sure it's really a child
         guard childVC.parent == self else { return }
+
+        navigationController?.setNavigationBarHidden(false, animated: true)
 
         let screenBounds = view.bounds
 
