@@ -31,6 +31,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     private let speakerSwitch = UISwitch()
     private let pipSwitch = UISwitch()
     private let screenSharingSwitch = UISwitch()
+    private let maskMarkedViewsSwitch = UISwitch()
+    private let maskIdentifiersSwitch = UISwitch()
+    private let maskClassesSwitch = UISwitch()
     private let maskSecureFieldsSwitch = UISwitch()
     private let maskAllTextInputsSwitch = UISwitch()
     private let maskHintsSwitch = UISwitch()
@@ -123,6 +126,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
         //Start from the SDK defaults
         let maskingDefaults = AuviousMaskingRules()
+        maskMarkedViewsSwitch.isOn = CobrowseDemoSettings.marksViews
+        maskIdentifiersSwitch.isOn = true
+        maskClassesSwitch.isOn = true
         maskSecureFieldsSwitch.isOn = maskingDefaults.maskSecureTextFields
         maskAllTextInputsSwitch.isOn = maskingDefaults.maskAllTextInputs
         maskHintsSwitch.isOn = AuviousCobrowseConfiguration(ticket: "", baseEndpoint: "", mqttEndpoint: "").showsMaskHints
@@ -166,7 +172,10 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             ]),
         ]
         cobrowseSections = [
-            FormSection(title: "Masking", footer: "Masked views are blacked out for the agent. Hints outline them on your screen; highlight also labels the rule that matched.", cells: [
+            FormSection(title: "Masking", footer: "Masked views are blacked out for the agent. Each rule can be turned off to see what it masks in the sample form. Hints outline masked views on your screen; highlight also labels the rule that matched.", cells: [
+                row("Marked views (auviousMasked)", maskMarkedViewsSwitch),
+                row("Accessibility identifiers", maskIdentifiersSwitch),
+                row("View classes", maskClassesSwitch),
                 row("Mask password fields", maskSecureFieldsSwitch),
                 row("Mask all text inputs", maskAllTextInputsSwitch),
                 row("Show mask hints", maskHintsSwitch),
@@ -412,8 +421,14 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         }
 
         //Mask by name: any view with these identifiers, and every CardNumberField
-        configuration.masking.accessibilityIdentifiers = ["payment.iban", "card.*"]
-        configuration.masking.viewClasses = [CardNumberField.self]
+        if maskIdentifiersSwitch.isOn {
+            configuration.masking.accessibilityIdentifiers = ["payment.iban", "card.*"]
+        }
+        if maskClassesSwitch.isOn {
+            configuration.masking.viewClasses = [CardNumberField.self]
+        }
+        //The sample form reads this when it builds its fields
+        CobrowseDemoSettings.marksViews = maskMarkedViewsSwitch.isOn
 
         configuration.masking.maskSecureTextFields = maskSecureFieldsSwitch.isOn
         configuration.masking.maskAllTextInputs = maskAllTextInputsSwitch.isOn

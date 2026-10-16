@@ -10,6 +10,12 @@ import UIKit
 import SwiftUI
 import AuviousSDK
 
+/// Example-only switches for the sample form, set from the main screen before co-browse starts
+enum CobrowseDemoSettings {
+    /// When false, the sample form leaves `auviousMasked` unset, so only the rules decide
+    static var marksViews = true
+}
+
 /// A text field type masked by class rule (`AuviousMaskingRules.viewClasses`)
 final class CardNumberField: UITextField {}
 
@@ -42,7 +48,9 @@ final class CobrowseDemoViewController: UIViewController {
         scrollView.addSubview(stack)
 
         let accountField = makeField(placeholder: "Account", text: "GR16 0110 1250 0000 0001 2345")
-        accountField.auviousMasked = true
+        if CobrowseDemoSettings.marksViews {
+            accountField.auviousMasked = true
+        }
 
         let amountField = makeField(placeholder: "Amount", text: "€ 250.00")
         amountField.keyboardType = .decimalPad
@@ -56,7 +64,9 @@ final class CobrowseDemoViewController: UIViewController {
 
         configure(referenceField, placeholder: "Reference", text: "Rent, October")
         //Opted out: stays visible even in "mask all text inputs" mode
-        referenceField.auviousMasked = false
+        if CobrowseDemoSettings.marksViews {
+            referenceField.auviousMasked = false
+        }
 
         let pinField = makeField(placeholder: "PIN", text: "")
         pinField.isSecureTextEntry = true

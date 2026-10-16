@@ -21,7 +21,7 @@ struct CobrowseSwiftUIDemoView: View {
         Form {
             Section(header: Text("From account · .auviousMasked()")) {
                 TextField("Account", text: $account)
-                    .auviousMasked()
+                    .demoMasked()
             }
 
             Section(header: Text("Amount")) {
@@ -30,13 +30,25 @@ struct CobrowseSwiftUIDemoView: View {
 
             Section(header: Text("Recipient IBAN · .auviousMasked()")) {
                 TextField("IBAN", text: $iban)
-                    .auviousMasked()
+                    .demoMasked()
             }
 
             Section(header: Text("PIN · secure field")) {
                 SecureField("PIN", text: $pin)
-                    .auviousMasked()
+                    .demoMasked()
             }
+        }
+    }
+}
+
+private extension View {
+
+    /// `.auviousMasked()`, unless marked views are turned off on the main screen
+    @ViewBuilder func demoMasked() -> some View {
+        if CobrowseDemoSettings.marksViews {
+            auviousMasked()
+        } else {
+            self
         }
     }
 }
