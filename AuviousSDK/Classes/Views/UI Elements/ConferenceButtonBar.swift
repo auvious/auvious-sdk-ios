@@ -23,8 +23,8 @@ class ConferenceButtonBar: UIView {
     
     let maxItems: Int = 4
     
-    //Popover buttons
-    var popoverButtons: [ConferencePopoverButton] = []
+    //Buttons that don't fit in the bar, shown in the options button's menu
+    var overflowButtonTypes: [ConferenceButtonType] = []
     //Bar buttons
     var buttons: [ConferenceButton] = []
     
@@ -120,7 +120,7 @@ class ConferenceButtonBar: UIView {
         }
         
         // Handle overflow with options button
-        popoverButtons.removeAll()
+        overflowButtonTypes.removeAll()
 
         if buttons.count > maxItems {
             // Reserve 1 slot for the options button
@@ -133,7 +133,7 @@ class ConferenceButtonBar: UIView {
             // Update main and popover buttons
             buttons = Array(visibleButtons)
             buttons.append(optionsButton)
-            popoverButtons = overflowButtons.map { ConferencePopoverButton(type: $0.type) }
+            overflowButtonTypes = overflowButtons.map { $0.type }
         }
         
         //Stack view to hold the buttons

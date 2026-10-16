@@ -85,7 +85,6 @@
 		12EC8A428CD443EBAA1AA330C96CE9DD /* Starscream_IOS13-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F1CC9BA68D31153E96A6958A8BC6AEF1 /* Starscream_IOS13-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		13157858332C1D895E82DCE6227D15A4 /* RTCPeerConnectionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44504DAE0428300739ADFCEEE906A6BB /* RTCPeerConnectionContainer.swift */; };
 		132C106DF39885BF4DAAA49D58D12A8E /* SentrySampleDecision.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C23EE27BC4626A04D768FCA91D6B8F0 /* SentrySampleDecision.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		132E20DE7FEDB58303C0BB843F36558C /* ConferencePopoverVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9460F955EC8F5D2CF12D8180D555C141 /* ConferencePopoverVC.swift */; };
 		13556CAC9A2AEA9F680B31B95EA5D0BE /* SentryThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 41B372D01382FA6FA4BCD44AF1AD4B26 /* SentryThread.m */; };
 		1359B1C10E67CBEBBF66D62E6CD55E95 /* SentryExtraContextProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = A1BC2899DB0F556F7578AB212230A38C /* SentryExtraContextProvider.m */; };
 		139E0E20346A55BA39A5391ECD7775EC /* FrameUnsubscribe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BCDED92C69EEA108135E66154107AC /* FrameUnsubscribe.swift */; };
@@ -1547,7 +1546,6 @@
 		939964854328FF572585E4AB42E1109F /* SentryReplayType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentryReplayType.swift; path = Sources/Swift/Integrations/SessionReplay/SentryReplayType.swift; sourceTree = "<group>"; };
 		93BCDED92C69EEA108135E66154107AC /* FrameUnsubscribe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FrameUnsubscribe.swift; path = Source/FrameUnsubscribe.swift; sourceTree = "<group>"; };
 		9434CB089B89BCC000AB5D6F519E7269 /* SentryCrashReportStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SentryCrashReportStore.h; path = Sources/SentryCrash/Recording/SentryCrashReportStore.h; sourceTree = "<group>"; };
-		9460F955EC8F5D2CF12D8180D555C141 /* ConferencePopoverVC.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConferencePopoverVC.swift; sourceTree = "<group>"; };
 		94D738D882D36F6F23239462A0B9ABDA /* Sentry-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Sentry-umbrella.h"; sourceTree = "<group>"; };
 		94EB8BAF3828500A785F14572F71CE65 /* SentryCrashMonitor_AppState.c */ = {isa = PBXFileReference; includeInIndex = 1; name = SentryCrashMonitor_AppState.c; path = Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_AppState.c; sourceTree = "<group>"; };
 		951E52A65ED9A1232474A916C48B346E /* ResourceBundle-Sentry-Sentry-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-Sentry-Sentry-Info.plist"; sourceTree = "<group>"; };
@@ -3167,7 +3165,6 @@
 				E3F1745C24EB5A787FE6E71D5F1F1C0A /* AuviousConferenceVC+Gesture.swift */,
 				8D33A96F344837D9714DB3DE79030D14 /* AuviousConferenceVC+PIP.swift */,
 				AC84F475F692DCC7B97509E20CE33A59 /* AuviousConferenceVCNew.swift */,
-				9460F955EC8F5D2CF12D8180D555C141 /* ConferencePopoverVC.swift */,
 			);
 			name = Conference;
 			path = Conference;
@@ -4712,7 +4709,6 @@
 				410FE1D007CBF0727D34797CB3B0DE2D /* ConferenceNetworkIndicatorEvent.swift in Sources */,
 				73C2D58F53C653EF33B61895EAA969C6 /* ConferenceParticipant.swift in Sources */,
 				77D92B74D3D86475F362BB0B0560BD29 /* ConferencePIPButtonBar.swift in Sources */,
-				132E20DE7FEDB58303C0BB843F36558C /* ConferencePopoverVC.swift in Sources */,
 				B8FDCE8E76CF782EF3C925342AC773A8 /* ConferenceSimpleView.swift in Sources */,
 				D642D39F47A745CE7CB7A752F3224EE6 /* ConferenceStreamMetadataUpdatedEvent.swift in Sources */,
 				B362CD9C1D75353AF7701337CCF7952C /* ConferenceStreamPublishedEvent.swift in Sources */,

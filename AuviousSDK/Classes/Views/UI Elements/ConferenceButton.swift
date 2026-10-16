@@ -205,6 +205,26 @@ class ConferenceButton: UIButton {
         }
     }
 
+    //The options menu opens above the button bar instead of over it
+    override func menuAttachmentPoint(for configuration: UIContextMenuConfiguration) -> CGPoint {
+        return CGPoint(x: bounds.midX, y: -12)
+    }
+
+    //The options button looks pressed while its menu is open
+    override func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        super.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: animator)
+        if type == .options {
+            type = .optionsTapped
+        }
+    }
+
+    override func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        super.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
+        if type == .optionsTapped {
+            type = .options
+        }
+    }
+
     /// Almost black glass for the controls, white glass while a control is toggled (mic or camera
     /// off, speaker on, options open) and the SDK red for hang up
     @available(iOS 26.0, *)
