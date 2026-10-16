@@ -71,7 +71,7 @@ internal final class CobrowseStatusPillView: UIView {
         spinner.hidesWhenStopped = true
 
         iconView.tintColor = UIColor(red: 247/255, green: 162/255, blue: 52/255, alpha: 1)
-        iconView.image = CobrowseTheme.symbol("pencil.tip", size: 14)
+        iconView.image = CobrowseTheme.penIcon(size: 15, stroke: 1.2)
         iconView.contentMode = .scaleAspectFit
 
         for label in [titleLabel, separatorLabel, timerLabel] {

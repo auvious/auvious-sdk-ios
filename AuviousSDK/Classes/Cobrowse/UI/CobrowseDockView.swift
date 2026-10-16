@@ -131,7 +131,7 @@ internal final class CobrowseDockView: UIView {
         case .sharing(let canDraw):
             stack.spacing = 6
             if canDraw {
-                stack.addArrangedSubview(labelButton(CobrowseStrings.draw, image: CobrowseTheme.symbol("pencil.tip"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(drawTapped)))
+                stack.addArrangedSubview(labelButton(CobrowseStrings.draw, image: CobrowseTheme.penIcon(size: 22), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(drawTapped)))
             }
             stack.addArrangedSubview(endButton())
 
@@ -142,15 +142,15 @@ internal final class CobrowseDockView: UIView {
 
         case .drawing(let tool, let inkColor):
             stack.spacing = 4
-            let pen = iconButton("pencil.tip", label: CobrowseStrings.pen, action: #selector(penTapped))
-            let arrow = iconButton("arrow.up.right", label: CobrowseStrings.arrow, action: #selector(arrowTapped))
+            let pen = iconButton(CobrowseTheme.penIcon(), label: CobrowseStrings.pen, action: #selector(penTapped))
+            let arrow = iconButton(CobrowseTheme.lineSymbol("arrow.up.right"), label: CobrowseStrings.arrow, action: #selector(arrowTapped))
             styleTool(pen, selected: tool == .pen, inkColor: inkColor)
             styleTool(arrow, selected: tool == .arrow, inkColor: inkColor)
             penButton = pen
             arrowButton = arrow
 
-            let undo = iconButton("arrow.uturn.left", label: CobrowseStrings.undo, action: #selector(undoTapped))
-            let clear = iconButton("trash", label: CobrowseStrings.clearDrawings, action: #selector(clearTapped))
+            let undo = iconButton(CobrowseTheme.lineSymbol("arrow.uturn.left"), label: CobrowseStrings.undo, action: #selector(undoTapped))
+            let clear = iconButton(CobrowseTheme.lineSymbol("trash"), label: CobrowseStrings.clearDrawings, action: #selector(clearTapped))
             clearButton = clear
 
             let divider = UIView()
@@ -203,9 +203,9 @@ internal final class CobrowseDockView: UIView {
         return button
     }
 
-    private func iconButton(_ symbol: String, label: String, action: Selector) -> UIButton {
+    private func iconButton(_ image: UIImage?, label: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
-        button.setImage(CobrowseTheme.symbol(symbol, size: 19), for: .normal)
+        button.setImage(image, for: .normal)
         button.tintColor = .white
         button.layer.cornerRadius = CobrowseTheme.dockButtonHeight / 2
         button.accessibilityLabel = label
@@ -267,7 +267,7 @@ internal final class CobrowseDockView: UIView {
 
     private func resetClearButton(_ button: UIButton) {
         button.setTitle(nil, for: .normal)
-        button.setImage(CobrowseTheme.symbol("trash", size: 19), for: .normal)
+        button.setImage(CobrowseTheme.lineSymbol("trash"), for: .normal)
         button.backgroundColor = .clear
         button.accessibilityLabel = CobrowseStrings.clearDrawings
     }

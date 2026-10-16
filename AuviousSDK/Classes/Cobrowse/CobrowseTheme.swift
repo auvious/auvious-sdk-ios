@@ -63,6 +63,54 @@ internal enum CobrowseTheme {
         return UIImage(systemName: name, withConfiguration: configuration)
     }
 
+    /// Stroke of the sketch line icons, matching the call's mic and camera icons
+    static let lineIconStroke: CGFloat = 1.3
+
+    /// SF Symbol for the sketch tools, at the light weight so it reads as a line icon
+    static func lineSymbol(_ name: String, size: CGFloat = 20) -> UIImage? {
+        return symbol(name, size: size, weight: .light)
+    }
+
+    /// Outlined pen line icon. SF Symbols only has filled pencils before iOS 17, so it is drawn here.
+    static func penIcon(size: CGFloat = 24, stroke: CGFloat = lineIconStroke) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        let image = renderer.image { context in
+            let cg = context.cgContext
+            //Lay the pen out horizontally around the origin (eraser left, tip right), then tilt it 45° up
+            cg.translateBy(x: size / 2, y: size / 2)
+            cg.rotate(by: -.pi / 4)
+
+            let length = size * 1.12
+            let width = size * 0.3
+            let tipLength = size * 0.26
+            let left = -length / 2
+            let right = length / 2
+            let shoulder = right - tipLength
+            let radius = width / 2
+
+            let body = UIBezierPath()
+            body.move(to: CGPoint(x: shoulder, y: -radius))
+            body.addLine(to: CGPoint(x: left + radius, y: -radius))
+            body.addArc(withCenter: CGPoint(x: left + radius, y: 0), radius: radius, startAngle: -.pi / 2, endAngle: .pi / 2, clockwise: false)
+            body.addLine(to: CGPoint(x: shoulder, y: radius))
+            body.addLine(to: CGPoint(x: right, y: 0))
+            body.close()
+
+            //Tip and ferrule lines
+            body.move(to: CGPoint(x: shoulder, y: -radius))
+            body.addLine(to: CGPoint(x: shoulder, y: radius))
+            body.move(to: CGPoint(x: left + width * 1.15, y: -radius))
+            body.addLine(to: CGPoint(x: left + width * 1.15, y: radius))
+
+            body.lineWidth = stroke
+            body.lineJoinStyle = .round
+            body.lineCapStyle = .round
+            UIColor.black.setStroke()
+            body.stroke()
+        }
+        return image.withRenderingMode(.alwaysTemplate)
+    }
+
     /// Approximate display corner radius, so the border follows the screen's rounded corners.
     /// Uses the screen size because the exact radius is only available through private API.
     static func displayCornerRadius(for window: UIWindow?) -> CGFloat {
