@@ -68,6 +68,33 @@ final class MaskHistoryTests: XCTestCase {
         XCTAssertTrue(rects.contains { $0.contains(fieldInFrame) })
     }
 
+    func testFramesDuringAScreenTransitionAreDropped() throws {
+        var history = MaskHistory()
+        let field = [CGRect(x: 20, y: 300, width: 350, height: 48)]
+        history.append(MaskSnapshot(rects: field, screenSize: screen, timestamp: 10))
+        history.append(MaskSnapshot(rects: field, screenSize: screen, timestamp: 10.016, isUnsafe: true))
+        //Snapshots keep coming every refresh once the transition settles
+        for frame in 1...24 {
+            history.append(MaskSnapshot(rects: field, screenSize: screen, timestamp: 10.016 + Double(frame) / 60))
+        }
+
+        let during = try XCTUnwrap(history.snapshot(forFrameAt: 10.02))
+        XCTAssertTrue(during.isUnsafe)
+
+        var buffer: CVPixelBuffer?
+        CVPixelBufferCreate(kCFAllocatorDefault, 16, 16, kCVPixelFormatType_32BGRA, nil, &buffer)
+        var format: CMVideoFormatDescription?
+        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: buffer!, formatDescriptionOut: &format)
+        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: CMTime(seconds: 10.02, preferredTimescale: 1000), decodeTimeStamp: .invalid)
+        var sample: CMSampleBuffer?
+        CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: buffer!, formatDescription: format!, sampleTiming: &timing, sampleBufferOut: &sample)
+        XCTAssertFalse(PixelBufferMasker.process(sampleBuffer: sample!, pixelBuffer: buffer!, snapshot: during, now: 10.02))
+
+        //Once the transition is over, frames are masked normally again
+        let after = try XCTUnwrap(history.snapshot(forFrameAt: 10.4))
+        XCTAssertFalse(after.isUnsafe)
+    }
+
     func testFrameTimeFallsBackToNowForForeignClocks() throws {
         var format: CMVideoFormatDescription?
         var pixelBuffer: CVPixelBuffer?

@@ -62,6 +62,11 @@ internal enum PixelBufferMasker {
 
     /// Frame processor for `ScreenCapturer`. Returns false to drop the frame.
     static func process(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, snapshot: MaskSnapshot, now: CFTimeInterval = CACurrentMediaTime()) -> Bool {
+        //Masked content is moving in a screen transition: hold the last frame instead
+        guard !snapshot.isUnsafe else {
+            return false
+        }
+
         guard !snapshot.rects.isEmpty else {
             return true
         }

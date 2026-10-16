@@ -23,6 +23,8 @@ internal struct MaskSnapshot {
     let screenSize: CGSize
     /// `CACurrentMediaTime()` when the snapshot was taken
     let timestamp: CFTimeInterval
+    /// True while a screen transition moves masked content: positions can't be trusted, frames are dropped
+    var isUnsafe: Bool = false
 
     static let empty = MaskSnapshot(rects: [], screenSize: .zero, timestamp: 0)
 }
@@ -79,7 +81,8 @@ internal struct MaskHistory {
 
         return MaskSnapshot(rects: used.flatMap { $0.rects },
                             screenSize: latest.screenSize,
-                            timestamp: used.map { $0.timestamp }.max() ?? latest.timestamp)
+                            timestamp: used.map { $0.timestamp }.max() ?? latest.timestamp,
+                            isUnsafe: used.contains { $0.isUnsafe })
     }
 }
 
@@ -117,6 +120,8 @@ internal final class MaskRegistry {
     private var currentSnapshot = MaskSnapshot.empty
     private var history = MaskHistory()
     private var lastRegions: [MaskRegion] = []
+    /// Whether the last snapshot taken outside a screen transition had anything masked
+    private var lastStableSnapshotHadMasks = false
     private weak var focusedInput: UIView?
     private var keyboardFrame: CGRect = .zero
     private var observers: [NSObjectProtocol] = []
@@ -220,16 +225,48 @@ internal final class MaskRegistry {
         let padding = MaskRegistry.padding
         let rects = regions.map { $0.rect.insetBy(dx: -padding, dy: -padding) }
 
-        let snapshot = MaskSnapshot(rects: rects, screenSize: screenBounds.size, timestamp: CACurrentMediaTime())
+        //During a screen transition (push, pop, present, interactive back) masked content moves in ways we can't
+        //measure reliably, so frames are dropped until it settles, as long as anything masked is or was on screen
+        let transitioning = isTransitionActive(in: windows)
+        if !transitioning {
+            lastStableSnapshotHadMasks = !rects.isEmpty
+        }
+        let isUnsafe = transitioning && (!rects.isEmpty || lastStableSnapshotHadMasks)
+
+        let snapshot = MaskSnapshot(rects: rects, screenSize: screenBounds.size, timestamp: CACurrentMediaTime(), isUnsafe: isUnsafe)
         lock.lock()
         currentSnapshot = snapshot
         history.append(snapshot)
         lock.unlock()
 
-        if regions != lastRegions {
-            lastRegions = regions
-            onRegionsChanged?(regions)
+        //The on-device hints disappear as soon as a transition starts and come back once it's done
+        let hintRegions = transitioning ? [] : regions
+        if hintRegions != lastRegions {
+            lastRegions = hintRegions
+            onRegionsChanged?(hintRegions)
         }
+    }
+
+    /// True while any view controller transition runs (navigation push/pop, modal present/dismiss,
+    /// interactive back swipe). SwiftUI navigation goes through the same UIKit containers.
+    private func isTransitionActive(in windows: [UIWindow]) -> Bool {
+        return windows.contains { window in
+            guard let root = window.rootViewController else { return false }
+            return hasActiveTransition(root)
+        }
+    }
+
+    private func hasActiveTransition(_ viewController: UIViewController) -> Bool {
+        if viewController.transitionCoordinator != nil {
+            return true
+        }
+        if viewController.children.contains(where: { hasActiveTransition($0) }) {
+            return true
+        }
+        if let presented = viewController.presentedViewController, presented.presentingViewController === viewController {
+            return hasActiveTransition(presented)
+        }
+        return false
     }
 
     private func appWindows() -> [UIWindow] {
