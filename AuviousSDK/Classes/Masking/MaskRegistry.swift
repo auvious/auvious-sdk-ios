@@ -245,10 +245,12 @@ internal final class MaskRegistry {
     }
 
     private func collect(_ view: UIView, screenBounds: CGRect, into regions: inout [MaskRegion]) {
-        guard !view.isHidden, view.alpha > 0.01 else { return }
+        //Visible if either the final or the on-screen (animating) opacity shows it, e.g. while fading out
+        let onScreenOpacity = CGFloat(view.layer.presentation()?.opacity ?? Float(view.alpha))
+        guard !view.isHidden, max(view.alpha, onScreenOpacity) > 0.01 else { return }
 
         if let reason = matchReason(for: view) {
-            let rect = view.convert(view.bounds, to: view.window?.screen.coordinateSpace ?? UIScreen.main.coordinateSpace).intersection(screenBounds)
+            let rect = MaskRegistry.onScreenRect(of: view).intersection(screenBounds)
             if !rect.isNull && !rect.isEmpty {
                 regions.append(MaskRegion(rect: rect, reason: reason, isKeyboard: false))
             }
@@ -259,6 +261,25 @@ internal final class MaskRegistry {
         for subview in view.subviews {
             collect(subview, screenBounds: screenBounds, into: &regions)
         }
+    }
+
+    /// Where the view is drawn right now, in screen points. Uses the presentation layers, so views that are
+    /// moving in an animation (navigation push/pop, sheets, scrolling animations) are measured where they
+    /// appear, not where they will end up.
+    static func onScreenRect(of view: UIView) -> CGRect {
+        guard let window = view.window else {
+            return view.convert(view.bounds, to: UIScreen.main.coordinateSpace)
+        }
+
+        let inWindow: CGRect
+        if let layer = view.layer.presentation(), let windowLayer = window.layer.presentation() {
+            //Presentation layers resolve their superlayers to presentation copies too, so the whole chain is on-screen state
+            inWindow = layer.convert(layer.bounds, to: windowLayer)
+        } else {
+            //Not rendered yet: the final layout is all there is
+            inWindow = view.convert(view.bounds, to: window)
+        }
+        return window.convert(inWindow, to: window.screen.coordinateSpace)
     }
 
     /// The rule that masks this view, or nil
