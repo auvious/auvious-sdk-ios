@@ -73,7 +73,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var lastKnownNetworkStatistics: NetworkStatistics? = nil
     private let notification = DismissableNotificationView(title: "", subtitle: "")
     private var hideNotificationBlock: DispatchWorkItem?
-    private let recorderIndicator = UIView()
+    private let recorderIndicator = UIImageView()
     
     //Container of all stream views
     private var streamContainerView: UIView!
@@ -93,6 +93,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     //UI constraints
     private var existingConstraints: [NSLayoutConstraint] = []
+    private var recorderIndicatorConstraints: [NSLayoutConstraint] = []
     private let viewPadding: CGFloat = 10
     private let viewSize: CGFloat = 80
     private var networkIndicatorDetailsTop: NSLayoutConstraint!
@@ -320,35 +321,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         let tapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.networkIndicatorPressed))
         networkIndicator.addGestureRecognizer(tapRecogniser)
         
-        //Recorder indicator
-        recorderIndicator.backgroundColor = UIColor.red
-        recorderIndicator.layer.cornerRadius = 5
-        recorderIndicator.layer.masksToBounds = true
-        recorderIndicator.alpha = 0;
-        
-        // REC text
-        let recLabel = UILabel()
-        recLabel.text = "REC"
-        recLabel.textColor = UIColor.white
-        recLabel.font = UIFont.boldSystemFont(ofSize: 14) // Set the font size as needed
-        recLabel.textAlignment = .center
-        // Add the label to the view
-        recorderIndicator.addSubview(recLabel)
-        
-        // Set up Auto Layout constraints
-        recLabel.translatesAutoresizingMaskIntoConstraints = false
-        recLabel.centerXAnchor.constraint(equalTo: recorderIndicator.centerXAnchor).isActive = true
-        recLabel.centerYAnchor.constraint(equalTo: recorderIndicator.centerYAnchor).isActive = true
-
+        //Recorder indicator: the same red record symbol as the recording notification
+        recorderIndicator.image = UIImage(systemName: "record.circle.fill")
+        recorderIndicator.contentMode = .center
+        recorderIndicator.isUserInteractionEnabled = true
+        recorderIndicator.alpha = 0
+        recorderIndicator.accessibilityLabel = NSLocalizedString("Recording", comment: "Notification")
         recorderIndicator.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(recorderIndicator)
-        
-        recorderIndicator.widthAnchor.constraint(equalToConstant: 50).isActive = true
-        recorderIndicator.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        
-        recorderIndicator.topAnchor.constraint(equalTo: view.saferAreaLayoutGuide.topAnchor, constant: 2).isActive = true
-        //Leading constraint managed dynamically in createConstraints() — positioned after networkIndicator
-       
+        //Position and size managed in layoutRecorderIndicator()
+
         let recTapRecogniser = UITapGestureRecognizer(target: self, action: #selector(self.recorderIndicatorPressed))
         recorderIndicator.addGestureRecognizer(recTapRecogniser)
         
@@ -1289,7 +1271,42 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         createConstraints()
     }
     
+    /// Full screen: next to the network indicator, centred on it. PiP: a smaller dot in the top left
+    /// corner (the network indicator is hidden there and the maximise button sits top right).
+    private func layoutRecorderIndicator() {
+        let inPiP = screenMode != .fullScreen
+        let pointSize: CGFloat = inPiP ? 14 : 20
+
+        //White dot on a red circle
+        recorderIndicator.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
+            .applying(UIImage.SymbolConfiguration(paletteColors: [.white, .systemRed]))
+        //In PiP taps belong to the PiP window (drag, double tap to expand)
+        recorderIndicator.isUserInteractionEnabled = !inPiP
+
+        NSLayoutConstraint.deactivate(recorderIndicatorConstraints)
+        if inPiP {
+            recorderIndicatorConstraints = [
+                recorderIndicator.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+                recorderIndicator.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
+                recorderIndicator.widthAnchor.constraint(equalToConstant: 20),
+                recorderIndicator.heightAnchor.constraint(equalToConstant: 20),
+            ]
+        } else {
+            recorderIndicatorConstraints = [
+                recorderIndicator.centerYAnchor.constraint(equalTo: networkIndicator.centerYAnchor),
+                recorderIndicator.leadingAnchor.constraint(equalTo: networkIndicator.trailingAnchor, constant: 5),
+                //Keeps a comfortable tap target around the dot
+                recorderIndicator.widthAnchor.constraint(equalToConstant: 30),
+                recorderIndicator.heightAnchor.constraint(equalToConstant: 30),
+            ]
+        }
+        NSLayoutConstraint.activate(recorderIndicatorConstraints)
+    }
+
     internal func createConstraints(animated: Bool = true) {
+        //Before the mode specific layout below, which can return early
+        layoutRecorderIndicator()
+
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
         let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
@@ -1796,7 +1813,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
         
         constraints.append(networkIndicator.leadingAnchor.constraint(equalTo: view.saferAreaLayoutGuide.leadingAnchor, constant: networkIndicatorLeadingConstant))
-        constraints.append(recorderIndicator.leadingAnchor.constraint(equalTo: networkIndicator.trailingAnchor, constant: 5))
 
         let applyConstraints = {
             //Clear existing constraints
