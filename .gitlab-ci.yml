@@ -1,0 +1,35 @@
+# Builds the example app ExampleSimpleConference (and with it AuviousSDK) for the
+# iOS simulator on the macOS runner. No signing, nothing published.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
+build-example:
+  tags: [macos]
+  timeout: 1h
+  variables:
+    LANG: en_US.UTF-8
+    # CocoaPods' spec cache, kept between jobs but away from the Mac user's own.
+    CP_HOME_DIR: $HOME/sdk-ios-ci/cocoapods
+  script:
+    - export PATH="/opt/homebrew/bin:$PATH"
+    - xcodebuild -version
+    - cd Example
+    - pod install --repo-update
+    - git status --short Podfile.lock
+    - set -o pipefail
+    - >
+      xcodebuild -workspace AuviousSDK.xcworkspace -scheme ExampleSimpleConference
+      -configuration Debug -destination 'generic/platform=iOS Simulator'
+      -derivedDataPath "$CI_PROJECT_DIR/build/DerivedData"
+      CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$CI_PROJECT_DIR/build/xcodebuild.log" | grep -E 'error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)|\*\*'
+  before_script:
+    - mkdir -p build
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - build/xcodebuild.log
+      - Example/Podfile.lock
