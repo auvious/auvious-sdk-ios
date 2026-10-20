@@ -273,8 +273,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         videoViewBackgroundColor = clientConfiguration.conferenceBackgroundColor
         
-        NotificationCenter.default.addObserver(self, selector: #selector(self.orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
-
         NotificationCenter.default.addObserver(self, selector: #selector(self.audioRouteChanged(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
         
         NotificationCenter.default.addObserver(
@@ -642,8 +640,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     //When orientation changes we simply reevaluate our UI constraints
-    @objc func orientationChanged(notification: NSNotification) {
-        createConstraints()
+    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: { _ in
+            self.createConstraints(animated: false)
+        })
     }
     
     // MARK: -
@@ -1291,7 +1292,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal func createConstraints(animated: Bool = true) {
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
-        let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
+        //The window's shape, not ours (PIP): statusBarOrientation is a no-op from iOS 27
+        let windowBounds = view.window?.bounds ?? UIScreen.main.bounds
+        let isLandscape = windowBounds.width > windowBounds.height
         var safeLeadingConstraint = view.leadingAnchor
         
         //Network indicator placement
