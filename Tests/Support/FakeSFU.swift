@@ -36,7 +36,7 @@ final class FakeSFU: NSObject, RTCPeerConnectionDelegate {
     }
 
     private(set) var connection: RTCPeerConnection!
-    private var capturer: SyntheticCapturer?
+    private var capturers: [SyntheticCapturer] = []
     private var onGatheringComplete: (() -> Void)?
 
     /// Called on the main queue for each track the SDK sends.
@@ -62,7 +62,7 @@ final class FakeSFU: NSObject, RTCPeerConnectionDelegate {
         let source = FakeSFU.factory.videoSource()
         let capturer = SyntheticCapturer(delegate: source)
         capturer.start()
-        self.capturer = capturer
+        capturers.append(capturer)
         return FakeSFU.factory.videoTrack(with: source, trackId: "sfu-video")
     }
 
@@ -102,7 +102,7 @@ final class FakeSFU: NSObject, RTCPeerConnectionDelegate {
     }
 
     func close() {
-        capturer?.stop()
+        capturers.forEach { $0.stop() }
         connection.close()
     }
 

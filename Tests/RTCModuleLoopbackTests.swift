@@ -15,10 +15,12 @@ final class RTCModuleLoopbackTests: XCTestCase {
     private var module: RTCModule!
     private var events: RecordingRTCDelegate!
     private var sfu: FakeSFU!
+    private var savedEndpointId: String?
 
     override func setUp() {
         super.setUp()
         // Set by the login in the app; stopping the camera reports it.
+        savedEndpointId = UserEndpointModule.sharedInstance.userEndpointId
         UserEndpointModule.sharedInstance.userEndpointId = "endpoint"
         module = RTCModule()
         module.initialisePeerConnectionFactory()
@@ -30,7 +32,11 @@ final class RTCModuleLoopbackTests: XCTestCase {
     }
 
     override func tearDown() {
-        // Callbacks still queued (late candidates) must not reach the next test's objects.
+        // Connections closed first, so WebRTC's threads stop calling the delegate; callbacks they
+        // already queued on main run after tearDown and must find nothing to call.
+        module.removeAllStreams()
+        module.emptyPeerConnections()
+        sfu.close()
         module.delegate = nil
         events.onPublishOffer = nil
         events.onRemoteOffer = nil
@@ -39,9 +45,7 @@ final class RTCModuleLoopbackTests: XCTestCase {
         events.onRemoteStream = nil
         sfu.onTrack = nil
         sfu.onConnectionState = nil
-        module.removeAllStreams()
-        module.emptyPeerConnections()
-        sfu.close()
+        UserEndpointModule.sharedInstance.userEndpointId = savedEndpointId
         module = nil
         events = nil
         sfu = nil
@@ -120,13 +124,15 @@ final class RTCModuleLoopbackTests: XCTestCase {
         events.onPublishOffer = { [unowned self] streamId, sdp in
             offer = sdp
             self.sfu.answer(sdp, sending: [], streamIds: []) { answer, error in
+                // After a timeout this can arrive past tearDown.
+                guard let module = self.module else { return }
                 XCTAssertNil(error)
                 if let answer = answer {
-                    self.module.handleAnswerReceivedPublish(withRemoteSDP: answer, streamId: streamId)
+                    module.handleAnswerReceivedPublish(withRemoteSDP: answer, streamId: streamId)
                 }
             }
         }
-        events.onPublishCandidates = { [unowned self] candidates in self.sfu.addRemoteCandidates(candidates) }
+        events.onPublishCandidates = { [unowned self] candidates in self.sfu?.addRemoteCandidates(candidates) }
 
         module.configurePublishStream(type: .micAndCam, streamId: "local-stream", endpointId: "endpoint", userId: "user")
         wait(for: [received, connected], timeout: 20)
@@ -153,13 +159,14 @@ final class RTCModuleLoopbackTests: XCTestCase {
                             onStream: @escaping (RTCMediaStream) -> Void) {
         events.onRemoteOffer = { [unowned self] streamId, sdp in
             self.sfu.answer(sdp, sending: tracks, streamIds: streamIds) { answer, error in
+                guard let module = self.module else { return }
                 XCTAssertNil(error)
                 if let answer = answer {
-                    self.module.handleAnswerReceivedRemote(withRemoteSDP: answer, streamId: streamId)
+                    module.handleAnswerReceivedRemote(withRemoteSDP: answer, streamId: streamId)
                 }
             }
         }
-        events.onRemoteCandidates = { [unowned self] candidates in self.sfu.addRemoteCandidates(candidates) }
+        events.onRemoteCandidates = { [unowned self] candidates in self.sfu?.addRemoteCandidates(candidates) }
         events.onRemoteStream = { stream, streamId, type in
             XCTAssertEqual(streamId, "remote-stream")
             XCTAssertEqual(type, .micAndCam)
