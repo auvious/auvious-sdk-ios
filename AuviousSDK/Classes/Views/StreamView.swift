@@ -40,14 +40,9 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private var overlayState: OverlayState = .none
     private var existingOverlayConstraints: [NSLayoutConstraint] = []
     
-    //Switch from OpenGL to Metal if we can
-    #if arch(i386) || arch(x86_64) || arch(arm)
-    let supportsMetal: Bool = false
-    var videoView: RTCEAGLVideoView = RTCEAGLVideoView(frame: CGRect.zero)
-    #else
+    // Metal everywhere: M155 has no RTCEAGLVideoView, and iOS 13+ simulators support Metal
     let supportsMetal: Bool = true
     var videoView:RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
-    #endif
     
     //Control flags
     private var hasAudioStream: Bool = false
