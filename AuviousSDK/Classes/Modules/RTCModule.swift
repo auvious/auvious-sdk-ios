@@ -270,7 +270,11 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         configuration.iceServers = iceServers
         configuration.continualGatheringPolicy = .gatherContinually
 
-        let connection = factory.peerConnection(with: configuration, constraints: self.defaultConnectionConstraint, delegate: self)
+        // nil if WebRTC rejects the configuration; callers then report missingPeerConnection
+        guard let connection = factory.peerConnection(with: configuration, constraints: self.defaultConnectionConstraint, delegate: self) else {
+            os_log("Could not create a connection for stream type %@", log: Log.rtc, type: .error, type.rawValue)
+            return
+        }
         let connectionContainer = RTCPeerConnectionContainer(conn: connection, streamId: streamId, endpointId: endpointId, userId: userId, type: type, isLocal: isLocal)
         
         if let callId = callId {

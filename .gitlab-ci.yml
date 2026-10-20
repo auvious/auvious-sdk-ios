@@ -23,7 +23,7 @@ build-example:
       xcodebuild -workspace AuviousSDK.xcworkspace -scheme ExampleSimpleConference
       -configuration Debug -destination 'generic/platform=iOS Simulator'
       -derivedDataPath "$CI_PROJECT_DIR/build/DerivedData"
-      CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$CI_PROJECT_DIR/build/xcodebuild.log" | grep -E 'error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)|\*\*'
+      CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$CI_PROJECT_DIR/build/xcodebuild.log" | grep -E 'error:|BUILD (SUCCEEDED|FAILED)'
   before_script:
     - mkdir -p build
   artifacts:
