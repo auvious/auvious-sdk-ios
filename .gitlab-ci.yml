@@ -11,10 +11,9 @@ build-example:
   timeout: 1h
   variables:
     LANG: en_US.UTF-8
-    # CocoaPods' spec cache, kept between jobs but away from the Mac user's own.
-    CP_HOME_DIR: $HOME/sdk-ios-ci/cocoapods
   script:
-    - export PATH="/opt/homebrew/bin:$PATH"
+    # CocoaPods' spec cache, kept between jobs but away from the Mac user's own.
+    - export PATH="/opt/homebrew/bin:$PATH" CP_HOME_DIR="$HOME/sdk-ios-ci/cocoapods"
     - xcodebuild -version
     - cd Example
     - pod install --repo-update
