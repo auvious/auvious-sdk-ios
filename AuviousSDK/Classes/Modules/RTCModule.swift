@@ -103,8 +103,8 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     //List of connections used
     internal var peerConnections: [RTCPeerConnectionContainer] = [RTCPeerConnectionContainer]()
     
-    //Connection factory
-    private var factory: RTCPeerConnectionFactory!
+    //Connection factory (readable by the tests, to keep their connections on loopback)
+    private(set) var factory: RTCPeerConnectionFactory!
     
     //Default connection constraint, used when instatiating a connection
     private let defaultConnectionConstraint = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: ["DtlsSrtpKeyAgreement": "true"])
@@ -947,13 +947,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
 
         var streams = mediaStreams
-        if streams.isEmpty, let track = rtpReceiver.track {
-            //No stream signalled for the track (WebRTC normally supplies a default one)
+        if streams.isEmpty {
+            //No stream signalled for the track (msid "-"): one stream of all the connection's
+            //received tracks, which all exist by now, delivered on the first of their callbacks
             let stream = factory.mediaStream(withStreamId: targetContainer.streamId)
-            if let audio = track as? RTCAudioTrack {
-                stream.addAudioTrack(audio)
-            } else if let video = track as? RTCVideoTrack {
-                stream.addVideoTrack(video)
+            for track in peerConnection.receivers.compactMap({ $0.track }) {
+                if let audio = track as? RTCAudioTrack {
+                    stream.addAudioTrack(audio)
+                } else if let video = track as? RTCVideoTrack {
+                    stream.addVideoTrack(video)
+                }
             }
             streams = [stream]
         }
