@@ -73,16 +73,28 @@ final class RTCModuleLoopbackTests: XCTestCase {
         XCTAssertEqual(events.errors.count, 0, "\(events.errors)")
     }
 
-    /// Tracks sent without a stream (msid "-") still reach the delegate, audio and video.
-    func testViewedTracksWithoutAStreamAreAllDelivered() {
+    /// Tracks sent without a stream (msid "-") reach the delegate together, as one stream holding
+    /// both, and its video plays.
+    func testViewedTracksWithoutAStreamAreDeliveredTogether() {
         let delivered = expectation(description: "remote tracks delivered")
-        var tracks: [RTCMediaStreamTrack] = []
+        var deliveries: [RTCMediaStream] = []
         viewStream(sending: [sfu.makeAudioTrack(), sfu.makeVideoTrack()], streamIds: []) { stream in
-            tracks += stream.audioTracks as [RTCMediaStreamTrack] + stream.videoTracks as [RTCMediaStreamTrack]
-            if tracks.count == 2 { delivered.fulfill() }
+            deliveries.append(stream)
+            if deliveries.count == 1 { delivered.fulfill() }
         }
         wait(for: [delivered], timeout: 20)
-        XCTAssertEqual(tracks.map { $0.kind }.sorted(), ["audio", "video"])
+
+        guard let stream = deliveries.first else { return }
+        XCTAssertEqual(stream.audioTracks.count, 1)
+        XCTAssertEqual(stream.videoTracks.count, 1)
+        guard let video = stream.videoTracks.first else { return }
+        let played = expectation(description: "10 frames rendered")
+        let counter = FrameCounter(target: 10, reached: played)
+        video.add(counter)
+        wait(for: [played], timeout: 20)
+        video.remove(counter)
+
+        XCTAssertEqual(deliveries.count, 1, "the tracks were delivered separately")
     }
 
     /// Publishing: the SDK's offer sends its tracks with addTrack (Unified Plan), audio before video,
