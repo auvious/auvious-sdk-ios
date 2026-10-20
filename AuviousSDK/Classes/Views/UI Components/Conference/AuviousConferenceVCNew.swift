@@ -541,6 +541,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        //Layouts made before the view had a window took the screen's shape, not the window's
+        //(iPad split view, Stage Manager), and no size change may follow to redo them
+        createConstraints(animated: false)
         
         if !performedInitialValidations {
             //Check for permissions
@@ -643,6 +646,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { _ in
+            self.createConstraints(animated: false)
+        }, completion: { _ in
+            //Again with the scene's final interface orientation, in case it changed after the animation started
             self.createConstraints(animated: false)
         })
     }
@@ -1289,6 +1295,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         createConstraints()
     }
     
+    //The orientation the UI is laid out in (unknown before the view has a window)
+    private var layoutOrientation: UIInterfaceOrientation {
+        guard let scene = view.window?.windowScene else { return .unknown }
+        if #available(iOS 16.0, *) {
+            return scene.effectiveGeometry.interfaceOrientation
+        }
+        return scene.interfaceOrientation
+    }
+
     internal func createConstraints(animated: Bool = true) {
         var constraints: [NSLayoutConstraint] = []
         let safeArea = streamContainerView.saferAreaLayoutGuide
@@ -1300,11 +1315,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Network indicator placement
         var networkIndicatorLeadingConstant: CGFloat = 6
         
-        //For landscape left we use the safe area leading constraint - otherwise superview
-        if UIDevice.current.orientation == UIDeviceOrientation.landscapeLeft {
+        //Notch on the leading side (interface landscapeRight, i.e. device landscapeLeft): the safe area's
+        //leading edge, otherwise the superview's. From the interface, not the device: a phone lying flat
+        //or with rotation locked reports a device orientation the UI isn't in
+        if layoutOrientation == .landscapeRight {
             safeLeadingConstraint = safeArea.leadingAnchor
-        } else if UIDevice.current.orientation == UIDeviceOrientation.landscapeRight {
-            safeLeadingConstraint = view.leadingAnchor
         }
         
         //PIP mode
