@@ -4,7 +4,7 @@ This is Auvious iOS SDK, which simplifies integration with [Auvious](https://auv
 
 ## Requirements
 
-iOS version >= 13.0
+iOS version >= 15.0
 
 ## Installation
 

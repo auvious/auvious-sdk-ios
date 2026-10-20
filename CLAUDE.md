@@ -1,6 +1,6 @@
 # Project 
 
-iOS SDK build with Swift, targeting iOS 13+.
+iOS SDK build with Swift, targeting iOS 15+.
 
 The main product is the `AuviousSDK`. 
 
