@@ -315,7 +315,9 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     private func addTracks(of stream: RTCMediaStream, to peerConnection: RTCPeerConnection) {
         let tracks: [RTCMediaStreamTrack] = stream.audioTracks + stream.videoTracks
         for track in tracks where peerConnection.add(track, streamIds: [stream.streamId]) == nil {
+            // The offer still goes out with the other tracks; the app learns this one isn't sent.
             os_log("Could not add %@ track to stream %@", log: Log.rtc, type: .error, track.kind, stream.streamId)
+            delegate?.rtcClient(onError: AuviousSDKError.internalError)
         }
     }
 
