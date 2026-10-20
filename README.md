@@ -344,7 +344,7 @@ The following example applications are included in this repository. If unsure, b
 - [ExampleConference](Example/ExampleConference)
 - [ExampleSimpleConference](Example/ExampleSimpleConference)
 
-To try the above examples you should open the Example/AuviousSDK.xcworkspace in Xcode.
+To try the above examples run `pod install` in `Example/`, then open `Example/AuviousSDK.xcworkspace` in Xcode. Apps built with Xcode 27 (iOS 27 SDK) must use the scene life cycle; ExampleSimpleConference shows how (`SceneDelegate` in its `AppDelegate.swift`).
 
 There is also a separate repository with examples available at https://github.com/auvious/ios-examples. At the current moment the following examples are available there:
 
