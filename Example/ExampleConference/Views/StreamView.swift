@@ -17,14 +17,9 @@ public class StreamView: UIView, RTCVideoViewDelegate {
     //@IBOutlet weak var videoView: RTCMTLVideoView!
     var videoTrack:RTCVideoTrack!
     
-    //Switch from OpenGL to Metal if we can
-    #if arch(i386) || arch(x86_64) || arch(arm)
-    let supportsMetal: Bool = false
-    var videoView: RTCEAGLVideoView = RTCEAGLVideoView(frame: CGRect.zero)
-    #else
+    // Metal everywhere: M155 has no RTCEAGLVideoView, and iOS 13+ simulators support Metal
     let supportsMetal: Bool = true
     var videoView:RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
-    #endif
     
     private var hasAudioStream:Bool = false
     private var hasVideoStream:Bool = false
