@@ -351,6 +351,20 @@ There is also a separate repository with examples available at https://github.co
 - [SimpleConference](https://github.com/auvious/ios-examples/tree/master/SimpleConference) Similar to ExampleSimpleConference written in SwiftUI.
 - [GenesysCloudSimpleConference](https://github.com/auvious/ios-examples/tree/master/GenesysCloudSimpleConference) Demonstrates how to quickly add video call capability to your iOS application, utilizing Genesys Cloud webChat channel for ACD routing.
 
+## Tests
+
+`Tests/` holds XCTests of the SDK, a `test_spec` of `AuviousSDK.podspec` hosted in its `app_spec` TestHost
+(an app with the scene life cycle). After `pod install` in `Example/` they are the scheme
+`AuviousSDK-Unit-Tests` of the workspace:
+
+    xcodebuild test -workspace Example/AuviousSDK.xcworkspace -scheme AuviousSDK-Unit-Tests \
+      -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
+
+CI runs them in the job test-sdk. `RTCModuleLoopbackTests` runs `RTCModule`'s conference signalling
+against `FakeSFU`, a peer connection in the same process standing in for the server: publishing a stream,
+and viewing one, with video from a synthetic camera (the simulator has none). No backend, no network:
+both sides only use the loopback interface.
+
 ## Publish version
 
 Follow the steps below to publish a new version

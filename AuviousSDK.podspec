@@ -56,4 +56,32 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
     'GCC_PREPROCESSOR_DEFINITIONS' => 'AUVIOUSSDK',
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) AUVIOUSSDK'
   }
+
+  # Host app of the XCTests: CocoaPods' generated one has no scene, which apps built with
+  # the iOS 27 SDK need to launch.
+  s.app_spec 'TestHost' do |app|
+    app.source_files = 'Tests/Host/*.swift'
+    app.info_plist = {
+      'UIApplicationSceneManifest' => {
+        'UIApplicationSupportsMultipleScenes' => false,
+        'UISceneConfigurations' => {
+          'UIWindowSceneSessionRoleApplication' => [{
+            'UISceneConfigurationName' => 'Default Configuration',
+            'UISceneDelegateClassName' => '$(PRODUCT_MODULE_NAME).TestHostSceneDelegate'
+          }]
+        }
+      },
+      'NSCameraUsageDescription' => 'Camera tests',
+      'NSMicrophoneUsageDescription' => 'Microphone tests'
+    }
+  end
+
+  # XCTests, run by the Example workspace's scheme AuviousSDK-Unit-Tests (see README).
+  # Hosted in an app: WebRTC's audio unit and AVAudioSession want a running UIKit app.
+  s.test_spec 'Tests' do |t|
+    t.source_files = 'Tests/*.swift', 'Tests/Support/*.swift'
+    t.requires_app_host = true
+    t.app_host_name = 'AuviousSDK/TestHost'
+    t.dependency 'AuviousSDK/TestHost'
+  end
 end

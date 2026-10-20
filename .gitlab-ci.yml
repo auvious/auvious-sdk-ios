@@ -1,5 +1,6 @@
-# Builds the example app ExampleSimpleConference (and with it AuviousSDK) for the
-# iOS simulator on the macOS runner. No signing, nothing published.
+# On the macOS runner: builds the example app ExampleSimpleConference (and with it
+# AuviousSDK) for the iOS simulator, and runs the SDK's XCTests (Tests/) on a simulator.
+# No signing, nothing published.
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -32,3 +33,30 @@ build-example:
     paths:
       - build/xcodebuild.log
       - Example/Podfile.lock
+
+test-sdk:
+  tags: [macos]
+  timeout: 1h
+  variables:
+    LANG: en_US.UTF-8
+  before_script:
+    - mkdir -p build
+  script:
+    - export PATH="/opt/homebrew/bin:$PATH" CP_HOME_DIR="$HOME/sdk-ios-ci/cocoapods"
+    - cd Example
+    - pod install
+    - set -o pipefail
+    # The scheme of the podspec's test_spec, hosted in its app_spec TestHost.
+    - >
+      xcodebuild test -workspace AuviousSDK.xcworkspace -scheme AuviousSDK-Unit-Tests
+      -destination 'platform=iOS Simulator,name=iPhone 17'
+      -derivedDataPath "$CI_PROJECT_DIR/build/DerivedData" -resultBundlePath "$CI_PROJECT_DIR/build/Tests.xcresult"
+      CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$CI_PROJECT_DIR/build/test.log" | grep -E "error:|Test Case|Executed|TEST (SUCCEEDED|FAILED)"
+  after_script:
+    - xcrun simctl shutdown all || true
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - build/test.log
+      - build/Tests.xcresult
