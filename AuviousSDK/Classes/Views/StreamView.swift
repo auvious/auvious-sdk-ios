@@ -40,8 +40,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private var overlayState: OverlayState = .none
     private var existingOverlayConstraints: [NSLayoutConstraint] = []
     
-    // Metal everywhere: M155 has no RTCEAGLVideoView, and iOS 13+ simulators support Metal
-    let supportsMetal: Bool = true
+    // Metal on devices and simulators (M155 has no RTCEAGLVideoView)
     var videoView:RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
     
     //Control flags
@@ -145,10 +144,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         
         addSubview(videoView)
         
-        #if arch(i386) || arch(x86_64) || arch(arm)
-        #else
         videoView.videoContentMode = .scaleAspectFill
-        #endif
         
         createOverlay()
         resetStreamView()
@@ -305,12 +301,9 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         hasVideoStream = true
         self.isScreen = isScreen
 
-        #if arch(i386) || arch(x86_64) || arch(arm)
-        #else
         if isScreen {
             videoView.videoContentMode = .scaleAspectFit
         }
-        #endif
 
         // Remove the old track from the renderer before attaching the new one
         // so the frozen last frame doesn't persist after a rejoin.

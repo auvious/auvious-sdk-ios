@@ -11,8 +11,7 @@ class StreamViewNew: UIView, RTCVideoViewDelegate {
     
     var videoTrack: RTCVideoTrack!
     
-    // Metal everywhere: M155 has no RTCEAGLVideoView, and iOS 13+ simulators support Metal
-    let supportsMetal: Bool = true
+    // Metal on devices and simulators (M155 has no RTCEAGLVideoView)
     var videoView: RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
     
     private var hasAudioStream: Bool = false
