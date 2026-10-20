@@ -405,6 +405,10 @@ Example:
 pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
 ```
 
+`pod repo push` first validates the pod, and that now includes the test spec: it builds the TestHost app
+and runs the [tests](#tests) on an iOS simulator, so it needs Xcode with a simulator runtime and takes a few
+minutes longer. When CI's test-sdk passed for the tagged commit, `--skip-tests` skips them.
+
 ## Release notes
 
 ### 1.4.0
