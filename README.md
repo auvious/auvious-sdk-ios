@@ -20,11 +20,11 @@ AuviousSDK is available through as a [CocoaPod](https://cocoapods.org). You can 
   ```
   Last but not least, you need to add the AuviousSDK pod on all targets that will need it
   ```ruby
-  pod 'AuviousSDK', '1.4.0'
+  pod 'AuviousSDK', '1.4.1'
   ```
 - Auvious SDK github repo. This method only requires the following line on the target dependencies:
   ```ruby
-  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.4.0'
+  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.4.1'
   ```
 
 Next you need to run `pod install` in order for AuviousSDK and it's dependencies to be installed in the project workspace.
@@ -410,6 +410,16 @@ and runs the [tests](#tests) on an iOS simulator, so it needs Xcode with a simul
 minutes longer. When CI's test-sdk passed for the tagged commit, `--skip-tests` skips them.
 
 ## Release notes
+
+### 1.4.1
+
+- Update / WebRTC M155 (AuviousGoogleWebRTC 155.8059). Unified Plan: streams are published as tracks, remote streams arrive through the receivers
+- Update / iOS 15 minimum (Xcode 27 rejects lower deployment targets)
+- Update / video views are Metal (RTCMTLVideoView) only, also on simulators
+- Bug fix / tracks a server sends without a stream are delivered together, video included
+- Example / ExampleSimpleConference uses the scene life cycle (apps built with the iOS 27 SDK don't launch without it), landscape layout without statusBarOrientation
+- Example / Pods are no longer committed: run `pod install` in `Example/`
+- Tests / XCTests of RTCModule against an in-process SFU, run in CI
 
 ### 1.4.0
 
