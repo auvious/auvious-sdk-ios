@@ -102,6 +102,8 @@ final class FakeSFU: NSObject, RTCPeerConnectionDelegate {
     }
 
     func close() {
+        // Holds this SFU until gathering completes, which a timed-out test may never see.
+        onGatheringComplete = nil
         capturers.forEach { $0.stop() }
         connection.close()
     }

@@ -59,7 +59,7 @@ final class RTCModuleLoopbackTests: XCTestCase {
         var deliveries: [RTCMediaStream] = []
         viewStream(sending: [sfu.makeAudioTrack(), sfu.makeVideoTrack()], streamIds: ["publisher-stream"]) { stream in
             deliveries.append(stream)
-            delivered.fulfill()
+            if deliveries.count == 1 { delivered.fulfill() }
         }
         wait(for: [delivered], timeout: 20)
 
@@ -99,6 +99,7 @@ final class RTCModuleLoopbackTests: XCTestCase {
         video.remove(counter)
 
         XCTAssertEqual(deliveries.count, 1, "the tracks were delivered separately")
+        XCTAssertEqual(events.errors.count, 0, "\(events.errors)")
     }
 
     /// A mic-and-camera view answered with audio only and no stream: the delivered stream holds only
