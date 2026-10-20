@@ -92,6 +92,25 @@ final class FakeSFU: NSObject, RTCPeerConnectionDelegate {
         }
     }
 
+    /// Offers `tracks` in the streams `streamIds`, as a caller does. The offer is passed on (main queue)
+    /// without waiting for candidates: what the SDK makes of an offer needs no media to flow.
+    func offer(sending tracks: [RTCMediaStreamTrack], streamIds: [String],
+               completion: @escaping (_ offer: String?, _ error: Error?) -> Void) {
+        let done: (String?, Error?) -> Void = { offer, error in
+            DispatchQueue.main.async { completion(offer, error) }
+        }
+        for track in tracks where connection.add(track, streamIds: streamIds) == nil {
+            return done(nil, NSError(domain: "FakeSFU", code: 1, userInfo: [NSLocalizedDescriptionKey: "add \(track.kind) track failed"]))
+        }
+        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
+        connection.offer(for: constraints) { [weak self] sdp, error in
+            guard let self = self, let sdp = sdp else { return done(nil, error) }
+            self.connection.setLocalDescription(sdp) { error in
+                done(error == nil ? sdp.sdp : nil, error)
+            }
+        }
+    }
+
     /// The SDK's trickled candidates.
     func addRemoteCandidates(_ candidates: [RTCIceCandidate]) {
         for candidate in candidates {

@@ -102,6 +102,36 @@ final class RTCModuleLoopbackTests: XCTestCase {
         XCTAssertEqual(events.errors.count, 0, "\(events.errors)")
     }
 
+    /// Answering an offer (an incoming call) of tracks without a stream: they reach the delegate
+    /// together, as one stream holding both, though nothing is negotiated before the answer.
+    func testOfferedTracksWithoutAStreamAreDeliveredTogether() {
+        let delivered = expectation(description: "offered tracks delivered")
+        var deliveries: [RTCMediaStream] = []
+        events.onRemoteStream = { stream, streamId, _ in
+            XCTAssertEqual(streamId, "call")
+            deliveries.append(stream)
+            if deliveries.count == 1 { delivered.fulfill() }
+        }
+        // As configureRemoteCallStream does, without its answer going to the backend
+        module.initialisePeerConnection(streamId: "call", endpointId: "remote-endpoint", userId: "remote-user",
+                                        type: .micAndCam, isLocal: true, callId: "call")
+        guard let connection = module.peerConnections.last?.connection else { return XCTFail("no connection") }
+        sfu.offer(sending: [sfu.makeAudioTrack(), sfu.makeVideoTrack()], streamIds: []) { offer, error in
+            XCTAssertNil(error)
+            guard let offer = offer else { return }
+            connection.setRemoteDescription(RTCSessionDescription(type: .offer, sdp: offer)) { error in
+                XCTAssertNil(error)
+            }
+        }
+        wait(for: [delivered], timeout: 20)
+
+        guard let stream = deliveries.first else { return }
+        XCTAssertEqual(stream.audioTracks.count, 1)
+        XCTAssertEqual(stream.videoTracks.count, 1)
+        XCTAssertEqual(deliveries.count, 1, "the tracks were delivered separately")
+        XCTAssertEqual(events.errors.count, 0, "\(events.errors)")
+    }
+
     /// A mic-and-camera view answered with audio only and no stream: the delivered stream holds only
     /// the audio track, not the video one the answer rejected (which would show as a black tile).
     func testViewedTracksWithoutAStreamLeaveOutRejectedOnes() {

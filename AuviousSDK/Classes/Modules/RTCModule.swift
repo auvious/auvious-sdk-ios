@@ -534,14 +534,14 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         
         let constraint = createConstraintForConference(type: type)
         peerConnection.offer(for: constraint, completionHandler: { [weak self]  (sdp, error) in
-            guard let _ = self else {
+            guard let self = self else {
                 return
             }
             if let error = error {
-                self!.delegate?.rtcClient(onError: AuviousSDKError.remoteStreamFailure(fragment: .makeOfferRemoteStream, output: error.localizedDescription))
+                self.delegate?.rtcClient(onError: AuviousSDKError.remoteStreamFailure(fragment: .makeOfferRemoteStream, output: error.localizedDescription))
             }
             else {
-                self?.handleSdpGeneratedRemote(sdpDescription: sdp, streamId: streamId)
+                self.handleSdpGeneratedRemote(sdpDescription: sdp, streamId: streamId)
             }
         })
     }
@@ -953,11 +953,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             //No stream signalled for the track (msid "-"): one stream of all the connection's
             //received tracks, which all exist by now, delivered on the first of their callbacks.
             //Only negotiated ones: a transceiver the answer rejected has a track that never plays.
+            //An offer we answer (incoming call) has no negotiated direction yet: there the
+            //transceiver's own, receiving for every m-line of the offer (also one the caller
+            //offers without sending, a track that never plays; the answer can't tell that apart).
             let stream = factory.mediaStream(withStreamId: targetContainer.streamId)
             let receiving = peerConnection.transceivers.filter { transceiver in
                 var direction = RTCRtpTransceiverDirection.inactive
-                return !transceiver.isStopped && transceiver.currentDirection(&direction)
-                    && (direction == .recvOnly || direction == .sendRecv)
+                if !transceiver.currentDirection(&direction) {
+                    direction = transceiver.direction
+                }
+                return !transceiver.isStopped && (direction == .recvOnly || direction == .sendRecv)
             }
             for track in receiving.compactMap({ $0.receiver.track }) {
                 if let audio = track as? RTCAudioTrack {
