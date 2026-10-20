@@ -185,7 +185,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 return
             }
             
-            peerConnection.add(stream)
+            addTracks(of: stream, to: peerConnection)
         } else {
             if type == .cam || type == .mic || type == .micAndCam {
                 addStream(type: type, streamId: streamId)
@@ -304,11 +304,24 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         
         if type == .screen {
             let screenStream = createScreenSharingStream(streamId: streamId)
-            peerConnection.add(screenStream)
+            addTracks(of: screenStream, to: peerConnection)
         } else {
             let localStream = createLocalMediaStream(type: type, streamId: streamId)
-            peerConnection.add(localStream)
+            addTracks(of: localStream, to: peerConnection)
         }
+    }
+
+    //Unified Plan: a stream is sent as its tracks (addStream crashes), audio first like Plan B's SDP
+    private func addTracks(of stream: RTCMediaStream, to peerConnection: RTCPeerConnection) {
+        let tracks: [RTCMediaStreamTrack] = stream.audioTracks + stream.videoTracks
+        for track in tracks where peerConnection.add(track, streamIds: [stream.streamId]) == nil {
+            os_log("Could not add %@ track to stream %@", log: Log.rtc, type: .error, track.kind, stream.streamId)
+        }
+    }
+
+    //The local tracks of a connection, of the given kind ("audio" or "video")
+    private func sentTracks(_ connection: RTCPeerConnection, kind: String) -> [RTCMediaStreamTrack] {
+        return connection.senders.compactMap { $0.track }.filter { $0.kind == kind }
     }
     
     /// Returns the device's native screen pixel dimensions (always portrait-ordered).
@@ -855,18 +868,18 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 if event.operation == MetadataRequestOperation.set {
                     if event.streamType == MetadataRequestType.audio {
                         //Mute audio
-                        let _ = streamConnection.connection.localStreams.map {$0.audioTracks.map {$0.isEnabled = false} }
+                        sentTracks(streamConnection.connection, kind: "audio").forEach { $0.isEnabled = false }
                     } else if event.streamType == MetadataRequestType.video {
                         //Mute video
-                        let _ = streamConnection.connection.localStreams.map {$0.videoTracks.map {$0.isEnabled = false} }
+                        sentTracks(streamConnection.connection, kind: "video").forEach { $0.isEnabled = false }
                     }
                 } else {
                     if event.streamType == MetadataRequestType.audio {
                         //Unmute audio
-                        let _ = streamConnection.connection.localStreams.map {$0.audioTracks.map {$0.isEnabled = true} }
+                        sentTracks(streamConnection.connection, kind: "audio").forEach { $0.isEnabled = true }
                     } else if event.streamType == MetadataRequestType.video {
                         //Unmute video
-                        let _ = streamConnection.connection.localStreams.map {$0.videoTracks.map {$0.isEnabled = true} }
+                        sentTracks(streamConnection.connection, kind: "video").forEach { $0.isEnabled = true }
                     }
                 }
             }
@@ -918,16 +931,15 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     // MARK: RTCPeerConnectionDelegate
+    //Still fired with Unified Plan (M155), once per remote stream after all its tracks are added
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        
-        var targetContainer: RTCPeerConnectionContainer!
-        for item in peerConnections {
-            if item.connection == peerConnection {
-                targetContainer = item
-                break
-            }
+
+        //The connection may have been removed (call ended) before this callback ran
+        guard let targetContainer = peerConnections.first(where: { $0.connection == peerConnection }) else {
+            os_log("Remote stream %@ for a removed connection", log: Log.rtc, type: .debug, stream.streamId)
+            return
         }
-        
+
         checkCurrentAudioRoute()
         
         delegate?.rtcClient(didReceiveRemoteStream: stream, streamId: targetContainer.streamId, endpointId: targetContainer.endpointId, type: targetContainer.streamType)
