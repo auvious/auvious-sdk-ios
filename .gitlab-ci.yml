@@ -48,7 +48,9 @@ test-sdk:
     - pod install --repo-update
     # A simulator of this job's own (newest runtime), deleted afterwards: no app or permission
     # state from earlier runs, and other users of the Mac's simulators are left alone.
-    - SIM=$(xcrun simctl create "ci-$CI_JOB_ID" "iPhone 17") && echo "$SIM" > "$CI_PROJECT_DIR/build/simulator"
+    # Two lines: a failed create in an && list would not stop the job.
+    - SIM=$(xcrun simctl create "ci-$CI_JOB_ID" "iPhone 17")
+    - echo "$SIM" > "$CI_PROJECT_DIR/build/simulator"
     - set -o pipefail
     # The scheme of the podspec's test_spec, hosted in its app_spec TestHost. No diagnostics on
     # failure: collecting them (simctl diagnose) adds up to 10 minutes to a failed job.
