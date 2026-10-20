@@ -931,18 +931,37 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     // MARK: RTCPeerConnectionDelegate
-    //Still fired with Unified Plan (M155), once per remote stream after all its tracks are added
+    //Plan B's remote stream callback: M155 still fires it, but streams are delivered from
+    //didAdd rtpReceiver, the Unified Plan callback, so this one must not deliver them again
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
+    }
+
+    //Unified Plan: one callback per remote track, fired once the whole remote description is
+    //applied, so its streams already hold all their tracks. Each stream is delivered once.
+    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {
 
         //The connection may have been removed (call ended) before this callback ran
         guard let targetContainer = peerConnections.first(where: { $0.connection == peerConnection }) else {
-            os_log("Remote stream %@ for a removed connection", log: Log.rtc, type: .debug, stream.streamId)
+            os_log("Remote track for a removed connection", log: Log.rtc, type: .debug)
             return
         }
 
-        checkCurrentAudioRoute()
-        
-        delegate?.rtcClient(didReceiveRemoteStream: stream, streamId: targetContainer.streamId, endpointId: targetContainer.endpointId, type: targetContainer.streamType)
+        var streams = mediaStreams
+        if streams.isEmpty, let track = rtpReceiver.track {
+            //No stream signalled for the track (WebRTC normally supplies a default one)
+            let stream = factory.mediaStream(withStreamId: targetContainer.streamId)
+            if let audio = track as? RTCAudioTrack {
+                stream.addAudioTrack(audio)
+            } else if let video = track as? RTCVideoTrack {
+                stream.addVideoTrack(video)
+            }
+            streams = [stream]
+        }
+
+        for stream in streams where targetContainer.deliveredRemoteStreamIds.insert(stream.streamId).inserted {
+            checkCurrentAudioRoute()
+            delegate?.rtcClient(didReceiveRemoteStream: stream, streamId: targetContainer.streamId, endpointId: targetContainer.endpointId, type: targetContainer.streamType)
+        }
     }
     
     //Setup an IceCandidate listener to gather candidates
