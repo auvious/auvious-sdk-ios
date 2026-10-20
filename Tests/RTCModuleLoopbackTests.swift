@@ -101,6 +101,22 @@ final class RTCModuleLoopbackTests: XCTestCase {
         XCTAssertEqual(deliveries.count, 1, "the tracks were delivered separately")
     }
 
+    /// A mic-and-camera view answered with audio only and no stream: the delivered stream holds only
+    /// the audio track, not the video one the answer rejected (which would show as a black tile).
+    func testViewedTracksWithoutAStreamLeaveOutRejectedOnes() {
+        let delivered = expectation(description: "remote tracks delivered")
+        var deliveries: [RTCMediaStream] = []
+        viewStream(sending: [sfu.makeAudioTrack()], streamIds: []) { stream in
+            deliveries.append(stream)
+            if deliveries.count == 1 { delivered.fulfill() }
+        }
+        wait(for: [delivered], timeout: 20)
+
+        guard let stream = deliveries.first else { return }
+        XCTAssertEqual(stream.audioTracks.count, 1)
+        XCTAssertEqual(stream.videoTracks.count, 0, "the rejected video track was delivered")
+    }
+
     /// Publishing: the SDK's offer sends its tracks with addTrack (Unified Plan), audio before video,
     /// and the SFU receives both over a connected transport.
     func testPublishedStreamSendsAudioAndVideoTracks() {

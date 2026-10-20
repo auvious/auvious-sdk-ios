@@ -951,9 +951,15 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         var streams = mediaStreams
         if streams.isEmpty {
             //No stream signalled for the track (msid "-"): one stream of all the connection's
-            //received tracks, which all exist by now, delivered on the first of their callbacks
+            //received tracks, which all exist by now, delivered on the first of their callbacks.
+            //Only negotiated ones: a transceiver the answer rejected has a track that never plays.
             let stream = factory.mediaStream(withStreamId: targetContainer.streamId)
-            for track in peerConnection.receivers.compactMap({ $0.track }) {
+            let receiving = peerConnection.transceivers.filter { transceiver in
+                var direction = RTCRtpTransceiverDirection.inactive
+                return !transceiver.isStopped && transceiver.currentDirection(&direction)
+                    && (direction == .recvOnly || direction == .sendRecv)
+            }
+            for track in receiving.compactMap({ $0.receiver.track }) {
                 if let audio = track as? RTCAudioTrack {
                     stream.addAudioTrack(audio)
                 } else if let video = track as? RTCVideoTrack {
