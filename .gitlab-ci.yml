@@ -45,7 +45,7 @@ test-sdk:
   script:
     - export PATH="/opt/homebrew/bin:$PATH" CP_HOME_DIR="$HOME/sdk-ios-ci/cocoapods"
     - cd Example
-    - pod install
+    - pod install --repo-update
     - set -o pipefail
     # The scheme of the podspec's test_spec, hosted in its app_spec TestHost.
     - >
