@@ -19,7 +19,7 @@ build-example:
     - cd Example
     - pod install --repo-update
     # The committed lock must be what pod install resolves (podspec or Podfile changed without it?).
-    - git diff --exit-code Podfile.lock || { echo "Podfile.lock is out of date: run pod install in Example/ and commit it"; exit 1; }
+    - 'git diff --exit-code Podfile.lock || { echo "Podfile.lock is out of date: run pod install in Example/ and commit it"; exit 1; }'
     - set -o pipefail
     - >
       xcodebuild -workspace AuviousSDK.xcworkspace -scheme ExampleSimpleConference
