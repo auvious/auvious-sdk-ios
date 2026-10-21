@@ -21,7 +21,7 @@ public struct AuviousConferenceConfiguration {
     public var mqttEndpoint: String = ""
     
     //UI
-    public var conferenceBackgroundColor: UIColor = .darkGray
+    public var conferenceBackgroundColor: UIColor = UIColor(red: 0x23/255, green: 0x29/255, blue: 0x31/255, alpha: 1) // #232931
     public var enableSpeaker = true
     public var cameraAvailable = true
     public var microphoneAvailable = true
