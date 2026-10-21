@@ -539,9 +539,16 @@ internal final class CobrowseSessionController: NSObject {
 
 //MARK: - Conference SDK delegate
 
+//The SDK calls these from its signalling thread, everything here drives UI so it hops to main
 extension CobrowseSessionController: AuviousSDKConferenceDelegate {
 
     func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
+        DispatchQueue.main.async { [weak self] in
+            self?.conferenceEventReceived(event)
+        }
+    }
+
+    private func conferenceEventReceived(_ event: ConferenceEvent) {
         switch event.type {
         case .conferenceEnded?:
             end(reason: .agentEnded)
@@ -562,16 +569,22 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
     }
 
     func auviousSDK(screenSharingStopped: Bool) {
-        //The capture stopped without us asking (ICE failure, ReplayKit interruption)
-        guard !isStoppingShare, !isEnding, !isInBackground, state == .sharing else { return }
-        shareFailed()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            //The capture stopped without us asking (ICE failure, ReplayKit interruption)
+            guard !self.isStoppingShare, !self.isEnding, !self.isInBackground, self.state == .sharing else { return }
+            self.shareFailed()
+        }
     }
 
     func auviousSDK(onError error: AuviousSDKError) {
         os_log("Co-browse SDK error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
 
-        if case .publishStreamFailure = error, state == .sharing {
-            shareFailed()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if case .publishStreamFailure = error, self.state == .sharing {
+                self.shareFailed()
+            }
         }
     }
 
@@ -589,9 +602,16 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
 
 //MARK: - Co-browse signalling
 
+//Also called from the SDK's signalling thread
 extension CobrowseSessionController: CobrowseSignallingDelegate {
 
     func cobrowseUserEventReceived(_ type: RtcUserEventType, json: JSON) {
+        DispatchQueue.main.async { [weak self] in
+            self?.userEventReceived(type, json: json)
+        }
+    }
+
+    private func userEventReceived(_ type: RtcUserEventType, json: JSON) {
         guard !isEnding else { return }
 
         switch type {
@@ -608,7 +628,9 @@ extension CobrowseSessionController: CobrowseSignallingDelegate {
     }
 
     func cobrowseMetadataChanged(_ event: ConferenceMetadataUpdatedEvent) {
-        guard !isEnding else { return }
-        sketch?.metadataChanged(key: event.key, operation: event.operation, rawValue: event.rawValue)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, !self.isEnding else { return }
+            self.sketch?.metadataChanged(key: event.key, operation: event.operation, rawValue: event.rawValue)
+        }
     }
 }
