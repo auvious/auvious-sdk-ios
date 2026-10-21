@@ -58,6 +58,25 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     //Shown from the moment a video track is attached until its first frame is rendered,
     //so the view never sits there empty
     private let loadingIndicator = UIActivityIndicatorView(style: .medium)
+
+    //Width / height last reported through onVideoShapeChange (0 = no size yet)
+    private var reportedAspect: CGFloat = 0
+
+    /// The spinner while a video track loads. Off for our own camera, whose video fades in instead.
+    var showsLoadingIndicator = true
+
+    //True from attaching a track until its first frame
+    private var awaitingFirstFrame = false
+
+    /// True once a frame has told us the video's dimensions. It stays true when the camera is muted,
+    /// so the tile keeps the video's shape instead of going back to the loading square.
+    var hasVideoSize: Bool {
+        return size != .zero
+    }
+
+    /// Called when the video's size first becomes known and whenever its aspect ratio changes
+    /// (rotation, camera switch), so the call can reshape the tile to the video
+    var onVideoShapeChange: (() -> Void)?
     
     //Switch from OpenGL to Metal if we can
     #if arch(i386) || arch(x86_64) || arch(arm)
@@ -364,11 +383,14 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
 
         statusLabel.alpha = 0.0
         self.videoTrack = videoTrack
-        //Until the first frame of the new track arrives
-        loadingIndicator.startAnimating()
+        //Until the first frame of the new track arrives: a spinner, or nothing (it fades in)
+        awaitingFirstFrame = true
+        if showsLoadingIndicator {
+            loadingIndicator.startAnimating()
+        }
         self.videoTrack.add(videoView)
         videoView.frame = bounds
-        videoView.alpha = 1.0
+        videoView.alpha = showsLoadingIndicator ? 1.0 : 0.0
 
         //Apply overlay
         handleOverlay()
@@ -439,6 +461,21 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         //The first frame has been rendered
         DispatchQueue.main.async {
             self.loadingIndicator.stopAnimating()
+            if self.awaitingFirstFrame {
+                self.awaitingFirstFrame = false
+                //Fade the first frame in, unless the camera was turned off meanwhile
+                if self.hasVideoStream && self.videoView.alpha < 1 {
+                    UIView.animate(withDuration: 0.3) {
+                        self.videoView.alpha = 1
+                    }
+                }
+            }
+            //Not on every resolution step of the stream, only when the shape changes
+            let aspect = self.hasVideoSize ? self.size.width / self.size.height : 0
+            if abs(aspect - self.reportedAspect) > 0.01 {
+                self.reportedAspect = aspect
+                self.onVideoShapeChange?()
+            }
         }
     }
     

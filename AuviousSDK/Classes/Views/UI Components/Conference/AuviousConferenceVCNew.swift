@@ -102,6 +102,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var statusCapsuleEffect: UIVisualEffect?
     private var isStatusCapsuleRevealed = false
 
+    //Our tile fades and scales in once, after the first layout places it
+    private var hasShownLocalView = false
+
+    //Remote tiles just added, faded and scaled in by the next layout animation
+    private var appearingRemoteViews: [StreamView] = []
+
     //Banner shown over the host app while the call is in PiP
     private weak var windowNotification: DismissableNotificationView?
     private let viewPadding: CGFloat = 10
@@ -430,6 +436,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         localView.layer.zPosition = 100
         localView.layer.borderColor = UIColor.gray.cgColor
         localView.layer.borderWidth = 1.0 / UIScreen.main.scale
+        //Our camera starts in a moment: a black tile, then the video fades in on its first frame
+        localView.backgroundColor = .black
+        localView.showsLoadingIndicator = false
+        localView.alpha = 0
+        localView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        //Reshape the tile to the camera's video once its size is known
+        localView.onVideoShapeChange = { [weak self] in
+            self?.createConstraints()
+        }
         
         streamContainerView.addSubview(localView)
         
@@ -954,12 +969,28 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             let remoteView = StreamView(frame: .zero)
             remoteView.translatesAutoresizingMaskIntoConstraints = false
             remoteView.participantEndpoint = participantEndpoint
-            remoteView.backgroundColor = videoViewBackgroundColor
+            //Black, like the camera off state, while the video loads or when there is none
+            remoteView.backgroundColor = .black
+            //Square until its video's size is known, then resized to the video (createConstraints())
+            remoteView.onVideoShapeChange = { [weak self] in
+                self?.createConstraints()
+            }
             //Keeps the mute badge clear of the call buttons
             remoteView.audioMutedBadgeBottomLimit = buttonContainerView.topAnchor
             self.remoteViews.append(remoteView)
             streamContainerView.addSubview(remoteView)
             view.bringSubviewToFront(buttonContainerView)
+
+            //Start as a transparent square in the middle of the screen, so the layout animation
+            //grows it from the center instead of from the top left corner
+            let side = view.safeAreaLayoutGuide.layoutFrame.width
+            UIView.performWithoutAnimation {
+                remoteView.frame = CGRect(x: view.bounds.midX - side / 2, y: view.bounds.midY - side / 2, width: side, height: side)
+                remoteView.layoutIfNeeded()
+            }
+            remoteView.alpha = 0
+            remoteView.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
+            appearingRemoteViews.append(remoteView)
             
             //If we can't show remote video due to UI limits, notify the user
             if initialStreamsConnected && remoteViews.count > maximumRemoteStreamsRendered {
@@ -1658,25 +1689,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     
                     for r in remoteViews { r.restoreOverlay() }
                     
-                    //Solo, no screen sharing
-                    if remoteViews.count == 0 {
-                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                        constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
-                        constraints.append(localView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
-                        constraints.append(localView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
-                    } else {
-                        
-                        if !isLandscape {
-                            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
-                            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
-                            constraints.append(localView.widthAnchor.constraint(equalToConstant: 75))
-                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 16/9))
-                        } else {
-                            constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20))
-                            constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
-                            constraints.append(localView.widthAnchor.constraint(equalToConstant: 132))
-                            constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: 9/16))
-                        }
+                    //Our video sits top right from the start, also while we wait for others to join.
+                    //Shaped like the camera's video, so nothing is cropped: 3:4 (640x480 in portrait)
+                    //until the first frame gives the real size.
+                    do {
+                        let videoSize = localView.size
+                        let aspect: CGFloat = localView.hasVideoSize ? videoSize.height / videoSize.width : (isLandscape ? 3/4 : 4/3)
+                        //The same margin from the top and the right
+                        constraints.append(localView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10))
+                        constraints.append(localView.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 10))
+                        constraints.append(localView.widthAnchor.constraint(equalToConstant: isLandscape ? 237 : 135))
+                        constraints.append(localView.heightAnchor.constraint(equalTo: localView.widthAnchor, multiplier: aspect))
                     }
                 }
                 if remoteViews.count == 0 {
@@ -1756,8 +1779,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     } else { //1 Remote WITHOUT Share screen
                         
                         if !isLandscape {
-                            //Full screen portrait video (with top|safeArea)
-                            if agentVideoPortraitMode {
+                            if !view1.hasVideoSize {
+                                //Loading, or no video yet: a centered square until a frame gives its size
+                                constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
+                                constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+                                constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
+                                constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
+                                constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor))
+                            } else if agentVideoPortraitMode {
+                                //Full screen portrait video (with top|safeArea)
                                 constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
                                 constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
                                 constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
@@ -1983,12 +2013,29 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.existingConstraints = constraints
 
             self.view.layoutIfNeeded()
+
+            //New remote tiles fade and scale in as they settle
+            for remoteView in self.appearingRemoteViews {
+                remoteView.alpha = 1
+                remoteView.transform = .identity
+            }
+            self.appearingRemoteViews.removeAll()
         }
 
-        if animated {
+        //The first layout places the views directly, instead of growing them from a zero frame
+        if animated && localView.bounds != .zero {
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 2, options: .curveEaseInOut, animations: applyConstraints)
         } else {
             applyConstraints()
+        }
+
+        //Our tile appears: fades in while growing from 0.8x to full size
+        if !hasShownLocalView && localView.bounds != .zero {
+            hasShownLocalView = true
+            UIView.animate(withDuration: 0.45, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: [.curveEaseOut], animations: {
+                self.localView.alpha = 1
+                self.localView.transform = .identity
+            })
         }
     }
 }
@@ -2066,7 +2113,9 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         let optionsButton = buttonContainerView.optionsButton
         optionsButton.menu = UIMenu(children: [
             UIDeferredMenuElement.uncached { [weak self] completion in
-                completion(self?.optionsMenuItems(for: types) ?? [])
+                //Each item in its own inline section, so the menu draws a divider between them
+                let items = self?.optionsMenuItems(for: types) ?? []
+                completion(items.map { UIMenu(title: "", options: .displayInline, children: [$0]) })
             }
         ])
         optionsButton.showsMenuAsPrimaryAction = true
