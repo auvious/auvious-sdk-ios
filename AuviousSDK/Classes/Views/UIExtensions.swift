@@ -40,15 +40,9 @@ extension UIView {
          self.layer.mask = mask
     }
     
-    //iOS-safe safe area layout guide
+    //The safe area layout guide (from before iOS 11 had one)
     var saferAreaLayoutGuide: UILayoutGuide {
-        get {
-            if #available(iOS 11.0, *) {
-                return self.safeAreaLayoutGuide
-            } else {
-                return self.layoutMarginsGuide
-            }
-        }
+        return self.safeAreaLayoutGuide
     }
     
     //Returns a screenshot of the view
