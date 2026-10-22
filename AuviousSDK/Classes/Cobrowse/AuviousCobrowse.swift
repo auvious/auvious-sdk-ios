@@ -130,6 +130,7 @@ public extension AuviousCobrowseDelegate {
 
  The session UI lives in its own window above the app, so the customer can keep navigating while sharing.
  Only one co-browse session can run at a time, and it can't run alongside `AuviousConferenceVCNew`.
+ To co-browse during a video call, set `AuviousConferenceConfiguration.cobrowseAvailable` instead.
  */
 public final class AuviousCobrowse {
 

@@ -46,7 +46,7 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
         overlay.showSheet(CobrowseSheetView.Content(iconSymbol: "iphone",
                                                     title: CobrowseStrings.explainerTitle("Anna"),
                                                     body: nil,
-                                                    bullets: [CobrowseStrings.explainerAppOnly("Anna"), CobrowseStrings.explainerPrivate, CobrowseStrings.explainerDraw],
+                                                    bullets: [CobrowseStrings.explainerAppOnly, CobrowseStrings.explainerPrivate, CobrowseStrings.explainerDraw],
                                                     primaryTitle: CobrowseStrings.startSharing,
                                                     secondaryTitle: CobrowseStrings.notNow,
                                                     footnote: CobrowseStrings.explainerFootnote),
@@ -76,6 +76,55 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
         overlay.setPhase(.notSharing)
         overlay.showToast(style: .info, title: nil, message: CobrowseStrings.agentStoppedViewing("Anna"))
         snapshot("5-not-sharing")
+    }
+
+    //MARK: In a video call
+
+    func testInCallDockHidesWhileTheCallIsFullScreen() {
+        overlay.setPhase(.sharing(since: Date().addingTimeInterval(-221)))
+        XCTAssertFalse(overlay.dock.isHidden)
+
+        overlay.hidesDock = true
+        XCTAssertTrue(overlay.dock.isHidden)
+        XCTAssertFalse(overlay.pill.isHidden, "The pill keeps telling the customer they are sharing")
+        snapshot("9-in-call-call-full-screen")
+
+        overlay.hidesDock = false
+        XCTAssertFalse(overlay.dock.isHidden)
+    }
+
+    func testInCallHiddenDockStaysHiddenAcrossPhases() {
+        overlay.hidesDock = true
+        overlay.setPhase(.sharing(since: Date()))
+        overlay.setPhase(.drawing(since: Date()))
+        XCTAssertTrue(overlay.dock.isHidden)
+    }
+
+    func testInCallExplainerAndEndConfirmation() {
+        overlay.setPhase(.awaitingConsent)
+        overlay.showSheet(CobrowseSheetView.Content(iconSymbol: "iphone",
+                                                    title: CobrowseStrings.inCallExplainerTitle("Anna"),
+                                                    body: nil,
+                                                    bullets: [CobrowseStrings.explainerAppOnly, CobrowseStrings.explainerPrivate, CobrowseStrings.explainerCallContinues, CobrowseStrings.explainerDraw],
+                                                    primaryTitle: CobrowseStrings.inCallStart,
+                                                    secondaryTitle: CobrowseStrings.notNow,
+                                                    footnote: CobrowseStrings.explainerFootnote),
+                          onPrimary: {}, onSecondary: {})
+        snapshot("10-in-call-explainer")
+
+        overlay.setPhase(.sharing(since: Date().addingTimeInterval(-302)))
+        overlay.showSheet(CobrowseSheetView.Content(iconSymbol: nil,
+                                                    title: CobrowseStrings.inCallEndTitle,
+                                                    body: CobrowseStrings.inCallEndBody("Anna"),
+                                                    bullets: [],
+                                                    primaryTitle: CobrowseStrings.inCallEndSession,
+                                                    secondaryTitle: CobrowseStrings.keepSharing,
+                                                    footnote: nil),
+                          onPrimary: {}, onSecondary: {})
+        XCTAssertTrue(overlay.isShowingSheet)
+        XCTAssertEqual(CobrowseStrings.inCallExplainerTitle("Maria"), "Co-browse with Maria?")
+        XCTAssertEqual(CobrowseStrings.inCallEndBody(nil), "Your agent will stop seeing your screen and all drawings are removed. You stay on the call.")
+        snapshot("11-in-call-end-confirmation")
     }
 
     func testEndConfirmation() {

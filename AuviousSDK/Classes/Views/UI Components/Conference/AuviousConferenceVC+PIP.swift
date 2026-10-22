@@ -19,7 +19,8 @@ extension AuviousConferenceVCNew {
 
         let corner: Corner
         if oldSize == UIScreen.main.bounds.size {
-            corner = .bottomRight
+            //While co-browsing the bottom belongs to the co-browse dock
+            corner = cobrowseSession != nil ? .topRight : .bottomRight
         } else {
             corner = closestCorner(for: pipView)
         }
@@ -92,7 +93,8 @@ extension AuviousConferenceVCNew {
     }
     
     func toggleSharingBorder(mode: Bool) {
-        if mode {
+        //Co-browse frames the whole screen instead of the PiP
+        if mode && cobrowseSession == nil {
             view.layer.borderWidth = 4
             view.layer.borderColor = UIColor.red.cgColor
             view.layer.masksToBounds = false

@@ -34,6 +34,23 @@ public struct AuviousConferenceConfiguration {
     /// Host app must add UIBackgroundModes "audio" to Info.plist.
     public var backgroundAudioEnabled: Bool = false
 
+    //Co-browse
+    /// Lets the agent ask to co-browse this app during the call. The customer shares the app's screen
+    /// (masked like a standalone co-browse session) and the call shrinks to PiP while sharing.
+    public var cobrowseAvailable: Bool = false
+
+    /// Which views are blacked out in the co-browse screen share
+    public var cobrowseMasking: AuviousMaskingRules = AuviousMaskingRules()
+
+    /// Allow the customer to draw on the shared screen and render the agent's drawings
+    public var cobrowseAnnotationsEnabled: Bool = true
+
+    /// Outline masked views on the customer's own screen so they know what the agent can't see
+    public var cobrowseShowsMaskHints: Bool = true
+
+    /// Show a short explanation sheet before the iOS screen recording prompt
+    public var cobrowseShowsShareExplainer: Bool = true
+
     //Other
     public var participantName: String? = nil
     

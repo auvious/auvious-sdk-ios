@@ -77,6 +77,9 @@ internal final class CobrowseOverlayViewController: UIViewController {
     let canvas = SketchCanvasView()
     let laser = LaserPointerView()
     let hints = CobrowseMaskHintsView()
+    /// In a video call, holds the call's PiP while co-browsing. Like the rest of this window it is never part of
+    /// the shared screen, so the agent sees the app behind the call instead of a masked box.
+    let callContainer = CobrowsePassthroughView()
 
     var accentColor: UIColor = CobrowseTheme.defaultAccent {
         didSet {
@@ -87,6 +90,16 @@ internal final class CobrowseOverlayViewController: UIViewController {
     }
 
     var annotationsEnabled = true
+
+    /// Hides the dock while the video call is full screen; the call has its own "Stop co-browsing" button
+    var hidesDock = false {
+        didSet {
+            if oldValue != hidesDock {
+                applyPhase()
+            }
+        }
+    }
+
     var tool: SketchTool = .pen {
         didSet {
             canvas.tool = tool
@@ -108,7 +121,7 @@ internal final class CobrowseOverlayViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        for fullScreen in [hints, canvas, laser, glow] as [UIView] {
+        for fullScreen in [hints, canvas, laser, callContainer, glow] as [UIView] {
             fullScreen.frame = view.bounds
             fullScreen.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             view.addSubview(fullScreen)
@@ -167,7 +180,7 @@ internal final class CobrowseOverlayViewController: UIViewController {
 
         let showsChrome = phase != .awaitingConsent
         pill.isHidden = !showsChrome
-        dock.isHidden = !showsChrome
+        dock.isHidden = !showsChrome || hidesDock
 
         //"Private" hints only make sense while the screen is shared
         switch phase {
@@ -233,7 +246,7 @@ internal final class CobrowseOverlayViewController: UIViewController {
     private func layoutPill() {
         let size = pill.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
         let width = min(size.width, view.bounds.width - 32)
-        pill.frame = CGRect(x: (view.bounds.width - width) / 2, y: view.safeAreaInsets.top + 2, width: width, height: 32)
+        pill.frame = CGRect(x: (view.bounds.width - width) / 2, y: view.safeAreaInsets.top + CobrowseTheme.pillTop, width: width, height: CobrowseTheme.pillHeight)
     }
 
     private func dockFrame(for edge: DockEdge) -> CGRect {

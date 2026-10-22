@@ -57,11 +57,28 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             _screenMode = newValue
             updateGestureState(for: newValue)
             createConstraints()
+            refreshCobrowseChrome()
         }
     }
+
+    //In-call co-browse: the running session, the mode to go back to when it ends, and the agent's
+    //sketch metadata received before it started
+    internal var cobrowseSession: CobrowseSessionController?
+    internal var screenModeBeforeCobrowse: ScreenMode?
+    internal var pendingCobrowseMetadata: [ConferenceMetadataUpdatedEvent] = []
+    //Where the call's view lives in the host app, while it is moved to the co-browse overlay
+    internal weak var callHostSuperview: UIView?
+    internal var callHostIndex: Int?
+    //The call's view is moving between the host app and the co-browse overlay: UIKit may send it a
+    //disappear/appear cycle for that, which must not end the call
+    internal var isMovingCallForCobrowse = false
+    //The host app was told co-browse started (onCobrowseStarted)
+    internal var didNotifyCobrowseStarted = false
+    //"<Agent> can't see the call", while sharing with the call full screen
+    internal var callHiddenChip: UIView?
     
     //UI components
-    private var clientConfiguration = AuviousConferenceConfiguration()
+    internal var clientConfiguration = AuviousConferenceConfiguration()
     
     //Network indicator view
     private let networkIndicator = NetworkIndicatorView()
@@ -83,7 +100,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     //Bottom button bar
     internal var buttonContainerView: ConferenceButtonBar!
     //Button for stopping the screen share when in PIP mode
-    private var stopScreenSharingButton: LargeButton = LargeButton(title: "Stop sharing", iconName: "stopSharing")
+    internal var stopScreenSharingButton: LargeButton = LargeButton(title: "Stop sharing", iconName: "stopSharing")
     
     //Overlay view for hold mode
     private var blurredOverlayView: ConferenceHoldView?
@@ -159,7 +176,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
     //Control flags
     private var performedInitialValidations: Bool = false
-    private var conferenceJoined: Bool = false
+    internal var conferenceJoined: Bool = false
     private var shareScreenFullScreen: Bool = false
     private var initialStreamsConnected: Bool = false
     private var hasAppliedInitialAudioRoute: Bool = false
@@ -168,14 +185,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     private var isConferenceOnHold = false
     
     //Delegate
-    private weak var delegate: AuviousSimpleConferenceDelegate?
+    internal weak var delegate: AuviousSimpleConferenceDelegate?
     
     //Our local stream id
-    private var localScreenShareStreamId: String?
+    internal var localScreenShareStreamId: String?
     private var localStreamId: String?
     private var localStreamType: StreamType?
     //The conference we're in
-    private var currentConference: ConferenceSimpleView!
+    internal var currentConference: ConferenceSimpleView!
     //Current conference participants
     private var conferenceParticipants: Int = 0 {
         didSet {
@@ -684,6 +701,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
+            listenForCobrowse()
             AuviousConferenceSDK.sharedInstance.configure(params: params, username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             AuviousConferenceSDK.sharedInstance.setUIConfiguration(config: clientConfiguration)
             os_log("Configured ConferenceSDK", log: Log.conferenceUI, type: .debug)
@@ -742,12 +760,26 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        
+        guard isLeavingCall else {
+            os_log("viewDidDisappear while co-browsing, the call goes on", log: Log.conferenceUI, type: .debug)
+            return
+        }
+        os_log("viewDidDisappear, leaving the call", log: Log.conferenceUI, type: .debug)
+        endCobrowseWithCall(.customerEnded)
+
         AuviousConferenceSDK.sharedInstance.logout(onSuccess: {
         }, onFailure: {error in
         })
     }
-    
+
+    /// While co-browsing, UIKit also cycles the call's appearance when the call moves between the host app and the
+    /// co-browse overlay, and when the host app changes screens for co-browse (onCobrowseStarted/Ended). Only the
+    /// call really going away (dismissed, popped or removed from its superview) ends it then.
+    private var isLeavingCall: Bool {
+        guard cobrowseSession != nil || isMovingCallForCobrowse else { return true }
+        return !isMovingCallForCobrowse && (isBeingDismissed || isMovingFromParent || view.superview == nil)
+    }
+
     //When orientation changes we simply reevaluate our UI constraints
     @objc func orientationChanged(notification: NSNotification) {
         createConstraints()
@@ -849,6 +881,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     private func handleConferenceEndedEvent(){
+        endCobrowseWithCall(.agentEnded)
         let sdk = AuviousConferenceSDK.sharedInstance
         if sdk.sharingMyScreen {
             sdk.rtcClient?.stopScreenSharing()
@@ -1242,11 +1275,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Reconnect to conference streams
         handleExistingConferenceStreams()
         startLocalStream()
+
+        //A co-browse that was sharing before the app went to the background shares again
+        cobrowseSession?.callResumed()
     }
 
     public func auviousSDK(didResumeFromBackground withActiveAudio: Bool) {
         // Audio route and peer connections are still active — just refresh video layout
         createConstraints()
+        cobrowseSession?.callResumed()
     }
     
     public func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {
@@ -1376,6 +1413,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     public func auviousSDK(screenSharingStarted: Bool) {
+        //Co-browse moves the call to PiP itself, without the sharing border
+        guard cobrowseSession == nil else { return }
+
         minimizeToPiP()
         
         //Display sharing border
@@ -1389,6 +1429,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             guard let self = self else { return }
             self.stopScreenSharingButton.alpha = 0
             self.toggleSharingBorder(mode: false)
+            self.cobrowseSession?.screenSharingStopped()
+        }
+    }
+
+    public func auviousSDK(onError error: AuviousSDKError) {
+        DispatchQueue.main.async { [weak self] in
+            self?.cobrowseSession?.sdkError(error)
         }
     }
     
@@ -2060,6 +2107,12 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     //Stops screen sharing
     @objc internal func stopScreenShareButtonPressed(_ sender: Any) {
         selectionFeedbackGenerator.impactOccurred()
+
+        //While co-browsing the same buttons end co-browsing, after confirming
+        if let session = cobrowseSession {
+            session.confirmEnd()
+            return
+        }
         
         guard let streamId = localScreenShareStreamId else {
             return
@@ -2142,7 +2195,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 let sharing = AuviousConferenceSDK.sharedInstance.sharingMyScreen
                 let shown: ConferenceButtonType = sharing ? .stopScreenShare : .screenShare
                 //Not while the agent shares their screen or the call is on hold
-                let attributes: UIMenuElement.Attributes = (isAgentSharingScreen || isConferenceOnHold) && !sharing ? .disabled : []
+                let attributes: UIMenuElement.Attributes = ((isAgentSharingScreen || isConferenceOnHold) && !sharing) || cobrowseSession != nil ? .disabled : []
                 return UIAction(title: shown.title, image: icon(shown), attributes: attributes) { [weak self] _ in
                     guard let self = self else { return }
                     if AuviousConferenceSDK.sharedInstance.sharingMyScreen {
@@ -2161,6 +2214,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     @objc internal func hangupButtonPressed(_ sender: Any) {
         os_log("hangupButtonPressed", log: Log.conferenceUI, type: .debug)
         selectionFeedbackGenerator.impactOccurred()
+        endCobrowseWithCall(.customerEnded)
         
         AuviousConferenceSDK.sharedInstance.leaveConference(conferenceId: currentConference.id, onSuccess: {
             os_log("Left conference", log: Log.conferenceUI, type: .debug)

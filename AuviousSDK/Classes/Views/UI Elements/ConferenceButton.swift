@@ -300,6 +300,11 @@ final class LargeButton: UIButton {
     private let iconView = UIImageView()
     private let label = UILabel()
 
+    var title: String? {
+        get { return label.text }
+        set { label.text = newValue }
+    }
+
     init(title: String, iconName: String) {
         super.init(frame: .zero)
 

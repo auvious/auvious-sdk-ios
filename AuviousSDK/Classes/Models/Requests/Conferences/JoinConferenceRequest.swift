@@ -53,11 +53,16 @@ internal final class JoinConferenceRequest {
 
         switch AuviousConferenceSDK.sharedInstance.joinProfile {
         case .stream:
-            if AuviousConferenceSDK.sharedInstance.uiConfiguration.screenSharingAvailable {
-                metaDataDictionary["capabilities"] = ["display-capture"]
-            } else {
-                metaDataDictionary["capabilities"] = []
+            let configuration = AuviousConferenceSDK.sharedInstance.uiConfiguration
+            var capabilities: [String] = []
+            if configuration.screenSharingAvailable || configuration.cobrowseAvailable {
+                capabilities.append("display-capture")
             }
+            //In-call co-browse: the agent asks this endpoint to share its screen (no ticket, no second endpoint)
+            if configuration.cobrowseAvailable {
+                capabilities.append(contentsOf: ["ar-pointer", "native-co-browse"])
+            }
+            metaDataDictionary["capabilities"] = capabilities
             metaDataDictionary["type"] = "stream"
 
         case .displayCapture(let originUrl, let customerMetadata):

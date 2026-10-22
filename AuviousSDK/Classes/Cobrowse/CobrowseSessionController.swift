@@ -13,6 +13,8 @@ import os
 private enum CobrowseEventName {
     static let displayCaptureAccept = "CobrowseDisplayCaptureAcceptEvent"
     static let displayCaptureDeny = "CobrowseDisplayCaptureDenyEvent"
+    /// In a call, the customer stopping is sent like the agent's own terminate event
+    static let displayCaptureTerminate = "CobrowseDisplayCaptureTerminateEvent"
 }
 
 /// Leave reason the agent maps to "the customer terminated the session"
@@ -22,20 +24,59 @@ private let customerTerminatedReason = "widgetScreenShareTerminated"
  Runs one co-browse session:
  ticket → login → join as a display-capture participant → consent → ReplayKit screen share,
  plus the agent's requests, sketch annotations, masking and the app lifecycle.
+
+ In a video call (`Mode.inCall`) the conference is already joined by `AuviousConferenceVCNew`: the session skips
+ login and join, shares the screen from the call's own endpoint, and leaves the conference delegate to the call.
  */
 internal final class CobrowseSessionController: NSObject {
 
-    var onStateChange: ((AuviousCobrowseState) -> Void)?
-    var onFailure: ((AuviousSDKGenericError) -> Void)?
-    var onEnd: ((AuviousCobrowseEndReason) -> Void)?
+    enum Mode {
+        /// Its own session, redeeming a ticket
+        case standalone(AuviousCobrowseConfiguration)
+        /// Inside the video call that is already running
+        case inCall
+    }
 
-    private struct Agent {
+    /// What the session needs from either configuration
+    struct Options {
+        var participantName: String?
+        var showsShareExplainer = true
+        var annotationsEnabled = true
+        var showsMaskHints = true
+        var accentColor: UIColor = CobrowseTheme.defaultAccent
+
+        init(_ configuration: AuviousCobrowseConfiguration) {
+            participantName = configuration.participantName
+            showsShareExplainer = configuration.showsShareExplainer
+            annotationsEnabled = configuration.annotationsEnabled
+            showsMaskHints = configuration.showsMaskHints
+            accentColor = configuration.accentColor
+        }
+
+        init(_ configuration: AuviousConferenceConfiguration) {
+            participantName = configuration.participantName
+            showsShareExplainer = configuration.cobrowseShowsShareExplainer
+            annotationsEnabled = configuration.cobrowseAnnotationsEnabled
+            showsMaskHints = configuration.cobrowseShowsMaskHints
+        }
+    }
+
+    struct Agent {
         let userId: String
         let endpointId: String
         let name: String?
     }
 
-    private let configuration: AuviousCobrowseConfiguration
+    var onStateChange: ((AuviousCobrowseState) -> Void)?
+    var onFailure: ((AuviousSDKGenericError) -> Void)?
+    var onEnd: ((AuviousCobrowseEndReason) -> Void)?
+    /// In a call: the screen started (true) or stopped (false) being shared
+    var onSharingChanged: ((Bool) -> Void)?
+    /// The session is ending and the screen is no longer captured (the ended toast may still show before `onEnd`)
+    var onWillEnd: ((AuviousCobrowseEndReason) -> Void)?
+
+    private let mode: Mode
+    private let options: Options
     private let sdk = AuviousConferenceSDK.sharedInstance
     private let overlay = CobrowseOverlayViewController()
     private var window: CobrowseOverlayWindow?
@@ -62,6 +103,25 @@ internal final class CobrowseSessionController: NSObject {
     private var resumeSharingOnForeground = false
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     private var lifecycleObservers: [NSObjectProtocol] = []
+    /// Ends without the "ended" toast (declined, or the call itself is going away)
+    private var endsQuietly = false
+
+    private var isInCall: Bool {
+        if case .inCall = mode {
+            return true
+        }
+        return false
+    }
+
+    /// The agent's name, once known
+    var agentName: String? {
+        return agent?.name
+    }
+
+    /// True while the screen is shared
+    var isSharing: Bool {
+        return state == .sharing
+    }
 
     private static let timestampFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -70,13 +130,25 @@ internal final class CobrowseSessionController: NSObject {
     }()
 
     init(configuration: AuviousCobrowseConfiguration) {
-        self.configuration = configuration
+        self.mode = .standalone(configuration)
+        self.options = Options(configuration)
+        super.init()
+    }
+
+    /// A session inside the running video call
+    init(inCallWith options: Options) {
+        self.mode = .inCall
+        self.options = options
         super.init()
     }
 
     //MARK: Start
 
     func start() {
+        guard case .standalone(let configuration) = mode else {
+            return
+        }
+
         installOverlay()
         state = .connecting
         overlay.setPhase(.connecting)
@@ -116,10 +188,50 @@ internal final class CobrowseSessionController: NSObject {
         })
     }
 
+    /**
+     Starts an in-call session after the agent asked to see the screen. The call owns the conference and its delegate.
+
+     - Parameter agent: The agent who asked, if known (falls back to the conference's agent)
+     - Parameter participants: The conference's participants, to find the agent and their name
+     - Parameter metadata: Sketch / AR pointer metadata received before the session started
+     */
+    func startInCall(agent requester: Agent?, participants: [ConferenceParticipant], metadata: [ConferenceMetadataUpdatedEvent]) {
+        guard isInCall else { return }
+
+        installOverlay()
+        hasJoined = true
+
+        sdk.cobrowseDelegate = self
+        sdk.screenStreamIsCobrowse = true
+        sdk.screenFrameProcessor = { sampleBuffer, pixelBuffer in
+            return PixelBufferMasker.maskedFrame(sampleBuffer: sampleBuffer, pixelBuffer: pixelBuffer, registry: MaskRegistry.shared)
+        }
+
+        //The requester, named from the participant list when the request didn't carry a name
+        for participant in participants {
+            for endpoint in participant.endpoints ?? [] {
+                if let requester = requester, endpoint.id == requester.endpointId {
+                    agentFound(userId: requester.userId, endpointId: requester.endpointId, name: requester.name ?? endpoint.name)
+                } else if requester == nil, agent == nil, isAgent(endpoint.roles) {
+                    agentFound(userId: participant.id, endpointId: endpoint.id, name: endpoint.name)
+                }
+            }
+        }
+        if let requester = requester, agent == nil {
+            agentFound(userId: requester.userId, endpointId: requester.endpointId, name: requester.name)
+        }
+
+        sketch?.applyJoinMetadata(sdk.joinedConferenceMetadata)
+        metadata.forEach { sketch?.metadataChanged(key: $0.key, operation: $0.operation, rawValue: $0.rawValue) }
+
+        observeLifecycle()
+        askToShare()
+    }
+
     private func installOverlay() {
-        overlay.accentColor = configuration.accentColor
-        overlay.annotationsEnabled = configuration.annotationsEnabled
-        overlay.hints.showsHints = configuration.showsMaskHints
+        overlay.accentColor = options.accentColor
+        overlay.annotationsEnabled = options.annotationsEnabled
+        overlay.hints.showsHints = options.showsMaskHints
         overlay.loadViewIfNeeded()
 
         overlay.dock.onCancel = { [weak self] in
@@ -150,7 +262,7 @@ internal final class CobrowseSessionController: NSObject {
             self?.sketch?.clear()
         }
 
-        if configuration.annotationsEnabled {
+        if options.annotationsEnabled {
             let session = SketchSession(canvas: overlay.canvas, laser: overlay.laser)
             session.onInkColorChanged = { [weak self] _ in
                 self?.overlay.inkColorChanged()
@@ -172,7 +284,7 @@ internal final class CobrowseSessionController: NSObject {
 
     /// The conference comes with the token (conference_id); fall back to the ticket's properties
     private func resolveConference(_ conferenceId: String?) {
-        guard !isEnding else { return }
+        guard !isEnding, case .standalone(let configuration) = mode else { return }
 
         if let id = conferenceId, !id.isEmpty {
             join(id)
@@ -239,7 +351,7 @@ internal final class CobrowseSessionController: NSObject {
     private func askToShare() {
         guard !isEnding else { return }
 
-        guard configuration.showsShareExplainer else {
+        guard options.showsShareExplainer else {
             requestShare()
             return
         }
@@ -248,15 +360,18 @@ internal final class CobrowseSessionController: NSObject {
         overlay.setPhase(.awaitingConsent)
 
         let name = agent?.name
-        var bullets = [CobrowseStrings.explainerAppOnly(name), CobrowseStrings.explainerPrivate]
-        if configuration.annotationsEnabled {
+        var bullets = [CobrowseStrings.explainerAppOnly, CobrowseStrings.explainerPrivate]
+        if isInCall {
+            bullets.append(CobrowseStrings.explainerCallContinues)
+        }
+        if options.annotationsEnabled {
             bullets.append(CobrowseStrings.explainerDraw)
         }
         let content = CobrowseSheetView.Content(iconSymbol: "iphone",
-                                                title: CobrowseStrings.explainerTitle(name),
+                                                title: isInCall ? CobrowseStrings.inCallExplainerTitle(name) : CobrowseStrings.explainerTitle(name),
                                                 body: nil,
                                                 bullets: bullets,
-                                                primaryTitle: CobrowseStrings.startSharing,
+                                                primaryTitle: isInCall ? CobrowseStrings.inCallStart : CobrowseStrings.startSharing,
                                                 secondaryTitle: CobrowseStrings.notNow,
                                                 footnote: CobrowseStrings.explainerFootnote)
         overlay.showSheet(content, onPrimary: { [weak self] in
@@ -269,6 +384,14 @@ internal final class CobrowseSessionController: NSObject {
     /// Shows the iOS screen recording prompt and publishes the screen once allowed
     private func requestShare() {
         guard !isEnding, hasJoined, state != .sharing else { return }
+
+        //In a call that is still reconnecting (back from the background), share once it's back
+        if isInCall && sdk.currentConferenceId == nil {
+            resumeSharingOnForeground = true
+            state = .notSharing
+            overlay.setPhase(.notSharing)
+            return
+        }
 
         state = .awaitingConsent
         overlay.setPhase(.awaitingConsent)
@@ -302,11 +425,20 @@ internal final class CobrowseSessionController: NSObject {
         state = .sharing
         overlay.setPhase(.sharing(since: since))
         sendToAgent(CobrowseEventName.displayCaptureAccept)
+        onSharingChanged?(true)
     }
 
     private func shareDeclined() {
         stopCapture()
         sendToAgent(CobrowseEventName.displayCaptureDeny)
+
+        //In a call there's nothing to stay connected to: the agent can ask again
+        if isInCall && sharingSince == nil {
+            endsQuietly = true
+            end(reason: .customerEnded)
+            return
+        }
+
         state = .notSharing
         overlay.setPhase(.notSharing)
     }
@@ -327,6 +459,7 @@ internal final class CobrowseSessionController: NSObject {
         sharingSince = nil
         state = .notSharing
         overlay.setPhase(.notSharing)
+        onSharingChanged?(false)
     }
 
     private func stopCapture(completion: (() -> Void)? = nil) {
@@ -340,6 +473,16 @@ internal final class CobrowseSessionController: NSObject {
         guard state == .sharing, let since = sharingSince else { return }
         isDrawing = drawing
         overlay.setPhase(drawing ? .drawing(since: since) : .sharing(since: since))
+    }
+
+    /// In a call: where the call's view goes while co-browsing, above the drawings and below the co-browse controls
+    var callContainer: UIView {
+        return overlay.callContainer
+    }
+
+    /// While the video call is full screen its own "Stop co-browsing" button replaces the dock
+    func setDockHidden(_ hidden: Bool) {
+        overlay.hidesDock = hidden
     }
 
     //MARK: Agent
@@ -357,7 +500,7 @@ internal final class CobrowseSessionController: NSObject {
         })
     }
 
-    private func agentRequestedShare() {
+    func agentRequestedShare() {
         switch state {
         case .sharing:
             //Already sharing (we started on our own), just confirm
@@ -371,12 +514,12 @@ internal final class CobrowseSessionController: NSObject {
 
     //MARK: Ending
 
-    private func confirmEnd() {
+    func confirmEnd() {
         let content = CobrowseSheetView.Content(iconSymbol: nil,
-                                                title: CobrowseStrings.endTitle,
-                                                body: CobrowseStrings.endBody(agent?.name),
+                                                title: isInCall ? CobrowseStrings.inCallEndTitle : CobrowseStrings.endTitle,
+                                                body: isInCall ? CobrowseStrings.inCallEndBody(agent?.name) : CobrowseStrings.endBody(agent?.name),
                                                 bullets: [],
-                                                primaryTitle: CobrowseStrings.endSession,
+                                                primaryTitle: isInCall ? CobrowseStrings.inCallEndSession : CobrowseStrings.endSession,
                                                 secondaryTitle: CobrowseStrings.keepSharing,
                                                 footnote: nil)
         overlay.showSheet(content, onPrimary: { [weak self] in
@@ -391,9 +534,15 @@ internal final class CobrowseSessionController: NSObject {
         end(reason: .failed)
     }
 
-    func end(reason: AuviousCobrowseEndReason) {
+    /**
+     Ends the session.
+
+     - Parameter quietly: Skip the "ended" toast, e.g. when the call itself is going away
+     */
+    func end(reason: AuviousCobrowseEndReason, quietly: Bool = false) {
         guard !isEnding else { return }
         isEnding = true
+        endsQuietly = endsQuietly || quietly
 
         overlay.dismissSheet()
         //Nothing is shared anymore, so no drawings either
@@ -401,30 +550,50 @@ internal final class CobrowseSessionController: NSObject {
         overlay.canvas.removeAll()
         overlay.laser.clear()
 
-        let leaveReason = reason == .customerEnded ? customerTerminatedReason : ""
-        stopCapture { [weak self] in
-            guard let self = self else { return }
-            if reason != .agentEnded, let conferenceId = self.sdk.currentConferenceId {
-                self.sdk.leaveConference(conferenceId: conferenceId, reason: leaveReason, onSuccess: {
+        let wasSharing = sharingSince != nil
+        sharingSince = nil
+
+        switch mode {
+        case .standalone:
+            let leaveReason = reason == .customerEnded ? customerTerminatedReason : ""
+            stopCapture { [weak self] in
+                guard let self = self else { return }
+                if reason != .agentEnded, let conferenceId = self.sdk.currentConferenceId {
+                    self.sdk.leaveConference(conferenceId: conferenceId, reason: leaveReason, onSuccess: {
+                        self.logout()
+                    }, onFailure: { _ in
+                        self.logout()
+                    })
+                } else {
                     self.logout()
-                }, onFailure: { _ in
-                    self.logout()
-                })
-            } else {
-                self.logout()
+                }
+            }
+
+        case .inCall:
+            //The call goes on: only the screen stops, and the agent hears that the customer ended it
+            stopCapture()
+            if reason == .customerEnded && !endsQuietly {
+                sendToAgent(CobrowseEventName.displayCaptureTerminate)
             }
         }
 
         resetSDK()
         stopObservingLifecycle()
+        endBackgroundTask()
         state = .ended
+        if wasSharing {
+            onSharingChanged?(false)
+        }
+        onWillEnd?(reason)
 
         //Let the customer know the screen is no longer shared before the overlay goes away
-        if hasJoined && reason != .failed {
+        if hasJoined && reason != .failed && !endsQuietly {
+            let title = isInCall ? CobrowseStrings.inCallEnded : CobrowseStrings.sessionEnded
+            let body = isInCall ? CobrowseStrings.inCallEndedBody(agent?.name) : CobrowseStrings.sessionEndedBody(agent?.name)
             overlay.setPhase(.notSharing)
             overlay.pill.isHidden = true
             overlay.dock.isHidden = true
-            overlay.showToast(style: .ended, title: CobrowseStrings.sessionEnded, message: CobrowseStrings.sessionEndedBody(agent?.name), duration: 2.5) { [weak self] in
+            overlay.showToast(style: .ended, title: title, message: body, duration: 2.5) { [weak self] in
                 self?.finish(reason: reason)
             }
         } else {
@@ -439,11 +608,15 @@ internal final class CobrowseSessionController: NSObject {
     }
 
     private func resetSDK() {
-        sdk.delegate = nil
+        //In a call the conference delegate and join profile belong to the call
+        if !isInCall {
+            sdk.delegate = nil
+            sdk.joinProfile = .stream
+            sdk.isCobrowseActive = false
+        }
         sdk.cobrowseDelegate = nil
         sdk.screenFrameProcessor = nil
-        sdk.joinProfile = .stream
-        sdk.isCobrowseActive = false
+        sdk.screenStreamIsCobrowse = false
 
         MaskRegistry.shared.stop()
         MaskRegistry.shared.onRegionsChanged = nil
@@ -462,7 +635,10 @@ internal final class CobrowseSessionController: NSObject {
             case .INVALID_TICKET(let ticketId):
                 return .INVALID_TICKET(ticketId: ticketId)
             case .httpError(let code) where code == 401 || code == 404:
-                return .INVALID_TICKET(ticketId: configuration.ticket)
+                if case .standalone(let configuration) = mode {
+                    return .INVALID_TICKET(ticketId: configuration.ticket)
+                }
+                return .UNKNOWN_FAILURE
             case .unauthorizedRequest:
                 return .AUTHENTICATION_FAILURE
             case .noInternetConnection, .connectionError:
@@ -519,6 +695,21 @@ internal final class CobrowseSessionController: NSObject {
         guard isInBackground, !isEnding else { return }
         isInBackground = false
 
+        //The call reconnects itself; sharing picks up once it's back (callResumed())
+        if isInCall {
+            if resumeSharingOnForeground {
+                state = .notSharing
+                overlay.setPhase(.notSharing)
+                //With background audio the call never dropped, so it may have resumed before we got here
+                if sdk.currentConferenceId != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                        self?.callResumed()
+                    }
+                }
+            }
+            return
+        }
+
         sdk.restoreCobrowseConnection(onSuccess: { [weak self] in
             guard let self = self, !self.isEnding else { return }
             if self.resumeSharingOnForeground {
@@ -528,6 +719,13 @@ internal final class CobrowseSessionController: NSObject {
         }, onFailure: { [weak self] error in
             self?.fail(with: error)
         })
+    }
+
+    /// In a call: the call is connected again after the app returned to the foreground
+    func callResumed() {
+        guard isInCall, !isEnding, !isInBackground, resumeSharingOnForeground else { return }
+        resumeSharingOnForeground = false
+        requestShare()
     }
 
     private func endBackgroundTask() {
@@ -570,10 +768,7 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
 
     func auviousSDK(screenSharingStopped: Bool) {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            //The capture stopped without us asking (ICE failure, ReplayKit interruption)
-            guard !self.isStoppingShare, !self.isEnding, !self.isInBackground, self.state == .sharing else { return }
-            self.shareFailed()
+            self?.screenSharingStopped()
         }
     }
 
@@ -581,10 +776,22 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
         os_log("Co-browse SDK error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
 
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            if case .publishStreamFailure = error, self.state == .sharing {
-                self.shareFailed()
-            }
+            self?.sdkError(error)
+        }
+    }
+
+    /// The capture stopped. Main thread; the call forwards it in an in-call session.
+    func screenSharingStopped() {
+        //Stopped without us asking (ICE failure, ReplayKit interruption), not by going to the background
+        guard !isStoppingShare, !isEnding, !isInBackground, state == .sharing,
+              UIApplication.shared.applicationState != .background else { return }
+        shareFailed()
+    }
+
+    /// An SDK error. Main thread; the call forwards it in an in-call session.
+    func sdkError(_ error: AuviousSDKError) {
+        if case .publishStreamFailure = error, state == .sharing {
+            shareFailed()
         }
     }
 
@@ -618,7 +825,10 @@ extension CobrowseSessionController: CobrowseSignallingDelegate {
         case .cobrowseDisplayCaptureRequest:
             agentRequestedShare()
         case .cobrowseDisplayCaptureTerminate:
-            if state == .sharing {
+            if isInCall {
+                //In a call the agent stopping ends co-browsing; the call goes on
+                end(reason: .agentEnded)
+            } else if state == .sharing {
                 stopSharing()
                 overlay.showToast(style: .info, title: nil, message: CobrowseStrings.agentStoppedViewing(agent?.name))
             }

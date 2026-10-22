@@ -13,6 +13,18 @@ public protocol AuviousSimpleConferenceDelegate: class {
     
     func onConferenceError(_ error: AuviousSDKGenericError)
     func onConferenceSuccess()
+
+    /// In-call co-browse started: the customer shares the app and the call is in PiP, above the app's screens.
+    /// A good moment to show the screen the agent should see.
+    func onCobrowseStarted()
+
+    /// In-call co-browse ended. The call goes back into the host app's view hierarchy, so show the screen that hosts it.
+    func onCobrowseEnded()
+}
+
+public extension AuviousSimpleConferenceDelegate {
+    func onCobrowseStarted() {}
+    func onCobrowseEnded() {}
 }
 
 public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {

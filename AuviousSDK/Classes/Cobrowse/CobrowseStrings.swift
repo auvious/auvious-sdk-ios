@@ -58,8 +58,9 @@ internal enum CobrowseStrings {
     static func explainerTitle(_ name: String?) -> String {
         return String(format: text("auvious.cobrowse.explainer.title", "Share your screen with %@?"), agent(name))
     }
-    static func explainerAppOnly(_ name: String?) -> String {
-        return String(format: text("auvious.cobrowse.explainer.appOnly", "%@ sees this app only, never other apps, photos or notifications."), agentCapitalized(name))
+    /// Checklist items never name the agent
+    static var explainerAppOnly: String {
+        return String(format: text("auvious.cobrowse.explainer.appOnly", "%@ sees this app only, never other apps, photos or notifications."), agentCapitalized(nil))
     }
     static var explainerPrivate: String { return text("auvious.cobrowse.explainer.private", "Private fields, like card and account numbers, show as black boxes.") }
     static var explainerDraw: String { return text("auvious.cobrowse.explainer.draw", "You can both draw on the screen, and you can stop anytime with End.") }
@@ -84,5 +85,25 @@ internal enum CobrowseStrings {
         return String(format: text("auvious.cobrowse.agentStopped", "%@ stopped viewing your screen. You're still connected and can share again."), agentCapitalized(name))
     }
     static var shareFailed: String { return text("auvious.cobrowse.shareFailed", "Your screen couldn't be shared. Try again.") }
+
+    //During a video call
+    static func inCallExplainerTitle(_ name: String?) -> String {
+        return String(format: text("auvious.cobrowse.inCall.explainer.title", "Co-browse with %@?"), agent(name))
+    }
+    static var inCallStart: String { return text("auvious.cobrowse.inCall.explainer.start", "Start co-browsing") }
+    static var explainerCallContinues: String { return text("auvious.cobrowse.inCall.explainer.call", "Your call keeps going in a small window while you share.") }
+    static var inCallEndTitle: String { return text("auvious.cobrowse.inCall.endConfirm.title", "End co-browsing?") }
+    static func inCallEndBody(_ name: String?) -> String {
+        return String(format: text("auvious.cobrowse.inCall.endConfirm.body", "%@ will stop seeing your screen and all drawings are removed. You stay on the call."), agentCapitalized(name))
+    }
+    static var inCallEndSession: String { return text("auvious.cobrowse.inCall.endConfirm.end", "End co-browsing") }
+    static var inCallEnded: String { return text("auvious.cobrowse.inCall.ended.title", "Co-browsing ended") }
+    static func inCallEndedBody(_ name: String?) -> String {
+        return String(format: text("auvious.cobrowse.inCall.ended.body", "%@ can no longer see your screen. You're still on the call."), agentCapitalized(name))
+    }
+    static var stopCobrowsing: String { return text("auvious.cobrowse.inCall.stop", "Stop co-browsing") }
+    static func callHidden(_ name: String?) -> String {
+        return String(format: text("auvious.cobrowse.inCall.callHidden", "%@ can't see the call"), agentCapitalized(name))
+    }
     static var privateField: String { return text("auvious.cobrowse.private", "Private") }
 }

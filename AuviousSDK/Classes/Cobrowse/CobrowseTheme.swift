@@ -53,6 +53,13 @@ internal enum CobrowseTheme {
     /// Distance of the dock from the safe area edge
     static let dockMargin: CGFloat = 12
 
+    /// Height of the dock (its buttons plus padding)
+    static let dockHeight: CGFloat = dockButtonHeight + 12
+
+    /// Status pill height and its distance below the safe area top
+    static let pillHeight: CGFloat = 32
+    static let pillTop: CGFloat = 2
+
     static func font(_ size: CGFloat, _ weight: UIFont.Weight = .regular) -> UIFont {
         return UIFont.systemFont(ofSize: size, weight: weight)
     }
