@@ -285,15 +285,9 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         os_log("Created connection for stream type %@", log: Log.rtc, type: .debug, type.rawValue)
     }
     
-    //Returns the connection created for the given stream id, if any
+    //Returns the connection created for the given stream id, if any (callers report a missing one)
     private func getConnectionForStream(streamId: String) -> RTCPeerConnection? {
-        let results = peerConnections.filter{$0.streamId == streamId}
-        guard let object = results.first else {
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection( streamId: streamId))
-            return nil
-        }
-        
-        return object.connection
+        return peerConnections.first { $0.streamId == streamId }?.connection
     }
     
     private func addStream(type: StreamType, streamId: String) {

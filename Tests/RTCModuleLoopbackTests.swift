@@ -199,6 +199,21 @@ final class RTCModuleLoopbackTests: XCTestCase {
         XCTAssertEqual(unexpected.count, 0, "\(unexpected)")
     }
 
+    /// An answer for a stream without a connection is reported once, as missingPeerConnection.
+    func testAnswerForAnUnknownStreamIsReportedOnce() {
+        module.handleAnswerReceivedRemote(withRemoteSDP: "", streamId: "unknown")
+        // The delegate records on main: let what it queued run.
+        let recorded = expectation(description: "errors recorded")
+        DispatchQueue.main.async { recorded.fulfill() }
+        wait(for: [recorded], timeout: 5)
+        XCTAssertEqual(events.errors.count, 1, "\(events.errors)")
+        if case .missingPeerConnection(let streamId)? = events.errors.first {
+            XCTAssertEqual(streamId, "unknown")
+        } else {
+            XCTFail("\(events.errors)")
+        }
+    }
+
     // MARK: -
 
     /// Views a remote stream of the SFU's `tracks` in `streamIds`, through RTCModule's conference signalling.
