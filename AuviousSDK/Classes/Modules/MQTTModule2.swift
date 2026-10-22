@@ -84,9 +84,10 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     /// Disconnect and reconnect with updated credentials (used by token refresh).
     func disconnectAndReconnect() {
         os_log("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
+        refreshCredentials()
         self.mqtt.disconnect()
     }
-    
+
     func reconnect() {
         os_log("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
         switch mqtt.connState {
@@ -96,8 +97,16 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
             os_log("MQTT2 session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
         default:
             os_log("MQTT2 reconnecting", log: Log.mqtt, type: .debug)
+            refreshCredentials()
             _ = mqtt.connect()
         }
+    }
+
+    /// The broker password is the access token, so the client must pick up the latest one
+    /// after a token refresh — otherwise reconnects keep sending the expired login token.
+    private func refreshCredentials() {
+        self.mqtt.username = ServerConfiguration.mqttUser
+        self.mqtt.password = ServerConfiguration.mqttPass
     }
     
     private func subscribeForUserEndpoint() {
@@ -238,7 +247,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
-        print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect))")
+        print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect), error=\(err.map { String(describing: $0) } ?? "none"))")
         if mqtt.autoReconnect {
             self.reconnect()
         }
