@@ -11,6 +11,7 @@ build-example:
   tags: [macos]
   # Both jobs share the CocoaPods home on the Mac: one job of this project at a time there, so
   # two pod installs never write it at once (and test-sdk's leftover simulators are its own).
+  # The runner runs one job at a time today (concurrent = 1); this holds if that is raised.
   resource_group: macos-sdk-ios
   timeout: 1h
   variables:

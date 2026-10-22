@@ -40,7 +40,7 @@ extension UIView {
          self.layer.mask = mask
     }
     
-    //The safe area layout guide (from before iOS 11 had one)
+    //Alias of safeAreaLayoutGuide, kept for its existing callers
     var saferAreaLayoutGuide: UILayoutGuide {
         return self.safeAreaLayoutGuide
     }

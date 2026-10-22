@@ -214,7 +214,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         //Get back our connection
         let results = peerConnections.filter{$0.callId == callId}
         guard let object = results.first else {
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection( streamId: streamId))
+            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: callId))
             return
         }
         

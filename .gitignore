@@ -22,11 +22,6 @@ DerivedData
 # Bundler
 .bundle
 
-# Add this line if you want to avoid checking in source code from Carthage dependencies.
-# Carthage/Checkouts
-
-Carthage/Build
-
 # CocoaPods
 # Ignored: run `pod install` in Example/ (CI does). Committed Pods went stale on
 # every dependency change and held a copy of the WebRTC framework.
