@@ -124,42 +124,19 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
+        //iOS also sends this when nothing moved the PiP, e.g. when the app comes back after a screenshot.
+        //Only a PiP that made way for the keyboard goes back to its corner.
+        guard currentKeyboardFrame != nil else { return }
         currentKeyboardFrame = nil
 
-        //iOS also sends this when the app comes back (e.g. after a screenshot). Snapping a full
-        //screen call to a PiP corner would offset it by the PiP margin.
         guard screenMode != .fullScreen,
               let pipView = self.view,
               let container = pipView.superview else { return }
 
-        let newOrigin = pipOrigin(for: currentCorner, viewSize: pipView.frame.size, in: container)
+        let center = pipAnchorPoint(for: currentCorner, viewSize: pipView.bounds.size, in: container)
 
         UIView.animate(withDuration: 0.3) {
-            pipView.frame.origin = newOrigin
-        }
-    }
-    
-    func pipOrigin(for corner: Corner, viewSize: CGSize, in container: UIView) -> CGPoint {
-        let margin: CGFloat = 20
-        let containerSize = container.bounds.size
-
-        var bottomSafeY = containerSize.height - viewSize.height - margin
-
-        // Adjust if keyboard is present and overlaps
-        if let keyboardFrame = currentKeyboardFrame {
-            let keyboardFrameInView = container.convert(keyboardFrame, from: nil)
-            bottomSafeY = min(bottomSafeY, keyboardFrameInView.minY - viewSize.height - margin)
-        }
-
-        switch corner {
-        case .topLeft:
-            return CGPoint(x: margin, y: margin)
-        case .topRight:
-            return CGPoint(x: containerSize.width - viewSize.width - margin, y: margin)
-        case .bottomLeft:
-            return CGPoint(x: margin, y: bottomSafeY)
-        case .bottomRight:
-            return CGPoint(x: containerSize.width - viewSize.width - margin, y: bottomSafeY)
+            pipView.center = center
         }
     }
 }
