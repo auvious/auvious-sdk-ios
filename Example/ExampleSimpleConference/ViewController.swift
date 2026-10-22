@@ -31,6 +31,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     private let speakerSwitch = UISwitch()
     private let pipSwitch = UISwitch()
     private let screenSharingSwitch = UISwitch()
+    private let cobrowseInCallSwitch = UISwitch()
     private let maskMarkedViewsSwitch = UISwitch()
     private let maskIdentifiersSwitch = UISwitch()
     private let maskClassesSwitch = UISwitch()
@@ -120,7 +121,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             self?.selectedCallMode = index
         }
 
-        for toggle in [speakerEnabledSwitch, cameraSwitch, micSwitch, speakerSwitch, pipSwitch, screenSharingSwitch] {
+        for toggle in [speakerEnabledSwitch, cameraSwitch, micSwitch, speakerSwitch, pipSwitch, screenSharingSwitch, cobrowseInCallSwitch] {
             toggle.isOn = true
         }
 
@@ -169,6 +170,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
                 row("Speaker", speakerSwitch),
                 row("Picture in picture", pipSwitch),
                 row("Screen sharing", screenSharingSwitch),
+            ]),
+            FormSection(title: "Co-browse", footer: "The agent can ask to see this app during the call. While you share, the call shrinks to picture in picture. Masking follows the rules in Co-browse mode.", cells: [
+                row("Allow co-browse in the call", cobrowseInCallSwitch),
             ]),
         ]
         cobrowseSections = [
@@ -391,6 +395,12 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.pipAvailable = self.pipSwitch.isOn
             conf.screenSharingAvailable = self.screenSharingSwitch.isOn
             conf.backgroundAudioEnabled = self.backgroundAudioSwitch.isOn
+            conf.cobrowseAvailable = self.cobrowseInCallSwitch.isOn
+            conf.cobrowseMasking = maskingRules()
+            conf.cobrowseShowsMaskHints = maskHintsSwitch.isOn
+            AuviousCobrowse.shared.debugHighlightMasks = debugMasksSwitch.isOn
+            //The ticket is on screen behind the call's PiP
+            ticketTextfield.auviousMasked = maskMarkedViewsSwitch.isOn ? true : nil
 
             view.endEditing(true)
             self.vc = AuviousConferenceVCNew(configuration: conf, delegate: self)
@@ -404,6 +414,18 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         self.vc.showAlert(title: "Message", msg: "Conference completed successfully", onSuccess: {
             self.dismissAuviousUI(childVC: self.vc)
         })
+    }
+
+    //While co-browsing the call floats above the app, so the sample form can be opened like a standalone co-browse
+    func onCobrowseStarted() {
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationController?.pushViewController(CobrowseDemoViewController(), animated: true)
+    }
+
+    //The call goes back into this screen
+    func onCobrowseEnded() {
+        navigationController?.popToViewController(self, animated: true)
+        navigationController?.setNavigationBarHidden(true, animated: true)
     }
 
     func onConferenceError(_ error: AuviousSDKGenericError) {
@@ -420,18 +442,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             configuration.participantName = name
         }
 
-        //Mask by name: any view with these identifiers, and every CardNumberField
-        if maskIdentifiersSwitch.isOn {
-            configuration.masking.accessibilityIdentifiers = ["payment.iban", "card.*"]
-        }
-        if maskClassesSwitch.isOn {
-            configuration.masking.viewClasses = [CardNumberField.self]
-        }
-        //The sample form reads this when it builds its fields
-        CobrowseDemoSettings.marksViews = maskMarkedViewsSwitch.isOn
-
-        configuration.masking.maskSecureTextFields = maskSecureFieldsSwitch.isOn
-        configuration.masking.maskAllTextInputs = maskAllTextInputsSwitch.isOn
+        configuration.masking = maskingRules()
         configuration.showsMaskHints = maskHintsSwitch.isOn
         AuviousCobrowse.shared.debugHighlightMasks = debugMasksSwitch.isOn
 
@@ -440,6 +451,25 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
         //Open a sample screen with masked fields; the session keeps running while navigating
         navigationController?.pushViewController(CobrowseDemoViewController(), animated: true)
+    }
+
+    /// The masking rules picked in the Masking section, for a co-browse session or a call
+    private func maskingRules() -> AuviousMaskingRules {
+        var masking = AuviousMaskingRules()
+
+        //Mask by name: any view with these identifiers, and every CardNumberField
+        if maskIdentifiersSwitch.isOn {
+            masking.accessibilityIdentifiers = ["payment.iban", "card.*"]
+        }
+        if maskClassesSwitch.isOn {
+            masking.viewClasses = [CardNumberField.self]
+        }
+        //The sample form reads this when it builds its fields
+        CobrowseDemoSettings.marksViews = maskMarkedViewsSwitch.isOn
+
+        masking.maskSecureTextFields = maskSecureFieldsSwitch.isOn
+        masking.maskAllTextInputs = maskAllTextInputsSwitch.isOn
+        return masking
     }
 
     // MARK: Helpers
