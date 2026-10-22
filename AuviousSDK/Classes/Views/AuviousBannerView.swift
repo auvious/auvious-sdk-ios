@@ -37,7 +37,11 @@ internal class AuviousBannerView: UIView {
     /// Sets the icon, title and message. A nil title shows the message alone.
     func configure(symbol: String?, tint: UIColor?, title: String?, message: String?) {
         if let symbol = symbol {
-            let configuration = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
+            var configuration = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
+            //Filled circles (checkmark, record) get a white glyph, instead of one cut out of the circle that shows the banner through
+            if symbol.hasSuffix(".circle.fill") {
+                configuration = configuration.applying(UIImage.SymbolConfiguration(paletteColors: [.white, tint ?? .secondaryLabel]))
+            }
             iconView.image = UIImage(systemName: symbol, withConfiguration: configuration)
         } else {
             iconView.image = nil
