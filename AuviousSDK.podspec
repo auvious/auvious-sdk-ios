@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.4.1'
+  s.version          = '1.5.0'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
@@ -44,7 +44,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'SwiftyJSON', '~> 5.0'
-  s.dependency 'AuviousGoogleWebRTC', '155.8059.3.test.0'
+  s.dependency 'AuviousGoogleWebRTC', '~> 155.8059.3'
   s.dependency 'CocoaMQTTWebsocket_IOS13'
   s.dependency 'MqttCocoaAsyncSocket_IOS13', '~> 14.0.0'
   s.dependency 'Starscream_IOS13', '~> 4.0.4'

@@ -33,7 +33,9 @@ file, or move it into the MR description, once its items are done or ticketed.
   in-process fake SFU, real media over loopback, no backend.
 - GitLab CI (`.gitlab-ci.yml`): `build-example` (also fails when `Podfile.lock` is out of date)
   and `test-sdk`.
-- Version 1.4.1, release notes in the README.
+- Version 1.5.0 (minor, like 1.3 → 1.4 raised iOS 10 → 13), release notes in the README.
+- Depends on `AuviousGoogleWebRTC '~> 155.8059.3'` (tag `auvious-m155.8059.3` of google-webrtc,
+  2026-10-26); not `'~> 155.8059'`, which would also allow the test version `155.8059.0`.
 
 Checked live on STG with ExampleSimpleConference (2026-10-20, two simulators in one conference:
 publish, view, rotation); everything since is covered by the tests and CI. Simulators have no
@@ -41,23 +43,18 @@ camera, so video tiles are grey: test on a device before release.
 
 ## Before release (in this order)
 
-1. **WebRTC pod.** google-webrtc MR !2 is merged by its reviewer, then a maintainer of that
-   project pushes the tag `auvious-m155.8059.3`; CI publishes `AuviousGoogleWebRTC 155.8059.3`.
-2. **Pin.** `AuviousSDK.podspec` still depends on the test pod `155.8059.3.test.0`: change it to
-   `'~> 155.8059.3'` (not `'~> 155.8059'`, which would also allow the test version `155.8059.0`).
-3. **Version number.** 1.4.1 was chosen as a small bump, but tag 1.4.0 is still M84 with iOS 13:
-   raising the minimum iOS breaks apps on iOS 13/14, so 1.5.0 or 2.0.0 would follow semver.
-   Decide, then update `s.version` and the README release notes.
-4. After 2 and 3: `pod install` in `Example/` and commit `Podfile.lock` (it records the WebRTC
-   version and the SDK's version and checksum; CI fails if it is stale).
-5. **MR** `m155-webrtc` → `master`. For its description:
+Done: the WebRTC pod 155.8059.3 is published, the SDK pins it, version 1.5.0, `Podfile.lock`
+committed.
+
+1. **Test on a device** (simulators have no camera).
+2. **MR** `m155-webrtc` → `master` (!16). For its description:
    - ExampleCall, ExampleSimpleCall and ExampleConference don't build (Podfile targets commented
      out since 2026-03); they need Podfile targets, API fixes, the scene life cycle and CI.
      ExampleSimpleCall is the only small 1:1 call example, worth porting if calls are still offered.
    - Mute/hold behave as before (`track.isEnabled = false` sends silence/black frames).
    Open decision to mention: really stopping the send on mute/hold (`sender.track = nil` /
    `replaceTrack`), which would save bandwidth but changes behaviour.
-6. **Publish** as the README's "Publish version" section says (tag, push to the public GitHub
+3. **Publish** as the README's "Publish version" section says (tag, push to the public GitHub
    repo, `pod repo push`). Needs push rights on github.com/auvious/auvious-sdk-ios and
    CocoaPodSpecs (ask who published 1.4.0).
 
