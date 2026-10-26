@@ -505,9 +505,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         pipMaximiseButton.tintColor = .white
         pipMaximiseButton.addTarget(self, action: #selector(self.maximisebuttonPressed(_:)), for: .touchUpInside)
         pipMaximiseButton.translatesAutoresizingMaskIntoConstraints = false
-        pipMaximiseButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
-        pipMaximiseButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -5).isActive = true
-        pipMaximiseButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        //The PiP's own corner: its safe area can still carry the screen's top inset, which pushed the button down
+        pipMaximiseButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4).isActive = true
+        pipMaximiseButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 4).isActive = true
+        pipMaximiseButton.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        pipMaximiseButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
         //Setup PIP bottom bar
         pipBottomBar.alpha = 0
