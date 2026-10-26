@@ -99,10 +99,15 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     /// AR pointer points and sketch over the video, while this tile is the pointer's target
     private(set) var annotationSurface: AnnotationSurfaceView?
 
-    /// Where the video's frames are drawn: aspect filled for cameras (it can overflow the clipped tile), aspect fit for screens
+    /// The whole video shows (aspect fit) for screens and while the AR pointer points at the tile, so nothing pointed at is cropped
+    private var fitsVideo: Bool {
+        return isScreen || annotationSurface != nil
+    }
+
+    /// Where the video's frames are drawn: aspect filled for cameras (it can overflow the clipped tile), aspect fit when fitsVideo
     var videoContentRect: CGRect {
         guard size.width > 0, size.height > 0, bounds.width > 0, bounds.height > 0 else { return bounds }
-        if isScreen {
+        if fitsVideo {
             return AVMakeRect(aspectRatio: size, insideRect: bounds)
         }
         let scale = max(bounds.width / size.width, bounds.height / size.height)
@@ -115,6 +120,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         guard annotationSurface !== surface else { return }
         removeAnnotationSurface()
         annotationSurface = surface
+        videoView.videoContentMode = .scaleAspectFit
         insertSubview(surface, aboveSubview: videoView)
         surface.frame = videoContentRect
     }
@@ -122,6 +128,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     func removeAnnotationSurface() {
         annotationSurface?.removeFromSuperview()
         annotationSurface = nil
+        videoView.videoContentMode = fitsVideo ? .scaleAspectFit : .scaleAspectFill
     }
     
     override public init(frame: CGRect) {
