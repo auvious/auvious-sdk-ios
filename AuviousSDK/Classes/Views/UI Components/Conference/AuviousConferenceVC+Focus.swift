@@ -150,7 +150,7 @@ extension AuviousConferenceVCNew {
         let (rows, columns) = ConferenceGridLayout.dimensions(count: tiles.count, isLandscape: isLandscape)
         let gap = viewPadding
 
-        //One guide per row and column, each an equal share of the safe area
+        //One guide per row and column, each an equal share of the safe area. The rows end right above the controls.
         let rowGuides = (0..<rows).map { _ in UILayoutGuide() }
         let columnGuides = (0..<columns).map { _ in UILayoutGuide() }
         gridGuides.forEach { streamContainerView.removeLayoutGuide($0) }
@@ -158,8 +158,13 @@ extension AuviousConferenceVCNew {
         gridGuides.forEach { streamContainerView.addLayoutGuide($0) }
 
         for (index, guide) in rowGuides.enumerated() {
-            constraints.append(guide.heightAnchor.constraint(equalTo: safeArea.heightAnchor, multiplier: 1 / CGFloat(rows), constant: -gap * CGFloat(rows - 1) / CGFloat(rows)))
             constraints.append(index == 0 ? guide.topAnchor.constraint(equalTo: safeArea.topAnchor) : guide.topAnchor.constraint(equalTo: rowGuides[index - 1].bottomAnchor, constant: gap))
+            if index > 0 {
+                constraints.append(guide.heightAnchor.constraint(equalTo: rowGuides[0].heightAnchor))
+            }
+        }
+        if let last = rowGuides.last {
+            constraints.append(last.bottomAnchor.constraint(equalTo: buttonContainerView.topAnchor, constant: -gap))
         }
         for (index, guide) in columnGuides.enumerated() {
             constraints.append(guide.widthAnchor.constraint(equalTo: safeArea.widthAnchor, multiplier: 1 / CGFloat(columns), constant: -gap * CGFloat(columns - 1) / CGFloat(columns)))
