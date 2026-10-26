@@ -159,7 +159,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             createConstraints()
         }
     }
-    
+
+    //Endpoints whose video has portraitMode metadata: their tiles always fill, taps don't switch them to fit
+    private var portraitModeEndpoints: Set<String> = []
+
     //Triggers network indicator positioning
     //Works ONLY on 1-1 calls with agentVideoPortraitMode and without screensharing
     private var isAgentMuted: Bool = false {
@@ -755,6 +758,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                                 for s in e.streams {
                                     if s.portraitMode {
                                         self.agentVideoPortraitMode = true
+                                        self.portraitModeEndpoints.insert(e.id)
                                         break
                                     }
                                 }
@@ -1045,6 +1049,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
             //Keeps the mute badge clear of the call buttons
             remoteView.audioMutedBadgeBottomLimit = buttonContainerView.topAnchor
+            //Tapping switches the video between fit and fill, unless it is a portrait video
+            remoteView.portraitMode = portraitModeEndpoints.contains(endpointId)
+            remoteView.togglesFitOnTap = screenMode == .fullScreen
+            remoteView.onFitChange = { [weak self] in
+                self?.createConstraints()
+            }
             self.remoteViews.append(remoteView)
             streamContainerView.addSubview(remoteView)
             view.bringSubviewToFront(buttonContainerView)
@@ -1146,6 +1156,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         } else if event is ConferenceStreamPublishedEvent {
             let object = event as! ConferenceStreamPublishedEvent
+            if object.portraitMode, let endpointId = object.userEndpointId {
+                portraitModeEndpoints.insert(endpointId)
+            }
             do {
                 os_log("Starting remote stream flow for type %@", log: Log.conferenceUI, type: .debug, object.streamType.rawValue)
                 try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: object.streamId, endpointId: object.userEndpointId, streamType: object.streamType, remoteUserId: object.userId)
@@ -1441,6 +1454,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     public func auviousSDK(agentPortraitMode flag: Bool, endpointId: String) {
+        if flag {
+            portraitModeEndpoints.insert(endpointId)
+        } else {
+            portraitModeEndpoints.remove(endpointId)
+        }
+        remoteViews.first { $0.participantEndpoint?.id == endpointId }?.portraitMode = flag
+
         var remoteParticipantIndex: Int?
         for (index, item) in remoteViews.enumerated() {
             if item.participantEndpoint?.id == endpointId {
@@ -1601,6 +1621,60 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             return scene.effectiveGeometry.interfaceOrientation
         }
         return scene.interfaceOrientation
+    }
+
+    /// The layouts place the tiles edge to edge in their space. For a tile that follows its video's shape, its constraints
+    /// place its `layoutSlot` instead, and the tile is the largest rectangle shaped like the video centered in the slot.
+    private func fitTilesToVideo(_ constraints: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
+        var slots: [ObjectIdentifier: UILayoutGuide] = [:]
+        var result: [NSLayoutConstraint] = []
+
+        for tile in remoteViews {
+            let slot = tile.layoutSlot
+            guard tile.followsVideoShape, let parent = tile.superview else {
+                slot.owningView?.removeLayoutGuide(slot)
+                continue
+            }
+            if slot.owningView !== parent {
+                slot.owningView?.removeLayoutGuide(slot)
+                parent.addLayoutGuide(slot)
+            }
+            slots[ObjectIdentifier(tile)] = slot
+
+            let fillWidth = tile.widthAnchor.constraint(equalTo: slot.widthAnchor)
+            let fillHeight = tile.heightAnchor.constraint(equalTo: slot.heightAnchor)
+            fillWidth.priority = .defaultHigh
+            fillHeight.priority = .defaultHigh
+            result += [
+                tile.centerXAnchor.constraint(equalTo: slot.centerXAnchor),
+                tile.centerYAnchor.constraint(equalTo: slot.centerYAnchor),
+                tile.widthAnchor.constraint(lessThanOrEqualTo: slot.widthAnchor),
+                tile.heightAnchor.constraint(lessThanOrEqualTo: slot.heightAnchor),
+                tile.widthAnchor.constraint(equalTo: tile.heightAnchor, multiplier: tile.size.width / tile.size.height),
+                fillWidth,
+                fillHeight
+            ]
+        }
+        guard !slots.isEmpty else { return constraints }
+
+        func slotted(_ item: AnyObject?) -> AnyObject? {
+            guard let tile = item as? StreamView, let slot = slots[ObjectIdentifier(tile)] else { return item }
+            return slot
+        }
+        for constraint in constraints {
+            let first = slotted(constraint.firstItem)
+            let second = slotted(constraint.secondItem)
+            guard first !== constraint.firstItem || second !== constraint.secondItem, let firstItem = first else {
+                result.append(constraint)
+                continue
+            }
+            let moved = NSLayoutConstraint(item: firstItem, attribute: constraint.firstAttribute, relatedBy: constraint.relation,
+                                           toItem: second, attribute: constraint.secondAttribute,
+                                           multiplier: constraint.multiplier, constant: constraint.constant)
+            moved.priority = constraint.priority
+            result.append(moved)
+        }
+        return result
     }
 
     internal func createConstraints(animated: Bool = true) {
@@ -1780,7 +1854,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 }
             }
         }
-        
+
+        //Tiles tapped to fit take their video's shape, inside the space the layout above gives them
+        constraints = fitTilesToVideo(constraints)
 
         let applyConstraints = {
             //Clear existing constraints

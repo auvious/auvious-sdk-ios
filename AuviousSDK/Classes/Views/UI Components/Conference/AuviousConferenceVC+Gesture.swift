@@ -15,6 +15,8 @@ extension AuviousConferenceVCNew {
         tapGesture?.isEnabled = enabled
         doubleTapGesture?.isEnabled = enabled
         panGesture?.isEnabled = enabled
+        //Tapping a remote video switches it between fit and fill, only in full screen (in PiP taps resize the PiP)
+        remoteViews.forEach { $0.togglesFitOnTap = mode == .fullScreen }
     }
     
     //Draggable pip view

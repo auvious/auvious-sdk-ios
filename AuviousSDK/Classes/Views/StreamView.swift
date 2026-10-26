@@ -93,9 +93,67 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     /// AR pointer points and sketch over the video, while this tile is the pointer's target
     private(set) var annotationSurface: AnnotationSurfaceView?
 
+    /// Set by tapping a remote tile: the tile takes the video's shape, so the whole video shows
+    private var tappedToFit = false
+
+    /// Taps switch the tile between fitting its video and filling its space in the layout.
+    /// On for remote tiles while the call is full screen.
+    var togglesFitOnTap = false {
+        didSet {
+            updateFitTapGesture()
+        }
+    }
+
+    /// The stream's portraitMode metadata. Its tile always fills its space, taps don't change it.
+    var portraitMode = false {
+        didSet {
+            if portraitMode && tappedToFit {
+                tappedToFit = false
+                onFitChange?()
+            }
+            updateFitTapGesture()
+        }
+    }
+
+    /// Called when a tap switches between fit and fill, so the call can reshape the tile
+    var onFitChange: (() -> Void)?
+
+    /// True when the call should shape the tile like its video, fitted inside the space its layout gives it (`layoutSlot`).
+    /// The video still fills the tile, which then crops nothing. Off in PiP.
+    var followsVideoShape: Bool {
+        return tappedToFit && togglesFitOnTap && !portraitMode && hasVideoSize
+    }
+
+    /// The space the call's layout gives a tile that follows its video's shape. Owned by the tile's superview.
+    let layoutSlot = UILayoutGuide()
+
+    private lazy var fitTapGesture = UITapGestureRecognizer(target: self, action: #selector(fitTapped))
+
     /// The whole video shows (aspect fit) for screens and while the AR pointer points at the tile, so nothing pointed at is cropped
     private var fitsVideo: Bool {
         return isScreen || annotationSurface != nil
+    }
+
+    /// Off for portrait videos, and for screens and the AR pointer's tile, which always fit
+    /// (so the tap never competes with the annotation surface's own taps)
+    private func updateFitTapGesture() {
+        fitTapGesture.isEnabled = togglesFitOnTap && !portraitMode && !isScreen && annotationSurface == nil
+    }
+
+    @objc private func fitTapped() {
+        tappedToFit.toggle()
+        onFitChange?()
+    }
+
+    override public func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
+        //The slot belongs to the old superview; the call adds it to the new one when it lays the tile out
+        layoutSlot.owningView?.removeLayoutGuide(layoutSlot)
+    }
+
+    private func updateVideoContentMode() {
+        videoView.videoContentMode = fitsVideo ? .scaleAspectFit : .scaleAspectFill
+        setNeedsLayout()
     }
 
     /// Where the video's frames are drawn: aspect filled for cameras (it can overflow the clipped tile), aspect fit when fitsVideo
@@ -117,12 +175,14 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         videoView.videoContentMode = .scaleAspectFit
         insertSubview(surface, aboveSubview: videoView)
         surface.frame = videoContentRect
+        updateFitTapGesture()
     }
 
     func removeAnnotationSurface() {
         annotationSurface?.removeFromSuperview()
         annotationSurface = nil
-        videoView.videoContentMode = fitsVideo ? .scaleAspectFit : .scaleAspectFill
+        updateVideoContentMode()
+        updateFitTapGesture()
     }
     
     override public init(frame: CGRect) {
@@ -221,7 +281,10 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         addSubview(videoView)
         
         videoView.videoContentMode = .scaleAspectFill
-        
+
+        updateFitTapGesture()
+        addGestureRecognizer(fitTapGesture)
+
         loadingIndicator.color = .white
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
@@ -399,6 +462,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         if isScreen {
             videoView.videoContentMode = .scaleAspectFit
         }
+        updateFitTapGesture()
 
         // Remove the old track from the renderer before attaching the new one
         // so the frozen last frame doesn't persist after a rejoin.

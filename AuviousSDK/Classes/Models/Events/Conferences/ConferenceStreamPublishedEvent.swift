@@ -22,7 +22,10 @@ public final class ConferenceStreamPublishedEvent: ConferenceEvent {
 
     /// The publisher's correlation id (stream metadata), used by AR pointer and sketch to name the stream
     public var correlationId: String?
-    
+
+    /// The publisher streams a portrait video (stream metadata)
+    public var portraitMode: Bool = false
+
     /// Initialiser using a JSON object
     override internal init(fromJson json: JSON!){
         super.init(fromJson: json)
@@ -30,5 +33,6 @@ public final class ConferenceStreamPublishedEvent: ConferenceEvent {
         streamId = json["streamId"].stringValue
         streamType = StreamType(rawValue: json["streamType"].stringValue)
         correlationId = json["metadata"]["correlationId"].string
+        portraitMode = json["metadata"]["portraitMode"].boolValue
     }
 }
