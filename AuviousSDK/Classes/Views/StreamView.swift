@@ -95,6 +95,34 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     var size: CGSize = .zero
     
     internal var participantEndpoint: ParticipantEndpoint?
+
+    /// AR pointer points and sketch over the video, while this tile is the pointer's target
+    private(set) var annotationSurface: AnnotationSurfaceView?
+
+    /// Where the video's frames are drawn: aspect filled for cameras (it can overflow the clipped tile), aspect fit for screens
+    var videoContentRect: CGRect {
+        guard size.width > 0, size.height > 0, bounds.width > 0, bounds.height > 0 else { return bounds }
+        if isScreen {
+            return AVMakeRect(aspectRatio: size, insideRect: bounds)
+        }
+        let scale = max(bounds.width / size.width, bounds.height / size.height)
+        let width = size.width * scale
+        let height = size.height * scale
+        return CGRect(x: bounds.midX - width / 2, y: bounds.midY - height / 2, width: width, height: height)
+    }
+
+    func installAnnotationSurface(_ surface: AnnotationSurfaceView) {
+        guard annotationSurface !== surface else { return }
+        removeAnnotationSurface()
+        annotationSurface = surface
+        insertSubview(surface, aboveSubview: videoView)
+        surface.frame = videoContentRect
+    }
+
+    func removeAnnotationSurface() {
+        annotationSurface?.removeFromSuperview()
+        annotationSurface = nil
+    }
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -156,6 +184,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             self.videoView.frame = bounds
         }
         
+        annotationSurface?.frame = videoContentRect
+
         if let o = overlayView {
             if overlayState == .audioMuted {
                 //Round badge
@@ -461,6 +491,10 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         //The first frame has been rendered
         DispatchQueue.main.async {
             self.loadingIndicator.stopAnimating()
+            //Annotations follow the video's shape
+            if self.annotationSurface != nil {
+                self.setNeedsLayout()
+            }
             if self.awaitingFirstFrame {
                 self.awaitingFirstFrame = false
                 //Fade the first frame in, unless the camera was turned off meanwhile

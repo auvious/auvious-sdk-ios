@@ -9,13 +9,25 @@ import UIKit
 
 /// The floating control dock. Compact while sharing ([Draw] [End]), expanded while drawing
 /// ([Pen] [Arrow] [Undo] [Clear] | [Done]). It can be dragged to the top or bottom edge.
+/// AR pointer annotations use it too: [Annotate] compact, and a Laser tool first while drawing.
 internal final class CobrowseDockView: UIView {
 
     enum Mode: Equatable {
         case connecting
         case sharing(canDraw: Bool)
         case notSharing
+        /// AR pointer, not annotating: a single [Annotate] button
+        case annotate
         case drawing(tool: SketchTool, inkColor: UIColor)
+    }
+
+    /// Offers the AR pointer's laser tool while drawing
+    var showsLaser = false {
+        didSet {
+            if oldValue != showsLaser {
+                rebuild()
+            }
+        }
     }
 
     var onCancel: (() -> Void)?
@@ -35,6 +47,7 @@ internal final class CobrowseDockView: UIView {
 
     private let background = UIVisualEffectView(effect: nil)
     private let stack = UIStackView()
+    private var laserButton: UIButton?
     private var penButton: UIButton?
     private var arrowButton: UIButton?
     private var clearButton: UIButton?
@@ -82,6 +95,9 @@ internal final class CobrowseDockView: UIView {
         if case .drawing = previous, case .drawing(let tool, let inkColor) = mode, let pen = penButton, let arrow = arrowButton {
             styleTool(pen, selected: tool == .pen, inkColor: inkColor)
             styleTool(arrow, selected: tool == .arrow, inkColor: inkColor)
+            if let laser = laserButton {
+                styleTool(laser, selected: tool == .laser, inkColor: inkColor)
+            }
             return
         }
 
@@ -117,6 +133,7 @@ internal final class CobrowseDockView: UIView {
 
     private func rebuild() {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        laserButton = nil
         penButton = nil
         arrowButton = nil
         clearButton = nil
@@ -140,8 +157,18 @@ internal final class CobrowseDockView: UIView {
             stack.addArrangedSubview(labelButton(CobrowseStrings.shareScreen, image: CobrowseTheme.symbol("iphone"), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(shareTapped)))
             stack.addArrangedSubview(endButton())
 
+        case .annotate:
+            stack.spacing = 6
+            stack.addArrangedSubview(labelButton(CobrowseStrings.annotate, image: CobrowseTheme.penIcon(size: 22), background: CobrowseTheme.dockGlassButton, foreground: .white, action: #selector(drawTapped)))
+
         case .drawing(let tool, let inkColor):
             stack.spacing = 4
+            if showsLaser {
+                let laser = iconButton(CobrowseTheme.laserIcon(), label: CobrowseStrings.laserPointer, action: #selector(laserTapped))
+                styleTool(laser, selected: tool == .laser, inkColor: inkColor)
+                laserButton = laser
+                stack.addArrangedSubview(laser)
+            }
             let pen = iconButton(CobrowseTheme.penIcon(), label: CobrowseStrings.pen, action: #selector(penTapped))
             let arrow = iconButton(CobrowseTheme.lineSymbol("arrow.up.right"), label: CobrowseStrings.arrow, action: #selector(arrowTapped))
             styleTool(pen, selected: tool == .pen, inkColor: inkColor)
@@ -231,6 +258,7 @@ internal final class CobrowseDockView: UIView {
     @objc private func shareTapped() { onShare?() }
     @objc private func endTapped() { onEnd?() }
     @objc private func doneTapped() { onDone?() }
+    @objc private func laserTapped() { onToolSelected?(.laser) }
     @objc private func penTapped() { onToolSelected?(.pen) }
     @objc private func arrowTapped() { onToolSelected?(.arrow) }
     @objc private func undoTapped() { onUndo?() }

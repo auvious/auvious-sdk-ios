@@ -118,6 +118,35 @@ internal enum CobrowseTheme {
         return image.withRenderingMode(.alwaysTemplate)
     }
 
+    /// AR pointer line icon, the web's laser glyph: an outer ring with a beam reaching in from the upper right,
+    /// a centre dot and five dots on a hexagon (the sixth, under the beam, left out)
+    static func laserIcon(size: CGFloat = 24, stroke: CGFloat = lineIconStroke) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        let image = renderer.image { _ in
+            let center = CGPoint(x: size / 2, y: size / 2)
+            func point(_ radius: CGFloat, _ degrees: CGFloat) -> CGPoint {
+                let angle = degrees * .pi / 180
+                return CGPoint(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
+            }
+            UIColor.black.setStroke()
+            UIColor.black.setFill()
+
+            let ring = UIBezierPath(arcCenter: center, radius: size * 0.45, startAngle: 0, endAngle: 2 * .pi, clockwise: true)
+            ring.move(to: point(size * 0.45, -38))
+            ring.addLine(to: point(size * 0.26, -38))
+            ring.lineWidth = stroke
+            ring.lineCapStyle = .round
+            ring.stroke()
+
+            UIBezierPath(arcCenter: center, radius: size * 0.12, startAngle: 0, endAngle: 2 * .pi, clockwise: true).fill()
+
+            for degrees: CGFloat in [-90, -150, 150, 90, 30] {
+                UIBezierPath(arcCenter: point(size * 0.22, degrees), radius: size * 0.04, startAngle: 0, endAngle: 2 * .pi, clockwise: true).fill()
+            }
+        }
+        return image.withRenderingMode(.alwaysTemplate)
+    }
+
     /// Approximate display corner radius, so the border follows the screen's rounded corners.
     /// Uses the screen size because the exact radius is only available through private API.
     static func displayCornerRadius(for window: UIWindow?) -> CGFloat {

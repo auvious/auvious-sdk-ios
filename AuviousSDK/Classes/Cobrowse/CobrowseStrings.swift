@@ -52,6 +52,11 @@ internal enum CobrowseStrings {
     static var clearDrawings: String { return text("auvious.cobrowse.clearDrawings", "Clear drawings") }
     static var clearConfirm: String { return text("auvious.cobrowse.clearConfirm", "Clear all drawings?") }
     static var clear: String { return text("auvious.cobrowse.clear", "Clear") }
+    static var annotate: String { return text("auvious.arpointer.annotate", "Annotate") }
+    static var laserPointer: String { return text("auvious.arpointer.laser", "Laser pointer") }
+    static var laserActivated: String { return text("auvious.arpointer.activated", "Laser pointer activated") }
+    static var laserDeactivated: String { return text("auvious.arpointer.deactivated", "Laser pointer deactivated") }
+    static var framePaused: String { return text("auvious.arpointer.framePaused", "Frame paused by agent") }
     static var moveControls: String { return text("auvious.cobrowse.moveControls", "Drag to move the controls") }
 
     //Explainer sheet

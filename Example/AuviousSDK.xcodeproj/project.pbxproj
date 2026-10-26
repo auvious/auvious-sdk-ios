@@ -62,7 +62,9 @@
 		7668C94D458E553DC43AAE8A /* CobrowseDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79CD973249BD8A58DD70D831 /* CobrowseDockView.swift */; };
 		7E00E8C5DA3C3E465AA59506 /* CobrowseSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A911F356789D276B431799 /* CobrowseSheetView.swift */; };
 		888BCA713D5BC99780960DDD /* AuviousBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */; };
+		98F50735476530FA446337E4 /* AnnotationSurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AFFB4697117E2765C01B1E /* AnnotationSurfaceView.swift */; };
 		9D041FA20B9C2D7EEFBE25BE /* PaperCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98456C07A7AFA7BFED18DB26 /* PaperCodec.swift */; };
+		A873D4FF5C6E27F0CD425ACD /* ConferenceGridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198F882FC6217CE150DDFEF8 /* ConferenceGridLayout.swift */; };
 		AB8ABDF68633B55825D50C04 /* AuviousMasking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B4CCA7284FD27B28FD23CA /* AuviousMasking.swift */; };
 		AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */; };
 		B3111BC1A072E6217D2AAE75 /* PaperCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CD4D2F47C03670A4463825 /* PaperCodecTests.swift */; };
@@ -71,6 +73,7 @@
 		BE770D3241407AAAB9268CE8 /* CobrowseStatusPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43678E40A7E15635DFFF5D0 /* CobrowseStatusPillView.swift */; };
 		C25CCCF28FBB33F3C7DEA6B3 /* MaskingRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A421B96FC7A0E8F5D426640 /* MaskingRulesTests.swift */; };
 		C48DC02F743A110C61C6C5F8 /* CobrowseOverlaySnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE32EEB7FB09B95CD8494498 /* CobrowseOverlaySnapshotTests.swift */; };
+		D3C96495EC980BE9A61B5547 /* ArPointerLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4810D27A5B781E649380CF /* ArPointerLayoutTests.swift */; };
 		D4841F9A5A36CC66D825E655 /* MaskHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */; };
 		DD1BA23983BD6AE9B38B5CF8 /* PixelBufferMaskerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816563A8A1786A22A8977BDE /* PixelBufferMaskerTests.swift */; };
 		E6D6EAE3EBDA7406001EE4B5 /* CobrowseStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F352865021054B949D39D9 /* CobrowseStrings.swift */; };
@@ -96,12 +99,14 @@
 		0A421B96FC7A0E8F5D426640 /* MaskingRulesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaskingRulesTests.swift; sourceTree = "<group>"; };
 		16F352865021054B949D39D9 /* CobrowseStrings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseStrings.swift; path = Cobrowse/CobrowseStrings.swift; sourceTree = "<group>"; };
 		1859B21A77B6EAED5F9ED751 /* AuviousSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = AuviousSDK.podspec; path = ../AuviousSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		198F882FC6217CE150DDFEF8 /* ConferenceGridLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConferenceGridLayout.swift; path = "Views/UI Components/Conference/ConferenceGridLayout.swift"; sourceTree = "<group>"; };
 		2002B43ACF531215E31093BB /* CobrowseMaskHintsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseMaskHintsView.swift; path = Cobrowse/UI/CobrowseMaskHintsView.swift; sourceTree = "<group>"; };
 		215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseAccentButton.swift; path = Cobrowse/UI/CobrowseAccentButton.swift; sourceTree = "<group>"; };
 		21C15FB9DB94C5B9B6A453FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelBufferCopier.swift; path = Masking/PixelBufferCopier.swift; sourceTree = "<group>"; };
 		28986940F0965661721BC376 /* CobrowseToastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CobrowseToastView.swift; path = Cobrowse/UI/CobrowseToastView.swift; sourceTree = "<group>"; };
 		439F35CD3C8C843DAD8DF380 /* SketchGeometry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SketchGeometry.swift; path = Sketch/SketchGeometry.swift; sourceTree = "<group>"; };
+		56AFFB4697117E2765C01B1E /* AnnotationSurfaceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnnotationSurfaceView.swift; path = Sketch/AnnotationSurfaceView.swift; sourceTree = "<group>"; };
 		5C290A7D5BAD089DC515900E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PixelBufferCopierTests.swift; sourceTree = "<group>"; };
 		5DE00C1C3DAB79BA1D593D01 /* PixelBufferMasker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelBufferMasker.swift; path = Masking/PixelBufferMasker.swift; sourceTree = "<group>"; };
@@ -162,6 +167,7 @@
 		BA7EA8DBD21B3F114BD1E604 /* LaserPointerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LaserPointerView.swift; path = Sketch/LaserPointerView.swift; sourceTree = "<group>"; };
 		C4B4CCA7284FD27B28FD23CA /* AuviousMasking.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AuviousMasking.swift; path = Masking/AuviousMasking.swift; sourceTree = "<group>"; };
 		CE32EEB7FB09B95CD8494498 /* CobrowseOverlaySnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CobrowseOverlaySnapshotTests.swift; sourceTree = "<group>"; };
+		CE4810D27A5B781E649380CF /* ArPointerLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ArPointerLayoutTests.swift; sourceTree = "<group>"; };
 		DD499D09746A036F1D2B6B6B /* CobrowseSwiftUIDemo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CobrowseSwiftUIDemo.swift; sourceTree = "<group>"; };
 		DDF79DD805B19157BCD3217E /* MaskRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MaskRegistry.swift; path = Masking/MaskRegistry.swift; sourceTree = "<group>"; };
 		E7651A0C1B03A88D1F86D572 /* SceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -250,6 +256,7 @@
 				26FC1BD18D84C8F5149194B4 /* SDK sources */,
 				B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */,
 				5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */,
+				CE4810D27A5B781E649380CF /* ArPointerLayoutTests.swift */,
 			);
 			path = AuviousSDKLogicTests;
 			sourceTree = "<group>";
@@ -276,6 +283,8 @@
 				254FF177143DBCFF3248A0AF /* PixelBufferCopier.swift */,
 				215BA8150818060542DCBEF1 /* CobrowseAccentButton.swift */,
 				F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */,
+				56AFFB4697117E2765C01B1E /* AnnotationSurfaceView.swift */,
+				198F882FC6217CE150DDFEF8 /* ConferenceGridLayout.swift */,
 			);
 			name = "SDK sources";
 			path = ../../AuviousSDK/Classes;
@@ -744,6 +753,9 @@
 				4CC57D953426A9030F939D4F /* PixelBufferCopier.swift in Sources */,
 				AD90DCA70CFF8DF59DBA2178 /* CobrowseAccentButton.swift in Sources */,
 				888BCA713D5BC99780960DDD /* AuviousBannerView.swift in Sources */,
+				98F50735476530FA446337E4 /* AnnotationSurfaceView.swift in Sources */,
+				A873D4FF5C6E27F0CD425ACD /* ConferenceGridLayout.swift in Sources */,
+				D3C96495EC980BE9A61B5547 /* ArPointerLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

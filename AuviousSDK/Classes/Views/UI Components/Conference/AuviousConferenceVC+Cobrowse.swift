@@ -112,6 +112,8 @@ extension AuviousConferenceVCNew {
         if conferenceJoined {
             listenForCobrowse()
         }
+        //An AR pointer may have started while co-browsing
+        refreshArPointer()
     }
 
     private func moveCallToCobrowseOverlay() {
