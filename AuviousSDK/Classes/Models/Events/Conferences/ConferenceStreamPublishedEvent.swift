@@ -19,6 +19,9 @@ public final class ConferenceStreamPublishedEvent: ConferenceEvent {
     
     /// The stream type (mic, cam, mic & cam etc.)
     public var streamType: StreamType!
+
+    /// The publisher's correlation id (stream metadata), used by AR pointer and sketch to name the stream
+    public var correlationId: String?
     
     /// Initialiser using a JSON object
     override internal init(fromJson json: JSON!){
@@ -26,5 +29,6 @@ public final class ConferenceStreamPublishedEvent: ConferenceEvent {
         
         streamId = json["streamId"].stringValue
         streamType = StreamType(rawValue: json["streamType"].stringValue)
+        correlationId = json["metadata"]["correlationId"].string
     }
 }

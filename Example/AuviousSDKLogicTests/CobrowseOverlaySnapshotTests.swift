@@ -58,7 +58,6 @@ final class CobrowseOverlaySnapshotTests: XCTestCase {
         overlay.setPhase(.sharing(since: Date().addingTimeInterval(-252)))
         addInk()
         overlay.hints.update(regions: maskedFields(), debug: false)
-        overlay.laser.show(x: 120, y: 140, areaWidth: 390, areaHeight: 844, color: UIColor(red: 0.2, green: 0.55, blue: 0.97, alpha: 1), index: 2, ttl: 5)
         snapshot("3-sharing")
     }
 

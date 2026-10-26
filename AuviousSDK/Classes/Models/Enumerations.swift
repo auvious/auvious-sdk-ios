@@ -196,6 +196,19 @@ internal enum RtcUserEventType: String {
     /// A sketch was made available/unavailable for this endpoint
     case sketchAvailabilityChanged = "SketchAvailabilityChangedEvent"
     
-    /// Laser pointer indication from the agent
+    /// A laser pointer point placed by another participant
     case arPointerIndicated = "ArPointerIndicatedEvent"
+
+    /// The agent froze or unfroze the AR pointer target's frame
+    case arPointerFreezeFrameChanged = "ArPointerFreezeFrameChangedEvent"
+
+    /// Sketch and AR pointer events, as opposed to the co-browse request/terminate ones
+    var isAnnotation: Bool {
+        switch self {
+        case .sketchCanvasUpdated, .sketchUserJoined, .sketchAvailabilityChanged, .arPointerIndicated, .arPointerFreezeFrameChanged:
+            return true
+        case .cobrowseDisplayCaptureRequest, .cobrowseDisplayCaptureTerminate:
+            return false
+        }
+    }
 }

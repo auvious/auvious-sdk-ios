@@ -263,7 +263,7 @@ internal final class CobrowseSessionController: NSObject {
         }
 
         if options.annotationsEnabled {
-            let session = SketchSession(canvas: overlay.canvas, laser: overlay.laser)
+            let session = SketchSession(canvas: overlay.canvas)
             session.onInkColorChanged = { [weak self] _ in
                 self?.overlay.inkColorChanged()
             }
@@ -454,7 +454,6 @@ internal final class CobrowseSessionController: NSObject {
         //Drawings belong to the shared screen; they go when it stops being shared
         sketch?.reset()
         overlay.canvas.removeAll()
-        overlay.laser.clear()
         stopCapture()
         sharingSince = nil
         state = .notSharing
@@ -548,7 +547,6 @@ internal final class CobrowseSessionController: NSObject {
         //Nothing is shared anymore, so no drawings either
         sketch?.reset()
         overlay.canvas.removeAll()
-        overlay.laser.clear()
 
         let wasSharing = sharingSince != nil
         sharingSince = nil
@@ -832,8 +830,11 @@ extension CobrowseSessionController: CobrowseSignallingDelegate {
                 stopSharing()
                 overlay.showToast(style: .info, title: nil, message: CobrowseStrings.agentStoppedViewing(agent?.name))
             }
-        case .sketchCanvasUpdated, .sketchUserJoined, .sketchAvailabilityChanged, .arPointerIndicated:
+        case .sketchCanvasUpdated, .sketchUserJoined, .sketchAvailabilityChanged:
             sketch?.userEventReceived(type, json: json)
+        case .arPointerIndicated, .arPointerFreezeFrameChanged:
+            //No AR pointer on a co-browse screen, only sketch
+            break
         }
     }
 

@@ -14,8 +14,9 @@ import os
  - discovers agent-started sketches through SKETCH / AR_POINTER / AR_POINTER_COLORS conference metadata
    (or a SketchAvailabilityChangedEvent),
  - joins them with `PUT api/sketch/{id}` and broadcasts finished items with `POST api/sketch/{id}`,
- - applies SketchCanvasUpdatedEvent operations and answers SketchUserJoinedEvent with our own items,
- - renders ArPointerIndicatedEvent laser points aimed at us.
+ - applies SketchCanvasUpdatedEvent operations and answers SketchUserJoinedEvent with our own items.
+
+ Laser points are not part of the sketch: `ArPointerSession` renders those.
 
  Customer ink is always kept locally (it is visible in the screen share either way) and is only posted
  while a sketch is joined.
@@ -23,7 +24,9 @@ import os
 internal final class SketchSession {
 
     private let canvas: SketchCanvasView
-    private let laser: LaserPointerView
+
+    /// The annotated stream. Nil means our own shared screen, whatever its correlation id (co-browse).
+    var target: (endpointId: String, correlationId: String?)?
 
     /// Called when our claimed ink color changes
     var onInkColorChanged: ((UIColor) -> Void)?
@@ -43,15 +46,17 @@ internal final class SketchSession {
     private var joiningSketchId: String?
     private var colorClaims: [String: String] = [:]
 
+    /// Our ink color as the web writes it, sent with our laser points
+    private(set) var inkHex: String = SketchGeometry.fallbackColor
+
     private(set) var inkColor: UIColor = SketchGeometry.color(hex: SketchGeometry.fallbackColor)! {
         didSet {
             onInkColorChanged?(inkColor)
         }
     }
 
-    init(canvas: SketchCanvasView, laser: LaserPointerView) {
+    init(canvas: SketchCanvasView) {
         self.canvas = canvas
-        self.laser = laser
 
         canvas.localIdentity = { [weak self] in
             return self?.identity()
@@ -99,17 +104,16 @@ internal final class SketchSession {
                 return
             }
 
-            guard let me = identity()?.endpointId else { return }
+            guard let target = targetFilter() else { return }
 
             //Always one entry: { "<sketchId>": { enabled, target: { endpoint, username }, mediaType, correlationId } }
             let entry = JSON(parseJSON: raw).dictionaryValue.first { _, value in
-                value["enabled"].boolValue && value["target"]["endpoint"].stringValue == me
+                guard value["enabled"].boolValue, value["target"]["endpoint"].stringValue == target.endpointId else { return false }
+                guard let correlationId = target.correlationId, let entryCorrelationId = value["correlationId"].string else { return true }
+                return entryCorrelationId == correlationId
             }
 
-            if let (id, value) = entry {
-                if let mediaType = value["mediaType"].string, mediaType != "screen" {
-                    os_log("Sketch %@ targets our %@ stream", log: Log.conferenceSDK, type: .debug, id, mediaType)
-                }
+            if let (id, _) = entry {
                 join(id)
             } else {
                 leave()
@@ -148,7 +152,7 @@ internal final class SketchSession {
             }
 
         case .sketchAvailabilityChanged:
-            if let target = json["targetEndpointId"].string, target != me.endpointId {
+            if let target = json["targetEndpointId"].string, target != targetFilter()?.endpointId {
                 return
             }
             guard let connectionId = json["connectionId"].string else { return }
@@ -159,22 +163,16 @@ internal final class SketchSession {
                 leave()
             }
 
-        case .arPointerIndicated:
-            if let target = json["targetUserEndpointId"].string, target != me.endpointId {
-                return
-            }
-            let color = json["color"].string.flatMap { SketchGeometry.color(hex: $0) } ?? inkColor
-            laser.show(x: CGFloat(json["coordinates"]["x"].doubleValue),
-                       y: CGFloat(json["coordinates"]["y"].doubleValue),
-                       areaWidth: CGFloat(json["area"]["width"].doubleValue),
-                       areaHeight: CGFloat(json["area"]["height"].doubleValue),
-                       color: color,
-                       index: json["index"].intValue,
-                       ttl: json["ttl"].double ?? 5)
-
         default:
             break
         }
+    }
+
+    private func targetFilter() -> (endpointId: String, correlationId: String?)? {
+        if let target = target {
+            return target
+        }
+        return identity().map { ($0.endpointId, nil) }
     }
 
     private func eventSketchId(_ json: JSON) -> String? {
@@ -214,7 +212,6 @@ internal final class SketchSession {
     /// Leaves the sketch and removes the agent's drawings. The customer's own ink stays.
     func stop() {
         leave()
-        laser.clear()
     }
 
     /// Leaves the sketch and removes every drawing locally, including the customer's own (nothing is broadcast)
@@ -283,7 +280,6 @@ internal final class SketchSession {
 
         let myEndpointId = identity()?.endpointId
         canvas.removeAll { $0.userEndpointId != myEndpointId }
-        laser.clear()
     }
 
     //MARK: Broadcast
@@ -322,11 +318,13 @@ internal final class SketchSession {
 
     private func updateInkColor() {
         if let me = identity()?.endpointId, let hex = colorClaims[me], let color = SketchGeometry.color(hex: hex) {
+            inkHex = hex
             inkColor = color
         } else {
             //No claim for us: take the first free color, preferring ones that don't clash with the red sharing border
             let claimed = Set(colorClaims.values.map { $0.uppercased() })
             let hex = SketchGeometry.customerFallbackOrder.first { !claimed.contains($0.uppercased()) } ?? SketchGeometry.fallbackColor
+            inkHex = hex
             inkColor = SketchGeometry.color(hex: hex) ?? inkColor
         }
         canvas.inkColor = inkColor

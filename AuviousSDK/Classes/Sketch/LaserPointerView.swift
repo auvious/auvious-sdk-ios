@@ -7,11 +7,13 @@
 
 import UIKit
 
-/// Renders the agent's laser pointer indications: a pulsing numbered dot with a countdown ring (web: point.component).
+/// Renders AR pointer points: a numbered dot with a countdown ring (web: point.component).
 internal final class LaserPointerView: UIView {
 
     private static let dotSize: CGFloat = 30
-    private static let ringRadius: CGFloat = 25
+    /// The ring hugs the dot: a 2.5pt gap between the dot and the ring's inner edge
+    private static let ringWidth: CGFloat = 3
+    private static let ringRadius: CGFloat = dotSize / 2 + 2.5 + ringWidth / 2
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -40,7 +42,7 @@ internal final class LaserPointerView: UIView {
         ring.path = UIBezierPath(arcCenter: containerCenter, radius: LaserPointerView.ringRadius, startAngle: -.pi / 2, endAngle: 1.5 * .pi, clockwise: true).cgPath
         ring.fillColor = UIColor.clear.cgColor
         ring.strokeColor = LaserPointerView.ringColor(for: color).cgColor
-        ring.lineWidth = 4
+        ring.lineWidth = LaserPointerView.ringWidth
         ring.lineCap = .round
         container.layer.addSublayer(ring)
 
@@ -63,26 +65,6 @@ internal final class LaserPointerView: UIView {
         dot.textColor = .white
         dot.font = CobrowseTheme.font(13, .bold)
         container.addSubview(dot)
-
-        //Pulse
-        let pulse = CALayer()
-        pulse.frame = dot.frame
-        pulse.cornerRadius = LaserPointerView.dotSize / 2
-        pulse.borderColor = UIColor.white.cgColor
-        pulse.borderWidth = 2
-        container.layer.insertSublayer(pulse, below: dot.layer)
-
-        let grow = CABasicAnimation(keyPath: "transform.scale")
-        grow.fromValue = 1
-        grow.toValue = 1.6
-        let fade = CABasicAnimation(keyPath: "opacity")
-        fade.fromValue = 0.9
-        fade.toValue = 0
-        let group = CAAnimationGroup()
-        group.animations = [grow, fade]
-        group.duration = 1
-        group.repeatCount = .infinity
-        pulse.add(group, forKey: "pulse")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + ttl + 0.3) { [weak container] in
             container?.removeFromSuperview()

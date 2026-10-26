@@ -22,6 +22,25 @@ internal protocol CobrowseSignallingDelegate: AnyObject {
     func cobrowseMetadataChanged(_ event: ConferenceMetadataUpdatedEvent)
 }
 
+/// Receives the AR pointer and sketch signalling of a regular call (camera and screen share annotations).
+internal protocol AnnotationSignallingDelegate: AnyObject {
+
+    /// A sketch or AR pointer user event
+    func annotationUserEventReceived(_ type: RtcUserEventType, json: JSON)
+
+    /// A SKETCH / AR_POINTER / AR_POINTER_COLORS conference metadata change from another participant
+    func annotationMetadataChanged(_ event: ConferenceMetadataUpdatedEvent)
+}
+
+/// Another endpoint in the current conference, as far as AR pointer events need to know it
+internal struct RemoteParticipant {
+    let userId: String
+    let endpointId: String
+
+    /// stream id -> the publisher's correlation id
+    var correlationIds: [String: String] = [:]
+}
+
 public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDelegate, RTCDelegate, UserEndpointDelegate {
 
     /// Singleton instance
@@ -32,6 +51,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
 
     /// Co-browse signalling sink, set while a co-browse session is active
     internal weak var cobrowseDelegate: CobrowseSignallingDelegate?
+
+    /// AR pointer / sketch signalling sink of the call screen. Gets the annotation events alongside `cobrowseDelegate`;
+    /// each sketch session filters by its own sketch and target, so double delivery is safe.
+    internal weak var annotationDelegate: AnnotationSignallingDelegate?
+
+    /// The other endpoints of the current conference, by endpoint id
+    internal private(set) var remoteParticipants: [String: RemoteParticipant] = [:]
 
     /// When true, the co-browse session manages app lifecycle itself and the public pause/resume calls are ignored
     internal var isCobrowseActive: Bool = false
@@ -105,6 +131,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             if currentConference != nil {
                 lastConferenceJoined = currentConference?.id
             }
+            rebuildRemoteParticipants()
         }
     }
     
@@ -1154,6 +1181,55 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     
     internal func userEventReceived(_ type: RtcUserEventType, json: JSON) {
         cobrowseDelegate?.cobrowseUserEventReceived(type, json: json)
+        if type.isAnnotation {
+            annotationDelegate?.annotationUserEventReceived(type, json: json)
+        }
+    }
+
+    //MARK: Participants
+
+    private func rebuildRemoteParticipants() {
+        var participants: [String: RemoteParticipant] = [:]
+        let me = UserEndpointModule.sharedInstance.userEndpointId
+        for participant in currentConference?.participants ?? [] {
+            guard let userId = participant.id else { continue }
+            for endpoint in participant.endpoints ?? [] where endpoint.id != nil && endpoint.id != me {
+                var remote = RemoteParticipant(userId: userId, endpointId: endpoint.id)
+                for stream in endpoint.streams ?? [] {
+                    remote.correlationIds[stream.id] = stream.correlationId ?? stream.id
+                }
+                participants[endpoint.id] = remote
+            }
+        }
+        remoteParticipants = participants
+    }
+
+    private func updateRemoteParticipants(_ msg: ConferenceEvent) {
+        guard let endpointId = msg.userEndpointId, let userId = msg.userId, let type = msg.type else { return }
+
+        switch type {
+        case .conferenceJoined:
+            if remoteParticipants[endpointId] == nil {
+                remoteParticipants[endpointId] = RemoteParticipant(userId: userId, endpointId: endpointId)
+            }
+        case .conferenceLeft:
+            remoteParticipants[endpointId] = nil
+        case .conferenceStreamPublished:
+            let object = msg as! ConferenceStreamPublishedEvent
+            var remote = remoteParticipants[endpointId] ?? RemoteParticipant(userId: userId, endpointId: endpointId)
+            remote.correlationIds[object.streamId] = object.correlationId ?? object.streamId
+            remoteParticipants[endpointId] = remote
+        case .conferenceStreamUnpublished:
+            let object = msg as! ConferenceStreamUnpublishedEvent
+            remoteParticipants[endpointId]?.correlationIds[object.streamId] = nil
+        default:
+            break
+        }
+    }
+
+    /// The correlation id of a remote stream, as the AR pointer and sketch events name it
+    internal func correlationId(ofRemoteStream streamId: String) -> String? {
+        return remoteParticipants.values.lazy.compactMap { $0.correlationIds[streamId] }.first
     }
     
     internal func conferenceMessageReceived(_ object: ConferenceEvent) {
@@ -1229,6 +1305,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     
     //MQTT message delegation
     private func delegateConferenceMessage(msg: ConferenceEvent) {
+        updateRemoteParticipants(msg)
+
         switch msg.type! {
         case .conferenceJoined, .conferenceLeft, .conferenceStreamPublished, .conferenceNetworkIndicatorEvent:
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
@@ -1248,6 +1326,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             //Co-browse annotations (sketch / laser pointer discovery)
             if object.isSketch || object.isArPointer || object.isArPointerColors {
                 cobrowseDelegate?.cobrowseMetadataChanged(object)
+                annotationDelegate?.annotationMetadataChanged(object)
                 
             //Conference on hold
             } else if object.isHold {

@@ -53,8 +53,8 @@ internal final class CobrowsePassthroughView: UIView {
 }
 
 /**
- Hosts and lays out the co-browse chrome: edge glow, status pill, dock, sketch canvas, laser points,
- mask hints, sheets and toasts.
+ Hosts and lays out the co-browse chrome: edge glow, status pill, dock, sketch canvas, mask hints,
+ sheets and toasts. There is no AR pointer while co-browsing, only sketch.
  */
 internal final class CobrowseOverlayViewController: UIViewController {
 
@@ -75,7 +75,6 @@ internal final class CobrowseOverlayViewController: UIViewController {
     let pill = CobrowseStatusPillView()
     let dock = CobrowseDockView()
     let canvas = SketchCanvasView()
-    let laser = LaserPointerView()
     let hints = CobrowseMaskHintsView()
     /// In a video call, holds the call's PiP while co-browsing. Like the rest of this window it is never part of
     /// the shared screen, so the agent sees the app behind the call instead of a masked box.
@@ -121,7 +120,7 @@ internal final class CobrowseOverlayViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        for fullScreen in [hints, canvas, laser, callContainer, glow] as [UIView] {
+        for fullScreen in [hints, canvas, callContainer, glow] as [UIView] {
             fullScreen.frame = view.bounds
             fullScreen.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             view.addSubview(fullScreen)

@@ -11,6 +11,8 @@ import UIKit
 internal enum SketchTool: Equatable {
     case pen
     case arrow
+    /// AR pointer: a tap places a numbered point instead of drawing
+    case laser
 }
 
 /// Constants and math shared with the web sketch implementation.

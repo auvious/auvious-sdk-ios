@@ -36,13 +36,18 @@ internal final class SketchCanvasView: UIView {
     /// Called when the customer finishes an item
     var onLocalItemCreated: ((PaperItem) -> Void)?
 
-    var tool: SketchTool = .pen
+    var tool: SketchTool = .pen {
+        didSet {
+            isUserInteractionEnabled = isDrawingEnabled && tool != .laser
+            cancelStroke()
+        }
+    }
     var inkColor: UIColor = SketchGeometry.color(hex: SketchGeometry.fallbackColor)!
 
-    /// While true, touches draw instead of reaching the app
+    /// While true, touches draw instead of reaching the app. The laser tool never draws.
     var isDrawingEnabled: Bool = false {
         didSet {
-            isUserInteractionEnabled = isDrawingEnabled
+            isUserInteractionEnabled = isDrawingEnabled && tool != .laser
             if !isDrawingEnabled {
                 cancelStroke()
             }
@@ -253,6 +258,8 @@ internal final class SketchCanvasView: UIView {
             }
         case .arrow:
             strokePoints = [first, point]
+        case .laser:
+            return
         }
         updateStrokeLayer()
     }
@@ -336,6 +343,9 @@ internal final class SketchCanvasView: UIView {
             let shaft = PaperPath(data: nil, segments: [PaperSegment(point: first), PaperSegment(point: last)], strokeColor: color, strokeWidth: width)
             let head = PaperPath(data: nil, segments: SketchGeometry.arrowHead(from: first, to: last).map { PaperSegment(point: $0) }, strokeColor: color, strokeWidth: width)
             return .group(PaperGroup(data: data, children: [.path(shaft), .path(head)]))
+
+        case .laser:
+            return nil
         }
     }
 }
