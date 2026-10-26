@@ -264,31 +264,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 API2.sharedInstance.updateConferenceMetadata(request, onSuccess: { _ in }, onFailure: { _ in })
             }
 
-            // Stop screen sharing if active — ReplayKit capture cannot continue in background
-            if sharingMyScreen, let conference = currentConference,
-               let loginResponse = AuthenticationModule.sharedInstance.loginResponse,
-               let userId = loginResponse.userId,
-               let endpointId = UserEndpointModule.sharedInstance.userEndpointId {
-
-                // Find the screen share stream before tearing it down
-                let screenStreamId = rtcClient.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
-
-                rtcClient.stopScreenSharing()
-                sharingMyScreen = false
-
-                if let streamId = screenStreamId {
-                    _ = rtcClient.removePublishStreams(streamId: streamId)
-                    let usRequest = UnpublishStreamRequest(
-                        conferenceId: conference.id,
-                        streamId: streamId,
-                        userEndpointId: endpointId,
-                        userId: userId
-                    )
-                    API2.sharedInstance.unpublishStream(usRequest, onSuccess: { _ in }, onFailure: { _ in })
-                }
-
-                delegate?.auviousSDK(screenSharingStopped: true)
-            }
+            stopScreenShareForBackground()
 
             // Switch from RunLoop timer (won't fire in background) to GCD timer
             UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
@@ -322,6 +298,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             self?.endBackgroundTask()
         }
 
+        // A regular screen share ends with the call, before leaving. Left running, sharingMyScreen would
+        // stay set and onApplicationResume() would skip the rejoin, leaving the call without media.
+        // An in-call co-browse stops and resumes its own share (CobrowseSessionController).
+        if !screenStreamIsCobrowse {
+            stopScreenShareForBackground()
+        }
+
         //Pause the keepAlive timer
         UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
 
@@ -338,6 +321,35 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
     }
     
+    /// Stops a regular screen share when the app leaves the foreground (switching to another app):
+    /// in-app ReplayKit capture only records this app, so it can't continue in background.
+    private func stopScreenShareForBackground() {
+        guard sharingMyScreen, let rtcClient = rtcClient else { return }
+
+        // Find the screen share stream before tearing it down
+        let screenStreamId = rtcClient.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
+
+        rtcClient.stopScreenSharing()
+        sharingMyScreen = false
+
+        if let streamId = screenStreamId,
+           let conference = currentConference,
+           let userId = AuthenticationModule.sharedInstance.loginResponse?.userId,
+           let endpointId = UserEndpointModule.sharedInstance.userEndpointId {
+            _ = rtcClient.removePublishStreams(streamId: streamId)
+            let usRequest = UnpublishStreamRequest(
+                conferenceId: conference.id,
+                streamId: streamId,
+                userEndpointId: endpointId,
+                userId: userId
+            )
+            API2.sharedInstance.unpublishStream(usRequest, onSuccess: { _ in }, onFailure: { _ in })
+        }
+
+        //stopScreenSharing() already told the delegate (screenSharingStopped)
+        os_log("Screen share stopped, the app left the foreground", log: Log.conferenceSDK, type: .debug)
+    }
+
     /**
      Should be called when the application is foregrounded in order to automatically
      rejoin the conference and reconnect to remote streams.
