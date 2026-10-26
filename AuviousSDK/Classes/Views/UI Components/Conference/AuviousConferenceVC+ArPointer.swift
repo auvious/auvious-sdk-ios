@@ -36,6 +36,8 @@ extension AuviousConferenceVCNew {
     /// The tile the AR pointer points at, which takes the focus slot
     var arPointerFocusView: StreamView? {
         guard let tile = arPointerTile, arPointer.target?.isScreen == false else { return nil }
+        //Its participant may have just left: the tile is out of the call until refreshArPointer() lets go of it
+        guard tile === localView || renderedRemoteViews.contains(where: { $0 === tile }) else { return nil }
         return tile
     }
 
