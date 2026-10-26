@@ -277,6 +277,11 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         let configuration = RTCConfiguration()
         configuration.iceServers = iceServers
         configuration.continualGatheringPolicy = .gatherContinually
+        //Keep the sockets per connection down: audio and video share one transport, and no host TCP candidates
+        //(TURN over TCP/TLS still works). WebRTC's network thread stops once a socket's descriptor passes 1024,
+        //which with one connection per stream froze calls of 5 participants.
+        configuration.bundlePolicy = .maxBundle
+        configuration.tcpCandidatePolicy = .disabled
 
         // nil if WebRTC rejects the configuration; callers then report missingPeerConnection
         guard let connection = factory.peerConnection(with: configuration, constraints: self.defaultConnectionConstraint, delegate: self) else {
