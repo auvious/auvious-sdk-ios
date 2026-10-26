@@ -1,6 +1,0 @@
-framework module Starscream_IOS13 {
-  umbrella header "Starscream_IOS13-umbrella.h"
-
-  export *
-  module * { export * }
-}

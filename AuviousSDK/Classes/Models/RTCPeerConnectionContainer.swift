@@ -24,6 +24,8 @@ internal final class RTCPeerConnectionContainer: CustomStringConvertible {
     var candidatesSentCount: Int = 0
     /// Whether an ICE-failure retry has already been attempted for this connection.
     var iceRestartAttempted: Bool = false
+    /// Remote streams already passed to the delegate (one callback per track arrives for each).
+    var deliveredRemoteStreamIds: Set<String> = []
     
     var description: String {
         return "Stream id \(String(describing: streamId)) - Call id \(String(describing: callId)) - isLocal \(isLocal)"

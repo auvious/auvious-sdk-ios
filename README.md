@@ -20,11 +20,11 @@ AuviousSDK is available through as a [CocoaPod](https://cocoapods.org). You can 
   ```
   Last but not least, you need to add the AuviousSDK pod on all targets that will need it
   ```ruby
-  pod 'AuviousSDK', '1.4.0'
+  pod 'AuviousSDK', '1.5.0'
   ```
 - Auvious SDK github repo. This method only requires the following line on the target dependencies:
   ```ruby
-  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.4.0'
+  pod 'AuviousSDK', :git => 'https://github.com/auvious/auvious-sdk-ios.git', :tag => '1.5.0'
   ```
 
 Next you need to run `pod install` in order for AuviousSDK and it's dependencies to be installed in the project workspace.
@@ -339,17 +339,29 @@ Used when presenting `AuviousConferenceVCNew` for the built-in conference UI.
 
 The following example applications are included in this repository. If unsure, begin with ExampleSimpleConference, which demonstrates how to use a ready-to-use ViewController we provide, for joining a video conference call.
 
-- [ExampleCall](Example/ExampleCall)
-- [ExampleSimpleCall](Example/ExampleSimpleCall)
-- [ExampleConference](Example/ExampleConference)
 - [ExampleSimpleConference](Example/ExampleSimpleConference)
+- [ExampleCall](Example/ExampleCall), [ExampleSimpleCall](Example/ExampleSimpleCall) and [ExampleConference](Example/ExampleConference): not maintained, their targets are commented out in `Example/Podfile` and don't build as they are
 
-To try the above examples you should open the Example/AuviousSDK.xcworkspace in Xcode.
+To try ExampleSimpleConference run `pod install` in `Example/`, then open `Example/AuviousSDK.xcworkspace` in Xcode. Apps built with Xcode 27 (iOS 27 SDK) must use the scene life cycle; ExampleSimpleConference shows how (`SceneDelegate` in its `AppDelegate.swift`).
 
 There is also a separate repository with examples available at https://github.com/auvious/ios-examples. At the current moment the following examples are available there:
 
 - [SimpleConference](https://github.com/auvious/ios-examples/tree/master/SimpleConference) Similar to ExampleSimpleConference written in SwiftUI.
 - [GenesysCloudSimpleConference](https://github.com/auvious/ios-examples/tree/master/GenesysCloudSimpleConference) Demonstrates how to quickly add video call capability to your iOS application, utilizing Genesys Cloud webChat channel for ACD routing.
+
+## Tests
+
+`Tests/` holds XCTests of the SDK, a `test_spec` of `AuviousSDK.podspec` hosted in its `app_spec` TestHost
+(an app with the scene life cycle). After `pod install` in `Example/` they are the scheme
+`AuviousSDK-Unit-Tests` of the workspace:
+
+    xcodebuild test -workspace Example/AuviousSDK.xcworkspace -scheme AuviousSDK-Unit-Tests \
+      -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
+
+CI runs them in the job test-sdk. `RTCModuleLoopbackTests` runs `RTCModule`'s conference signalling
+against `FakeSFU`, a peer connection in the same process standing in for the server: publishing a stream,
+and viewing one, with video from a synthetic camera (the simulator has none). No backend, no network:
+both sides only use the loopback interface.
 
 ## Publish version
 
@@ -391,7 +403,23 @@ Example:
 pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
 ```
 
+`pod repo push` first validates the pod, and that now includes the test spec: it builds the TestHost app
+and runs the [tests](#tests) on an iOS simulator, so it needs Xcode with a simulator runtime and takes a few
+minutes longer. When CI's test-sdk passed for the tagged commit, `--skip-tests` skips them.
+
 ## Release notes
+
+### 1.5.0
+
+- Update / WebRTC M155 (AuviousGoogleWebRTC 155.8059.3). Unified Plan: streams are published as tracks, remote streams arrive through the receivers
+- Update / iOS 15 minimum (Xcode 27 rejects lower deployment targets)
+- Update / video views are Metal (RTCMTLVideoView) only, also on simulators
+- Bug fix / tracks a server or caller sends without a stream are delivered together, video included, and without the ones the answer rejected (no black tile for a refused camera)
+- Behaviour / a track that can't be added to a connection is reported to the delegate (`internalError`), not only logged; the offer still goes out with the other tracks
+- Bug fix / conference UI: the notch side follows the interface orientation, and the layout is redone once the view is on screen
+- Example / ExampleSimpleConference uses the scene life cycle (apps built with the iOS 27 SDK don't launch without it), landscape layout without statusBarOrientation
+- Example / Pods are no longer committed: run `pod install` in `Example/`
+- Tests / XCTests of RTCModule against an in-process SFU, run in CI
 
 ### 1.4.0
 

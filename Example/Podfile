@@ -1,7 +1,6 @@
 platform :ios, '15.0'
 
-#source 'https://cdn.cocoapods.org/'
-source 'https://github.com/CocoaPods/Specs.git'
+source 'https://cdn.cocoapods.org/'
 source 'https://github.com/auvious/CocoaPodSpecs.git'
 source 'https://github.com/jkritikos/Podspec.git'
 
@@ -31,7 +30,7 @@ use_frameworks!
 #end
 
 target 'ExampleSimpleConference' do
-  pod 'AuviousSDK', :path => '../'
+  pod 'AuviousSDK', :path => '../', :testspecs => ['Tests'], :appspecs => ['TestHost']
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
   #pod 'CocoaMQTT_IOS13/Core', :git => 'https://github.com/jkritikos/CocoaMQTT_Fixed.git'
   pod 'CocoaMQTTWebsocket_IOS13', :git => 'https://github.com/jkritikos/CocoaMQTT_Fixed.git'

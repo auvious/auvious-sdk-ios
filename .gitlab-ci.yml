@@ -1,0 +1,79 @@
+# On the macOS runner: builds the example app ExampleSimpleConference (and with it
+# AuviousSDK) for the iOS simulator, and runs the SDK's XCTests (Tests/) on a simulator.
+# No signing, nothing published.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
+build-example:
+  tags: [macos]
+  # Both jobs share the CocoaPods home on the Mac: one job of this project at a time there, so
+  # two pod installs never write it at once (and test-sdk's leftover simulators are its own).
+  # The runner runs one job at a time today (concurrent = 1); this holds if that is raised.
+  resource_group: macos-sdk-ios
+  timeout: 1h
+  variables:
+    LANG: en_US.UTF-8
+  script:
+    # CocoaPods' spec cache, kept between jobs but away from the Mac user's own.
+    - export PATH="/opt/homebrew/bin:$PATH" CP_HOME_DIR="$HOME/sdk-ios-ci/cocoapods"
+    - xcodebuild -version
+    - cd Example
+    - pod install --repo-update
+    # The committed lock must be what pod install resolves (podspec or Podfile changed without it?).
+    # Its COCOAPODS line is only the version that wrote it, the Mac's may differ.
+    - 'git diff --exit-code -I "^COCOAPODS: " Podfile.lock || { echo "Podfile.lock is out of date: run pod install in Example/ and commit it"; exit 1; }'
+    - set -o pipefail
+    - >
+      xcodebuild -workspace AuviousSDK.xcworkspace -scheme ExampleSimpleConference
+      -configuration Debug -destination 'generic/platform=iOS Simulator'
+      -derivedDataPath "$CI_PROJECT_DIR/build/DerivedData"
+      CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$CI_PROJECT_DIR/build/xcodebuild.log" | grep -E 'error:|BUILD (SUCCEEDED|FAILED)'
+  before_script:
+    - mkdir -p build
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - build/xcodebuild.log
+      - Example/Podfile.lock
+
+test-sdk:
+  tags: [macos]
+  resource_group: macos-sdk-ios
+  timeout: 1h
+  variables:
+    LANG: en_US.UTF-8
+  before_script:
+    - mkdir -p build
+  script:
+    - export PATH="/opt/homebrew/bin:$PATH" CP_HOME_DIR="$HOME/sdk-ios-ci/cocoapods"
+    - cd Example
+    - pod install --repo-update
+    # A simulator of this job's own (newest runtime), deleted afterwards: no app or permission
+    # state from earlier runs, and other users of the Mac's simulators are left alone.
+    # Those of killed jobs (no after_script) deleted first: none of this project's is running.
+    - xcrun simctl list devices | sed -nE 's/^ *sdk-ios-ci-[0-9]+ \(([0-9A-F-]+)\).*/\1/p' | xargs -n1 xcrun simctl delete
+    # Two lines: a failed create in an && list would not stop the job.
+    - SIM=$(xcrun simctl create "sdk-ios-ci-$CI_JOB_ID" "iPhone 17")
+    - echo "$SIM" > "$CI_PROJECT_DIR/build/simulator"
+    - set -o pipefail
+    # The scheme of the podspec's test_spec, hosted in its app_spec TestHost. No diagnostics on
+    # failure: collecting them (simctl diagnose) adds up to 10 minutes to a failed job.
+    - >
+      xcodebuild test -workspace AuviousSDK.xcworkspace -scheme AuviousSDK-Unit-Tests
+      -destination "platform=iOS Simulator,id=$SIM" -collect-test-diagnostics never
+      -derivedDataPath "$CI_PROJECT_DIR/build/DerivedData" -resultBundlePath "$CI_PROJECT_DIR/build/Tests.xcresult"
+      CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$CI_PROJECT_DIR/build/test.log" | grep -E "error:|Test Case|Executed|TEST (SUCCEEDED|FAILED)"
+  after_script:
+    - SIM=$(cat build/simulator 2>/dev/null) || exit 0
+    - xcrun simctl shutdown "$SIM" 2>/dev/null || true
+    - xcrun simctl delete "$SIM" || true
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - build/test.log
+      - build/Tests.xcresult

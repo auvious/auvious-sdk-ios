@@ -1,7 +1,22 @@
 PODS:
-  - AuviousGoogleWebRTC (84.4147.4)
-  - AuviousSDK (1.4.0):
-    - AuviousGoogleWebRTC (~> 84.4147.4)
+  - AuviousGoogleWebRTC (155.8059.3)
+  - AuviousSDK (1.5.0):
+    - AuviousGoogleWebRTC (~> 155.8059.3)
+    - CocoaMQTTWebsocket_IOS13
+    - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
+    - Sentry (~> 8.0)
+    - Starscream_IOS13 (~> 4.0.4)
+    - SwiftyJSON (~> 5.0)
+  - AuviousSDK/TestHost (1.5.0):
+    - AuviousGoogleWebRTC (~> 155.8059.3)
+    - CocoaMQTTWebsocket_IOS13
+    - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
+    - Sentry (~> 8.0)
+    - Starscream_IOS13 (~> 4.0.4)
+    - SwiftyJSON (~> 5.0)
+  - AuviousSDK/Tests (1.5.0):
+    - AuviousGoogleWebRTC (~> 155.8059.3)
+    - AuviousSDK/TestHost
     - CocoaMQTTWebsocket_IOS13
     - MqttCocoaAsyncSocket_IOS13 (~> 14.0.0)
     - Sentry (~> 8.0)
@@ -19,6 +34,8 @@ PODS:
 
 DEPENDENCIES:
   - AuviousSDK (from `../`)
+  - AuviousSDK/TestHost (from `../`)
+  - AuviousSDK/Tests (from `../`)
   - CocoaMQTTWebsocket_IOS13 (from `https://github.com/jkritikos/CocoaMQTT_Fixed.git`)
   - MqttCocoaAsyncSocket_IOS13 (from `https://github.com/jkritikos/MqttCocoaAsyncSocket.git`, tag `14.0.0`)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `8.46.0`)
@@ -27,7 +44,7 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/auvious/CocoaPodSpecs.git:
     - AuviousGoogleWebRTC
-  https://github.com/CocoaPods/Specs.git:
+  trunk:
     - SwiftyJSON
 
 EXTERNAL SOURCES:
@@ -60,14 +77,14 @@ CHECKOUT OPTIONS:
     :tag: 4.0.4
 
 SPEC CHECKSUMS:
-  AuviousGoogleWebRTC: 146e1bcb5423fbef3796d1e2cd28c7c592ae575a
-  AuviousSDK: 4e1fe3d14a4df9591cbeb829c6465c9e882b0af8
+  AuviousGoogleWebRTC: c8cc3877683d5719f1d059badba7232e10a449c6
+  AuviousSDK: 9bc18ff6f2288d6ac7c7e55e6a7c8009c9e51f7c
   CocoaMQTTWebsocket_IOS13: cb657e8cfc7a0729b58f37a01f4cdf67b2fe259a
   MqttCocoaAsyncSocket_IOS13: a32f9a761890366c28d22a6383e2389ff2a5a312
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   Starscream_IOS13: 71409ad6351f8df04b4a5814a01fc70f1a0bed7c
   SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
 
-PODFILE CHECKSUM: 3c0c826b116f1dd6f8d934bc0582d156685fe402
+PODFILE CHECKSUM: 154a5d4302244ede627ad705db38222f5e126889
 
 COCOAPODS: 1.16.2
