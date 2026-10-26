@@ -149,7 +149,12 @@ class ConferenceButtonBar: UIView {
         buttonStackView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
         buttonStackView.centerXAnchor.constraint(equalTo: centerXAnchor, constant: 0).isActive = true
         buttonStackView.heightAnchor.constraint(equalToConstant:55).isActive = true
-        
+        //As narrow as its buttons allow. Only centered, its width is otherwise free, and the call's layouts size
+        //tiles from it: a tile shaped like its video would stretch the row (and the tiles with it) to fill its space
+        let hug = buttonStackView.widthAnchor.constraint(equalToConstant: 0)
+        hug.priority = .required - 1
+        hug.isActive = true
+
         //Add buttons to stack view
         for b in buttons {
             buttonStackView.addArrangedSubview(b)

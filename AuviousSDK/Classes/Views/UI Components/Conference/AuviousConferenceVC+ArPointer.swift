@@ -10,7 +10,7 @@ import SwiftyJSON
 import os
 
 //AR pointer: an agent points and draws on one of the call's streams. On a camera (ours or another customer's)
-//the target tile takes the focus slot, with an [Annotate] dock inside it; on our regular screen share the
+//the target tile takes the focus slot, with an [Annotate] dock at the bottom of it; on our regular screen share the
 //points and ink are drawn over the whole app, in an overlay window above it.
 extension AuviousConferenceVCNew {
 
@@ -167,14 +167,26 @@ extension AuviousConferenceVCNew {
         dock.onClear = { [weak self] in
             self?.arPointer.clear()
         }
-        tile.addSubview(dock)
-        NSLayoutConstraint.activate([
+        //Next to the tile, not in it: placed by createConstraints() (arPointerDockConstraints)
+        streamContainerView.addSubview(dock)
+        arPointerDock = dock
+        applyArPointerTools()
+    }
+
+    /// The [Annotate] dock at the bottom of the AR pointer tile's space. Given with the layout's constraints, so a tile shaped
+    /// like its video (fitTilesToVideo) has the dock at the bottom of the space around it, off the video.
+    /// Hidden while the layout doesn't place the tile (PiP).
+    func arPointerDockConstraints(layout: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
+        guard let dock = arPointerDock, let tile = arPointerTile else { return [] }
+        let placed = tile.superview === dock.superview && layout.contains { $0.firstItem === tile || $0.secondItem === tile }
+        dock.isHidden = !placed
+        guard placed else { return [] }
+        dock.superview?.bringSubviewToFront(dock)
+        return [
             dock.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
             dock.bottomAnchor.constraint(equalTo: tile.bottomAnchor, constant: -12),
             dock.widthAnchor.constraint(lessThanOrEqualTo: tile.widthAnchor, constant: -16)
-        ])
-        arPointerDock = dock
-        applyArPointerTools()
+        ]
     }
 
     private func removeArPointerFromTile() {

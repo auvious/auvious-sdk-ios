@@ -119,9 +119,10 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     var onFitChange: (() -> Void)?
 
     /// True when the call should shape the tile like its video, fitted inside the space its layout gives it (`layoutSlot`).
-    /// The video still fills the tile, which then crops nothing. Off in PiP.
+    /// The video still fills the tile, which then crops nothing. Always for screens (no black bars), off in PiP for cameras.
     var followsVideoShape: Bool {
-        return tappedToFit && togglesFitOnTap && !portraitMode && hasVideoSize
+        guard hasVideoSize else { return false }
+        return isScreen || (tappedToFit && togglesFitOnTap && !portraitMode)
     }
 
     /// The space the call's layout gives a tile that follows its video's shape. Owned by the tile's superview.

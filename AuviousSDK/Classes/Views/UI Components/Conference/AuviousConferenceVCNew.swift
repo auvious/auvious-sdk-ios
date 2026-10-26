@@ -1189,7 +1189,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 self.shareScreenContainerView = StreamView(frame: .zero)
                 self.shareScreenContainerView!.translatesAutoresizingMaskIntoConstraints = false
                 self.shareScreenContainerView!.setZoomable(true)
-                
+                //Shaped like the shared screen inside its space, resized when the shared screen's shape changes
+                self.shareScreenContainerView!.onVideoShapeChange = { [weak self] in
+                    self?.createConstraints()
+                }
+
                 #warning("potential mem leak")
                 let tap = UITapGestureRecognizer(target: self, action: #selector(self.shareScreenDoubleTapped))
                 tap.numberOfTapsRequired = 2
@@ -1629,9 +1633,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         var slots: [ObjectIdentifier: UILayoutGuide] = [:]
         var result: [NSLayoutConstraint] = []
 
-        for tile in remoteViews {
+        //Only tiles the layout above places (the screen share only while it is in focus)
+        let placed = Set(constraints.flatMap { [$0.firstItem, $0.secondItem] }.compactMap { $0 as? StreamView }.map(ObjectIdentifier.init))
+        for tile in remoteViews + [shareScreenContainerView].compactMap({ $0 }) {
             let slot = tile.layoutSlot
-            guard tile.followsVideoShape, let parent = tile.superview else {
+            guard tile.followsVideoShape, placed.contains(ObjectIdentifier(tile)), let parent = tile.superview else {
                 slot.owningView?.removeLayoutGuide(slot)
                 continue
             }
@@ -1855,7 +1861,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             }
         }
 
-        //Tiles tapped to fit take their video's shape, inside the space the layout above gives them
+        constraints += arPointerDockConstraints(layout: constraints)
+        //Screen shares and tiles tapped to fit take their video's shape, inside the space the layout above gives them
         constraints = fitTilesToVideo(constraints)
 
         let applyConstraints = {
