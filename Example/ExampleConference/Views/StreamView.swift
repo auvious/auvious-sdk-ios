@@ -17,14 +17,8 @@ public class StreamView: UIView, RTCVideoViewDelegate {
     //@IBOutlet weak var videoView: RTCMTLVideoView!
     var videoTrack:RTCVideoTrack!
     
-    //Switch from OpenGL to Metal if we can
-    #if arch(i386) || arch(x86_64) || arch(arm)
-    let supportsMetal: Bool = false
-    var videoView: RTCEAGLVideoView = RTCEAGLVideoView(frame: CGRect.zero)
-    #else
-    let supportsMetal: Bool = true
+    // Metal on devices and simulators (M155 has no RTCEAGLVideoView)
     var videoView:RTCMTLVideoView = RTCMTLVideoView(frame: CGRect.zero)
-    #endif
     
     private var hasAudioStream:Bool = false
     private var hasVideoStream:Bool = false
@@ -87,10 +81,7 @@ public class StreamView: UIView, RTCVideoViewDelegate {
         
         addSubview(videoView)
         
-        #if arch(i386) || arch(x86_64) || arch(arm)
-        #else
         videoView.videoContentMode = .scaleAspectFill
-        #endif
         
         resetStreamView()
     }

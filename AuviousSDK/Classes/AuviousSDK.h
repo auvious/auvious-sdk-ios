@@ -17,7 +17,7 @@
 #import "WebRTC/RTCVideoSource.h"
 #import "WebRTC/RTCDataChannel.h"
 #import "WebRTC/RTCIceCandidate.h"
-#import "WebRTC/RTCEAGLVideoView.h"
+#import "WebRTC/RTCMTLVideoView.h"
 //#import "MQTTClient/MQTTClient.h"
 
 //! Project version number for AuviousSDK.
