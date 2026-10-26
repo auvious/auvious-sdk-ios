@@ -54,8 +54,8 @@ internal class DismissableNotificationView: AuviousBannerView {
         translatesAutoresizingMaskIntoConstraints = false
     }
 
-    internal func updateUI(withTitle: String, subtitle: String?, symbol: String? = nil, tint: UIColor? = nil) {
-        configure(symbol: symbol, tint: tint, title: withTitle, message: subtitle)
+    internal func updateUI(withTitle: String, subtitle: String?, symbol: String? = nil, image: UIImage? = nil, tint: UIColor? = nil) {
+        configure(symbol: symbol, image: image, tint: tint, title: withTitle, message: subtitle)
     }
 }
 

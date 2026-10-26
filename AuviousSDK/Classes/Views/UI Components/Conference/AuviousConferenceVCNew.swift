@@ -548,14 +548,14 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     //Shows the toast notification view
-    internal func showNotification(with title: String, subtitle: String?, symbol: String? = nil, tint: UIColor? = nil) {
+    internal func showNotification(with title: String, subtitle: String?, symbol: String? = nil, image: UIImage? = nil, tint: UIColor? = nil) {
         //PiP is too small for a banner: show it over the host app instead
         if screenMode != .fullScreen, let window = view.window {
-            showWindowNotification(with: title, subtitle: subtitle, symbol: symbol, tint: tint, in: window)
+            showWindowNotification(with: title, subtitle: subtitle, symbol: symbol, image: image, tint: tint, in: window)
             return
         }
 
-        notification.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, tint: tint)
+        notification.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, image: image, tint: tint)
         
         UIView.animate(withDuration: 0.2, animations: {
             self.notification.alpha = 1
@@ -571,13 +571,13 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
     
     /// The same notification banner, added to the window above the host app while the call is in PiP
-    private func showWindowNotification(with title: String, subtitle: String?, symbol: String?, tint: UIColor?, in window: UIWindow) {
+    private func showWindowNotification(with title: String, subtitle: String?, symbol: String?, image: UIImage?, tint: UIColor?, in window: UIWindow) {
         if let previous = windowNotification {
             Self.dismissWindowNotification(previous)
         }
 
         let banner = DismissableNotificationView(title: title, subtitle: subtitle)
-        banner.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, tint: tint)
+        banner.updateUI(withTitle: title, subtitle: subtitle, symbol: symbol, image: image, tint: tint)
         banner.alpha = 0
         banner.layer.zPosition = 2101
         window.addSubview(banner)

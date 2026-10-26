@@ -8,7 +8,7 @@
 import UIKit
 
 /// The floating control dock. Compact while sharing ([Draw] [End]), expanded while drawing
-/// ([Pen] [Arrow] [Undo] [Clear] | [Done]). It can be dragged to the top or bottom edge.
+/// ([Pen] [Arrow] [Undo] [Clear] | [✓]). It can be dragged to the top or bottom edge.
 /// AR pointer annotations use it too: [Annotate] compact, and a Laser tool first while drawing.
 internal final class CobrowseDockView: UIView {
 
@@ -188,7 +188,10 @@ internal final class CobrowseDockView: UIView {
                 divider.heightAnchor.constraint(equalToConstant: 28)
             ])
 
-            let done = labelButton(CobrowseStrings.done, image: nil, background: .white, foreground: CobrowseTheme.dock, action: #selector(doneTapped))
+            //Done is a tick, so it fits however narrow the dock gets
+            let done = iconButton(CobrowseTheme.symbol("checkmark", size: 20, weight: .bold), label: CobrowseStrings.done, action: #selector(doneTapped))
+            done.backgroundColor = .white
+            done.tintColor = CobrowseTheme.dock
 
             for view in [pen, arrow, undo, clear, divider, done] {
                 stack.addArrangedSubview(view)

@@ -66,7 +66,7 @@ extension AuviousConferenceVCNew {
         let isActive = arPointerTile != nil || screenAnnotationOverlay != nil
 
         if isActive != wasActive {
-            showNotification(with: isActive ? CobrowseStrings.laserActivated : CobrowseStrings.laserDeactivated, subtitle: nil, symbol: "scope")
+            showNotification(with: isActive ? CobrowseStrings.laserActivated : CobrowseStrings.laserDeactivated, subtitle: nil, image: CobrowseTheme.laserIcon(stroke: 2))
         }
     }
 
