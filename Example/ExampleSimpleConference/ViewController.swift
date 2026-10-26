@@ -32,6 +32,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
     private let pipSwitch = UISwitch()
     private let screenSharingSwitch = UISwitch()
     private let cobrowseInCallSwitch = UISwitch()
+    private let arPointerSwitch = UISwitch()
     private let maskMarkedViewsSwitch = UISwitch()
     private let maskIdentifiersSwitch = UISwitch()
     private let maskClassesSwitch = UISwitch()
@@ -121,7 +122,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             self?.selectedCallMode = index
         }
 
-        for toggle in [speakerEnabledSwitch, cameraSwitch, micSwitch, speakerSwitch, pipSwitch, screenSharingSwitch, cobrowseInCallSwitch] {
+        for toggle in [speakerEnabledSwitch, cameraSwitch, micSwitch, speakerSwitch, pipSwitch, screenSharingSwitch, cobrowseInCallSwitch, arPointerSwitch] {
             toggle.isOn = true
         }
 
@@ -170,6 +171,9 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
                 row("Speaker", speakerSwitch),
                 row("Picture in picture", pipSwitch),
                 row("Screen sharing", screenSharingSwitch),
+            ]),
+            FormSection(title: "AR pointer", footer: "The agent can point and draw on your camera or on your shared screen, and you can annotate back.", cells: [
+                row("Allow AR pointer", arPointerSwitch),
             ]),
             FormSection(title: "Co-browse", footer: "The agent can ask to see this app during the call. While you share, the call shrinks to picture in picture. Masking follows the rules in Co-browse mode.", cells: [
                 row("Allow co-browse in the call", cobrowseInCallSwitch),
@@ -396,6 +400,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             conf.screenSharingAvailable = self.screenSharingSwitch.isOn
             conf.backgroundAudioEnabled = self.backgroundAudioSwitch.isOn
             conf.cobrowseAvailable = self.cobrowseInCallSwitch.isOn
+            conf.arPointerAvailable = self.arPointerSwitch.isOn
             conf.cobrowseMasking = maskingRules()
             conf.cobrowseShowsMaskHints = maskHintsSwitch.isOn
             AuviousCobrowse.shared.debugHighlightMasks = debugMasksSwitch.isOn

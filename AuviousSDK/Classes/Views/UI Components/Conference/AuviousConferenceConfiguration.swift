@@ -51,6 +51,11 @@ public struct AuviousConferenceConfiguration {
     /// Show a short explanation sheet before the iOS screen recording prompt
     public var cobrowseShowsShareExplainer: Bool = true
 
+    //AR pointer
+    /// Lets the agent point and draw on this customer's camera and on a regular screen share
+    /// (never on a co-browse screen). The customer sees the points and ink and can annotate back.
+    public var arPointerAvailable: Bool = true
+
     //Other
     public var participantName: String? = nil
     
