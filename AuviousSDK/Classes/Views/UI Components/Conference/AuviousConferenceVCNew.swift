@@ -89,6 +89,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     internal var screenAnnotationOverlay: ScreenAnnotationOverlayViewController?
     //Holds the other tiles while one tile is in focus (agent screen share or AR pointer target)
     internal let focusStrip = UIScrollView()
+    //The strip's content: the tiles and their guide live here, since a guide owned by the scroll view itself
+    //moves with the scroll offset and makes the row scroll the opposite way
+    internal let focusStripContent = UIView()
     internal let focusGroupGuide = UILayoutGuide()
     //Row and column guides of the grid layout
     internal var gridGuides: [UILayoutGuide] = []

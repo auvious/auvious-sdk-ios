@@ -22,8 +22,19 @@ extension AuviousConferenceVCNew {
             focusStrip.showsHorizontalScrollIndicator = false
             focusStrip.showsVerticalScrollIndicator = false
             focusStrip.backgroundColor = .clear
-            focusStrip.addLayoutGuide(focusGroupGuide)
             streamContainerView.addSubview(focusStrip)
+
+            let content = focusStripContent
+            content.translatesAutoresizingMaskIntoConstraints = false
+            content.backgroundColor = .clear
+            content.addLayoutGuide(focusGroupGuide)
+            focusStrip.addSubview(content)
+            NSLayoutConstraint.activate([
+                content.leadingAnchor.constraint(equalTo: focusStrip.contentLayoutGuide.leadingAnchor),
+                content.trailingAnchor.constraint(equalTo: focusStrip.contentLayoutGuide.trailingAnchor),
+                content.topAnchor.constraint(equalTo: focusStrip.contentLayoutGuide.topAnchor),
+                content.bottomAnchor.constraint(equalTo: focusStrip.contentLayoutGuide.bottomAnchor)
+            ])
         }
         focusStrip.isHidden = !active
 
@@ -32,7 +43,7 @@ extension AuviousConferenceVCNew {
         }
 
         for tile in [localView] + remoteViews {
-            let parent: UIView = active && tile !== focused ? focusStrip : streamContainerView
+            let parent: UIView = active && tile !== focused ? focusStripContent : streamContainerView
             guard tile.superview !== parent else { continue }
             parent.addSubview(tile)
             //Moving a view drops its constraints to views outside it: redo the mute badge's
