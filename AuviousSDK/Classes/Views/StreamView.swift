@@ -159,7 +159,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     //isZoomed last reported through onZoomChange
     private var reportedZoomed = false
 
-    /// Drawn around the video while it shows (from its first frame, while the camera is on), never around an empty tile
+    /// Drawn around a camera tile whatever it shows (video, camera off, no video, loading), and around a screen
+    /// while it shows (from its first frame), never around its empty space
     var videoBorder: (color: UIColor, width: CGFloat)? {
         didSet {
             updateBorderAndClip()
@@ -612,15 +613,16 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         }
     }
 
-    /// Outlines the video while it shows. Clips the zoomed in tile to the part of its slot the zoomed video covers,
+    /// Outlines the tile (a screen while it shows). Clips the zoomed in tile to the part of its slot the zoomed video covers,
     /// rounded and outlined like the tile.
     private func updateBorderAndClip() {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         defer { CATransaction.commit() }
 
-        //From when the call was told the video's shape (not hasVideoSize, which the first frame sets off the main thread before that)
-        var borderWidth = reportedAspect > 0 && hasVideoStream ? videoBorder?.width ?? 0 : 0
+        //A screen from when the call was told its shape (not hasVideoSize, which the first frame sets off the main thread before that)
+        let showsBorder = !isScreen || (reportedAspect > 0 && hasVideoStream)
+        var borderWidth = showsBorder ? videoBorder?.width ?? 0 : 0
         layer.borderColor = videoBorder?.color.cgColor
 
         //A border appearing while the tile is reshaped (to its video's shape at the first frame) would follow it,

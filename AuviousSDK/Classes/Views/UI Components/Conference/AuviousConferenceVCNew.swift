@@ -471,8 +471,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         localView.translatesAutoresizingMaskIntoConstraints = false
         localView.frame = .zero
         localView.layer.zPosition = 100
-        localView.layer.borderColor = UIColor.gray.cgColor
-        localView.layer.borderWidth = 1.0 / UIScreen.main.scale
+        //Outlined like the remote tiles, whatever it shows
+        localView.videoBorder = (UIColor.white.withAlphaComponent(0.3), 1)
         //Our camera starts in a moment: a black tile, then the video fades in on its first frame
         localView.backgroundColor = .black
         localView.showsLoadingIndicator = false
@@ -1055,6 +1055,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         remoteView.participantEndpoint = participantEndpoint
         //Black, like the camera off state, while the video loads or when there is none
         remoteView.backgroundColor = .black
+        //Outlined from the moment it appears, whatever it shows
+        remoteView.videoBorder = (UIColor.white.withAlphaComponent(0.3), 1)
         //Square until its video's size is known, then resized to the video (createConstraints())
         remoteView.onVideoShapeChange = { [weak self] in
             self?.createConstraints()
@@ -1322,8 +1324,6 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         }
                     }
                 }
-                
-                remoteView.videoBorder = (UIColor.white.withAlphaComponent(0.3), 1)
             }
             
             //Keep track of this stream addition
