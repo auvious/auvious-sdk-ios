@@ -1700,9 +1700,9 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         var slots: [ObjectIdentifier: UILayoutGuide] = [:]
         var result: [NSLayoutConstraint] = []
 
-        //Only tiles the layout above places (the screen share only while it is in focus)
+        //Only tiles the layout above places (the screen share only while it is in focus). Our camera only while the AR pointer points at it.
         let placed = Set(constraints.flatMap { [$0.firstItem, $0.secondItem] }.compactMap { $0 as? StreamView }.map(ObjectIdentifier.init))
-        for tile in remoteViews + [shareScreenContainerView].compactMap({ $0 }) {
+        for tile in [localView] + remoteViews + [shareScreenContainerView].compactMap({ $0 }) {
             let slot = tile.layoutSlot
             guard tile.followsVideoShape, placed.contains(ObjectIdentifier(tile)), let parent = tile.superview else {
                 slot.owningView?.removeLayoutGuide(slot)

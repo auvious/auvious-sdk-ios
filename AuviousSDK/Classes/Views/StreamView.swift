@@ -135,12 +135,12 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     }
 
     /// True when the call should shape the tile like its video, fitted inside the space its layout gives it (`layoutSlot`).
-    /// The video still fills the tile, which then crops nothing. For screens (no black bars) unless zoomed in, off in PiP for cameras.
-    /// The no video placeholder is square, also off in PiP (togglesFitOnTap is on only in full screen).
+    /// The video still fills the tile, which then crops nothing. For screens and the AR pointer's tile (no black bars) unless zoomed in,
+    /// off in PiP for tapped cameras. The no video placeholder is square, also off in PiP (togglesFitOnTap is on only in full screen).
     var followsVideoShape: Bool {
         if showsNoVideoPlaceholder { return togglesFitOnTap }
         guard hasVideoSize else { return false }
-        return (isScreen && !isZoomed) || (tappedToFit && togglesFitOnTap && !portraitMode)
+        return (fitsVideo && !isZoomed) || (tappedToFit && togglesFitOnTap && !portraitMode)
     }
 
     /// The shape a tile that follows its video's shape takes: its video's, or square for the no video placeholder
