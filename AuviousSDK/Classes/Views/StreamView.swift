@@ -14,14 +14,12 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     
     //Various states for the overlay
     private enum OverlayState: CustomStringConvertible {
-        case audioMuted, videoMuted, avMuted, userPlaceholder, none
+        case audioMuted, videoMuted, avMuted, none
 
         var description: String {
             switch self {
             case .audioMuted:
                 return "audioMuted"
-            case .userPlaceholder:
-                return "userPlaceholder"
             case .videoMuted:
                 return "videoMuted"
             case .avMuted:
@@ -124,37 +122,30 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     /// Called when a tap switches between fit and fill, so the call can reshape the tile
     var onFitChange: (() -> Void)?
 
-    /// A participant who publishes no video: the user icon on a square tile instead of a video
-    var showsUserPlaceholder = false {
+    /// A participant who publishes no video: a square tile, with the camera off overlay (the mic icon, or the muted mic)
+    var showsNoVideoPlaceholder = false {
         didSet {
-            guard showsUserPlaceholder != oldValue else { return }
+            guard showsNoVideoPlaceholder != oldValue else { return }
             updateFitTapGesture()
+            //A tile without any stream yet has no overlay until now
             handleOverlay()
             //Square while it shows, the video's shape again after
             onVideoShapeChange?()
         }
     }
 
-    /// The placeholder's participant publishes audio: it shows the mic icon (on or muted) instead of the user icon
-    var isAudioPublished = false {
-        didSet {
-            guard isAudioPublished != oldValue else { return }
-            handleOverlay()
-        }
-    }
-
     /// True when the call should shape the tile like its video, fitted inside the space its layout gives it (`layoutSlot`).
     /// The video still fills the tile, which then crops nothing. For screens (no black bars) unless zoomed in, off in PiP for cameras.
-    /// The user placeholder is square, also off in PiP (togglesFitOnTap is on only in full screen).
+    /// The no video placeholder is square, also off in PiP (togglesFitOnTap is on only in full screen).
     var followsVideoShape: Bool {
-        if showsUserPlaceholder { return togglesFitOnTap }
+        if showsNoVideoPlaceholder { return togglesFitOnTap }
         guard hasVideoSize else { return false }
         return (isScreen && !isZoomed) || (tappedToFit && togglesFitOnTap && !portraitMode)
     }
 
-    /// The shape a tile that follows its video's shape takes: its video's, or square for the user placeholder
+    /// The shape a tile that follows its video's shape takes: its video's, or square for the no video placeholder
     var videoShape: CGSize {
-        return showsUserPlaceholder ? CGSize(width: 1, height: 1) : size
+        return showsNoVideoPlaceholder ? CGSize(width: 1, height: 1) : size
     }
 
     /// True while pinched in. A zoomed in tile fills its whole slot, but shows (and is outlined) only where the zoomed video is.
@@ -191,7 +182,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     /// Off for portrait videos, and for screens and the AR pointer's tile, which always fit
     /// (so the tap never competes with the annotation surface's own taps), and without a video
     private func updateFitTapGesture() {
-        fitTapGesture.isEnabled = togglesFitOnTap && !portraitMode && !isScreen && annotationSurface == nil && !showsUserPlaceholder
+        fitTapGesture.isEnabled = togglesFitOnTap && !portraitMode && !isScreen && annotationSurface == nil && !showsNoVideoPlaceholder
     }
 
     @objc private func fitTapped() {
@@ -340,8 +331,6 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         overlayIcon = UIImageView(frame: .zero)
         overlayIcon!.translatesAutoresizingMaskIntoConstraints = false
         overlayIcon!.contentMode = .scaleAspectFit
-        //For template icons (the user placeholder's)
-        overlayIcon!.tintColor = .white
         overlayView!.addSubview(overlayIcon!)
     }
     
@@ -386,31 +375,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             overlayState = .none
         }
 
-        if showsUserPlaceholder {
-            overlayState = .userPlaceholder
-        }
-
         switch overlayState {
-        case .userPlaceholder:
-            //The icon in the middle; the tile's own background is the placeholder's (set by the call)
-            backgroundColor = .clear
-            //The overlay no longer covers the "Audio only" label
-            statusLabel.alpha = 0
-            constraints.append(overlayView!.topAnchor.constraint(equalTo: self.topAnchor, constant: 0))
-            constraints.append(overlayView!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0))
-            constraints.append(overlayView!.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0))
-            constraints.append(overlayView!.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0))
-            constraints.append(overlayIcon!.centerYAnchor.constraint(equalTo: overlayView!.centerYAnchor, constant: 0))
-            constraints.append(overlayIcon!.centerXAnchor.constraint(equalTo: overlayView!.centerXAnchor, constant: 0))
-            if isAudioPublished {
-                //The mic icon of an audio only participant, as on the black tile
-                iconName = hasAudioStream ? "notificationMicrophoneOn" : "notificationMicrophoneOff"
-                constraints.append(overlayIcon!.widthAnchor.constraint(equalToConstant: 40))
-            } else {
-                iconName = "user"
-                constraints.append(overlayIcon!.widthAnchor.constraint(equalTo: overlayView!.widthAnchor, multiplier: 0.25))
-            }
-            constraints.append(overlayIcon!.heightAnchor.constraint(equalTo: overlayIcon!.widthAnchor))
         case .audioMuted:
             //The mute icon of the call buttons, in a round badge
             iconName = "micDisabled"

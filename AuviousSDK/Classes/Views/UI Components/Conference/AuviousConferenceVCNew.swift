@@ -984,7 +984,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         if index == 0 {
                             isAgentMuted = false
                         }
-                        updateUserPlaceholder(remoteView)
+                        updateNoVideoPlaceholder(remoteView)
                     } else {
                         removeRemoteView(at: index)
                     }
@@ -1000,7 +1000,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     } else if streamType == .micAndCam {
                         remoteView.avStreamRemoved()
                     }
-                    updateUserPlaceholder(remoteView)
+                    updateNoVideoPlaceholder(remoteView)
                 }
             }
         }
@@ -1032,7 +1032,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             let participantEndpoint = remoteViews[index].participantEndpoint
             let participantStream = ParticipantEndpointStream(id: streamId, type: streamType)
             participantEndpoint?.streams.append(participantStream)
-            updateUserPlaceholder(remoteViews[index])
+            updateNoVideoPlaceholder(remoteViews[index])
 
             return index
         } else {
@@ -1043,7 +1043,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             participantEndpoint.streams.append(participantStream)
 
             let remoteView = addRemoteView(for: participantEndpoint)
-            updateUserPlaceholder(remoteView)
+            updateNoVideoPlaceholder(remoteView)
             return self.remoteViews.count - 1
         }
     }
@@ -1053,7 +1053,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         let remoteView = StreamView(frame: .zero)
         remoteView.translatesAutoresizingMaskIntoConstraints = false
         remoteView.participantEndpoint = participantEndpoint
-        //Black, like the camera off state, while the video loads (updateUserPlaceholder())
+        //Black, like the camera off state, while the video loads or when there is none
         remoteView.backgroundColor = .black
         //Square until its video's size is known, then resized to the video (createConstraints())
         remoteView.onVideoShapeChange = { [weak self] in
@@ -1091,15 +1091,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         return remoteView
     }
 
-    /// A participant who publishes no camera shows a square tile, a shade darker than the call's background, with the user icon,
-    /// or the mic icon when they publish audio
-    private func updateUserPlaceholder(_ remoteView: StreamView) {
-        let streams = remoteView.participantEndpoint?.streams ?? []
-        let publishesVideo = streams.contains { $0.type == .cam || $0.type == .micAndCam }
-        remoteView.isAudioPublished = streams.contains { $0.type == .mic || $0.type == .micAndCam }
-        //Before the flag, which reshapes the tile
-        remoteView.backgroundColor = publishesVideo ? .black : UIColor.black.withAlphaComponent(0.3)
-        remoteView.showsUserPlaceholder = !publishesVideo
+    /// A participant who publishes no camera shows a square tile, like a camera that is off: the mic icon,
+    /// or the muted mic when they publish no audio or are muted
+    private func updateNoVideoPlaceholder(_ remoteView: StreamView) {
+        let publishesVideo = remoteView.participantEndpoint?.streams.contains { $0.type == .cam || $0.type == .micAndCam } ?? false
+        remoteView.showsNoVideoPlaceholder = !publishesVideo
     }
 
     /// Shows the tile of a participant who joined, before (or without) any video. Not for co-browse endpoints, which are screens.
@@ -1111,7 +1107,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             return
         }
         //Turning the placeholder on lays the tile out (onVideoShapeChange)
-        updateUserPlaceholder(addRemoteView(for: ParticipantEndpoint(endpointId: endpointId)))
+        updateNoVideoPlaceholder(addRemoteView(for: ParticipantEndpoint(endpointId: endpointId)))
     }
 
     //Removes the tile of a participant who left
@@ -1871,7 +1867,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     let view1 = remoteViews[0]
                     
                     if !isLandscape {
-                        if !view1.hasVideoSize || view1.showsUserPlaceholder {
+                        if !view1.hasVideoSize || view1.showsNoVideoPlaceholder {
                             //Loading, or no video: a centered square until a frame gives its size
                             constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
                             constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
