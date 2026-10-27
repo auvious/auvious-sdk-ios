@@ -841,6 +841,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if !currentConference.participants.isEmpty {
             for user in currentConference.participants {
                 for endpointStream in user.endpoints {
+                    //Without a camera their tile shows now, with the user placeholder; the others' when their video arrives
+                    if !endpointStream.streams.contains(where: { $0.type == .cam || $0.type == .micAndCam }) {
+                        showJoinedParticipant(endpointId: endpointStream.id, endpointType: endpointStream.endpointType)
+                    }
                     for stream in endpointStream.streams {
                         do {
                             if !initialStreamsConnected {
@@ -961,12 +965,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 // inflate the count and trigger the wrong branch.
                 participant?.streams.removeAll { $0.id == streamId }
 
-                //We only had 1 stream from this participant, therefore we should remove the cell from the collection view
+                //We only had 1 stream from this participant: while they are still in the conference their tile
+                //stays, with the user placeholder, otherwise it goes
                 if participant?.streams.count == 0 {
-                    let remoteView = remoteViews.remove(at: index)
-                    if index == 0 {
-                        isAgentMuted = false
-                    }
+                    let remoteView = remoteViews[index]
 
                     if index < maximumRemoteStreamsRendered {
                         if streamType == .mic {
@@ -977,14 +979,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             remoteView.avStreamRemoved()
                         }
                     }
-                        
-                    remoteView.removeFromSuperview()
 
-                    //Refresh UI
-                    if remoteViews.isEmpty && (screenMode == .pip || screenMode == .expandedPip) && !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-                        screenMode = .fullScreen
+                    if AuviousConferenceSDK.sharedInstance.remoteParticipants[endpointId] != nil {
+                        if index == 0 {
+                            isAgentMuted = false
+                        }
+                        updateUserPlaceholder(remoteView)
+                    } else {
+                        removeRemoteView(at: index)
                     }
-                    createConstraints()
 
                 } else if (participant?.streams!.count)! > 0 {
 
@@ -997,6 +1000,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     } else if streamType == .micAndCam {
                         remoteView.avStreamRemoved()
                     }
+                    updateUserPlaceholder(remoteView)
                 }
             }
         }
@@ -1023,61 +1027,118 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         //Stream view is already created
         if let index = remoteParticipantIndex {
-            
+
             //Add new stream to this user's endpoint
             let participantEndpoint = remoteViews[index].participantEndpoint
             let participantStream = ParticipantEndpointStream(id: streamId, type: streamType)
             participantEndpoint?.streams.append(participantStream)
-            
+            updateUserPlaceholder(remoteViews[index])
+
             return index
         } else {
-            
+
             //Create a new remote participant with the incoming stream
             let participantEndpoint = ParticipantEndpoint(endpointId: endpointId)
             let participantStream = ParticipantEndpointStream(id: streamId, type: streamType)
             participantEndpoint.streams.append(participantStream)
-            
-            //Create a view for this remote stream
-            let remoteView = StreamView(frame: .zero)
-            remoteView.translatesAutoresizingMaskIntoConstraints = false
-            remoteView.participantEndpoint = participantEndpoint
-            //Black, like the camera off state, while the video loads or when there is none
-            remoteView.backgroundColor = .black
-            //Square until its video's size is known, then resized to the video (createConstraints())
-            remoteView.onVideoShapeChange = { [weak self] in
-                self?.createConstraints()
-            }
-            //Keeps the mute badge clear of the call buttons
-            remoteView.audioMutedBadgeBottomLimit = buttonContainerView.topAnchor
-            //Tapping switches the video between fit and fill, unless it is a portrait video
-            remoteView.portraitMode = portraitModeEndpoints.contains(endpointId)
-            remoteView.togglesFitOnTap = screenMode == .fullScreen
-            remoteView.onFitChange = { [weak self] in
-                self?.createConstraints()
-            }
-            self.remoteViews.append(remoteView)
-            streamContainerView.addSubview(remoteView)
-            view.bringSubviewToFront(buttonContainerView)
 
-            //Start as a transparent square in the middle of the screen, so the layout animation
-            //grows it from the center instead of from the top left corner
-            let side = view.safeAreaLayoutGuide.layoutFrame.width
-            UIView.performWithoutAnimation {
-                remoteView.frame = CGRect(x: view.bounds.midX - side / 2, y: view.bounds.midY - side / 2, width: side, height: side)
-                remoteView.layoutIfNeeded()
-            }
-            remoteView.alpha = 0
-            remoteView.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
-            appearingRemoteViews.append(remoteView)
-            
-            //If we can't show remote video due to UI limits, notify the user
-            if initialStreamsConnected && remoteViews.count > maximumRemoteStreamsRendered {
-                self.networkIndicatorDetails.updateUI(with: "A new participant has joined", subtitle: "Due to current limitations, you can only listen")
-                self.showNetworkDetails()
-            }
-            
+            let remoteView = addRemoteView(for: participantEndpoint)
+            updateUserPlaceholder(remoteView)
             return self.remoteViews.count - 1
         }
+    }
+
+    //Creates the tile of a remote participant
+    private func addRemoteView(for participantEndpoint: ParticipantEndpoint) -> StreamView {
+        let remoteView = StreamView(frame: .zero)
+        remoteView.translatesAutoresizingMaskIntoConstraints = false
+        remoteView.participantEndpoint = participantEndpoint
+        //Black, like the camera off state, while the video loads (updateUserPlaceholder())
+        remoteView.backgroundColor = .black
+        //Square until its video's size is known, then resized to the video (createConstraints())
+        remoteView.onVideoShapeChange = { [weak self] in
+            self?.createConstraints()
+        }
+        //Keeps the mute badge clear of the call buttons
+        remoteView.audioMutedBadgeBottomLimit = buttonContainerView.topAnchor
+        //Tapping switches the video between fit and fill, unless it is a portrait video
+        remoteView.portraitMode = portraitModeEndpoints.contains(participantEndpoint.id)
+        remoteView.togglesFitOnTap = screenMode == .fullScreen
+        remoteView.onFitChange = { [weak self] in
+            self?.createConstraints()
+        }
+        self.remoteViews.append(remoteView)
+        streamContainerView.addSubview(remoteView)
+        view.bringSubviewToFront(buttonContainerView)
+
+        //Start as a transparent square in the middle of the screen, so the layout animation
+        //grows it from the center instead of from the top left corner
+        let side = view.safeAreaLayoutGuide.layoutFrame.width
+        UIView.performWithoutAnimation {
+            remoteView.frame = CGRect(x: view.bounds.midX - side / 2, y: view.bounds.midY - side / 2, width: side, height: side)
+            remoteView.layoutIfNeeded()
+        }
+        remoteView.alpha = 0
+        remoteView.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
+        appearingRemoteViews.append(remoteView)
+
+        //If we can't show remote video due to UI limits, notify the user
+        if initialStreamsConnected && remoteViews.count > maximumRemoteStreamsRendered {
+            self.networkIndicatorDetails.updateUI(with: "A new participant has joined", subtitle: "Due to current limitations, you can only listen")
+            self.showNetworkDetails()
+        }
+
+        return remoteView
+    }
+
+    /// A participant who publishes no camera shows a square tile, a shade darker than the call's background, with the user icon,
+    /// or the mic icon when they publish audio
+    private func updateUserPlaceholder(_ remoteView: StreamView) {
+        let streams = remoteView.participantEndpoint?.streams ?? []
+        let publishesVideo = streams.contains { $0.type == .cam || $0.type == .micAndCam }
+        remoteView.isAudioPublished = streams.contains { $0.type == .mic || $0.type == .micAndCam }
+        //Before the flag, which reshapes the tile
+        remoteView.backgroundColor = publishesVideo ? .black : UIColor.black.withAlphaComponent(0.3)
+        remoteView.showsUserPlaceholder = !publishesVideo
+    }
+
+    /// Shows the tile of a participant who joined, before (or without) any video. Not for co-browse endpoints, which are screens.
+    private func showJoinedParticipant(endpointId: String?, endpointType: String?) {
+        guard let endpointId = endpointId, !endpointId.isEmpty,
+              endpointId != AuviousConferenceSDK.sharedInstance.userEndpointId,
+              endpointType != "displayCapture", endpointType != "coBrowse",
+              !remoteViews.contains(where: { $0.participantEndpoint?.id == endpointId }) else {
+            return
+        }
+        //Turning the placeholder on lays the tile out (onVideoShapeChange)
+        updateUserPlaceholder(addRemoteView(for: ParticipantEndpoint(endpointId: endpointId)))
+    }
+
+    //Removes the tile of a participant who left
+    private func removeLeftParticipant(endpointId: String?) {
+        guard let index = remoteViews.firstIndex(where: { $0.participantEndpoint?.id == endpointId }) else {
+            return
+        }
+        //Detaches any video still attached
+        remoteViews[index].resetStreamView()
+        removeRemoteView(at: index)
+        //The pointed at tile may be gone
+        refreshArPointer()
+    }
+
+    //Removes a participant's tile
+    private func removeRemoteView(at index: Int) {
+        let remoteView = remoteViews.remove(at: index)
+        if index == 0 {
+            isAgentMuted = false
+        }
+        remoteView.removeFromSuperview()
+
+        //Refresh UI
+        if remoteViews.isEmpty && (screenMode == .pip || screenMode == .expandedPip) && !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
+            screenMode = .fullScreen
+        }
+        createConstraints()
     }
     
     // MARK: -
@@ -1140,10 +1201,16 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     }
 
     public func auviousSDK(didReceiveConferenceEvent event: ConferenceEvent) {
-        if event is ConferenceJoinedEvent {
+        if let joined = event as? ConferenceJoinedEvent {
             conferenceParticipants += 1
+            DispatchQueue.main.async {
+                self.showJoinedParticipant(endpointId: joined.userEndpointId, endpointType: joined.endpointType)
+            }
         } else if event is ConferenceLeftEvent {
             conferenceParticipants -= 1
+            DispatchQueue.main.async {
+                self.removeLeftParticipant(endpointId: event.userEndpointId)
+            }
         } else if event is ConferenceEndedEvent {
             handleConferenceEndedEvent()
         } else if event is ConferenceNetworkIndicatorEvent {
@@ -1660,7 +1727,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 tile.centerYAnchor.constraint(equalTo: slot.centerYAnchor),
                 tile.widthAnchor.constraint(lessThanOrEqualTo: slot.widthAnchor),
                 tile.heightAnchor.constraint(lessThanOrEqualTo: slot.heightAnchor),
-                tile.widthAnchor.constraint(equalTo: tile.heightAnchor, multiplier: tile.size.width / tile.size.height),
+                tile.widthAnchor.constraint(equalTo: tile.heightAnchor, multiplier: tile.videoShape.width / tile.videoShape.height),
                 fillWidth,
                 fillHeight
             ]
@@ -1804,8 +1871,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     let view1 = remoteViews[0]
                     
                     if !isLandscape {
-                        if !view1.hasVideoSize {
-                            //Loading, or no video yet: a centered square until a frame gives its size
+                        if !view1.hasVideoSize || view1.showsUserPlaceholder {
+                            //Loading, or no video: a centered square until a frame gives its size
                             constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
                             constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
                             constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
