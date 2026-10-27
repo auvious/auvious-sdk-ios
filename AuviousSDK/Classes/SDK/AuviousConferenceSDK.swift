@@ -1585,9 +1585,6 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         delegate?.auviousSDK(recorderStateChanged: toActive)
     }
     
-    //Not needed for conferences
-    func rtcClient(agentSwitchedCamera toFront: Bool) {}
-    
     internal func rtcClient(didStopScreenSharing: Bool) {
         delegate?.auviousSDK(screenSharingStopped: true)
     }

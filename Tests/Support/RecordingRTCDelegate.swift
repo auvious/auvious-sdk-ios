@@ -51,7 +51,6 @@ final class RecordingRTCDelegate: RTCDelegate {
     func rtcClient(didReceiveLocalVideoTrack localVideoTrack: RTCVideoTrack!) {}
     func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {}
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {}
-    func rtcClient(agentSwitchedCamera toFront: Bool) {}
     func rtcClient(didStopScreenSharing: Bool) {}
     func rtcClient(didStartScreenSharing: Bool) {}
 }

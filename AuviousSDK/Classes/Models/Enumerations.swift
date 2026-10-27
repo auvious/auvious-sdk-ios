@@ -58,40 +58,6 @@ internal enum APIErrorCode: Int {
 }
 
 /**
- The type of camera request received during a call.
- */
-public enum CameraRequestType: String {
-    case cameraSwitch = "CAMERA_SWITCH"
-    case flashOn = "FLASH_ON"
-    case flashOff = "FLASH_OFF"
-}
-
-/**
- The type of snapshot request received during a call.
- */
-public enum SnapshotEventType: String {
-    case snapshotCameraRequestedEvent = "SnapshotCameraRequestedEvent"
-    case snapshotCameraRequestProcessedEvent = "SnapshotCameraRequestProcessedEvent"
-    case snapshotApprovedEvent = "SnapshotApprovedEvent"
-    case snapshotAcquiredEvent = "SnapshotAcquiredEvent"
-    case snapshotRequestedEvent = "SnapshotRequestedEvent"
-}
-
-/**
-    The type of event received during a call.
- */
-public enum CallEventType: String {
-    
-    case callAnswered = "CallAnsweredEvent"
-    case callCancelled = "CallCancelledEvent"
-    case callCreated = "CallCreatedEvent"
-    case callEnded = "CallEndedEvent"
-    case callRejected = "CallRejectedEvent"
-    case callRinging = "CallRingingEvent"
-    case callIceCandidatesFound = "IceCandidatesFoundEvent"
-}
-
-/**
     The type of event received during a conference.
  */
 public enum ConferenceEventType: String {

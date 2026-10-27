@@ -125,11 +125,6 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
             AuviousConferenceSDK.sharedInstance.delegate = self
             AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             os_log("UI Conference component: Configured ConferenceSDK")
-//
-//            //Get access to the local video stream immediately
-//            let localStream = AuviousCallSDK.sharedInstance.createLocalMediaStream(type: .micAndCam, streamId: "test")
-//            log("UI Call component: Created local media stream")
-//
             
             AuviousConferenceSDK.sharedInstance.login(onLoginSuccess: {(userId, conferenceId) in
                 os_log("UI Conference component: Login success")

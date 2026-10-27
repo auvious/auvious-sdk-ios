@@ -6,29 +6,6 @@ source 'https://github.com/jkritikos/Podspec.git'
 
 use_frameworks!
 
-#target 'ExampleConference' do
-#  pod 'AuviousSDK', :path => '../'
-#  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
-#  pod 'SPPermissions/Camera', '~> 4.1'
-#  pod 'SPPermissions/Microphone', '~> 4.1'
-#  pod 'BEMCheckBox', '~> 1.4'
-#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
-#end
-
-#target 'ExampleCall' do
-#  pod 'AuviousSDK', :path => '../'
-#  pod 'SVProgressHUD', :git => 'https://github.com/mmdock/SVProgressHUD.git', :branch => 'patch-1'
-#  pod 'SPPermissions/Camera', '~> 4.1'
-#  pod 'SPPermissions/Microphone', '~> 4.1'
-#  pod 'BEMCheckBox', '~> 1.4'
-#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
-#end
-
-#target 'ExampleSimpleCall' do
-#  pod 'AuviousSDK', :path => '../'
-#  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'
-#end
-
 target 'ExampleSimpleConference' do
   pod 'AuviousSDK', :path => '../', :testspecs => ['Tests'], :appspecs => ['TestHost']
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.46.0'

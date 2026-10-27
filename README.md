@@ -337,10 +337,7 @@ Used when presenting `AuviousConferenceVCNew` for the built-in conference UI.
 
 ## Examples
 
-The following example applications are included in this repository. If unsure, begin with ExampleSimpleConference, which demonstrates how to use a ready-to-use ViewController we provide, for joining a video conference call.
-
-- [ExampleSimpleConference](Example/ExampleSimpleConference)
-- [ExampleCall](Example/ExampleCall), [ExampleSimpleCall](Example/ExampleSimpleCall) and [ExampleConference](Example/ExampleConference): not maintained, their targets are commented out in `Example/Podfile` and don't build as they are
+This repository includes one example application, [ExampleSimpleConference](Example/ExampleSimpleConference), which demonstrates how to use a ready-to-use ViewController we provide, for joining a video conference call.
 
 To try ExampleSimpleConference run `pod install` in `Example/`, then open `Example/AuviousSDK.xcworkspace` in Xcode. Apps built with Xcode 27 (iOS 27 SDK) must use the scene life cycle; ExampleSimpleConference shows how (`SceneDelegate` in its `AppDelegate.swift`).
 

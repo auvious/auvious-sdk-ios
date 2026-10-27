@@ -17,15 +17,6 @@ enum Router: URLRequestConvertible2 {
     //IceSupport
     case getIceServers(Void)
     
-    // Calls
-    case call(object: CallRequest)
-    case answerCall(object: CallAnswerRequest)
-    case rejectCall(object: CallRejectRequest)
-    case callRinging(object: CallRingingRequest)
-    case callHangup(object: CallHangupRequest)
-    case callCancel(object: CallCancelRequest)
-    case addCallIceCandidates(object: CallIceCandidatesRequest)
-    
     //Conferences
     case getConferences(Void)
     case getConferenceDetails(id: String)
@@ -122,42 +113,6 @@ enum Router: URLRequestConvertible2 {
         //IceSupport
         case .getIceServers():
             query = "rtc-api/iceServers"
-            
-        //Calls
-        case .call(let object):
-            query = "rtc-api/calls/call"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-        
-        case .answerCall(let object):
-            query = "rtc-api/calls/answer"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-        
-        case .rejectCall(let object):
-            query = "rtc-api/calls/reject"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callRinging(let object):
-            query = "rtc-api/calls/ringing"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callHangup(let object):
-            query = "rtc-api/calls/hangup"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callCancel(let object):
-            query = "rtc-api/calls/cancel"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .addCallIceCandidates(let object):
-            query = "rtc-api/calls/addIceCandidates"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
             
         //Conferences
         case .getConferences():

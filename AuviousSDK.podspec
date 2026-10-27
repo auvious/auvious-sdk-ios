@@ -18,8 +18,8 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-AuviousSDK makes it easy to use Auvious services in your app. Add now video call,
-multiparty video conferencing, snapshot, and many more things are coming your way!
+AuviousSDK makes it easy to use Auvious services in your app. Add now multiparty
+video conferencing, co-browsing, and many more things are coming your way!
                        DESC
 
   s.homepage         = 'https://github.com/auvious/auvious-sdk-ios.git'

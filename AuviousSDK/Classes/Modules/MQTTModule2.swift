@@ -15,16 +15,6 @@ internal protocol MQTTConferenceDelegate {
     func conferenceMessageReceived(_ object: ConferenceEvent)
 }
 
-internal protocol MQTTCallDelegate {
-    
-    func callMessageReceived(_ object: CallEvent)
-}
-
-internal protocol MQTTSnapshotDelegate {
-
-    func snapshotMessageReceived(_ object: SnapshotEvent)
-}
-
 internal protocol MQTTUserEventDelegate: AnyObject {
 
     func userEventReceived(_ type: RtcUserEventType, json: JSON)
@@ -41,9 +31,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     private var subscriptionCallback: (()->())?
     
     //Delegates
-    var callDelegate: MQTTCallDelegate?
     var conferenceDelegate: MQTTConferenceDelegate?
-    var snapshotDelegate: MQTTSnapshotDelegate?
     weak var userEventDelegate: MQTTUserEventDelegate?
 
     func configure(endpointId: String) {
@@ -174,46 +162,6 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
                 }
                 
                 conferenceDelegate?.conferenceMessageReceived(model)
-                
-            } else if let eventType = CallEventType(rawValue: jsonObject["type"].stringValue) {
-                var model: CallEvent!
-                
-                switch eventType {
-                case .callAnswered:
-                    model = CallAnsweredEvent(fromJson: jsonObject)
-                case .callEnded:
-                    model = CallEndedEvent(fromJson: jsonObject)
-                case .callCreated:
-                    model = CallCreatedEvent(fromJson: jsonObject)
-                case .callRinging:
-                    model = CallRingingEvent(fromJson: jsonObject)
-                case .callRejected:
-                    model = CallRejectedEvent(fromJson: jsonObject)
-                case .callCancelled:
-                    model = CallCancelledEvent(fromJson: jsonObject)
-                case .callIceCandidatesFound:
-                    model = IceCandidatesFoundEvent(fromJson: jsonObject)
-                }
-                
-                callDelegate?.callMessageReceived(model)
-                
-            } else if let eventType = SnapshotEventType(rawValue: jsonObject["type"].stringValue) {
-                var model: SnapshotEvent!
-                
-                switch eventType {
-                case .snapshotAcquiredEvent:
-                    model = SnapshotAcquiredEvent(fromJson: jsonObject)
-                case .snapshotApprovedEvent:
-                    model = SnapshotApprovedEvent(fromJson: jsonObject)
-                case .snapshotCameraRequestedEvent:
-                    model = SnapshotCameraRequestedEvent(fromJson: jsonObject)
-                case .snapshotCameraRequestProcessedEvent:
-                    model = SnapshotCameraRequestProcessedEvent(fromJson: jsonObject)
-                case .snapshotRequestedEvent:
-                    model = SnapshotRequestedEvent(fromJson: jsonObject)
-                }
-                
-                snapshotDelegate?.snapshotMessageReceived(model)
                 
             } else {
                 os_log("MQTT message with unknown type %@", log: Log.mqtt, type: .debug, jsonObject["type"].stringValue)

@@ -112,9 +112,8 @@ final class RTCModuleLoopbackTests: XCTestCase {
             deliveries.append(stream)
             if deliveries.count == 1 { delivered.fulfill() }
         }
-        // As configureRemoteCallStream does, without its answer going to the backend
         module.initialisePeerConnection(streamId: "call", endpointId: "remote-endpoint", userId: "remote-user",
-                                        type: .micAndCam, isLocal: true, callId: "call")
+                                        type: .micAndCam, isLocal: true)
         guard let connection = module.peerConnections.last?.connection else { return XCTFail("no connection") }
         sfu.offer(sending: [sfu.makeAudioTrack(), sfu.makeVideoTrack()], streamIds: []) { offer, error in
             XCTAssertNil(error)

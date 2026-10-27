@@ -247,42 +247,6 @@ internal final class API2 {
         fireRequest(transaction)
     }
     
-    //Calls
-    func call(_ object: CallRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.call(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func answerCall(_ object: CallAnswerRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.answerCall(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func rejectCall(_ object: CallRejectRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.rejectCall(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func callRinging(_ object: CallRingingRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.callRinging(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func callHangup(_ object: CallHangupRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.callHangup(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func callCancel(_ object: CallCancelRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.callCancel(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
-    func addCallIceCandidates(_ object: CallIceCandidatesRequest, onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
-        let transaction: TransactionElementNew = (Router.addCallIceCandidates(object: object), onSuccess, onFailure, true)
-        fireRequest(transaction)
-    }
-    
     //Conferences
     func getConferences(onSuccess: @escaping (JSON?)->(), onFailure: @escaping (Error)->()) {
         let transaction: TransactionElementNew = (Router.getConferences(()), onSuccess, onFailure, true)
