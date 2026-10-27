@@ -83,7 +83,11 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     
     //Control flags
     private var hasAudioStream: Bool = false
-    private var hasVideoStream: Bool = false
+    private var hasVideoStream: Bool = false {
+        didSet {
+            updateBorderAndClip()
+        }
+    }
     private var isScreen: Bool = false
     
     var size: CGSize = .zero
@@ -119,11 +123,32 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     var onFitChange: (() -> Void)?
 
     /// True when the call should shape the tile like its video, fitted inside the space its layout gives it (`layoutSlot`).
-    /// The video still fills the tile, which then crops nothing. Always for screens (no black bars), off in PiP for cameras.
+    /// The video still fills the tile, which then crops nothing. For screens (no black bars) unless zoomed in, off in PiP for cameras.
     var followsVideoShape: Bool {
         guard hasVideoSize else { return false }
-        return isScreen || (tappedToFit && togglesFitOnTap && !portraitMode)
+        return (isScreen && !isZoomed) || (tappedToFit && togglesFitOnTap && !portraitMode)
     }
+
+    /// True while pinched in. A zoomed in tile fills its whole slot, but shows (and is outlined) only where the zoomed video is.
+    var isZoomed: Bool {
+        return videoView.transform.a > optionsForZooming().minZoom
+    }
+
+    /// Called when the tile is zoomed in from unzoomed and back, so the call can switch it between its video's shape and its slot
+    var onZoomChange: (() -> Void)?
+
+    //isZoomed last reported through onZoomChange
+    private var reportedZoomed = false
+
+    /// Drawn around the video while it shows (from its first frame, while the camera is on), never around an empty tile
+    var videoBorder: (color: UIColor, width: CGFloat)? {
+        didSet {
+            updateBorderAndClip()
+        }
+    }
+
+    //While zoomed in the border is drawn around the visible video instead of the tile's edge
+    private let zoomedBorder = CAShapeLayer()
 
     /// The space the call's layout gives a tile that follows its video's shape. Owned by the tile's superview.
     let layoutSlot = UILayoutGuide()
@@ -176,6 +201,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         videoView.videoContentMode = .scaleAspectFit
         insertSubview(surface, aboveSubview: videoView)
         surface.frame = videoContentRect
+        //Zoomed with the video
+        surface.transform = videoView.transform
         updateFitTapGesture()
     }
 
@@ -205,48 +232,19 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     override public func layoutSubviews() {
         super.layoutSubviews()
                 
-        if (self.size.width > 0 && self.size.height > 0) {
-            let videoFrame = AVMakeRect(aspectRatio: CGSize(width: bounds.width, height: bounds.height), insideRect: bounds)
-            var scale: CGFloat = 1.0
-            if (videoFrame.size.width > videoFrame.size.height) {
-                scale = bounds.size.height / videoFrame.size.height
-            } else {
-                scale = bounds.size.width / videoFrame.size.width
-            }
-            
-            if scale.isNaN {
-                scale = 1
-            }
-            
-            var width = videoFrame.size.width
-            var height = videoFrame.size.height
-            if width.isNaN {
-               width = 0
-            }
-            
-            if height.isNaN {
-                height = 0
-            }
-            
-            var x = videoFrame.origin.x
-            if x.isNaN {
-                x = 0
-            }
-            
-            var y = videoFrame.origin.y
-            if y.isNaN {
-                y = 0
-            }
-            
-            width = width * scale
-            height = height * scale
-            self.videoView.frame = CGRect(x: x, y: y, width: width, height: height)
-            self.videoView.center = CGPoint(x: bounds.midX, y: bounds.midY)
-        } else {
-            self.videoView.frame = bounds
+        //Through bounds and center, so a zoomed (transformed) video keeps its zoom
+        videoView.bounds = CGRect(origin: .zero, size: bounds.size)
+        videoView.center = CGPoint(x: bounds.midX, y: bounds.midY)
+
+        if let surface = annotationSurface {
+            let rect = videoContentRect
+            surface.bounds = CGRect(origin: .zero, size: rect.size)
+            surface.center = CGPoint(x: rect.midX, y: rect.midY)
         }
-        
-        annotationSurface?.frame = videoContentRect
+
+        //The tile may have been reshaped, keep the zoomed video covering it
+        clampZoom()
+        updateBorderAndClip()
 
         if let o = overlayView {
             if overlayState == .audioMuted {
@@ -570,6 +568,8 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
                 self.reportedAspect = aspect
                 self.onVideoShapeChange?()
             }
+            //After the reshape has started, so the border can wait for it
+            self.updateBorderAndClip()
         }
     }
     
@@ -579,6 +579,88 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     
     public func optionsForZooming() -> ZoomableViewOptions {
         return ZoomableViewOptions(minZoom: 1, maxZoom: 8)
+    }
+
+    public func contentRectForZooming() -> CGRect {
+        return videoContentRect
+    }
+
+    public func zoomDidChange() {
+        updateBorderAndClip()
+        if isZoomed != reportedZoomed {
+            reportedZoomed = isZoomed
+            onZoomChange?()
+        }
+    }
+
+    /// Outlines the video while it shows. Clips the zoomed in tile to the part of its slot the zoomed video covers,
+    /// rounded and outlined like the tile.
+    private func updateBorderAndClip() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
+
+        //From when the call was told the video's shape (not hasVideoSize, which the first frame sets off the main thread before that)
+        var borderWidth = reportedAspect > 0 && hasVideoStream ? videoBorder?.width ?? 0 : 0
+        layer.borderColor = videoBorder?.color.cgColor
+
+        //A border appearing while the tile is reshaped (to its video's shape at the first frame) would follow it,
+        //so it appears once the tile has its shape
+        if borderWidth > 0 && layer.borderWidth == 0 && !isZoomed && isBeingReshaped {
+            borderWidth = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                self?.updateBorderAndClip()
+            }
+        }
+
+        guard isZoomed else {
+            layer.mask = nil
+            zoomedBorder.removeFromSuperlayer()
+            layer.borderWidth = borderWidth
+            return
+        }
+
+        //The video's rect, zoomed around the video view's centre
+        let center = videoView.center
+        let visible = videoContentRect
+            .offsetBy(dx: -center.x, dy: -center.y)
+            .applying(videoView.transform)
+            .offsetBy(dx: center.x, dy: center.y)
+            .intersection(bounds)
+        guard !visible.isNull else { return }
+
+        layer.borderWidth = 0
+        let mask = layer.mask as? CAShapeLayer ?? CAShapeLayer()
+        mask.path = UIBezierPath(roundedRect: visible, cornerRadius: layer.cornerRadius).cgPath
+        layer.mask = mask
+
+        zoomedBorder.path = UIBezierPath(roundedRect: visible.insetBy(dx: borderWidth / 2, dy: borderWidth / 2),
+                                         cornerRadius: max(0, layer.cornerRadius - borderWidth / 2)).cgPath
+        zoomedBorder.lineWidth = borderWidth
+        zoomedBorder.strokeColor = layer.borderColor
+        zoomedBorder.fillColor = nil
+        //Over the video and the annotations
+        zoomedBorder.zPosition = 1000
+        if zoomedBorder.superlayer == nil {
+            layer.addSublayer(zoomedBorder)
+        }
+    }
+
+    /// True while what is on screen hasn't reached the tile's size and position yet (an animation runs, or it is still to start)
+    private var isBeingReshaped: Bool {
+        guard let shown = layer.presentation() else { return false }
+        return abs(shown.bounds.width - layer.bounds.width) > 0.5 || abs(shown.bounds.height - layer.bounds.height) > 0.5
+            || abs(shown.position.x - layer.position.x) > 0.5 || abs(shown.position.y - layer.position.y) > 0.5
+            || !(layer.animationKeys() ?? []).filter { $0.hasPrefix("bounds") || $0.hasPrefix("position") }.isEmpty
+    }
+
+    public func viewsZoomingAlong() -> [UIView] {
+        return annotationSurface.map { [$0] } ?? []
+    }
+
+    /// While annotating, touches draw and point instead of zooming
+    public func canZoom() -> Bool {
+        return annotationSurface?.isAnnotating != true
     }
     
 }

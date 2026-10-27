@@ -1193,6 +1193,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 self.shareScreenContainerView!.onVideoShapeChange = { [weak self] in
                     self?.createConstraints()
                 }
+                //Zoomed in it fills its slot; at once, as the pinch continues from the same picture
+                self.shareScreenContainerView!.onZoomChange = { [weak self] in
+                    self?.createConstraints(animated: false)
+                }
+                self.shareScreenContainerView!.videoBorder = (UIColor.white.withAlphaComponent(0.3), 1)
 
                 #warning("potential mem leak")
                 let tap = UITapGestureRecognizer(target: self, action: #selector(self.shareScreenDoubleTapped))
@@ -1255,8 +1260,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     }
                 }
                 
-                remoteView.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
-                remoteView.layer.borderWidth = 1
+                remoteView.videoBorder = (UIColor.white.withAlphaComponent(0.3), 1)
             }
             
             //Keep track of this stream addition
