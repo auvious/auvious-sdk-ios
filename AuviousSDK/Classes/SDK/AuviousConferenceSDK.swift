@@ -107,29 +107,37 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     /// This delegate informs of all conference related stream state changes and errors
     public var delegate: AuviousSDKConferenceDelegate?
     
-    /// List of MQTT messages
+    /// MQTT messages waiting to be processed: the ones after a conference version we have not received yet
     private var mqttMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
-    /// List of MQTT messages flagged for delayed processing
-    private var mqttDelayedMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
+
     /// List of MQTT messages cached for future processing
     private var mqttCachedMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
-    /// Configuration setting for the interval between the processing of delayed messages
-    private let delayedMessageWaitTime: Double = 0.7
-    
+
+    /// How long to wait for a missing conference version before fetching the conference state
+    private let missingMessageWaitTime: Double = 1.5
+
     /// Indicates whether processing of MQTT messages is taking place
     private var isProcessingMessages: Bool = false
-    
-    /// Number of times to try processing an MQTT message flagged for delayed processing
-    private let maxDelayedProcessingAttempts: Int = 3
-    
+
+    /// Fetches the conference state when a conference version is still missing after missingMessageWaitTime
+    private var resyncWorkItem: DispatchWorkItem?
+
+    /// Conference state fetches in a row that left messages still waiting
+    private var resyncAttempts: Int = 0
+
+    /// Conference state fetches in a row after which the waiting messages are dropped
+    private let maxResyncAttempts: Int = 3
+
     /// The currently joined conference, if any
     private var currentConference: ConferenceSimpleView? {
         didSet {
             if currentConference != nil {
                 lastConferenceJoined = currentConference?.id
+            }
+            //Messages waiting for another conference's versions would never be processed
+            if currentConference?.id != oldValue?.id {
+                mqttMessages.removeAll()
+                cancelResync()
             }
             rebuildRemoteParticipants()
         }
@@ -1257,64 +1265,158 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         if !isProcessingMessages {
             processMessages()
         } else {
-            os_log("WARNING: Ignoring conference msg processing because we're already processing", log: Log.conferenceSDK, type: .debug)
+            os_log("Queued conference msg, it is processed after the current one", log: Log.conferenceSDK, type: .debug)
         }
     }
     
-    //MQTT message processor
+    //MQTT message processor: applies the messages in conference version order. Messages after a version we
+    //have not received wait for it; if it does not come, resyncConference() catches up from the conference state
     private func processMessages(){
-        guard !mqttMessages.isEmpty, let conference = currentConference else {
-            os_log("WARNING: processMessages() has no messages to process or we're not in a conference. Returning", log: Log.conferenceSDK, type: .debug)
-            return
-        }
-        
-        //Lock processing
+        //Lock processing; messages received meanwhile are picked up by this loop
         isProcessingMessages = true
-        
-        for (index, msg) in mqttMessages.enumerated() {
-            
-            //If the event has a conference version
-            if let eventConferenceVersion = msg.conferenceVersion {
-                
-                //Discard older messages
-                if eventConferenceVersion < conference.version {
-                    let cVersion = String(describing: eventConferenceVersion)
-                    let ourVersion = String(describing: conference.version)
-                    os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
-                    continue
-                }
-                
-                //Delay processing of messages with version > than we know
-                if eventConferenceVersion > conference.version {
-                    let cVersion = String(describing: msg.conferenceVersion)
-                    let ourVersion = String(describing: conference.version)
-                    os_log("Delaying message processing because its conference version %@ > our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
-                    mqttDelayedMessages.append(msg)
-                    startDelayedMessageProcessorTimer(messageId: msg.id)
-                    continue
-                }
+        defer { isProcessingMessages = false }
+
+        while let conference = currentConference {
+            //The conference has ended whatever came before; otherwise messages without a version, or the next one
+            let nextIndex = mqttMessages.firstIndex(where: { $0.type == .conferenceEnded })
+                ?? mqttMessages.firstIndex(where: { $0.conferenceVersion.map { $0 <= conference.version } ?? true })
+            guard let index = nextIndex else {
+                break
             }
-            
+            let msg = mqttMessages.remove(at: index)
+
+            //Discard older messages
+            if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion < conference.version {
+                let cVersion = String(describing: eventConferenceVersion)
+                let ourVersion = String(describing: conference.version)
+                os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
+                continue
+            }
+
             //Only process messages coming from other users
             if let userEndpointId = UserEndpointModule.sharedInstance.userEndpointId, msg.userEndpointId != userEndpointId {
                 delegateConferenceMessage(msg: msg)
             }
-            
+
             //Increase conference version number
             if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion == currentConference?.version {
                 currentConference?.version += 1
+                resyncAttempts = 0
                 os_log("Local conference version incremented to %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
             }
-        
-            os_log("Conference msg processed, our version is now %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
-            //Remove the message after successfull processing
-            mqttMessages.remove(at: index)
         }
-        
-        //Unlock processing
-        isProcessingMessages = false
+
+        if mqttMessages.isEmpty {
+            cancelResync()
+        } else if resyncWorkItem == nil {
+            os_log("Delaying %d conference msgs until conference version %@ arrives", log: Log.conferenceSDK, type: .debug, mqttMessages.count, String(describing: currentConference?.version))
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.resyncWorkItem = nil
+                self?.resyncConference()
+            }
+            resyncWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + missingMessageWaitTime, execute: workItem)
+        }
     }
-    
+
+    private func cancelResync() {
+        resyncWorkItem?.cancel()
+        resyncWorkItem = nil
+        resyncAttempts = 0
+    }
+
+    /// A conference version never arrived: fetches the conference state and delegates the messages we missed
+    /// (participants who joined or left, streams published or unpublished), then the ones that were waiting
+    private func resyncConference() {
+        guard let conference = currentConference, !mqttMessages.isEmpty else {
+            return
+        }
+        resyncAttempts += 1
+        guard resyncAttempts <= maxResyncAttempts else {
+            os_log("Dropping %d conference msgs still waiting after %d conference state fetches", log: Log.conferenceSDK, type: .error, mqttMessages.count, maxResyncAttempts)
+            mqttMessages.removeAll()
+            resyncAttempts = 0
+            return
+        }
+
+        os_log("Conference version %@ is missing, fetching the conference state", log: Log.conferenceSDK, type: .debug, String(describing: conference.version))
+        API2.sharedInstance.getConferenceSimpleView(conference.id, onSuccess: {(json) in
+            guard let data = json, let current = self.currentConference, current.id == conference.id else {
+                return
+            }
+            let fresh = ConferenceSimpleView(fromJson: data)
+            if fresh.version > current.version {
+                let missed = self.missedMessages(until: fresh)
+                os_log("Conference state is at version %@, delegating %d missed msgs", log: Log.conferenceSDK, type: .debug, String(describing: fresh.version), missed.count)
+                self.currentConference = fresh
+                missed.forEach { self.delegateConferenceMessage(msg: $0) }
+            }
+            //Processes the messages after the fetched version, or waits again
+            self.processMessages()
+        }, onFailure: {(error) in
+            os_log("Unable to fetch the conference state - error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            //No such conference any more: we missed that it ended
+            if case AuviousSDKError.httpError(let code) = error, code == 404,
+               let current = self.currentConference, current.id == conference.id {
+                self.mqttMessages.removeAll()
+                self.delegateConferenceMessage(msg: ConferenceEndedEvent(fromJson: JSON(["type": ConferenceEventType.conferenceEnded.rawValue, "conferenceId": conference.id ?? ""])))
+                return
+            }
+            self.processMessages()
+        })
+    }
+
+    /// The participant and stream messages that take the remote participants we know of to the conference's.
+    /// Must run before currentConference is set to the conference, which rebuilds remoteParticipants.
+    private func missedMessages(until conference: ConferenceSimpleView) -> [ConferenceEvent] {
+        let me = UserEndpointModule.sharedInstance.userEndpointId
+        var endpoints: [String: (userId: String, endpoint: ParticipantEndpoint)] = [:]
+        for participant in conference.participants ?? [] {
+            guard let userId = participant.id else { continue }
+            for endpoint in participant.endpoints ?? [] where endpoint.id != nil && endpoint.id != me {
+                endpoints[endpoint.id] = (userId, endpoint)
+            }
+        }
+
+        func message(_ type: ConferenceEventType, userId: String, endpointId: String, _ fields: [String: Any] = [:]) -> JSON {
+            var json: [String: Any] = ["type": type.rawValue, "conferenceId": conference.id ?? "", "userId": userId, "userEndpointId": endpointId]
+            json.merge(fields) { $1 }
+            return JSON(json)
+        }
+        let subscribed = rtcClient?.peerConnections.filter { !$0.isLocal } ?? []
+
+        //Gone first: the streams that were unpublished, then the participants who left
+        var missed: [ConferenceEvent] = []
+        for (endpointId, remote) in remoteParticipants {
+            let streamIds = Set(endpoints[endpointId]?.endpoint.streams.compactMap { $0.id } ?? [])
+            for streamId in remote.correlationIds.keys where !streamIds.contains(streamId) {
+                guard let container = subscribed.first(where: { $0.streamId == streamId }), let type = container.streamType else { continue }
+                missed.append(ConferenceStreamUnpublishedEvent(fromJson: message(.conferenceStreamUnpublished, userId: remote.userId, endpointId: endpointId, ["streamId": streamId, "streamType": type.rawValue])))
+            }
+            if endpoints[endpointId] == nil {
+                missed.append(ConferenceLeftEvent(fromJson: message(.conferenceLeft, userId: remote.userId, endpointId: endpointId)))
+            }
+        }
+
+        //Then the participants who joined, and the streams that were published
+        for (endpointId, entry) in endpoints {
+            let known = remoteParticipants[endpointId]
+            if known == nil {
+                let metadata: [String: Any] = ["roles": entry.endpoint.roles, "name": entry.endpoint.name ?? "", "type": entry.endpoint.endpointType ?? ""]
+                missed.append(ConferenceJoinedEvent(fromJson: message(.conferenceJoined, userId: entry.userId, endpointId: endpointId, ["metadata": metadata])))
+            }
+            for stream in entry.endpoint.streams ?? [] where stream.id != nil && stream.type != nil {
+                guard known?.correlationIds[stream.id] == nil, !subscribed.contains(where: { $0.streamId == stream.id }) else { continue }
+                var metadata: [String: Any] = ["portraitMode": stream.portraitMode]
+                if let correlationId = stream.correlationId {
+                    metadata["correlationId"] = correlationId
+                }
+                missed.append(ConferenceStreamPublishedEvent(fromJson: message(.conferenceStreamPublished, userId: entry.userId, endpointId: endpointId, ["streamId": stream.id!, "streamType": stream.type.rawValue, "metadata": metadata])))
+            }
+        }
+        return missed
+    }
+
     //MQTT message delegation
     private func delegateConferenceMessage(msg: ConferenceEvent) {
         updateRemoteParticipants(msg)
@@ -1380,55 +1482,6 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             
         default:
             os_log("WARNING: Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
-        }
-    }
-    
-    //Schedules the delayed message processor timer
-    private func startDelayedMessageProcessorTimer(messageId: String) {
-        let delayedMessageProcessorTimer = Timer(timeInterval: delayedMessageWaitTime, target: self, selector: #selector(onDelayedMessageTick), userInfo: ["messageId" : messageId], repeats: true)
-        RunLoop.current.add(delayedMessageProcessorTimer, forMode: .common)
-    }
-    
-    //Delayed message processor timer tick
-    @objc private func onDelayedMessageTick(timer: Timer) {
-        //Ensure we're in a conference
-        guard let conference = currentConference else {
-            timer.invalidate()
-            return
-        }
-        
-        //No timer context? Disregard timer and message
-        guard let context = timer.userInfo as? [String: String] else {
-            timer.invalidate()
-            return
-        }
-        
-        //Invalid timer context? Disregard timer and message
-        let messageId = context["user", default: ""]
-        if messageId.isEmpty {
-            timer.invalidate()
-            return
-        } else {
-            
-            let filteredMessage = mqttDelayedMessages.filter {$0.id == messageId}.first
-            if let message = filteredMessage {
-                message.processedTimes += 1
-                
-                //Attempt to process
-                if message.processedTimes <= maxDelayedProcessingAttempts && message.conferenceVersion == conference.version {
-                    //all good, safe to process now
-                    delegateConferenceMessage(msg: message)
-                    //and remove from list
-                    mqttDelayedMessages.removeAll()
-                    return
-                } else {
-                    //Tried to process delayed message enough times but we still have a version mismatch - disregard timer and message and throw error
-                    mqttDelayedMessages.removeAll()
-                    timer.invalidate()
-                    delegate?.auviousSDK(onError: AuviousSDKError.internalError)
-                    return
-                }
-            }
         }
     }
     
