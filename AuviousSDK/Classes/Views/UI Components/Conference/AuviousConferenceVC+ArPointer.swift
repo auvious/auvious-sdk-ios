@@ -151,6 +151,8 @@ extension AuviousConferenceVCNew {
         let dock = CobrowseDockView()
         dock.showsLaser = true
         dock.translatesAutoresizingMaskIntoConstraints = false
+        //Drawn above our tile too, which renders above its siblings (zPosition); bringSubviewToFront() only orders the touches
+        dock.layer.zPosition = localView.layer.zPosition + 1
         dock.onDraw = { [weak self] in
             self?.setArPointerAnnotating(true)
         }
@@ -265,20 +267,14 @@ extension AuviousConferenceVCNew {
     }
 
     /// Our camera can't change while it is pointed at, and there is no screen sharing during a pointer session
-    private func applyArPointerControls() {
+    func applyArPointerControls() {
         guard !isConferenceOnHold else { return }
         let cameraLocked = isArPointerOnOurCamera
         for button in [buttonContainerView.cameraButton, buttonContainerView.cameraSwitchButton] {
             button.alpha = cameraLocked ? 0.5 : 1
             button.isUserInteractionEnabled = !cameraLocked
         }
-
-        //A running screen share keeps its stop button; starting one waits for the pointer to end
-        if cobrowseSession == nil && !AuviousConferenceSDK.sharedInstance.sharingMyScreen {
-            let canShare = arPointer.target == nil
-            buttonContainerView.screenShareButton.alpha = canShare ? 1 : 0.5
-            buttonContainerView.screenShareButton.isUserInteractionEnabled = canShare
-        }
+        updateScreenShareButton()
     }
 
     //MARK: Screen share overlay
