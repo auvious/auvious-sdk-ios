@@ -827,6 +827,17 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
     }
     
+    //Swaps the local mic or cam stream for a micAndCam one, leaving any screen share stream published
+    private func republishLocalStreamAsMicAndCam(replacing streamId: String) {
+        do {
+            try AuviousConferenceSDK.sharedInstance.startUnpublishLocalStreamFlow(streamId: streamId, streamType: localStreamType ?? configuredStreamType)
+        } catch let error {
+            os_log("startUnpublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+        }
+        configuredStreamType = .micAndCam
+        startLocalStream()
+    }
+    
     //Initialises the RTC view stream flow for existing conference streams
     private func handleExistingConferenceStreams(){
         //Reset our flag, and start connecting to remote participants
@@ -2191,10 +2202,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             if localStreamType == .mic {
                 // mic is open, we need to unpublish the stream and publish a micAndCam
-                // todo: we should replace 'all local streams' if we want to support screen share
-                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
-                configuredStreamType = .micAndCam
-                startLocalStream()
+                republishLocalStreamAsMicAndCam(replacing: localStreamId)
                 
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .video, onSuccess: {
@@ -2247,9 +2255,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             if localStreamType == .cam {
                 // cam is open, we need to unpublish and publish a micAndCam stream
-                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
-                configuredStreamType = .micAndCam
-                startLocalStream()
+                republishLocalStreamAsMicAndCam(replacing: localStreamId)
                 
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
@@ -2301,9 +2307,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             
             if localStreamType == .cam {
                 // cam is open, we need to unpublish and publish a micAndCam stream
-                AuviousConferenceSDK.sharedInstance.unpublishAllLocalStreams()
-                configuredStreamType = .micAndCam
-                startLocalStream()
+                republishLocalStreamAsMicAndCam(replacing: localStreamId)
                 
             } else {
                 AuviousConferenceSDK.sharedInstance.toggleLocalStream(conferenceId: currentConference.id, streamId: localStreamId, operation: .remove, type: .audio, onSuccess: {
