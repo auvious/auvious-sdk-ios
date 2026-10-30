@@ -1840,7 +1840,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             let showsShareFullScreen = focused != nil && focused === shareScreenContainerView && shareScreenFullScreen
             placeTilesInFocusStrip(focused != nil, focused: focused)
             shareScreenContainerView?.isHidden = focused !== shareScreenContainerView
-            for r in remoteViews { r.restoreOverlay() }
+            for r in remoteViews {
+                r.restoreOverlay()
+                //Only the 1:1 portrait layout below turns it on
+                r.tapSwitchesToPortrait = false
+            }
 
             if let focused = focused {
                 constraints.append(contentsOf: focusConstraints(focused: focused, fullScreen: showsShareFullScreen, isLandscape: isLandscape, safeArea: safeArea, safeLeading: safeLeadingConstraint))
@@ -1862,6 +1866,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
                 if remoteViews.count == 1 {
                     let view1 = remoteViews[0]
+                    view1.tapSwitchesToPortrait = !isLandscape
                     
                     if !isLandscape {
                         if !view1.hasVideoSize || view1.showsNoVideoPlaceholder {
@@ -1871,7 +1876,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
                             constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor))
-                        } else if agentVideoPortraitMode {
+                        } else if agentVideoPortraitMode || view1.isTappedToPortrait {
                             //Full screen portrait video (with top|safeArea)
                             constraints.append(view1.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor))
                             constraints.append(view1.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor))
@@ -1881,12 +1886,11 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             constraints.append(view1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
 
                         } else {
-                            //4:3 centered video
-                            constraints.append(view1.centerXAnchor.constraint(equalTo: view.centerXAnchor))
-                            constraints.append(view1.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+                            //The safe area is its slot: shaped like its video and centered in it (fitTilesToVideo)
                             constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))
                             constraints.append(view1.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: 0))
-                            constraints.append(view1.heightAnchor.constraint(equalTo: view1.widthAnchor, multiplier: 0.66))
+                            constraints.append(view1.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0))
+                            constraints.append(view1.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0))
                         }
                     } else {
                         constraints.append(view1.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 0))

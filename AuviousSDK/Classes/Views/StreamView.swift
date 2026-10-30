@@ -98,7 +98,17 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     private(set) var annotationSurface: AnnotationSurfaceView?
 
     /// Set by tapping a remote tile: the tile takes the video's shape, so the whole video shows
+    /// (or, with tapSwitchesToPortrait, the call switches to the portrait layout)
     private var tappedToFit = false
+
+    /// Set by the call for the only remote tile of a 1:1 call in portrait: the tile is shaped like its video,
+    /// and a tap switches the call to the portrait layout (the video fills the screen) and back
+    var tapSwitchesToPortrait = false
+
+    /// True while a tap has switched a 1:1 call to the portrait layout
+    var isTappedToPortrait: Bool {
+        return tappedToFit && tapSwitchesToPortrait && togglesFitOnTap && !portraitMode
+    }
 
     /// Taps switch the tile between fitting its video and filling its space in the layout.
     /// On for remote tiles while the call is full screen.
@@ -140,7 +150,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
     var followsVideoShape: Bool {
         if showsNoVideoPlaceholder { return togglesFitOnTap }
         guard hasVideoSize else { return false }
-        return (fitsVideo && !isZoomed) || (tappedToFit && togglesFitOnTap && !portraitMode)
+        return (fitsVideo && !isZoomed) || (togglesFitOnTap && !portraitMode && tappedToFit != tapSwitchesToPortrait)
     }
 
     /// The shape a tile that follows its video's shape takes: its video's, or square for the no video placeholder
