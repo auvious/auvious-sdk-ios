@@ -155,10 +155,7 @@ extension AuviousConferenceVCNew {
         session?.setDockHidden(isFullScreen)
         stopScreenSharingButton.title = session != nil ? CobrowseStrings.stopCobrowsing : "Stop sharing"
 
-        //One screen share at a time
-        let canShare = session == nil
-        buttonContainerView.screenShareButton.alpha = canShare ? 1 : 0.5
-        buttonContainerView.screenShareButton.isUserInteractionEnabled = canShare
+        updateScreenShareButton()
 
         showsCallHiddenChip(session?.isSharing == true && isFullScreen, agentName: session?.agentName)
     }

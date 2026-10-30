@@ -1182,6 +1182,8 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                     self.pipStopShareButton.isUserInteractionEnabled = true
                     self.pipStopShareButton.alpha = 1
                     self.isConferenceOnHold = false
+                    //Off hold re-enabled every button: keep the ones the AR pointer and co-browse disable
+                    self.applyArPointerControls()
 
                     AuviousConferenceSDK.sharedInstance.addLocalAudioStream()
                     AuviousConferenceSDK.sharedInstance.addLocalVideoStream()
@@ -2012,11 +2014,23 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
         }
     }
     
+    /// One screen share at a time: none while co-browsing, nor while the agent points at a stream (same as the web)
+    var canStartScreenShare: Bool {
+        return cobrowseSession == nil && arPointer.target == nil
+    }
+
+    /// The share screen button is disabled while on hold, co-browsing or in an AR pointer session
+    func updateScreenShareButton() {
+        guard !isConferenceOnHold else { return }
+        let enabled = canStartScreenShare
+        buttonContainerView.screenShareButton.alpha = enabled ? 1 : 0.5
+        buttonContainerView.screenShareButton.isUserInteractionEnabled = enabled
+    }
+
     //Try to start the screen sharing - will trigger iOS permission dialog
     //UI changes will occur once delegation ensures sharing started
     @objc internal func screenShareButtonPressed(_ sender: Any) {
-        //No screen sharing while the agent points at a stream (same as the web)
-        guard arPointer.target == nil else { return }
+        guard canStartScreenShare else { return }
         selectionFeedbackGenerator.impactOccurred()
         buttonContainerView.resetOptionsButton()
 
