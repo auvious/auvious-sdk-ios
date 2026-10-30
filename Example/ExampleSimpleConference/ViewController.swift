@@ -56,10 +56,15 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
 
     private let environments = [
         (title: "PROD", host: "auvious.video"),
+        (title: "PROD US", host: "us.auvious.video"),
+        (title: "PROD AU", host: "au.auvious.video"),
+        (title: "PROD ME", host: "me.auvious.video"),
+        (title: "PROD IN", host: "in.auvious.video"),
+        (title: "PROD UAE", host: "uae.auvious.video"),
         (title: "DEV", host: "dev.auvious.video"),
         (title: "STG", host: "stg.auvious.video"),
     ]
-    private var selectedEnvironment = 1
+    private lazy var selectedEnvironment = environments.firstIndex { $0.title == "DEV" } ?? 0
 
     private let callModes: [(title: String, mode: AuviousCallMode)] = [
         ("Audio", .audio),
