@@ -41,6 +41,9 @@ video conferencing, co-browsing, and many more things are coming your way!
     'AuviousSDKAssets' => ['Assets.xcassets']
   }
 
+  # The full version, pre-release included: CFBundleShortVersionString only keeps 1.5.0 of 1.5.0-beta.2
+  s.info_plist = { 'AuviousSDKVersion' => s.version.to_s }
+
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'SwiftyJSON', '~> 5.0'

@@ -203,8 +203,7 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
         tableView.allowsSelection = false
         tableView.keyboardDismissMode = .interactive
         tableView.backgroundColor = .clear
-        //Grouped tables leave an empty gap on top when there is no header view
-        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNonzeroMagnitude))
+        tableView.tableHeaderView = makeVersionHeader()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
 
@@ -214,6 +213,21 @@ class ViewController: UIViewController, AuviousSimpleConferenceDelegate {
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
+    }
+
+    /// The SDK version in small print above the form
+    private func makeVersionHeader() -> UIView {
+        let info = Bundle(for: AuviousConferenceSDK.self).infoDictionary
+        //AuviousSDKVersion keeps the pre-release part (1.5.0-beta.2), which CFBundleShortVersionString drops
+        let version = info?["AuviousSDKVersion"] as? String ?? info?["CFBundleShortVersionString"] as? String ?? "?"
+
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: 24))
+        label.text = "AuviousSDK \(version)"
+        label.font = .preferredFont(forTextStyle: .caption2)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .tertiaryLabel
+        label.textAlignment = .center
+        return label
     }
 
     /// Keeps the call button above the home indicator, and above the keyboard while typing
