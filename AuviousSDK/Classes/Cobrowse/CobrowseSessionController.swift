@@ -105,6 +105,8 @@ internal final class CobrowseSessionController: NSObject {
     private var lifecycleObservers: [NSObjectProtocol] = []
     /// Ends without the "ended" toast (declined, or the call itself is going away)
     private var endsQuietly = false
+    /// Standalone: the reason sent when leaving the conference
+    private var leaveReason = ""
 
     private var isInCall: Bool {
         if case .inCall = mode {
@@ -181,8 +183,9 @@ internal final class CobrowseSessionController: NSObject {
 
         observeLifecycle()
 
-        sdk.login(onLoginSuccess: { [weak self] _, conferenceId in
-            self?.resolveConference(conferenceId)
+        //Holds on to self, so a session ended while logging in still logs out
+        sdk.login(onLoginSuccess: { _, conferenceId in
+            self.resolveConference(conferenceId)
         }, onLoginFailure: { [weak self] error in
             self?.fail(with: error)
         })
@@ -284,7 +287,12 @@ internal final class CobrowseSessionController: NSObject {
 
     /// The conference comes with the token (conference_id); fall back to the ticket's properties
     private func resolveConference(_ conferenceId: String?) {
-        guard !isEnding, case .standalone(let configuration) = mode else { return }
+        guard case .standalone(let configuration) = mode else { return }
+        //Ended while logging in: the teardown in end() ran before we were logged in
+        guard !isEnding else {
+            leaveAndLogout()
+            return
+        }
 
         if let id = conferenceId, !id.isEmpty {
             join(id)
@@ -304,8 +312,12 @@ internal final class CobrowseSessionController: NSObject {
     }
 
     private func join(_ conferenceId: String) {
-        sdk.joinConference(conferenceId: conferenceId, onSuccess: { [weak self] conference in
-            guard let self = self, !self.isEnding else { return }
+        //Holds on to self, so a session ended while joining still leaves
+        sdk.joinConference(conferenceId: conferenceId, onSuccess: { conference in
+            guard !self.isEnding else {
+                self.leaveAndLogout()
+                return
+            }
             guard let conference = conference else {
                 self.fail(with: AuviousSDKError.notInConference)
                 return
@@ -553,15 +565,11 @@ internal final class CobrowseSessionController: NSObject {
 
         switch mode {
         case .standalone:
-            let leaveReason = reason == .customerEnded ? customerTerminatedReason : ""
-            stopCapture { [weak self] in
-                guard let self = self else { return }
-                if reason != .agentEnded, let conferenceId = self.sdk.currentConferenceId {
-                    self.sdk.leaveConference(conferenceId: conferenceId, reason: leaveReason, onSuccess: {
-                        self.logout()
-                    }, onFailure: { _ in
-                        self.logout()
-                    })
+            leaveReason = reason == .customerEnded ? customerTerminatedReason : ""
+            //Holds on to self: finish() may release the session before the capture has stopped
+            stopCapture {
+                if reason != .agentEnded {
+                    self.leaveAndLogout()
                 } else {
                     self.logout()
                 }
@@ -597,6 +605,18 @@ internal final class CobrowseSessionController: NSObject {
         } else {
             finish(reason: reason)
         }
+    }
+
+    private func leaveAndLogout() {
+        guard let conferenceId = sdk.currentConferenceId else {
+            logout()
+            return
+        }
+        sdk.leaveConference(conferenceId: conferenceId, reason: leaveReason, onSuccess: {
+            self.logout()
+        }, onFailure: { _ in
+            self.logout()
+        })
     }
 
     private func logout() {
@@ -712,6 +732,9 @@ internal final class CobrowseSessionController: NSObject {
             guard let self = self, !self.isEnding else { return }
             if self.resumeSharingOnForeground {
                 self.resumeSharingOnForeground = false
+                //The capture stopped in the background, the state still says sharing
+                self.state = .notSharing
+                self.overlay.setPhase(.notSharing)
                 self.requestShare()
             }
         }, onFailure: { [weak self] error in

@@ -84,6 +84,17 @@ final class PaperCodecTests: XCTestCase {
         XCTAssertEqual(path.strokeColor?.red ?? 0, 247.0 / 255.0, accuracy: 0.0001)
     }
 
+    func testRejectsOutOfRangeIdsWithoutTrapping() throws {
+        let item = """
+        ["Path",{"data":{"tool":"path","id":1e19,"userId":"u","userEndpointId":"e"},"segments":[[0,0],[1,1]]}]
+        """
+        if case .path(let path) = try? decodeItem(item) {
+            XCTAssertNil(path.data)
+        }
+
+        XCTAssertThrowsError(try JSONDecoder().decode(SketchErasedReference.self, from: Data(#"{"id":-1e300}"#.utf8)))
+    }
+
     func testUnwrapsDictionaryWrapper() throws {
         let json = """
         [["dictionary",{}],["Path",{"data":{"tool":"path","id":5,"userId":"u","userEndpointId":"e"},"segments":[[0,0],[1,1]]}]]

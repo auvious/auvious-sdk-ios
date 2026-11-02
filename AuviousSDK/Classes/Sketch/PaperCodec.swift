@@ -19,12 +19,15 @@ import UIKit
     return (value * 100000).rounded() / 100000
 }
 
-/// Decodes an integer that may have been written as a floating point number
-private func decodeInt64(_ container: KeyedDecodingContainer<SketchItemData.CodingKeys>, _ key: SketchItemData.CodingKeys) throws -> Int64 {
+/// Decodes an integer that may have been written as a floating point number. Throws when it doesn't fit in an Int64.
+private func decodeInt64<Key: CodingKey>(_ container: KeyedDecodingContainer<Key>, _ key: Key) throws -> Int64 {
     if let value = try? container.decode(Int64.self, forKey: key) {
         return value
     }
-    return Int64(try container.decode(Double.self, forKey: key).rounded())
+    guard let value = Int64(exactly: try container.decode(Double.self, forKey: key).rounded()) else {
+        throw DecodingError.dataCorruptedError(forKey: key, in: container, debugDescription: "Integer out of range")
+    }
+    return value
 }
 
 //MARK: - Item identity
@@ -338,11 +341,7 @@ internal struct SketchErasedReference: Codable, Equatable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let value = try? container.decode(Int64.self, forKey: .id) {
-            id = value
-        } else {
-            id = Int64(try container.decode(Double.self, forKey: .id).rounded())
-        }
+        id = try decodeInt64(container, .id)
         userId = try? container.decode(String.self, forKey: .userId)
         userEndpointId = try? container.decode(String.self, forKey: .userEndpointId)
     }

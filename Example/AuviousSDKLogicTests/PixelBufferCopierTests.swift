@@ -41,7 +41,7 @@ final class PixelBufferCopierTests: XCTestCase {
         XCTAssertEqual(CVPixelBufferGetBaseAddressOfPlane(copy, 1)!.load(as: UInt8.self), 128)
     }
     
-    func testPassesFramesThroughWhenMaskingIsOff() throws {
+    func testDropsFramesWhenMaskingIsOff() throws {
         var source: CVPixelBuffer?
         CVPixelBufferCreate(kCFAllocatorDefault, 8, 8, kCVPixelFormatType_32BGRA, nil, &source)
         var format: CMVideoFormatDescription?
@@ -52,6 +52,6 @@ final class PixelBufferCopierTests: XCTestCase {
         
         XCTAssertFalse(MaskRegistry.shared.isRunning)
         let output = PixelBufferMasker.maskedFrame(sampleBuffer: sample!, pixelBuffer: source!, registry: MaskRegistry.shared)
-        XCTAssertTrue(output === source)
+        XCTAssertNil(output)
     }
 }

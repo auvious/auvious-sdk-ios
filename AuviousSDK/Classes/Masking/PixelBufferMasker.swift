@@ -38,12 +38,13 @@ internal enum PixelBufferMasker {
     /**
      Frame processor for `ScreenCapturer`: returns the frame to send, or nil to drop it.
 
-     While masking runs, the frame is copied into an SDK-owned buffer and the copy is masked with the
-     layout around the frame's capture time. ReplayKit's buffer is never modified.
+     The frame is copied into an SDK-owned buffer and the copy is masked with the layout around the frame's
+     capture time. ReplayKit's buffer is never modified.
      */
     static func maskedFrame(sampleBuffer: CMSampleBuffer, pixelBuffer: CVPixelBuffer, registry: MaskRegistry) -> CVPixelBuffer? {
+        //Masking isn't tracking the layout (not started yet, or stopped while the capture winds down): drop the frame
         guard registry.isRunning else {
-            return pixelBuffer
+            return nil
         }
 
         let time = frameTime(of: sampleBuffer)
