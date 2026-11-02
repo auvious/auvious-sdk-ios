@@ -206,4 +206,21 @@ public final class AuviousCobrowse {
     public func stop() {
         controller?.end(reason: .customerEnded)
     }
+
+    /**
+     The orientations the app should allow right now. Co-browse is portrait only, also in a video call:
+     rotating while the screen is shared stalls it on the agent's side.
+
+     The SDK can't decide the app's orientations itself, so return this from your app delegate.
+     It rotates the app to portrait when a session starts and back when it ends.
+     ```
+     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+         return AuviousCobrowse.shared.supportedInterfaceOrientations(otherwise: .allButUpsideDown)
+     }
+     ```
+     - Parameter mask: The app's own orientations, used while no session runs
+     */
+    public func supportedInterfaceOrientations(otherwise mask: UIInterfaceOrientationMask) -> UIInterfaceOrientationMask {
+        return CobrowseOverlayWindow.holdsPortrait ? .portrait : mask
+    }
 }

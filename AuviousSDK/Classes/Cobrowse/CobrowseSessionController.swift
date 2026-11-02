@@ -276,6 +276,7 @@ internal final class CobrowseSessionController: NSObject {
         let window = CobrowseOverlayWindow.make(rootViewController: overlay)
         window.isHidden = false
         self.window = window
+        CobrowseOverlayWindow.holdsPortrait = true
 
         MaskRegistry.shared.excludedWindow = window
         MaskRegistry.shared.onRegionsChanged = { [weak self] regions in
@@ -644,6 +645,7 @@ internal final class CobrowseSessionController: NSObject {
     private func finish(reason: AuviousCobrowseEndReason) {
         window?.isHidden = true
         window = nil
+        CobrowseOverlayWindow.holdsPortrait = false
         onEnd?(reason)
     }
 

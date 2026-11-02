@@ -35,6 +35,29 @@ internal final class CobrowseOverlayWindow: UIWindow {
         return window
     }
 
+    /// True while a co-browse session shows its overlay: the app is held in portrait
+    /// (see `AuviousCobrowse.supportedInterfaceOrientations(otherwise:)`)
+    static var holdsPortrait = false {
+        didSet {
+            guard holdsPortrait != oldValue else { return }
+            updateOrientation()
+        }
+    }
+
+    /// Asks UIKit to apply the supported orientations again: to portrait when the session starts,
+    /// back to the app's own (and the device's orientation) once it ends
+    private static func updateOrientation() {
+        if #available(iOS 16.0, *) {
+            guard let scene = activeWindowScene() else { return }
+            scene.windows.forEach { $0.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations() }
+            if holdsPortrait {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+            }
+        } else {
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
+    }
+
     private static func activeWindowScene() -> UIWindowScene? {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         return scenes.first { $0.activationState == .foregroundActive }
