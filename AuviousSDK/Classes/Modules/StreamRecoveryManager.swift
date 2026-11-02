@@ -29,8 +29,8 @@ internal enum StreamIceState {
  - A rebuilt connection that fails, or doesn't connect within `connectTimeout`, is tried again after
    `retryDelay`. Attempts wait while the device has no network, and `networkSettleDelay` once it is back:
    a connection that was only disconnected often comes back by itself then.
- - After `failureLimit` failures in a row the stream is marked `failed`. A connection that connects
-   clears the count, so a long call on a flaky network keeps recovering.
+ - After `failureLimit` failures in a row the stream is marked `failed`, until the network changes. A connection
+   that connects clears the count, so a long call on a flaky network keeps recovering.
 
  Used on the main queue only.
  */
@@ -154,11 +154,18 @@ internal final class StreamRecoveryManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay, execute: work)
     }
 
-    /// Lets waiting recoveries go ahead as soon as the device is back online
+    /// Lets waiting recoveries go ahead as soon as the device is back online. A network that changed may work
+    /// where the last one didn't, so streams that were given up are tried again too
     func setNetworkAvailable(_ available: Bool) {
         networkAvailable = available
         guard available else { return }
-        for (streamId, entry) in entries where entry.waitingForNetwork {
+        for (streamId, entry) in entries where entry.waitingForNetwork || entry.gaveUp {
+            if entry.gaveUp {
+                os_log("Network changed, trying stream %{public}@ again", log: Log.conferenceSDK, type: .default, streamId)
+                entry.gaveUp = false
+                entry.failures = 0
+                stateChanged(entry.endpointId, entry.isLocal, .reconnecting)
+            }
             entry.waitingForNetwork = false
             //A stream that connects meanwhile cancels this
             let work = DispatchWorkItem { [weak self] in

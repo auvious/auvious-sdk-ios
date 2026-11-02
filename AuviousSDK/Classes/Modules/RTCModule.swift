@@ -98,8 +98,22 @@ internal extension RTCDelegate {
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
     
-    //List of connections used
-    internal var peerConnections: [RTCPeerConnectionContainer] = [RTCPeerConnectionContainer]()
+    //List of connections used. Changed on main, but WebRTC's callbacks read it on its signaling thread,
+    //so every access goes through the lock (a read during a change of the array can crash)
+    internal var peerConnections: [RTCPeerConnectionContainer] {
+        get {
+            peerConnectionsLock.lock()
+            defer { peerConnectionsLock.unlock() }
+            return lockedPeerConnections
+        }
+        set {
+            peerConnectionsLock.lock()
+            defer { peerConnectionsLock.unlock() }
+            lockedPeerConnections = newValue
+        }
+    }
+    private var lockedPeerConnections: [RTCPeerConnectionContainer] = []
+    private let peerConnectionsLock = NSLock()
     
     //Connection factory (readable by the tests, to keep their connections on loopback)
     private(set) var factory: RTCPeerConnectionFactory!

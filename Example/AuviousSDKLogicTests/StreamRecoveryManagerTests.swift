@@ -88,6 +88,23 @@ final class StreamRecoveryManagerTests: XCTestCase {
         XCTAssertEqual(states, [.reconnecting, .failed])
     }
 
+    func testAStreamThatGaveUpIsTriedAgainWhenTheNetworkChanges() {
+        let recovery = manager(connectTimeout: 0.05)
+
+        recovery.iceStateChanged(streamId: "s1", isLocal: false, endpointId: "agent", state: .failed)
+        wait(0.3)
+        XCTAssertEqual(states, [.reconnecting, .failed])
+
+        //After the settle delay, before that attempt times out
+        recovery.setNetworkAvailable(true)
+        wait(0.075)
+        XCTAssertEqual(attempts.count, 4)
+        XCTAssertEqual(states, [.reconnecting, .failed, .reconnecting])
+
+        recovery.iceStateChanged(streamId: "s1", isLocal: false, endpointId: "agent", state: .connected)
+        XCTAssertEqual(states, [.reconnecting, .failed, .reconnecting, nil])
+    }
+
     func testAConnectionThatNeverConnectsIsTriedAgain() {
         let recovery = manager(connectTimeout: 0.05)
 

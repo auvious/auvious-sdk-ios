@@ -878,6 +878,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 API2.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
                         
+                        self.isConferenceOnHold = false
                         self.currentConference = ConferenceSimpleView(fromJson: data)
                         os_log("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                         //Notify the user of successfully joining
@@ -943,6 +944,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
 
         streamRecovery.clear()
         republishedStreamsToMute.removeAll()
+        isConferenceOnHold = false
 
         //Step 1 - Close all streams
         removeAllStreams()
@@ -1147,6 +1149,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         UserEndpointModule.sharedInstance.stopKeepAliveTimer()
         API2.sharedInstance.stopTokenRefreshTimer()
         MQTTModule2.sharedInstance.disconnect()
+        stopNetworkMonitor()
         self.currentConference = nil
     }
     
@@ -1454,6 +1457,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceEnded:
             streamRecovery.clear()
+            isConferenceOnHold = false
             removeAllStreams()
             emptyPeerConnections()
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
@@ -1602,8 +1606,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 if self.streamRecovery.isRecovering(streamId) {
                     //No such stream any more: the remote side unpublished it while we were away
                     if case AuviousSDKError.httpError(let code) = error, code == 404 {
-                        self.streamRecovery.forget(streamId)
-                        _ = self.rtcClient.removeRemoteStreams(streamId: streamId)
+                        self.streamGone(streamId, conferenceId: conference.id)
                     } else {
                         self.streamRecovery.attemptFailed(streamId)
                     }
@@ -1758,6 +1761,20 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         return streamId
     }
 
+    /// A remote stream we were recovering no longer exists: unpublishes it as the backend would have told us,
+    /// so the app removes its view (the unpublished message, live or missed, finds no stream to remove after this)
+    private func streamGone(_ streamId: String, conferenceId: String) {
+        guard let container = rtcClient.peerConnections.first(where: { $0.streamId == streamId && !$0.isLocal }),
+              let type = container.streamType, let endpointId = container.endpointId, let userId = container.userId else {
+            streamRecovery.forget(streamId)
+            _ = rtcClient.removeRemoteStreams(streamId: streamId)
+            return
+        }
+        let json: [String: Any] = ["type": ConferenceEventType.conferenceStreamUnpublished.rawValue, "conferenceId": conferenceId,
+                                   "userId": userId, "userEndpointId": endpointId, "streamId": streamId, "streamType": type.rawValue]
+        delegateConferenceMessage(msg: ConferenceStreamUnpublishedEvent(fromJson: JSON(json)))
+    }
+
     private func restoreMutedTracks(ofRepublishedStream streamId: String) {
         guard republishedStreamsToMute.remove(streamId) != nil, let conference = currentConference else { return }
         if rtcClient.localVideoTrack?.isEnabled == false {
@@ -1789,6 +1806,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
         monitor.start(queue: DispatchQueue(label: "AuviousSDK.network"))
         pathMonitor = monitor
+    }
+
+    /// Started again on the next login
+    private func stopNetworkMonitor() {
+        pathMonitor?.cancel()
+        pathMonitor = nil
     }
 
     internal func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {
