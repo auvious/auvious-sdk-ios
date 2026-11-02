@@ -27,6 +27,15 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     
     //Internal properties
     private var mqtt: CocoaMQTT!
+
+    /// Lost since it last connected, so a new subscription is a reconnect
+    private var lostConnection = false
+
+    /// We disconnected to reconnect with new credentials; CocoaMQTT doesn't reconnect after a disconnect of ours
+    private var reconnectAfterDisconnect = false
+
+    /// Called once the connection is back after a drop and the topic is subscribed again
+    var onReconnected: (() -> Void)?
     private var endpointId: String!
     private var subscriptionCallback: (()->())?
     
@@ -56,6 +65,8 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         self.mqtt.allowUntrustCACertificate = true
         self.mqtt.enableSSL = true
         self.mqtt.autoReconnect = true
+        //Retries back off from 1s; during a call 30s is the longest worth waiting
+        self.mqtt.maxAutoReconnectTimeInterval = 30
         self.mqtt.delegate = self
         _ = self.mqtt.connect()
         
@@ -72,12 +83,14 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     /// Disconnect and reconnect with updated credentials (used by token refresh).
     func disconnectAndReconnect() {
         os_log("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
+        reconnectAfterDisconnect = true
         refreshCredentials()
         self.mqtt.disconnect()
     }
 
     func reconnect() {
         os_log("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
+        guard mqtt != nil else { return }
         switch mqtt.connState {
         case .connected:
             os_log("MQTT2 session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
@@ -179,6 +192,10 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
             if let closure = subscriptionCallback {
                 closure()
             }
+            if lostConnection {
+                lostConnection = false
+                onReconnected?()
+            }
         }
     }
     
@@ -196,7 +213,13 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
         print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect), error=\(err.map { String(describing: $0) } ?? "none"))")
-        if mqtt.autoReconnect {
+        guard mqtt.autoReconnect else { return }
+        lostConnection = true
+        //A lost connection is retried by CocoaMQTT, backing off up to maxAutoReconnectTimeInterval, and right away
+        //once the device is back online (AuviousConferenceSDK's network monitor). Retrying here as well spun
+        //thousands of times a minute while offline, each attempt failing at once
+        if reconnectAfterDisconnect {
+            reconnectAfterDisconnect = false
             self.reconnect()
         }
     }

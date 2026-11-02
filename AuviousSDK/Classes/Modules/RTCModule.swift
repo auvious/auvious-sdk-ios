@@ -28,6 +28,8 @@ internal protocol RTCDelegate {
     func rtcClient(didFailToStartScreenSharing: Bool)
     func rtcClient(screenShareICEConnectionFailed streamId: String)
     func rtcClient(screenShareICEConnectionNeedsRestart streamId: String)
+    //ICE state of a call stream's connection (all but our shared screen, which recovers itself)
+    func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String)
     
     //rest call + rtclient invocation
     func rtcClient(publishStream streamId: String, streamType: StreamType, sdpOffer: String)
@@ -91,6 +93,7 @@ internal extension RTCDelegate {
     func rtcClient(didFailToStartScreenSharing: Bool){}
     func rtcClient(screenShareICEConnectionFailed streamId: String) {}
     func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {}
+    func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String) {}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
@@ -576,6 +579,35 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         return true
     }
 
+    /**
+     Publishes our camera or microphone stream again over a new connection, under a new stream ID, after its
+     connection was lost. The capture and tracks keep running, so the local preview doesn't change.
+     Returns false when there is no such stream.
+     */
+    internal func republishLocalStream(replacing oldStreamId: String, with newStreamId: String) -> Bool {
+        guard let old = peerConnections.first(where: { $0.streamId == oldStreamId && $0.isLocal }),
+              let type = old.streamType, let endpointId = old.endpointId, let userId = old.userId else {
+            return false
+        }
+        let tracks = sentTracks(old.connection, kind: "audio") + sentTracks(old.connection, kind: "video")
+        old.connection?.close()
+        peerConnections.removeAll { $0.streamId == oldStreamId }
+
+        initialisePeerConnection(streamId: newStreamId, endpointId: endpointId, userId: userId, type: type, isLocal: true)
+        guard let connection = getConnectionForStream(streamId: newStreamId) else {
+            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: newStreamId))
+            return false
+        }
+        for track in tracks where connection.add(track, streamIds: [newStreamId]) == nil {
+            os_log("Could not add %@ track to republished stream %@", log: Log.rtc, type: .error, track.kind, newStreamId)
+        }
+        if switchCamStreamId == oldStreamId {
+            switchCamStreamId = newStreamId
+        }
+        makeOfferPublishStream(type: type, streamId: newStreamId)
+        return true
+    }
+
     internal func removeRemoteStreams(streamId: String) -> Bool{
         guard let obj = peerConnections.first(where: { $0.streamId == streamId }) else {
             return false
@@ -784,8 +816,23 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        guard let container = peerConnections.first(where: { $0.connection == peerConnection }),
-              container.streamType == .screen else { return }
+        //A connection we already dropped or replaced is no longer in the list
+        guard let container = peerConnections.first(where: { $0.connection == peerConnection }) else { return }
+
+        if !(container.streamType == .screen && container.isLocal), let streamId = container.streamId, let endpointId = container.endpointId {
+            let state: StreamIceState
+            switch newState {
+            case .connected, .completed: state = .connected
+            case .disconnected: state = .disconnected
+            case .failed: state = .failed
+            default: state = .other
+            }
+            os_log("ICE %{public}@ for %{public}@ stream %{public}@", log: Log.rtc, type: .default,
+                   String(describing: state), container.isLocal ? "published" : "subscribed", streamId)
+            delegate?.rtcClient(iceConnectionChanged: state, streamId: streamId, isLocal: container.isLocal, endpointId: endpointId)
+        }
+
+        guard container.streamType == .screen else { return }
         let stateName: String
         switch newState {
         case .new:          stateName = "new"
