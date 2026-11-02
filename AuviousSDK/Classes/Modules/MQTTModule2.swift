@@ -39,6 +39,14 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     private let maxRetryInterval: TimeInterval = 30
     private var retryWork: DispatchWorkItem?
 
+    /// A refused connection's socket is still closing: a connect before its close arrives is dropped by it
+    private var awaitingClose = false
+
+    /// A connect of ours still connecting after connectTimeout is started over: a stale close can drop
+    /// the new connection's open, leaving CocoaMQTT connecting forever, which reconnect() would trust
+    private let connectTimeout: TimeInterval = 20
+    private var connectWatchdog: DispatchWorkItem?
+
     /// Called once the connection is back after a drop and the topic is subscribed again
     var onReconnected: (() -> Void)?
     private var endpointId: String!
@@ -74,8 +82,9 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         self.mqtt.maxAutoReconnectTimeInterval = UInt16(maxRetryInterval)
         self.mqtt.delegate = self
         needsOwnRetry = false
+        awaitingClose = false
         cancelRetry()
-        _ = self.mqtt.connect()
+        startConnecting()
         
         print("MQTT2 connect()")
     }
@@ -85,15 +94,25 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         os_log("MQTT2 disconnecting (permanent)", log: Log.mqtt, type: .debug)
         self.mqtt.autoReconnect = false
         cancelRetry()
+        cancelConnectWatchdog()
         self.mqtt.disconnect()
     }
 
     /// Disconnect and reconnect with updated credentials (used by token refresh).
     func disconnectAndReconnect() {
         os_log("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
+        guard mqtt != nil else { return }
         needsOwnRetry = true
-        retryInterval = 0
         refreshCredentials()
+        //A refused connection is closing: the retry after its close picks up the new credentials
+        guard !awaitingClose else { return }
+        //Already down (waiting for a retry): its socket is closed, so a disconnect would never report back
+        if mqtt.connState == .disconnected {
+            cancelRetry()
+            reconnect()
+            return
+        }
+        retryInterval = 0
         self.mqtt.disconnect()
     }
 
@@ -101,16 +120,48 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         os_log("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
         //Not after a disconnect of ours (e.g. logout)
         guard mqtt != nil, mqtt.autoReconnect else { return }
+        guard !awaitingClose else {
+            os_log("MQTT2 refused connection still closing - retrying once it has", log: Log.mqtt, type: .debug)
+            return
+        }
         switch mqtt.connState {
         case .connected:
             os_log("MQTT2 session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
         case .connecting:
             os_log("MQTT2 session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
+            //A connect CocoaMQTT started, or one whose watchdog already ran: still give it a deadline
+            if connectWatchdog == nil {
+                armConnectWatchdog()
+            }
         default:
             os_log("MQTT2 reconnecting", log: Log.mqtt, type: .debug)
             refreshCredentials()
-            _ = mqtt.connect()
+            startConnecting()
         }
+    }
+
+    private func startConnecting() {
+        _ = mqtt.connect()
+        armConnectWatchdog()
+    }
+
+    private func armConnectWatchdog() {
+        connectWatchdog?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.connectWatchdog = nil
+            guard self.mqtt.autoReconnect, self.mqtt.connState == .connecting else { return }
+            os_log("MQTT2 still connecting after %.0fs, starting over", log: Log.mqtt, type: .error, self.connectTimeout)
+            self.refreshCredentials()
+            self.startConnecting()
+        }
+        connectWatchdog = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + connectTimeout, execute: work)
+    }
+
+    private func cancelConnectWatchdog() {
+        connectWatchdog?.cancel()
+        connectWatchdog = nil
     }
 
     /// The broker password is the access token, so the client must pick up the latest one
@@ -156,13 +207,14 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         if ack == .accept {
             needsOwnRetry = false
             cancelRetry()
+            cancelConnectWatchdog()
             subscribeForUserEndpoint()
         } else {
-            //A refused connection (e.g. the broker restarting, or a token that expired) ends CocoaMQTT's retries
+            //A refused connection (e.g. the broker restarting, or a token that expired) ends CocoaMQTT's retries.
+            //The socket is still closing here: mqttDidDisconnect retries once it has, as a connect before that
+            //is dropped by the stale close and leaves the client stuck connecting
             needsOwnRetry = true
-            if mqtt.autoReconnect {
-                scheduleRetry()
-            }
+            awaitingClose = true
         }
     }
     
@@ -250,6 +302,8 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
         print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect), error=\(err.map { String(describing: $0) } ?? "none"))")
+        //The watchdog stays: a stale close can arrive before the connect it belongs to is marked connecting
+        awaitingClose = false
         guard mqtt.autoReconnect else { return }
         lostConnection = true
         //A lost connection is retried by CocoaMQTT, backing off up to maxAutoReconnectTimeInterval, and right away
