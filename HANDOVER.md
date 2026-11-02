@@ -53,9 +53,9 @@ committed.
    - Mute/hold behave as before (`track.isEnabled = false` sends silence/black frames).
    Open decision to mention: really stopping the send on mute/hold (`sender.track = nil` /
    `replaceTrack`), which would save bandwidth but changes behaviour.
-3. **Publish** as the README's "Publish version" section says (tag, push to the public GitHub
-   repo, `pod repo push`). Needs push rights on github.com/auvious/auvious-sdk-ios and
-   CocoaPodSpecs (ask who published 1.4.0).
+3. **Publish:** tag the version on GitLab, then start the manual job `publish` in the tag's pipeline
+   (README, "Publish version"). Before it can run: `GITHUB_TOKEN` in this project (Contents write
+   access to github.com/auvious/auvious-sdk-ios and CocoaPodSpecs), and version tags protected.
 
 ## Swift Package Manager (not started)
 
