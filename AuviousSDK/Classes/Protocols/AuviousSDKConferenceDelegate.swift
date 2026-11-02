@@ -65,9 +65,24 @@ public protocol AuviousSDKConferenceDelegate: AuviousSDKBaseProtocol {
 
     /// Called when the app returns from background with audio still active (no rejoin needed).
     func auviousSDK(didResumeFromBackground withActiveAudio: Bool)
+
+    /**
+     Our stream lost its connection and was published again under a new stream ID (the capture keeps
+     running). Use the new ID from now on, e.g. to mute or unpublish it.
+     */
+    func auviousSDK(didRepublishLocalStream oldStreamId: String, as newStreamId: String)
+
+    /**
+     A participant's stream lost its connection and is being rebuilt (`.reconnecting`), was given up
+     (`.failed`), or is fine again (nil).
+     - Parameter endpointId: The participant's endpoint, ours when `isLocal`
+     */
+    func auviousSDK(streamConnectionChanged state: StreamRecoveryState?, endpointId: String, isLocal: Bool)
 }
 
 public extension AuviousSDKConferenceDelegate {
     func auviousSDK(didResumeFromBackground withActiveAudio: Bool) {}
+    func auviousSDK(didRepublishLocalStream oldStreamId: String, as newStreamId: String) {}
+    func auviousSDK(streamConnectionChanged state: StreamRecoveryState?, endpointId: String, isLocal: Bool) {}
 }
 

@@ -1034,10 +1034,12 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         //Stream view is already created
         if let index = remoteParticipantIndex {
 
-            //Add new stream to this user's endpoint
+            //Add new stream to this user's endpoint (a stream viewed again after a lost connection is there already)
             let participantEndpoint = remoteViews[index].participantEndpoint
-            let participantStream = ParticipantEndpointStream(id: streamId, type: streamType)
-            participantEndpoint?.streams.append(participantStream)
+            if participantEndpoint?.streams.contains(where: { $0.id == streamId }) != true {
+                let participantStream = ParticipantEndpointStream(id: streamId, type: streamType)
+                participantEndpoint?.streams.append(participantStream)
+            }
             updateNoVideoPlaceholder(remoteViews[index])
 
             return index
@@ -1253,6 +1255,15 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     public func auviousSDK(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {
         DispatchQueue.main.async {
+            //The same shared screen viewed again after its connection was lost: only its video is new
+            if type == .screen, let shareView = self.shareScreenContainerView,
+               shareView.participantEndpoint?.streams.contains(where: { $0.id == streamId }) == true {
+                if let videoTrack = stream.videoTracks.first {
+                    shareView.videoStreamAdded(videoTrack, isScreen: true)
+                }
+                return
+            }
+
             if type == .screen {
                 
                 //Announce it
@@ -1573,6 +1584,25 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             self.toggleSharingBorder(mode: false)
             self.cobrowseSession?.screenSharingStopped()
             self.refreshArPointer()
+        }
+    }
+
+    public func auviousSDK(didRepublishLocalStream oldStreamId: String, as newStreamId: String) {
+        DispatchQueue.main.async {
+            if self.localStreamId == oldStreamId {
+                self.localStreamId = newStreamId
+            }
+        }
+    }
+
+    public func auviousSDK(streamConnectionChanged state: StreamRecoveryState?, endpointId: String, isLocal: Bool) {
+        DispatchQueue.main.async {
+            if isLocal {
+                self.localView.showsConnectionLabel = false
+                self.localView.connectionState = state
+            } else {
+                self.remoteViews.first { $0.participantEndpoint?.id == endpointId }?.connectionState = state
+            }
         }
     }
 

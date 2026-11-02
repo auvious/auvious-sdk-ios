@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import CoreMedia
 import SwiftyJSON
+import Network
 import os
 
 /// Receives the co-browse specific signalling that does not go through `AuviousSDKConferenceDelegate`.
@@ -152,6 +153,23 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     
     /// Our viewer id per stream Id
     private var viewerIdMap: [String: String] = [:]
+
+    /// Rebuilds the connection of a call stream that lost it, e.g. after a network drop
+    private lazy var streamRecovery = StreamRecoveryManager(
+        recover: { [weak self] streamId, isLocal in self?.recoverStream(streamId, isLocal: isLocal) },
+        stateChanged: { [weak self] endpointId, isLocal, state in
+            self?.delegate?.auviousSDK(streamConnectionChanged: state, endpointId: endpointId, isLocal: isLocal)
+        }
+    )
+
+    /// Tells MQTT and the stream recovery when the device has a network again
+    private var pathMonitor: NWPathMonitor?
+
+    /// Republished streams whose muted tracks must be marked muted again once the backend has them
+    private var republishedStreamsToMute: Set<String> = []
+
+    /// The conference is on hold, which disables our tracks without the user muting them
+    private var isConferenceOnHold = false
     
     /// Reference to the background task used for gracefully stopping streams
     private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
@@ -497,6 +515,11 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         rtcClient.screenFrameProcessor = screenFrameProcessor
         rtcClient.delegate = self
         rtcClient.initialisePeerConnectionFactory()
+
+        MQTTModule2.sharedInstance.onReconnected = { [weak self] in
+            DispatchQueue.main.async { self?.catchUpAfterReconnect() }
+        }
+        startNetworkMonitor()
     }
     
     /**
@@ -615,6 +638,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             sharingMyScreen = false
         }
         
+        streamRecovery.forget(streamId)
         delegate?.auviousSDK(didChangeState: .localStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:userEndpointId)
         
         if rtcClient.removePublishStreams(streamId: streamId) {
@@ -731,6 +755,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             throw AuviousSDKError.notInConference
         }
         
+        streamRecovery.forget(streamId)
         self.delegate?.auviousSDK(didChangeState: .remoteStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:remoteEndpointId)
         
         let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
@@ -853,6 +878,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 API2.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
                         
+                        self.isConferenceOnHold = false
                         self.currentConference = ConferenceSimpleView(fromJson: data)
                         os_log("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                         //Notify the user of successfully joining
@@ -915,6 +941,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
         sharingMyScreen = false
         stopBackgroundKeepAliveTimer()
+
+        streamRecovery.clear()
+        republishedStreamsToMute.removeAll()
+        isConferenceOnHold = false
 
         //Step 1 - Close all streams
         removeAllStreams()
@@ -1119,6 +1149,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         UserEndpointModule.sharedInstance.stopKeepAliveTimer()
         API2.sharedInstance.stopTokenRefreshTimer()
         MQTTModule2.sharedInstance.disconnect()
+        stopNetworkMonitor()
         self.currentConference = nil
     }
     
@@ -1327,11 +1358,11 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
 
     /// A conference version never arrived: fetches the conference state and delegates the messages we missed
     /// (participants who joined or left, streams published or unpublished), then the ones that were waiting
-    private func resyncConference() {
-        guard let conference = currentConference, !mqttMessages.isEmpty else {
+    private func resyncConference(force: Bool = false) {
+        guard let conference = currentConference, force || !mqttMessages.isEmpty else {
             return
         }
-        resyncAttempts += 1
+        resyncAttempts += force ? 0 : 1
         guard resyncAttempts <= maxResyncAttempts else {
             os_log("Dropping %d conference msgs still waiting after %d conference state fetches", log: Log.conferenceSDK, type: .error, mqttMessages.count, maxResyncAttempts)
             mqttMessages.removeAll()
@@ -1425,11 +1456,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         case .conferenceJoined, .conferenceLeft, .conferenceStreamPublished, .conferenceNetworkIndicatorEvent:
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceEnded:
+            streamRecovery.clear()
+            isConferenceOnHold = false
             removeAllStreams()
             emptyPeerConnections()
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceStreamUnpublished:
             let object = msg as! ConferenceStreamUnpublishedEvent
+            streamRecovery.forget(object.streamId)
             if (rtcClient.removeRemoteStreams(streamId: object.streamId)){
                 delegate?.auviousSDK(didReceiveConferenceEvent: msg)
             }
@@ -1445,6 +1479,8 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             //Conference on hold
             } else if object.isHold {
                 
+                isConferenceOnHold = !isEnabled
+
                 //Mute/unmute local audio and video
                 rtcClient.localVideoTrack?.isEnabled = isEnabled
                 rtcClient.localAudioTrack?.isEnabled = isEnabled
@@ -1527,10 +1563,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 let response = PublishStreamResponse(fromJson: data)
                 
                 self.rtcClient.handleAnswerReceivedPublish(withRemoteSDP: response.sdpAnswer, streamId: streamId)
+                DispatchQueue.main.async { self.restoreMutedTracks(ofRepublishedStream: streamId) }
             }
             
         }, onFailure: {(error) in
-            self.delegate?.auviousSDK(onError: AuviousSDKError.publishStreamFailure(fragment: .publishStreamRequest, output: error.localizedDescription))
+            DispatchQueue.main.async {
+                //A recovery attempt that failed is retried, not an error for the app
+                if self.streamRecovery.isRecovering(streamId) {
+                    self.streamRecovery.attemptFailed(streamId)
+                    return
+                }
+                self.delegate?.auviousSDK(onError: AuviousSDKError.publishStreamFailure(fragment: .publishStreamRequest, output: error.localizedDescription))
+            }
         })
     }
     
@@ -1558,7 +1602,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             }
             
         }, onFailure: {(error) in
-            self.delegate?.auviousSDK(onError: AuviousSDKError.remoteStreamFailure(fragment: .remoteStreamRequest, output: error.localizedDescription))
+            DispatchQueue.main.async {
+                if self.streamRecovery.isRecovering(streamId) {
+                    //No such stream any more: the remote side unpublished it while we were away
+                    if case AuviousSDKError.httpError(let code) = error, code == 404 {
+                        self.streamGone(streamId, conferenceId: conference.id)
+                    } else {
+                        self.streamRecovery.attemptFailed(streamId)
+                    }
+                    return
+                }
+                self.delegate?.auviousSDK(onError: AuviousSDKError.remoteStreamFailure(fragment: .remoteStreamRequest, output: error.localizedDescription))
+            }
         })
     }
     
@@ -1648,6 +1703,115 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
 
     internal func rtcClient(didFailToStartScreenSharing: Bool) {
         sharingMyScreen = false
+    }
+
+    internal func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String) {
+        DispatchQueue.main.async {
+            self.streamRecovery.iceStateChanged(streamId: streamId, isLocal: isLocal, endpointId: endpointId, state: state)
+        }
+    }
+
+    /**
+     Rebuilds the connection of a call stream that lost it: republishes our stream under a new stream ID over
+     the capture that keeps running (so the other side sees a new stream and subscribes to it), or views a
+     remote stream again. Returns the stream ID the new connection carries, nil if there is nothing to recover.
+     */
+    private func recoverStream(_ streamId: String, isLocal: Bool) -> String? {
+        guard let conference = currentConference, let userId = currentUserId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            return nil
+        }
+        guard let container = rtcClient.peerConnections.first(where: { $0.streamId == streamId && $0.isLocal == isLocal }),
+              let streamType = container.streamType else {
+            return nil
+        }
+        os_log("Recovering %{public}@ stream %{public}@ (%{public}@)", log: Log.conferenceSDK, type: .default,
+               isLocal ? "published" : "subscribed", streamId, streamType.rawValue)
+
+        if isLocal {
+            //Tell the backend, which may still list the lost stream
+            let request = UnpublishStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: endpointId, userId: userId)
+            API2.sharedInstance.unpublishStream(request, onSuccess: { _ in }, onFailure: { error in
+                os_log("Unpublishing the lost stream %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+            })
+
+            let newStreamId = UUID().uuidString
+            guard rtcClient.republishLocalStream(replacing: streamId, with: newStreamId) else {
+                return nil
+            }
+            //The new stream starts unmuted for viewers: mark what the user muted once it is published
+            let videoMuted = rtcClient.localVideoTrack.map { !$0.isEnabled } ?? false
+            let audioMuted = rtcClient.localAudioTrack.map { !$0.isEnabled } ?? false
+            if !isConferenceOnHold && (videoMuted || audioMuted) {
+                republishedStreamsToMute.insert(newStreamId)
+            }
+            delegate?.auviousSDK(didRepublishLocalStream: streamId, as: newStreamId)
+            return newStreamId
+        }
+
+        guard let remoteEndpointId = container.endpointId, let remoteUserId = container.userId else {
+            return nil
+        }
+        let request = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
+        API2.sharedInstance.stopViewStream(request, onSuccess: { _ in }, onFailure: { error in
+            os_log("Stopping the lost view of %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+        })
+        _ = rtcClient.removeRemoteStreams(streamId: streamId)
+        rtcClient.configureRemoteStream(type: streamType, streamId: streamId, endpointId: remoteEndpointId, userId: remoteUserId)
+        return streamId
+    }
+
+    /// A remote stream we were recovering no longer exists: unpublishes it as the backend would have told us,
+    /// so the app removes its view (the unpublished message, live or missed, finds no stream to remove after this)
+    private func streamGone(_ streamId: String, conferenceId: String) {
+        guard let container = rtcClient.peerConnections.first(where: { $0.streamId == streamId && !$0.isLocal }),
+              let type = container.streamType, let endpointId = container.endpointId, let userId = container.userId else {
+            streamRecovery.forget(streamId)
+            _ = rtcClient.removeRemoteStreams(streamId: streamId)
+            return
+        }
+        let json: [String: Any] = ["type": ConferenceEventType.conferenceStreamUnpublished.rawValue, "conferenceId": conferenceId,
+                                   "userId": userId, "userEndpointId": endpointId, "streamId": streamId, "streamType": type.rawValue]
+        delegateConferenceMessage(msg: ConferenceStreamUnpublishedEvent(fromJson: JSON(json)))
+    }
+
+    private func restoreMutedTracks(ofRepublishedStream streamId: String) {
+        guard republishedStreamsToMute.remove(streamId) != nil, let conference = currentConference else { return }
+        if rtcClient.localVideoTrack?.isEnabled == false {
+            toggleLocalStream(conferenceId: conference.id, streamId: streamId, operation: .set, type: .video, onSuccess: {}, onFailure: { _ in })
+        }
+        if rtcClient.localAudioTrack?.isEnabled == false {
+            toggleLocalStream(conferenceId: conference.id, streamId: streamId, operation: .set, type: .audio, onSuccess: {}, onFailure: { _ in })
+        }
+    }
+
+    /// MQTT is back after a drop: catch up with the conference messages we missed meanwhile
+    private func catchUpAfterReconnect() {
+        guard currentConference != nil else { return }
+        os_log("MQTT reconnected, fetching the conference state", log: Log.conferenceSDK, type: .default)
+        resyncConference(force: true)
+    }
+
+    private func startNetworkMonitor() {
+        guard pathMonitor == nil else { return }
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                let available = path.status == .satisfied
+                self?.streamRecovery.setNetworkAvailable(available)
+                if available {
+                    MQTTModule2.sharedInstance.reconnect()
+                }
+            }
+        }
+        monitor.start(queue: DispatchQueue(label: "AuviousSDK.network"))
+        pathMonitor = monitor
+    }
+
+    /// Started again on the next login
+    private func stopNetworkMonitor() {
+        pathMonitor?.cancel()
+        pathMonitor = nil
     }
 
     internal func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {

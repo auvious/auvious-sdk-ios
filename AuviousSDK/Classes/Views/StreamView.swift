@@ -55,6 +55,75 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
         }
     }
 
+    /// Shows that the video's connection dropped: a spinner while it reconnects, a warning once it was given up
+    /// (like the web call's "Unstable network" tile badge). Nil hides it.
+    var connectionState: StreamRecoveryState? {
+        didSet {
+            updateConnectionBadge()
+        }
+    }
+
+    /// Leaves the text out of the connection badge, for the small local preview
+    var showsConnectionLabel = true {
+        didSet {
+            updateConnectionBadge()
+        }
+    }
+
+    private var connectionBadge: UIStackView?
+    private let connectionSpinner = UIActivityIndicatorView(style: .medium)
+    private let connectionWarning = UIImageView(image: UIImage(systemName: "exclamationmark.circle.fill"))
+    private let connectionLabel = UILabel()
+
+    private func updateConnectionBadge() {
+        guard let state = connectionState else {
+            connectionSpinner.stopAnimating()
+            connectionBadge?.isHidden = true
+            return
+        }
+        let badge = connectionBadge ?? createConnectionBadge()
+        let lost = state == .failed
+        connectionSpinner.isHidden = lost
+        lost ? connectionSpinner.stopAnimating() : connectionSpinner.startAnimating()
+        connectionWarning.isHidden = !lost
+        connectionLabel.text = lost
+            ? NSLocalizedString("Connection lost", comment: "Video tile badge")
+            : NSLocalizedString("Reconnecting…", comment: "Video tile badge")
+        connectionLabel.isHidden = !showsConnectionLabel
+        badge.accessibilityLabel = connectionLabel.text
+        badge.isHidden = false
+        bringSubviewToFront(badge)
+    }
+
+    private func createConnectionBadge() -> UIStackView {
+        connectionSpinner.color = .white
+        connectionSpinner.hidesWhenStopped = false
+        connectionWarning.tintColor = .systemRed
+        connectionWarning.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        connectionLabel.textColor = .white
+        connectionLabel.font = .systemFont(ofSize: 13, weight: .medium)
+
+        let badge = UIStackView(arrangedSubviews: [connectionSpinner, connectionWarning, connectionLabel])
+        badge.axis = .horizontal
+        badge.spacing = 8
+        badge.alignment = .center
+        badge.isLayoutMarginsRelativeArrangement = true
+        badge.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
+        badge.backgroundColor = UIColor(white: 0.02, alpha: 0.5)
+        badge.layer.cornerRadius = 15
+        badge.isAccessibilityElement = true
+        badge.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(badge)
+        NSLayoutConstraint.activate([
+            badge.heightAnchor.constraint(equalToConstant: 30),
+            badge.centerXAnchor.constraint(equalTo: centerXAnchor),
+            badge.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 8),
+            badge.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -16)
+        ])
+        connectionBadge = badge
+        return badge
+    }
+
     //Shown from the moment a video track is attached until its first frame is rendered,
     //so the view never sits there empty
     private let loadingIndicator = UIActivityIndicatorView(style: .medium)

@@ -47,6 +47,9 @@
 		EA0CA162C92FE8D5ADBF0809 /* CobrowseTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75884F0AD5C5C294541F6D29 /* CobrowseTheme.swift */; };
 		F5B53D00312460A17825579A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C15FB9DB94C5B9B6A453FC /* Foundation.framework */; };
 		F7F8437083B222A6F9F368A4 /* MaskRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF79DD805B19157BCD3217E /* MaskRegistry.swift */; };
+		1648304B75CBA3B8D02A517C /* StreamRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA60B748EDDE1748D4D7B096 /* StreamRecoveryManager.swift */; };
+		4ED40208D635FBC46FAADCA5 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479A9E373FB518776B780292 /* Log.swift */; };
+		92915E310C8DBBE712243674 /* StreamRecoveryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA07611EE887CB14C2D4109 /* StreamRecoveryManagerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,6 +103,9 @@
 		F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AuviousBannerView.swift; path = Views/AuviousBannerView.swift; sourceTree = "<group>"; };
 		F88C22D9A297827E82238A8E /* Pods_ExampleSimpleConference.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleSimpleConference.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8CD4D2F47C03670A4463825 /* PaperCodecTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaperCodecTests.swift; sourceTree = "<group>"; };
+		AA60B748EDDE1748D4D7B096 /* StreamRecoveryManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StreamRecoveryManager.swift; path = Modules/StreamRecoveryManager.swift; sourceTree = "<group>"; };
+		479A9E373FB518776B780292 /* Log.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Log.swift; path = Other/Log.swift; sourceTree = "<group>"; };
+		1AA07611EE887CB14C2D4109 /* StreamRecoveryManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamRecoveryManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +165,7 @@
 				B0F6A2B8580F6867F3CEFE80 /* MaskHistoryTests.swift */,
 				5C7DF444499948F97189E0A3 /* PixelBufferCopierTests.swift */,
 				CE4810D27A5B781E649380CF /* ArPointerLayoutTests.swift */,
+				1AA07611EE887CB14C2D4109 /* StreamRecoveryManagerTests.swift */,
 			);
 			path = AuviousSDKLogicTests;
 			sourceTree = "<group>";
@@ -187,6 +194,8 @@
 				F4938EF5D60F6348A4C376E8 /* AuviousBannerView.swift */,
 				56AFFB4697117E2765C01B1E /* AnnotationSurfaceView.swift */,
 				198F882FC6217CE150DDFEF8 /* ConferenceGridLayout.swift */,
+				479A9E373FB518776B780292 /* Log.swift */,
+				AA60B748EDDE1748D4D7B096 /* StreamRecoveryManager.swift */,
 			);
 			name = "SDK sources";
 			path = ../../AuviousSDK/Classes;
@@ -443,6 +452,9 @@
 				98F50735476530FA446337E4 /* AnnotationSurfaceView.swift in Sources */,
 				A873D4FF5C6E27F0CD425ACD /* ConferenceGridLayout.swift in Sources */,
 				D3C96495EC980BE9A61B5547 /* ArPointerLayoutTests.swift in Sources */,
+				92915E310C8DBBE712243674 /* StreamRecoveryManagerTests.swift in Sources */,
+				4ED40208D635FBC46FAADCA5 /* Log.swift in Sources */,
+				1648304B75CBA3B8D02A517C /* StreamRecoveryManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
