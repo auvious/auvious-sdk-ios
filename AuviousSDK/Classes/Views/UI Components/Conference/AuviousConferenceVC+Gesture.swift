@@ -15,6 +15,8 @@ extension AuviousConferenceVCNew {
         tapGesture?.isEnabled = enabled
         doubleTapGesture?.isEnabled = enabled
         panGesture?.isEnabled = enabled
+        //Tapping a remote video switches it between fit and fill, only in full screen (in PiP taps resize the PiP)
+        remoteViews.forEach { $0.togglesFitOnTap = mode == .fullScreen }
     }
     
     //Draggable pip view
@@ -39,8 +41,12 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func handlePiPDoubleTap(_ gesture: UITapGestureRecognizer) {
-        guard let pipView = gesture.view else { return }
-        guard let container = pipView.superview else { return }
+        expandToFullScreen()
+    }
+
+    /// Grows the PiP back to the full screen call
+    func expandToFullScreen() {
+        guard let pipView = self.view, let container = pipView.superview else { return }
 
         //Remove sharing border
         view.layer.borderWidth = 0
@@ -50,6 +56,7 @@ extension AuviousConferenceVCNew {
         _screenMode = .fullScreen
         updateGestureState(for: .fullScreen)
         createConstraints(animated: false)
+        refreshCobrowseChrome()
 
         //Animate frame expansion and constraint layout together
         UIView.animate(withDuration: 0.3) {
@@ -145,7 +152,12 @@ extension AuviousConferenceVCNew {
         }
         
         let safeTop = (container.window?.safeAreaInsets.top ?? container.safeAreaInsets.top)
-        let topY = safeTop + margin + viewSize.height / 2
+        var topY = safeTop + margin + viewSize.height / 2
+
+        if let limits = cobrowsePiPLimits(viewSize: viewSize, in: container) {
+            topY = max(topY, limits.minY)
+            bottomY = min(bottomY, limits.maxY)
+        }
         
         print("safeTop: \(safeTop), topY: \(topY)")
         
@@ -178,7 +190,12 @@ extension AuviousConferenceVCNew {
         }
 
         let safeTop = container.safeAreaInsets.top
-        let topY = safeTop + viewSize.height / 2
+        var topY = safeTop + viewSize.height / 2
+
+        if let limits = cobrowsePiPLimits(viewSize: viewSize, in: container) {
+            topY = max(topY, limits.minY)
+            bottomY = min(bottomY, limits.maxY)
+        }
         
         // All four snap points
         let cornerCenters: [(Corner, CGPoint)] = [
@@ -199,6 +216,17 @@ extension AuviousConferenceVCNew {
         UIView.animate(withDuration: 0.3) {
             pipView.center = targetCenter
         }
+    }
+
+    /// While co-browsing, the PiP's center stays between the status pill at the top and the dock at the bottom
+    private func cobrowsePiPLimits(viewSize: CGSize, in container: UIView) -> (minY: CGFloat, maxY: CGFloat)? {
+        guard cobrowseSession != nil else { return nil }
+
+        let insets = container.window?.safeAreaInsets ?? container.safeAreaInsets
+        let spacing: CGFloat = 12
+        let pillBottom = insets.top + CobrowseTheme.pillTop + CobrowseTheme.pillHeight
+        let dockTop = container.bounds.height - max(insets.bottom, CobrowseTheme.dockMargin) - CobrowseTheme.dockMargin - CobrowseTheme.dockHeight
+        return (pillBottom + spacing + viewSize.height / 2, dockTop - spacing - viewSize.height / 2)
     }
 
     private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {

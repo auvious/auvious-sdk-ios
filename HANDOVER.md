@@ -48,15 +48,14 @@ committed.
 
 1. **Test on a device** (simulators have no camera).
 2. **MR** `m155-webrtc` → `master` (!16). For its description:
-   - ExampleCall, ExampleSimpleCall and ExampleConference don't build (Podfile targets commented
-     out since 2026-03); they need Podfile targets, API fixes, the scene life cycle and CI.
-     ExampleSimpleCall is the only small 1:1 call example, worth porting if calls are still offered.
+   - The 1:1 call SDK (`AuviousCallSDK`, `AuviousCallVC`, snapshots) and the stale examples
+     ExampleCall, ExampleSimpleCall and ExampleConference were removed: conferences only.
    - Mute/hold behave as before (`track.isEnabled = false` sends silence/black frames).
    Open decision to mention: really stopping the send on mute/hold (`sender.track = nil` /
    `replaceTrack`), which would save bandwidth but changes behaviour.
-3. **Publish** as the README's "Publish version" section says (tag, push to the public GitHub
-   repo, `pod repo push`). Needs push rights on github.com/auvious/auvious-sdk-ios and
-   CocoaPodSpecs (ask who published 1.4.0).
+3. **Publish:** tag the version on GitLab, then start the manual job `publish` in the tag's pipeline
+   (README, "Publish version"). Before it can run: `GITHUB_TOKEN` in this project (Contents write
+   access to github.com/auvious/auvious-sdk-ios and CocoaPodSpecs), and version tags protected.
 
 ## Swift Package Manager (not started)
 
@@ -74,7 +73,7 @@ What it takes, from the code:
 | WebRTC | `.binaryTarget(url:checksum:)` to the Nexus zip. The checksum is the sha256 google-webrtc's CI prints. Same file CocoaPods uses. |
 | MQTT / websocket | The `_IOS13` forks (jkritikos) only rename modules and raise the minimum iOS; under SPM use upstream `emqx/CocoaMQTT` (products CocoaMQTT, CocoaMQTTWebSocket; brings Starscream and MqttCocoaAsyncSocket). Only `MQTTModule2.swift` imports it. |
 | `import WebRTC` | The SDK's header `AuviousSDK/Classes/AuviousSDK.h` imports the WebRTC headers, so under CocoaPods every Swift file sees them. SPM has no such header: 12 files need `import WebRTC` (all users of RTC* types except `ScreenCapturer.swift`). Apps need it too, because public API takes RTC types (`AuviousSDKBaseProtocol`, `StreamViewNew`): use `@_exported import WebRTC` in one file. |
-| Resources | 4 xibs, `Assets.xcassets` (at the repo root, outside the target: move it) and 3 pngs, found in ~12 places with `Bundle(for:)` and the names `AuviousSDKAssets.bundle` / `AuviousSDK.bundle`. Write one helper that returns the CocoaPods bundle, or `Bundle.module` under SPM. The main work, about half a day. `AuviousCallVC.swift:139` force-unwraps `AuviousSDK.bundle`, which the podspec's `s.resources` doesn't create: the call UI likely crashes there today; the helper fixes it. |
+| Resources | 3 xibs, `Assets.xcassets` (at the repo root, outside the target: move it) and 3 pngs, found in ~9 places with `Bundle(for:)` and the name `AuviousSDKAssets.bundle`. Write one helper that returns the CocoaPods bundle, or `Bundle.module` under SPM. The main work, about half a day. |
 | SDK version in User-Agent | Read from the SDK bundle's Info.plist (`Utilities.swift`), which SPM doesn't have: use a constant. |
 | `Package.swift` | New, at the repo root. The podspec's `AUVIOUSSDK` flag is used by no source file, and its `exclude_files` paths match nothing: neither needs carrying over. CI: add an SPM build (`xcodebuild -scheme AuviousSDK -destination 'generic/platform=iOS Simulator'`) next to the pod jobs. |
 

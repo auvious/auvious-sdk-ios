@@ -1,6 +1,6 @@
 # On the macOS runner: builds the example app ExampleSimpleConference (and with it
 # AuviousSDK) for the iOS simulator, and runs the SDK's XCTests (Tests/) on a simulator.
-# No signing, nothing published.
+# No signing. On a version tag, the manual job publish releases that version (README, "Publish version").
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -77,3 +77,23 @@ test-sdk:
     paths:
       - build/test.log
       - build/Tests.xcresult
+
+# Manual, on protected version tags (1.5.0, 1.5.0-beta.0, 1.5.0-rc.1) once both jobs above passed:
+# ci/publish.sh pushes the tag to github.com/auvious/auvious-sdk-ios, then the podspec to
+# github.com/auvious/CocoaPodSpecs. Needs GITHUB_TOKEN (masked, protected): Contents write access
+# to both repos. Protected refs only, since the Mac's shell runner keeps state between jobs.
+publish:
+  stage: deploy
+  tags: [macos]
+  resource_group: macos-sdk-ios
+  timeout: 1h
+  needs: [build-example, test-sdk]
+  variables:
+    GIT_DEPTH: "0"
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED != "true"
+      when: never
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+(-(beta|rc)\.\d+)?$/
+      when: manual
+  script:
+    - caffeinate -is bash ci/publish.sh

@@ -8,6 +8,16 @@
 
 import Foundation
 
+/// Determines how this endpoint presents itself to the other participants when joining a conference.
+internal enum JoinProfile {
+
+    /// Regular audio/video call participant
+    case stream
+
+    /// Co-browse customer sharing their app screen (agent side treats it as a display-capture participant)
+    case displayCapture(originUrl: String, customerMetadata: [String: Any]?)
+}
+
 internal final class JoinConferenceRequest {
     
     var conferenceId: String!
@@ -40,15 +50,22 @@ internal final class JoinConferenceRequest {
         //Metadata
         var metaDataDictionary = [String:Any]()
         metaDataDictionary["roles"] = ["CUSTOMER"]
-        
-        if AuviousConferenceSDK.sharedInstance.uiConfiguration.screenSharingAvailable {
-            metaDataDictionary["capabilities"] = ["display-capture"]
-        } else {
-            metaDataDictionary["capabilities"] = []
+
+        switch AuviousConferenceSDK.sharedInstance.joinProfile {
+        case .stream:
+            metaDataDictionary["capabilities"] = JoinConferenceRequest.streamCapabilities(AuviousConferenceSDK.sharedInstance.uiConfiguration)
+            metaDataDictionary["type"] = "stream"
+
+        case .displayCapture(let originUrl, let customerMetadata):
+            //"co-browse" is deliberately not advertised, it would offer the web-only DOM co-browse to the agent.
+            //No "ar-pointer" either: the agent can't point at a co-browse screen, only sketch on it.
+            metaDataDictionary["capabilities"] = JoinConferenceRequest.displayCaptureCapabilities
+            metaDataDictionary["type"] = "displayCapture"
+            metaDataDictionary["originUrl"] = originUrl
+            metaDataDictionary["customerMetadata"] = customerMetadata ?? NSNull()
         }
-        
+
         metaDataDictionary["language"] = Utilities.getApplicationLanguage()
-        metaDataDictionary["type"] = "stream"
         metaDataDictionary["mediaDevices"] = Utilities.getMediaDevices()
         
         if let participantName = participantName {
@@ -61,7 +78,31 @@ internal final class JoinConferenceRequest {
         metaDataDictionary["deviceInfo"] = Utilities.getDeviceInfo()
         
         dictionary["metadata"] = metaDataDictionary
-        
+
         return dictionary
+    }
+
+    //MARK: Capabilities
+
+    static let displayCaptureCapabilities = ["display-capture", "sketch"]
+
+    /// What a call participant offers the agent. "sketch" means we render and draw sketches on what we share.
+    static func streamCapabilities(_ configuration: AuviousConferenceConfiguration) -> [String] {
+        var capabilities: [String] = []
+        if configuration.screenSharingAvailable || configuration.cobrowseAvailable {
+            capabilities.append("display-capture")
+        }
+        //Points and sketch on our camera and on a regular screen share
+        if configuration.arPointerAvailable {
+            capabilities.append("ar-pointer")
+        }
+        //In-call co-browse: the agent asks this endpoint to share its screen (no ticket, no second endpoint)
+        if configuration.cobrowseAvailable {
+            capabilities.append("native-co-browse")
+        }
+        if configuration.arPointerAvailable || configuration.cobrowseAvailable {
+            capabilities.append("sketch")
+        }
+        return capabilities
     }
 }

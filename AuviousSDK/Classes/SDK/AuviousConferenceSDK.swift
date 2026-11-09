@@ -8,13 +8,71 @@
 
 import Foundation
 import UIKit
+import CoreMedia
+import SwiftyJSON
+import Network
 import os
 
-public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, UserEndpointDelegate {
-    
+/// Receives the co-browse specific signalling that does not go through `AuviousSDKConferenceDelegate`.
+internal protocol CobrowseSignallingDelegate: AnyObject {
+
+    /// A non-versioned user event (co-browse request/terminate, sketch, laser pointer)
+    func cobrowseUserEventReceived(_ type: RtcUserEventType, json: JSON)
+
+    /// A SKETCH / AR_POINTER / AR_POINTER_COLORS conference metadata change from another participant
+    func cobrowseMetadataChanged(_ event: ConferenceMetadataUpdatedEvent)
+}
+
+/// Receives the AR pointer and sketch signalling of a regular call (camera and screen share annotations).
+internal protocol AnnotationSignallingDelegate: AnyObject {
+
+    /// A sketch or AR pointer user event
+    func annotationUserEventReceived(_ type: RtcUserEventType, json: JSON)
+
+    /// A SKETCH / AR_POINTER / AR_POINTER_COLORS conference metadata change from another participant
+    func annotationMetadataChanged(_ event: ConferenceMetadataUpdatedEvent)
+}
+
+/// Another endpoint in the current conference, as far as AR pointer events need to know it
+internal struct RemoteParticipant {
+    let userId: String
+    let endpointId: String
+
+    /// stream id -> the publisher's correlation id
+    var correlationIds: [String: String] = [:]
+}
+
+public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDelegate, RTCDelegate, UserEndpointDelegate {
+
     /// Singleton instance
     public static let sharedInstance = AuviousConferenceSDK()
-    
+
+    /// How this endpoint presents itself when joining a conference
+    internal var joinProfile: JoinProfile = .stream
+
+    /// Co-browse signalling sink, set while a co-browse session is active
+    internal weak var cobrowseDelegate: CobrowseSignallingDelegate?
+
+    /// AR pointer / sketch signalling sink of the call screen. Gets the annotation events alongside `cobrowseDelegate`;
+    /// each sketch session filters by its own sketch and target, so double delivery is safe.
+    internal weak var annotationDelegate: AnnotationSignallingDelegate?
+
+    /// The other endpoints of the current conference, by endpoint id
+    internal private(set) var remoteParticipants: [String: RemoteParticipant] = [:]
+
+    /// When true, the co-browse session manages app lifecycle itself and the public pause/resume calls are ignored
+    internal var isCobrowseActive: Bool = false
+
+    /// Marks the published screen stream as an in-call co-browse (stream metadata "cobrowse"), so the agent shows it in the co-browse view
+    internal var screenStreamIsCobrowse: Bool = false
+
+    /// Per-frame hook for the screen share capture (co-browse masking). Returns the buffer to send, or nil to drop the frame.
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)? {
+        didSet {
+            rtcClient?.screenFrameProcessor = screenFrameProcessor
+        }
+    }
+
     /// The username property, used for logging in
     internal var username: String?
     
@@ -50,30 +108,39 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     /// This delegate informs of all conference related stream state changes and errors
     public var delegate: AuviousSDKConferenceDelegate?
     
-    /// List of MQTT messages
+    /// MQTT messages waiting to be processed: the ones after a conference version we have not received yet
     private var mqttMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
-    /// List of MQTT messages flagged for delayed processing
-    private var mqttDelayedMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
+
     /// List of MQTT messages cached for future processing
     private var mqttCachedMessages: [ConferenceEvent] = [ConferenceEvent]()
-    
-    /// Configuration setting for the interval between the processing of delayed messages
-    private let delayedMessageWaitTime: Double = 0.7
-    
+
+    /// How long to wait for a missing conference version before fetching the conference state
+    private let missingMessageWaitTime: Double = 1.5
+
     /// Indicates whether processing of MQTT messages is taking place
     private var isProcessingMessages: Bool = false
-    
-    /// Number of times to try processing an MQTT message flagged for delayed processing
-    private let maxDelayedProcessingAttempts: Int = 3
-    
+
+    /// Fetches the conference state when a conference version is still missing after missingMessageWaitTime
+    private var resyncWorkItem: DispatchWorkItem?
+
+    /// Conference state fetches in a row that left messages still waiting
+    private var resyncAttempts: Int = 0
+
+    /// Conference state fetches in a row after which the waiting messages are dropped
+    private let maxResyncAttempts: Int = 3
+
     /// The currently joined conference, if any
     private var currentConference: ConferenceSimpleView? {
         didSet {
             if currentConference != nil {
                 lastConferenceJoined = currentConference?.id
             }
+            //Messages waiting for another conference's versions would never be processed
+            if currentConference?.id != oldValue?.id {
+                mqttMessages.removeAll()
+                cancelResync()
+            }
+            rebuildRemoteParticipants()
         }
     }
     
@@ -86,6 +153,23 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     
     /// Our viewer id per stream Id
     private var viewerIdMap: [String: String] = [:]
+
+    /// Rebuilds the connection of a call stream that lost it, e.g. after a network drop
+    private lazy var streamRecovery = StreamRecoveryManager(
+        recover: { [weak self] streamId, isLocal in self?.recoverStream(streamId, isLocal: isLocal) },
+        stateChanged: { [weak self] endpointId, isLocal, state in
+            self?.delegate?.auviousSDK(streamConnectionChanged: state, endpointId: endpointId, isLocal: isLocal)
+        }
+    )
+
+    /// Tells MQTT and the stream recovery when the device has a network again
+    private var pathMonitor: NWPathMonitor?
+
+    /// Republished streams whose muted tracks must be marked muted again once the backend has them
+    private var republishedStreamsToMute: Set<String> = []
+
+    /// The conference is on hold, which disables our tracks without the user muting them
+    private var isConferenceOnHold = false
     
     /// Reference to the background task used for gracefully stopping streams
     private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
@@ -181,6 +265,9 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      disconnect from remote streams.
      */
     public func onApplicationPause(){
+        //Co-browse sessions observe the app lifecycle themselves
+        guard !isCobrowseActive else { return }
+        
         didPauseForBackground = true
 
         // App is entering real background — cancel the screenshot fallback timer so it doesn't
@@ -203,31 +290,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 API2.sharedInstance.updateConferenceMetadata(request, onSuccess: { _ in }, onFailure: { _ in })
             }
 
-            // Stop screen sharing if active — ReplayKit capture cannot continue in background
-            if sharingMyScreen, let conference = currentConference,
-               let loginResponse = AuthenticationModule.sharedInstance.loginResponse,
-               let userId = loginResponse.userId,
-               let endpointId = UserEndpointModule.sharedInstance.userEndpointId {
-
-                // Find the screen share stream before tearing it down
-                let screenStreamId = rtcClient.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
-
-                rtcClient.stopScreenSharing()
-                sharingMyScreen = false
-
-                if let streamId = screenStreamId {
-                    _ = rtcClient.removePublishStreams(streamId: streamId)
-                    let usRequest = UnpublishStreamRequest(
-                        conferenceId: conference.id,
-                        streamId: streamId,
-                        userEndpointId: endpointId,
-                        userId: userId
-                    )
-                    API2.sharedInstance.unpublishStream(usRequest, onSuccess: { _ in }, onFailure: { _ in })
-                }
-
-                delegate?.auviousSDK(screenSharingStopped: true)
-            }
+            stopScreenShareForBackground()
 
             // Switch from RunLoop timer (won't fire in background) to GCD timer
             UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
@@ -261,6 +324,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             self?.endBackgroundTask()
         }
 
+        // A regular screen share ends with the call, before leaving. Left running, sharingMyScreen would
+        // stay set and onApplicationResume() would skip the rejoin, leaving the call without media.
+        // An in-call co-browse stops and resumes its own share (CobrowseSessionController).
+        if !screenStreamIsCobrowse {
+            stopScreenShareForBackground()
+        }
+
         //Pause the keepAlive timer
         UserEndpointModule.sharedInstance.keepAliveTimer?.invalidate()
 
@@ -277,11 +347,43 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         }
     }
     
+    /// Stops a regular screen share when the app leaves the foreground (switching to another app):
+    /// in-app ReplayKit capture only records this app, so it can't continue in background.
+    private func stopScreenShareForBackground() {
+        guard sharingMyScreen, let rtcClient = rtcClient else { return }
+
+        // Find the screen share stream before tearing it down
+        let screenStreamId = rtcClient.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
+
+        rtcClient.stopScreenSharing()
+        sharingMyScreen = false
+
+        if let streamId = screenStreamId,
+           let conference = currentConference,
+           let userId = AuthenticationModule.sharedInstance.loginResponse?.userId,
+           let endpointId = UserEndpointModule.sharedInstance.userEndpointId {
+            _ = rtcClient.removePublishStreams(streamId: streamId)
+            let usRequest = UnpublishStreamRequest(
+                conferenceId: conference.id,
+                streamId: streamId,
+                userEndpointId: endpointId,
+                userId: userId
+            )
+            API2.sharedInstance.unpublishStream(usRequest, onSuccess: { _ in }, onFailure: { _ in })
+        }
+
+        //stopScreenSharing() already told the delegate (screenSharingStopped)
+        os_log("Screen share stopped, the app left the foreground", log: Log.conferenceSDK, type: .debug)
+    }
+
     /**
      Should be called when the application is foregrounded in order to automatically
      rejoin the conference and reconnect to remote streams.
      */
     public func onApplicationResume(){
+        //Co-browse sessions observe the app lifecycle themselves
+        guard !isCobrowseActive else { return }
+        
         // Background audio path: connections are still alive, just resume video
         if isBackgroundAudioActive {
             os_log("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
@@ -410,8 +512,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         rtcClient.iceServers = ServerConfiguration.iceServers
         
         rtcClient.publishVideoResolution = publishVideoResolution
+        rtcClient.screenFrameProcessor = screenFrameProcessor
         rtcClient.delegate = self
         rtcClient.initialisePeerConnectionFactory()
+
+        MQTTModule2.sharedInstance.onReconnected = { [weak self] in
+            DispatchQueue.main.async { self?.catchUpAfterReconnect() }
+        }
+        startNetworkMonitor()
     }
     
     /**
@@ -530,6 +638,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             sharingMyScreen = false
         }
         
+        streamRecovery.forget(streamId)
         delegate?.auviousSDK(didChangeState: .localStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:userEndpointId)
         
         if rtcClient.removePublishStreams(streamId: streamId) {
@@ -646,6 +755,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             throw AuviousSDKError.notInConference
         }
         
+        streamRecovery.forget(streamId)
         self.delegate?.auviousSDK(didChangeState: .remoteStreamIsDisconnecting, streamId: streamId, streamType: streamType, endpointId:remoteEndpointId)
         
         let svsRequest = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
@@ -768,6 +878,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 API2.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
                         
+                        self.isConferenceOnHold = false
                         self.currentConference = ConferenceSimpleView(fromJson: data)
                         os_log("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                         //Notify the user of successfully joining
@@ -807,7 +918,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
      - Parameter onSuccess: Called after successfully leaving the conference
      - Parameter onFailure: Called in case of failure with the designated Error
      */
-    public func leaveConference(conferenceId: String, onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
+    public func leaveConference(conferenceId: String, reason: String = "", onSuccess: @escaping ()->(), onFailure: @escaping (Error)->()) {
         guard let loginResponse = AuthenticationModule.sharedInstance.loginResponse, let userId = loginResponse.userId else {
             onFailure(AuviousSDKError.notLoggedIn)
             return
@@ -831,6 +942,10 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         sharingMyScreen = false
         stopBackgroundKeepAliveTimer()
 
+        streamRecovery.clear()
+        republishedStreamsToMute.removeAll()
+        isConferenceOnHold = false
+
         //Step 1 - Close all streams
         removeAllStreams()
 
@@ -850,7 +965,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         self.currentConference = nil
 
         //Step 5 - Leave conference
-        let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: "", userEndpointId: endpointId, userId: userId)
+        let lcRequest = LeaveConferenceRequest(conferenceId: conferenceId, reason: reason, userEndpointId: endpointId, userId: userId)
         API2.sharedInstance.leaveConference(lcRequest, onSuccess: {(json) in
             if let _ = json {
                 onSuccess()
@@ -944,6 +1059,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 
                 MQTTModule2.sharedInstance.configure(endpointId: endpoint)
                 MQTTModule2.sharedInstance.conferenceDelegate = self
+                MQTTModule2.sharedInstance.userEventDelegate = self
                 MQTTModule2.sharedInstance.connect(onSubscription: {
                     onLoginSuccess(endpointId, conferenceId)
                     //We no longer want the closure to be called
@@ -1033,6 +1149,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         UserEndpointModule.sharedInstance.stopKeepAliveTimer()
         API2.sharedInstance.stopTokenRefreshTimer()
         MQTTModule2.sharedInstance.disconnect()
+        stopNetworkMonitor()
         self.currentConference = nil
     }
     
@@ -1113,6 +1230,59 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
     //MARK: MQTT Client Delegate
     //MARK: -
     
+    internal func userEventReceived(_ type: RtcUserEventType, json: JSON) {
+        cobrowseDelegate?.cobrowseUserEventReceived(type, json: json)
+        if type.isAnnotation {
+            annotationDelegate?.annotationUserEventReceived(type, json: json)
+        }
+    }
+
+    //MARK: Participants
+
+    private func rebuildRemoteParticipants() {
+        var participants: [String: RemoteParticipant] = [:]
+        let me = UserEndpointModule.sharedInstance.userEndpointId
+        for participant in currentConference?.participants ?? [] {
+            guard let userId = participant.id else { continue }
+            for endpoint in participant.endpoints ?? [] where endpoint.id != nil && endpoint.id != me {
+                var remote = RemoteParticipant(userId: userId, endpointId: endpoint.id)
+                for stream in endpoint.streams ?? [] {
+                    remote.correlationIds[stream.id] = stream.correlationId ?? stream.id
+                }
+                participants[endpoint.id] = remote
+            }
+        }
+        remoteParticipants = participants
+    }
+
+    private func updateRemoteParticipants(_ msg: ConferenceEvent) {
+        guard let endpointId = msg.userEndpointId, let userId = msg.userId, let type = msg.type else { return }
+
+        switch type {
+        case .conferenceJoined:
+            if remoteParticipants[endpointId] == nil {
+                remoteParticipants[endpointId] = RemoteParticipant(userId: userId, endpointId: endpointId)
+            }
+        case .conferenceLeft:
+            remoteParticipants[endpointId] = nil
+        case .conferenceStreamPublished:
+            let object = msg as! ConferenceStreamPublishedEvent
+            var remote = remoteParticipants[endpointId] ?? RemoteParticipant(userId: userId, endpointId: endpointId)
+            remote.correlationIds[object.streamId] = object.correlationId ?? object.streamId
+            remoteParticipants[endpointId] = remote
+        case .conferenceStreamUnpublished:
+            let object = msg as! ConferenceStreamUnpublishedEvent
+            remoteParticipants[endpointId]?.correlationIds[object.streamId] = nil
+        default:
+            break
+        }
+    }
+
+    /// The correlation id of a remote stream, as the AR pointer and sketch events name it
+    internal func correlationId(ofRemoteStream streamId: String) -> String? {
+        return remoteParticipants.values.lazy.compactMap { $0.correlationIds[streamId] }.first
+    }
+    
     internal func conferenceMessageReceived(_ object: ConferenceEvent) {
         //Ensure we're in a conference
         guard let _ = currentConference else {
@@ -1126,75 +1296,174 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         if !isProcessingMessages {
             processMessages()
         } else {
-            os_log("WARNING: Ignoring conference msg processing because we're already processing", log: Log.conferenceSDK, type: .debug)
+            os_log("Queued conference msg, it is processed after the current one", log: Log.conferenceSDK, type: .debug)
         }
     }
     
-    //MQTT message processor
+    //MQTT message processor: applies the messages in conference version order. Messages after a version we
+    //have not received wait for it; if it does not come, resyncConference() catches up from the conference state
     private func processMessages(){
-        guard !mqttMessages.isEmpty, let conference = currentConference else {
-            os_log("WARNING: processMessages() has no messages to process or we're not in a conference. Returning", log: Log.conferenceSDK, type: .debug)
-            return
-        }
-        
-        //Lock processing
+        //Lock processing; messages received meanwhile are picked up by this loop
         isProcessingMessages = true
-        
-        for (index, msg) in mqttMessages.enumerated() {
-            
-            //If the event has a conference version
-            if let eventConferenceVersion = msg.conferenceVersion {
-                
-                //Discard older messages
-                if eventConferenceVersion < conference.version {
-                    let cVersion = String(describing: eventConferenceVersion)
-                    let ourVersion = String(describing: conference.version)
-                    os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
-                    continue
-                }
-                
-                //Delay processing of messages with version > than we know
-                if eventConferenceVersion > conference.version {
-                    let cVersion = String(describing: msg.conferenceVersion)
-                    let ourVersion = String(describing: conference.version)
-                    os_log("Delaying message processing because its conference version %@ > our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
-                    mqttDelayedMessages.append(msg)
-                    startDelayedMessageProcessorTimer(messageId: msg.id)
-                    continue
-                }
+        defer { isProcessingMessages = false }
+
+        while let conference = currentConference {
+            //The conference has ended whatever came before; otherwise messages without a version, or the next one
+            let nextIndex = mqttMessages.firstIndex(where: { $0.type == .conferenceEnded })
+                ?? mqttMessages.firstIndex(where: { $0.conferenceVersion.map { $0 <= conference.version } ?? true })
+            guard let index = nextIndex else {
+                break
             }
-            
+            let msg = mqttMessages.remove(at: index)
+
+            //Discard older messages
+            if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion < conference.version {
+                let cVersion = String(describing: eventConferenceVersion)
+                let ourVersion = String(describing: conference.version)
+                os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
+                continue
+            }
+
             //Only process messages coming from other users
             if let userEndpointId = UserEndpointModule.sharedInstance.userEndpointId, msg.userEndpointId != userEndpointId {
                 delegateConferenceMessage(msg: msg)
             }
-            
+
             //Increase conference version number
             if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion == currentConference?.version {
                 currentConference?.version += 1
+                resyncAttempts = 0
                 os_log("Local conference version incremented to %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
             }
-        
-            os_log("Conference msg processed, our version is now %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
-            //Remove the message after successfull processing
-            mqttMessages.remove(at: index)
         }
-        
-        //Unlock processing
-        isProcessingMessages = false
+
+        if mqttMessages.isEmpty {
+            cancelResync()
+        } else if resyncWorkItem == nil {
+            os_log("Delaying %d conference msgs until conference version %@ arrives", log: Log.conferenceSDK, type: .debug, mqttMessages.count, String(describing: currentConference?.version))
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.resyncWorkItem = nil
+                self?.resyncConference()
+            }
+            resyncWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + missingMessageWaitTime, execute: workItem)
+        }
     }
-    
+
+    private func cancelResync() {
+        resyncWorkItem?.cancel()
+        resyncWorkItem = nil
+        resyncAttempts = 0
+    }
+
+    /// A conference version never arrived: fetches the conference state and delegates the messages we missed
+    /// (participants who joined or left, streams published or unpublished), then the ones that were waiting
+    private func resyncConference(force: Bool = false) {
+        guard let conference = currentConference, force || !mqttMessages.isEmpty else {
+            return
+        }
+        resyncAttempts += force ? 0 : 1
+        guard resyncAttempts <= maxResyncAttempts else {
+            os_log("Dropping %d conference msgs still waiting after %d conference state fetches", log: Log.conferenceSDK, type: .error, mqttMessages.count, maxResyncAttempts)
+            mqttMessages.removeAll()
+            resyncAttempts = 0
+            return
+        }
+
+        os_log("Conference version %@ is missing, fetching the conference state", log: Log.conferenceSDK, type: .debug, String(describing: conference.version))
+        API2.sharedInstance.getConferenceSimpleView(conference.id, onSuccess: {(json) in
+            guard let data = json, let current = self.currentConference, current.id == conference.id else {
+                return
+            }
+            let fresh = ConferenceSimpleView(fromJson: data)
+            if fresh.version > current.version {
+                let missed = self.missedMessages(until: fresh)
+                os_log("Conference state is at version %@, delegating %d missed msgs", log: Log.conferenceSDK, type: .debug, String(describing: fresh.version), missed.count)
+                self.currentConference = fresh
+                missed.forEach { self.delegateConferenceMessage(msg: $0) }
+            }
+            //Processes the messages after the fetched version, or waits again
+            self.processMessages()
+        }, onFailure: {(error) in
+            os_log("Unable to fetch the conference state - error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            //No such conference any more: we missed that it ended
+            if case AuviousSDKError.httpError(let code) = error, code == 404,
+               let current = self.currentConference, current.id == conference.id {
+                self.mqttMessages.removeAll()
+                self.delegateConferenceMessage(msg: ConferenceEndedEvent(fromJson: JSON(["type": ConferenceEventType.conferenceEnded.rawValue, "conferenceId": conference.id ?? ""])))
+                return
+            }
+            self.processMessages()
+        })
+    }
+
+    /// The participant and stream messages that take the remote participants we know of to the conference's.
+    /// Must run before currentConference is set to the conference, which rebuilds remoteParticipants.
+    private func missedMessages(until conference: ConferenceSimpleView) -> [ConferenceEvent] {
+        let me = UserEndpointModule.sharedInstance.userEndpointId
+        var endpoints: [String: (userId: String, endpoint: ParticipantEndpoint)] = [:]
+        for participant in conference.participants ?? [] {
+            guard let userId = participant.id else { continue }
+            for endpoint in participant.endpoints ?? [] where endpoint.id != nil && endpoint.id != me {
+                endpoints[endpoint.id] = (userId, endpoint)
+            }
+        }
+
+        func message(_ type: ConferenceEventType, userId: String, endpointId: String, _ fields: [String: Any] = [:]) -> JSON {
+            var json: [String: Any] = ["type": type.rawValue, "conferenceId": conference.id ?? "", "userId": userId, "userEndpointId": endpointId]
+            json.merge(fields) { $1 }
+            return JSON(json)
+        }
+        let subscribed = rtcClient?.peerConnections.filter { !$0.isLocal } ?? []
+
+        //Gone first: the streams that were unpublished, then the participants who left
+        var missed: [ConferenceEvent] = []
+        for (endpointId, remote) in remoteParticipants {
+            let streamIds = Set(endpoints[endpointId]?.endpoint.streams.compactMap { $0.id } ?? [])
+            for streamId in remote.correlationIds.keys where !streamIds.contains(streamId) {
+                guard let container = subscribed.first(where: { $0.streamId == streamId }), let type = container.streamType else { continue }
+                missed.append(ConferenceStreamUnpublishedEvent(fromJson: message(.conferenceStreamUnpublished, userId: remote.userId, endpointId: endpointId, ["streamId": streamId, "streamType": type.rawValue])))
+            }
+            if endpoints[endpointId] == nil {
+                missed.append(ConferenceLeftEvent(fromJson: message(.conferenceLeft, userId: remote.userId, endpointId: endpointId)))
+            }
+        }
+
+        //Then the participants who joined, and the streams that were published
+        for (endpointId, entry) in endpoints {
+            let known = remoteParticipants[endpointId]
+            if known == nil {
+                let metadata: [String: Any] = ["roles": entry.endpoint.roles, "name": entry.endpoint.name ?? "", "type": entry.endpoint.endpointType ?? ""]
+                missed.append(ConferenceJoinedEvent(fromJson: message(.conferenceJoined, userId: entry.userId, endpointId: endpointId, ["metadata": metadata])))
+            }
+            for stream in entry.endpoint.streams ?? [] where stream.id != nil && stream.type != nil {
+                guard known?.correlationIds[stream.id] == nil, !subscribed.contains(where: { $0.streamId == stream.id }) else { continue }
+                var metadata: [String: Any] = ["portraitMode": stream.portraitMode]
+                if let correlationId = stream.correlationId {
+                    metadata["correlationId"] = correlationId
+                }
+                missed.append(ConferenceStreamPublishedEvent(fromJson: message(.conferenceStreamPublished, userId: entry.userId, endpointId: endpointId, ["streamId": stream.id!, "streamType": stream.type.rawValue, "metadata": metadata])))
+            }
+        }
+        return missed
+    }
+
     //MQTT message delegation
     private func delegateConferenceMessage(msg: ConferenceEvent) {
+        updateRemoteParticipants(msg)
+
         switch msg.type! {
         case .conferenceJoined, .conferenceLeft, .conferenceStreamPublished, .conferenceNetworkIndicatorEvent:
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceEnded:
+            streamRecovery.clear()
+            isConferenceOnHold = false
             removeAllStreams()
             emptyPeerConnections()
             delegate?.auviousSDK(didReceiveConferenceEvent: msg)
         case .conferenceStreamUnpublished:
             let object = msg as! ConferenceStreamUnpublishedEvent
+            streamRecovery.forget(object.streamId)
             if (rtcClient.removeRemoteStreams(streamId: object.streamId)){
                 delegate?.auviousSDK(didReceiveConferenceEvent: msg)
             }
@@ -1202,12 +1471,21 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             let object = msg as! ConferenceMetadataUpdatedEvent
             let isEnabled = object.operation == .set ? false : true
             
-            //Conference on hold
-            if object.isHold {
+            //Co-browse annotations (sketch / laser pointer discovery)
+            if object.isSketch || object.isArPointer || object.isArPointerColors {
+                cobrowseDelegate?.cobrowseMetadataChanged(object)
+                annotationDelegate?.annotationMetadataChanged(object)
                 
+            //Conference on hold
+            } else if object.isHold {
+                
+                isConferenceOnHold = !isEnabled
+
                 //Mute/unmute local audio and video
                 rtcClient.localVideoTrack?.isEnabled = isEnabled
                 rtcClient.localAudioTrack?.isEnabled = isEnabled
+                //Never keep streaming the screen while on hold
+                rtcClient.setScreenTrackEnabled(isEnabled)
                 
                 //Delegate back to client
                 delegate?.auviousSDK(conferenceOnHold: !isEnabled)
@@ -1240,55 +1518,6 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             
         default:
             os_log("WARNING: Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
-        }
-    }
-    
-    //Schedules the delayed message processor timer
-    private func startDelayedMessageProcessorTimer(messageId: String) {
-        let delayedMessageProcessorTimer = Timer(timeInterval: delayedMessageWaitTime, target: self, selector: #selector(onDelayedMessageTick), userInfo: ["messageId" : messageId], repeats: true)
-        RunLoop.current.add(delayedMessageProcessorTimer, forMode: .common)
-    }
-    
-    //Delayed message processor timer tick
-    @objc private func onDelayedMessageTick(timer: Timer) {
-        //Ensure we're in a conference
-        guard let conference = currentConference else {
-            timer.invalidate()
-            return
-        }
-        
-        //No timer context? Disregard timer and message
-        guard let context = timer.userInfo as? [String: String] else {
-            timer.invalidate()
-            return
-        }
-        
-        //Invalid timer context? Disregard timer and message
-        let messageId = context["user", default: ""]
-        if messageId.isEmpty {
-            timer.invalidate()
-            return
-        } else {
-            
-            let filteredMessage = mqttDelayedMessages.filter {$0.id == messageId}.first
-            if let message = filteredMessage {
-                message.processedTimes += 1
-                
-                //Attempt to process
-                if message.processedTimes <= maxDelayedProcessingAttempts && message.conferenceVersion == conference.version {
-                    //all good, safe to process now
-                    delegateConferenceMessage(msg: message)
-                    //and remove from list
-                    mqttDelayedMessages.removeAll()
-                    return
-                } else {
-                    //Tried to process delayed message enough times but we still have a version mismatch - disregard timer and message and throw error
-                    mqttDelayedMessages.removeAll()
-                    timer.invalidate()
-                    delegate?.auviousSDK(onError: AuviousSDKError.internalError)
-                    return
-                }
-            }
         }
     }
     
@@ -1334,10 +1563,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
                 let response = PublishStreamResponse(fromJson: data)
                 
                 self.rtcClient.handleAnswerReceivedPublish(withRemoteSDP: response.sdpAnswer, streamId: streamId)
+                DispatchQueue.main.async { self.restoreMutedTracks(ofRepublishedStream: streamId) }
             }
             
         }, onFailure: {(error) in
-            self.delegate?.auviousSDK(onError: AuviousSDKError.publishStreamFailure(fragment: .publishStreamRequest, output: error.localizedDescription))
+            DispatchQueue.main.async {
+                //A recovery attempt that failed is retried, not an error for the app
+                if self.streamRecovery.isRecovering(streamId) {
+                    self.streamRecovery.attemptFailed(streamId)
+                    return
+                }
+                self.delegate?.auviousSDK(onError: AuviousSDKError.publishStreamFailure(fragment: .publishStreamRequest, output: error.localizedDescription))
+            }
         })
     }
     
@@ -1365,7 +1602,18 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             }
             
         }, onFailure: {(error) in
-            self.delegate?.auviousSDK(onError: AuviousSDKError.remoteStreamFailure(fragment: .remoteStreamRequest, output: error.localizedDescription))
+            DispatchQueue.main.async {
+                if self.streamRecovery.isRecovering(streamId) {
+                    //No such stream any more: the remote side unpublished it while we were away
+                    if case AuviousSDKError.httpError(let code) = error, code == 404 {
+                        self.streamGone(streamId, conferenceId: conference.id)
+                    } else {
+                        self.streamRecovery.attemptFailed(streamId)
+                    }
+                    return
+                }
+                self.delegate?.auviousSDK(onError: AuviousSDKError.remoteStreamFailure(fragment: .remoteStreamRequest, output: error.localizedDescription))
+            }
         })
     }
     
@@ -1445,9 +1693,6 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
         delegate?.auviousSDK(recorderStateChanged: toActive)
     }
     
-    //Not needed for conferences
-    func rtcClient(agentSwitchedCamera toFront: Bool) {}
-    
     internal func rtcClient(didStopScreenSharing: Bool) {
         delegate?.auviousSDK(screenSharingStopped: true)
     }
@@ -1458,6 +1703,115 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
 
     internal func rtcClient(didFailToStartScreenSharing: Bool) {
         sharingMyScreen = false
+    }
+
+    internal func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String) {
+        DispatchQueue.main.async {
+            self.streamRecovery.iceStateChanged(streamId: streamId, isLocal: isLocal, endpointId: endpointId, state: state)
+        }
+    }
+
+    /**
+     Rebuilds the connection of a call stream that lost it: republishes our stream under a new stream ID over
+     the capture that keeps running (so the other side sees a new stream and subscribes to it), or views a
+     remote stream again. Returns the stream ID the new connection carries, nil if there is nothing to recover.
+     */
+    private func recoverStream(_ streamId: String, isLocal: Bool) -> String? {
+        guard let conference = currentConference, let userId = currentUserId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            return nil
+        }
+        guard let container = rtcClient.peerConnections.first(where: { $0.streamId == streamId && $0.isLocal == isLocal }),
+              let streamType = container.streamType else {
+            return nil
+        }
+        os_log("Recovering %{public}@ stream %{public}@ (%{public}@)", log: Log.conferenceSDK, type: .default,
+               isLocal ? "published" : "subscribed", streamId, streamType.rawValue)
+
+        if isLocal {
+            //Tell the backend, which may still list the lost stream
+            let request = UnpublishStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: endpointId, userId: userId)
+            API2.sharedInstance.unpublishStream(request, onSuccess: { _ in }, onFailure: { error in
+                os_log("Unpublishing the lost stream %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+            })
+
+            let newStreamId = UUID().uuidString
+            guard rtcClient.republishLocalStream(replacing: streamId, with: newStreamId) else {
+                return nil
+            }
+            //The new stream starts unmuted for viewers: mark what the user muted once it is published
+            let videoMuted = rtcClient.localVideoTrack.map { !$0.isEnabled } ?? false
+            let audioMuted = rtcClient.localAudioTrack.map { !$0.isEnabled } ?? false
+            if !isConferenceOnHold && (videoMuted || audioMuted) {
+                republishedStreamsToMute.insert(newStreamId)
+            }
+            delegate?.auviousSDK(didRepublishLocalStream: streamId, as: newStreamId)
+            return newStreamId
+        }
+
+        guard let remoteEndpointId = container.endpointId, let remoteUserId = container.userId else {
+            return nil
+        }
+        let request = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
+        API2.sharedInstance.stopViewStream(request, onSuccess: { _ in }, onFailure: { error in
+            os_log("Stopping the lost view of %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+        })
+        _ = rtcClient.removeRemoteStreams(streamId: streamId)
+        rtcClient.configureRemoteStream(type: streamType, streamId: streamId, endpointId: remoteEndpointId, userId: remoteUserId)
+        return streamId
+    }
+
+    /// A remote stream we were recovering no longer exists: unpublishes it as the backend would have told us,
+    /// so the app removes its view (the unpublished message, live or missed, finds no stream to remove after this)
+    private func streamGone(_ streamId: String, conferenceId: String) {
+        guard let container = rtcClient.peerConnections.first(where: { $0.streamId == streamId && !$0.isLocal }),
+              let type = container.streamType, let endpointId = container.endpointId, let userId = container.userId else {
+            streamRecovery.forget(streamId)
+            _ = rtcClient.removeRemoteStreams(streamId: streamId)
+            return
+        }
+        let json: [String: Any] = ["type": ConferenceEventType.conferenceStreamUnpublished.rawValue, "conferenceId": conferenceId,
+                                   "userId": userId, "userEndpointId": endpointId, "streamId": streamId, "streamType": type.rawValue]
+        delegateConferenceMessage(msg: ConferenceStreamUnpublishedEvent(fromJson: JSON(json)))
+    }
+
+    private func restoreMutedTracks(ofRepublishedStream streamId: String) {
+        guard republishedStreamsToMute.remove(streamId) != nil, let conference = currentConference else { return }
+        if rtcClient.localVideoTrack?.isEnabled == false {
+            toggleLocalStream(conferenceId: conference.id, streamId: streamId, operation: .set, type: .video, onSuccess: {}, onFailure: { _ in })
+        }
+        if rtcClient.localAudioTrack?.isEnabled == false {
+            toggleLocalStream(conferenceId: conference.id, streamId: streamId, operation: .set, type: .audio, onSuccess: {}, onFailure: { _ in })
+        }
+    }
+
+    /// MQTT is back after a drop: catch up with the conference messages we missed meanwhile
+    private func catchUpAfterReconnect() {
+        guard currentConference != nil else { return }
+        os_log("MQTT reconnected, fetching the conference state", log: Log.conferenceSDK, type: .default)
+        resyncConference(force: true)
+    }
+
+    private func startNetworkMonitor() {
+        guard pathMonitor == nil else { return }
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                let available = path.status == .satisfied
+                self?.streamRecovery.setNetworkAvailable(available)
+                if available {
+                    MQTTModule2.sharedInstance.reconnect()
+                }
+            }
+        }
+        monitor.start(queue: DispatchQueue(label: "AuviousSDK.network"))
+        pathMonitor = monitor
+    }
+
+    /// Started again on the next login
+    private func stopNetworkMonitor() {
+        pathMonitor?.cancel()
+        pathMonitor = nil
     }
 
     internal func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {
@@ -1523,6 +1877,105 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, RTCDelegate, Us
             self?.delegate?.auviousSDK(screenSharingStopped: true)
         }, onFailure: { [weak self] _ in
             self?.delegate?.auviousSDK(screenSharingStopped: true)
+        })
+    }
+}
+
+//MARK: -
+//MARK: Co-browse helpers
+//MARK: -
+
+extension AuviousConferenceSDK {
+    
+    /// The logged in user id ('sub' claim)
+    internal var currentUserId: String? {
+        return AuthenticationModule.sharedInstance.loginResponse?.userId
+    }
+    
+    /// The conference we are currently joined to
+    internal var currentConferenceId: String? {
+        return currentConference?.id
+    }
+    
+    /// Raw conference metadata values (key -> value) as received when joining
+    internal var joinedConferenceMetadata: [String: String] {
+        return currentConference?.metadataValues ?? [:]
+    }
+    
+    /// The id of our published screen stream, if any (changes after an ICE re-publish)
+    internal var localScreenStreamId: String? {
+        return rtcClient?.peerConnections.first(where: { $0.streamType == .screen && $0.isLocal })?.streamId
+    }
+    
+    /// Stops the screen capture and unpublishes the screen stream, if any.
+    internal func stopLocalScreenShare(completion: (() -> Void)? = nil) {
+        guard rtcClient != nil else {
+            completion?()
+            return
+        }
+        
+        let streamId = localScreenStreamId
+        sharingMyScreen = false
+        isPendingScreenSharePermission = false
+        
+        if rtcClient.isScreenCapturing {
+            rtcClient.stopScreenSharing()
+        }
+        
+        guard let screenStreamId = streamId,
+              rtcClient.removePublishStreams(streamId: screenStreamId),
+              let conference = currentConference,
+              let userId = currentUserId,
+              let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            completion?()
+            return
+        }
+        
+        let request = UnpublishStreamRequest(conferenceId: conference.id, streamId: screenStreamId, userEndpointId: endpointId, userId: userId)
+        API2.sharedInstance.unpublishStream(request, onSuccess: { _ in
+            completion?()
+        }, onFailure: { error in
+            os_log("Co-browse unpublish screen failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            completion?()
+        })
+    }
+    
+    /// Restores connectivity after the app returns to the foreground during a co-browse session.
+    /// Re-registers the endpoint and rejoins the conference if the server dropped us while suspended.
+    internal func restoreCobrowseConnection(onSuccess: @escaping () -> Void, onFailure: @escaping (Error) -> Void) {
+        guard let userId = currentUserId, let endpointId = UserEndpointModule.sharedInstance.userEndpointId else {
+            onFailure(AuviousSDKError.notLoggedIn)
+            return
+        }
+        
+        let conferenceId = currentConference?.id ?? lastConferenceJoined
+        let request = KeepAliveRequest(userEndpointId: endpointId, userId: userId)
+        UserEndpointModule.sharedInstance.keepAliveRequest = request
+        
+        API2.sharedInstance.keepAlive(request, validateStatus: true, onSuccess: { _ in
+            UserEndpointModule.sharedInstance.startKeepAliveTimer()
+            MQTTModule2.sharedInstance.reconnect()
+            onSuccess()
+        }, onFailure: { _ in
+            os_log("Co-browse endpoint expired while in background, re-registering", log: Log.conferenceSDK, type: .debug)
+            
+            UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: { newEndpointId in
+                MQTTModule2.sharedInstance.configure(endpointId: newEndpointId)
+                MQTTModule2.sharedInstance.disconnectAndReconnect()
+                
+                guard let rejoinId = conferenceId else {
+                    onFailure(AuviousSDKError.notInConference)
+                    return
+                }
+                
+                //Our previous membership is gone, rejoin as a fresh endpoint
+                self.removeAllStreams()
+                self.emptyPeerConnections()
+                self.currentConference = nil
+                self.joinConference(conferenceId: rejoinId, onSuccess: { _ in
+                    onSuccess()
+                }, onFailure: onFailure)
+            }, onFailure: onFailure)
         })
     }
 }

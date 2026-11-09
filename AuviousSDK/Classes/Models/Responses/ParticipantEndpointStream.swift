@@ -14,6 +14,9 @@ public final class ParticipantEndpointStream {
     public var id: String!
     public var type: StreamType!
     public var portraitMode: Bool = false
+
+    /// The publisher's correlation id (stream metadata), used by AR pointer and sketch to name the stream
+    public var correlationId: String?
     
     public init(id: String, type: StreamType) {
         self.id = id
@@ -28,5 +31,6 @@ public final class ParticipantEndpointStream {
         id = json["id"].stringValue
         type = StreamType(rawValue: json["type"].stringValue.uppercased())
         portraitMode = json["metadata"]["portraitMode"].boolValue
+        correlationId = json["metadata"]["correlationId"].string
     }
 }

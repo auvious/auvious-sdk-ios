@@ -11,7 +11,7 @@ import AVFoundation
 import os
 import Sentry
 
-//Return type for camera commands such as FlashOn, FlashOff, CameraSwitch etc.
+//Return type for camera commands: success, and the error otherwise
 internal typealias CameraResponse = (Bool, String)
 
 internal protocol RTCDelegate {
@@ -22,16 +22,14 @@ internal protocol RTCDelegate {
     func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType)
     func rtcClient(onError error: AuviousSDKError)
     func rtcClient(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String)
-    func rtcClient(agentSwitchedCamera toFront: Bool)
     func rtcClient(recorderStateChanged toActive: Bool)
     func rtcClient(didStopScreenSharing: Bool)
     func rtcClient(didStartScreenSharing: Bool)
     func rtcClient(didFailToStartScreenSharing: Bool)
     func rtcClient(screenShareICEConnectionFailed streamId: String)
     func rtcClient(screenShareICEConnectionNeedsRestart streamId: String)
-    
-    //rest call
-    func rtcClient(call streamId: String, sdpOffer: String, target: String)
+    //ICE state of a call stream's connection (all but our shared screen, which recovers itself)
+    func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String)
     
     //rest call + rtclient invocation
     func rtcClient(publishStream streamId: String, streamType: StreamType, sdpOffer: String)
@@ -85,7 +83,6 @@ internal final class RTCMyVP8VideoEncoderFactory: NSObject, RTCVideoEncoderFacto
 
 //Adding this to make the methods optional (a simple @obj optional func won't work in this case)
 internal extension RTCDelegate {
-    func rtcClient(call streamId: String, sdpOffer: String, target: String) {}
     func rtcClient(publishStream streamId: String, streamType: StreamType, sdpOffer: String) {}
     func rtcClient(didReceiveLocalStream stream: RTCMediaStream, streamId: String, type: StreamType) {}
     func rtcClient(didReceiveRemoteStream stream: RTCMediaStream, streamId: String, endpointId: String, type: StreamType) {}
@@ -96,12 +93,27 @@ internal extension RTCDelegate {
     func rtcClient(didFailToStartScreenSharing: Bool){}
     func rtcClient(screenShareICEConnectionFailed streamId: String) {}
     func rtcClient(screenShareICEConnectionNeedsRestart streamId: String) {}
+    func rtcClient(iceConnectionChanged state: StreamIceState, streamId: String, isLocal: Bool, endpointId: String) {}
 }
 
 internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCapturerDelegate {
     
-    //List of connections used
-    internal var peerConnections: [RTCPeerConnectionContainer] = [RTCPeerConnectionContainer]()
+    //List of connections used. Changed on main, but WebRTC's callbacks read it on its signaling thread,
+    //so every access goes through the lock (a read during a change of the array can crash)
+    internal var peerConnections: [RTCPeerConnectionContainer] {
+        get {
+            peerConnectionsLock.lock()
+            defer { peerConnectionsLock.unlock() }
+            return lockedPeerConnections
+        }
+        set {
+            peerConnectionsLock.lock()
+            defer { peerConnectionsLock.unlock() }
+            lockedPeerConnections = newValue
+        }
+    }
+    private var lockedPeerConnections: [RTCPeerConnectionContainer] = []
+    private let peerConnectionsLock = NSLock()
     
     //Connection factory (readable by the tests, to keep their connections on loopback)
     private(set) var factory: RTCPeerConnectionFactory!
@@ -118,6 +130,14 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     // Pending capturer created during the permission phase (reused in createScreenSharingStream)
     private var pendingScreenVideoSource: RTCVideoSource?
     private var pendingScreenCapturer: ScreenCapturer?
+
+    /// Per-frame hook applied to every screen capturer (e.g. co-browse masking)
+    internal var screenFrameProcessor: ((CMSampleBuffer, CVPixelBuffer) -> CVPixelBuffer?)? {
+        didSet {
+            screenCapturer?.frameProcessor = screenFrameProcessor
+            pendingScreenCapturer?.frameProcessor = screenFrameProcessor
+        }
+    }
     
     private var capturer: RTCCameraVideoCapturer!
     private var localVideoSource: RTCVideoSource?
@@ -132,12 +152,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     
     var delegate: RTCDelegate?
     
-    private var outgoingCallStreamType: StreamType?
-    
-    //Latest local captured frame
-    private var lastLocalFrame: RTCVideoFrame?
-    private var capturingScreenshot: Bool = false
-
     /// Stores the last speaker preference set via changeAudioRoot().
     /// Used by checkCurrentAudioRoute() so it doesn't override the user's choice.
     private var audioPrefersSpeaker: Bool = true
@@ -169,82 +183,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         iceServers = ServerConfiguration.iceServers
     }
     
-    //Configures a stream for publishing in a call (create call)
-    internal func configureCallStream(type: StreamType, streamId: String, endpointId: String, userId: String, target: String, localStream: RTCMediaStream? = nil) {
-        
-        self.outgoingCallStreamType = type
-        
-        //Create a new RTCPeerConnection
-        initialisePeerConnection(streamId: streamId, endpointId: endpointId, userId: userId, type: type, isLocal: true, callId: streamId)
-        
-        //Add the stream obtained, or use the provided one
-        if let stream = localStream {
-            
-            guard let peerConnection = getConnectionForStream(streamId: streamId) else {
-                delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: streamId))
-                return
-            }
-            
-            addTracks(of: stream, to: peerConnection)
-        } else {
-            if type == .cam || type == .mic || type == .micAndCam {
-                addStream(type: type, streamId: streamId)
-            }
-        }
-        
-        makeOfferCallStream(type:type, streamId: streamId, target: target)
-    }
-    
-    //Configures an outgoing stream for a call (answer call)
-    internal func configureRemoteCallStream(event: CallCreatedEvent, userEndpointId: String, userId: String, streamId: String, remoteStreamType: StreamType, outgoingStreamType: StreamType) {
-        let callId = event.callId!
-        let endpointId = event.userEndpointId!
-        let userId = event.userId!
-        let sdpOffer = event.sdpOffer!
-        
-        //Create a new RTCPeerConnection
-        initialisePeerConnection(streamId: callId, endpointId: endpointId, userId: userId, type: remoteStreamType, isLocal: true, callId: callId)
-        
-        //if we are sending audio and/or video create a stream for it
-        if outgoingStreamType == .cam || outgoingStreamType == .mic || outgoingStreamType == .micAndCam {
-            self.outgoingCallStreamType = outgoingStreamType
-            addStream(type: outgoingStreamType, streamId: callId)
-        }
-        
-        //Get back our connection
-        let results = peerConnections.filter{$0.callId == callId}
-        guard let object = results.first else {
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: callId))
-            return
-        }
-        
-        let offer = RTCSessionDescription(type: .offer, sdp: sdpOffer)
-        object.connection.setRemoteDescription(offer, completionHandler: {(error) in
-            if error == nil {
-                
-                object.connection.answer(for: self.createConstraintForConference(type: remoteStreamType), completionHandler: {(sessionDescription, error) in
-                    
-                    if error == nil {
-                        object.connection.setLocalDescription(sessionDescription!, completionHandler: {(error) in
-                            
-                            if error == nil {
-                                self.invokeAnswer(callId: callId, sdpAnswer: sessionDescription!.sdp, userEndpointId: userEndpointId, userId: userId, container: object)
-                                
-                            } else {
-                                os_log("ARTCClient set local description ERROR %@", log: Log.rtc, type: .error, error!.localizedDescription)
-                            }
-                        })
-                    } else {
-                        os_log("ARTCClient sdp answer creation FAILURE - error %@", log: Log.rtc, type: .error, error!.localizedDescription)
-                    }
-                })
-                
-            } else {
-                os_log("ARTCClient remote description FAILED for call answer. Error is %@", log: Log.rtc, type: .error, error!.localizedDescription)
-            }
-        })
-    }
-    
     //Configures a stream for publishing in a conference
     internal func configurePublishStream(type: StreamType, streamId: String, endpointId: String, userId: String) {
         
@@ -265,10 +203,15 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     //Creates a new peer connection for the specified stream and endpoint IDs
-    internal func initialisePeerConnection(streamId: String, endpointId: String, userId: String, type: StreamType, isLocal: Bool, callId: String? = nil) {
+    internal func initialisePeerConnection(streamId: String, endpointId: String, userId: String, type: StreamType, isLocal: Bool) {
         let configuration = RTCConfiguration()
         configuration.iceServers = iceServers
         configuration.continualGatheringPolicy = .gatherContinually
+        //Keep the sockets per connection down: audio and video share one transport, and no host TCP candidates
+        //(TURN over TCP/TLS still works). WebRTC's network thread stops once a socket's descriptor passes 1024,
+        //which with one connection per stream froze calls of 5 participants.
+        configuration.bundlePolicy = .maxBundle
+        configuration.tcpCandidatePolicy = .disabled
 
         // nil if WebRTC rejects the configuration; callers then report missingPeerConnection
         guard let connection = factory.peerConnection(with: configuration, constraints: self.defaultConnectionConstraint, delegate: self) else {
@@ -276,10 +219,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             return
         }
         let connectionContainer = RTCPeerConnectionContainer(conn: connection, streamId: streamId, endpointId: endpointId, userId: userId, type: type, isLocal: isLocal)
-        
-        if let callId = callId {
-            connectionContainer.callId = callId
-        }
         
         peerConnections.append(connectionContainer)
         os_log("Created connection for stream type %@", log: Log.rtc, type: .debug, type.rawValue)
@@ -339,6 +278,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         pendingScreenVideoSource?.adaptOutputFormat(toWidth: pendingDims.width, height: pendingDims.height, fps: 15)
         let capturer = ScreenCapturer(videoSource: pendingScreenVideoSource!)
         capturer.delegate = self
+        capturer.frameProcessor = screenFrameProcessor
         pendingScreenCapturer = capturer
         capturer.permissionCompletion = { [weak self] granted in
             guard let self = self else { return }
@@ -375,6 +315,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             localScreenVideoSource?.adaptOutputFormat(toWidth: freshDims.width, height: freshDims.height, fps: 15)
             screenCapturer = ScreenCapturer(videoSource: localScreenVideoSource!)
             screenCapturer.delegate = self
+            screenCapturer.frameProcessor = screenFrameProcessor
 
             let crumb = Breadcrumb(level: .warning, category: "screen_share")
             crumb.message = "Screen stream created (no pending capturer — starting fresh)"
@@ -401,6 +342,16 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         localScreenVideoSource = nil
         localScreenVideoTrack = nil
         localScreenStream = nil
+    }
+
+    /// True while a ReplayKit capture is running or pending publication
+    internal var isScreenCapturing: Bool {
+        return screenCapturer != nil || pendingScreenCapturer != nil
+    }
+
+    /// Pauses/resumes the outgoing screen track without tearing down the capture (e.g. while on hold).
+    internal func setScreenTrackEnabled(_ enabled: Bool) {
+        localScreenVideoTrack?.isEnabled = enabled
     }
 
     internal func stopScreenSharing() {
@@ -486,24 +437,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         })
     }
     
-    private func makeOfferCallStream(type: StreamType, streamId: String, target: String) {
-        guard let peerConnection = getConnectionForStream(streamId: streamId) else {
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: streamId))
-            return
-        }
-        
-        let constraint = createConstraintForConference(type: type)
-        peerConnection.offer(for: constraint, completionHandler: { [weak self]  (sdp, error) in
-            
-            if let error = error {
-                self?.delegate?.rtcClient(onError: AuviousSDKError.publishStreamFailure(fragment: .makeOfferPublishStream, output: error.localizedDescription))
-            }
-            else {
-                self?.handleSdpGeneratedPublishCall(sdpDescription: sdp, streamType:type, streamId: streamId, target: target)
-            }
-        })
-    }
-    
     //Creates the RTC media constraint for the specified conference type
     private func createConstraintForConference(type: StreamType) -> RTCMediaConstraints {
         switch type {
@@ -514,10 +447,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         default:
             return RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio" : "true", "OfferToReceiveVideo": "true"], optionalConstraints: nil)
         }
-    }
-    
-    private func createConstraintForCall(type: StreamType) -> RTCMediaConstraints {
-        return RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio" : "true", "OfferToReceiveVideo": "true"], optionalConstraints: nil)
     }
     
     internal func makeOfferRemoteStream(type: StreamType, streamId: String) {
@@ -536,25 +465,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             }
             else {
                 self.handleSdpGeneratedRemote(sdpDescription: sdp, streamId: streamId)
-            }
-        })
-    }
-    
-    private func handleSdpGeneratedPublishCall(sdpDescription: RTCSessionDescription?, streamType: StreamType, streamId: String, target: String) {
-        guard let peerConnection = getConnectionForStream(streamId: streamId)  else {
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: streamId))
-            return
-        }
-        
-        //Call RTCPeerConnection.setLocalDescription(sdpOffer)
-        peerConnection.setLocalDescription(sdpDescription!, completionHandler: {[weak self] (error) in
-            
-            if let error = error {
-                self?.delegate?.rtcClient(onError: AuviousSDKError.publishStreamFailure(fragment: .localDescriptionPublishStream, output: error.localizedDescription))
-            }
-            else {
-                //Use rest call
-                self?.invokeCall(sdpDescription: sdpDescription!, streamId: streamId, target: target)
             }
         })
     }
@@ -595,139 +505,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
                 self?.invokeViewRemoteStream(sdpDescription: sdpDescription!, streamId: streamId, remoteEndpointId: container.endpointId, remoteUserId: container.userId)
             }
         })
-    }
-    
-    private func invokeAnswer(callId: String, sdpAnswer: String, userEndpointId: String, userId: String, container: RTCPeerConnectionContainer) {
-        let object = CallAnswerRequest(callId: callId, sdpAnswer: sdpAnswer, userEndpointId: userEndpointId, userId: userId)
-        API2.sharedInstance.answerCall(object, onSuccess: {(json) in
-            
-            if let _ = json {
-                
-                if !container.iceCandidates.isEmpty {
-                    
-                    var candidatesArray:[IceCandidate] = [IceCandidate]()
-                    for item in container.iceCandidates {
-                        let obj = IceCandidate(candidate: item.sdp, sdpMLineIndex: item.sdpMLineIndex, sdpMid: item.sdpMid!)
-                        candidatesArray.append(obj)
-                    }
-                    
-                    let iceCandidatesRequest = CallIceCandidatesRequest(callId: callId, candidates: candidatesArray, userEndpointId: userEndpointId, userId: userId)
-                    API2.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
-                        
-                        if let _ = json {
-                            //success
-                        }
-                        
-                    }, onFailure: {(error) in
-                        os_log("addCallIceCandidates request error %@", log: Log.rtc, type: .error, error.localizedDescription)
-                    })
-                }
-            }
-        }, onFailure: {(error) in
-            os_log("answer call error %@", log: Log.rtc, type: .error, error.localizedDescription)
-        })
-        
-    }
-    
-    internal func handleTerminatedCall(_ callId: String) {
-        let containerList = peerConnections.filter{$0.callId == callId}
-        guard containerList.first != nil else {
-            os_log("error no connection for call id %@", log: Log.rtc, type: .error, callId)
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: callId))
-            return
-        }
-        
-        if let outgoingStream = outgoingCallStreamType {
-            stopCapture(type: outgoingStream, streamId: callId)
-            removeAllStreams()
-        }
-    }
-    
-    internal func handleCallRejectedEvent(_ event: CallRejectedEvent) {
-        let containerList = peerConnections.filter{$0.callId == event.callId!}
-        guard containerList.first != nil else {
-            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
-            return
-        }
-        
-        if let outgoingStream = outgoingCallStreamType {
-            stopCapture(type: outgoingStream, streamId: event.callId)
-            removeAllStreams()
-        }
-    }
-    
-    internal func handleCallEndedEvent(_ event: CallEndedEvent){
-        let containerList = peerConnections.filter{$0.callId == event.callId!}
-        guard containerList.first != nil else {
-            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
-            return
-        }
-        
-        if let outgoingStream = outgoingCallStreamType {
-            stopCapture(type: outgoingStream, streamId: event.callId)
-            removeAllStreams()
-        }
-    }
-    
-    internal func handleCallAnsweredEvent(_ event: CallAnsweredEvent, userEndpointId: String, userId: String) {
-        let containerList = peerConnections.filter{$0.callId == event.callId!}
-        guard containerList.first != nil else {
-            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
-            return
-        }
-        
-        event.sdpAnswer = event.sdpAnswer.replacingOccurrences(of: "h264", with: "H264")
-        event.sdpAnswer = event.sdpAnswer.replacingOccurrences(of: "vp8", with: "VP8")
-        
-        let sessionDescription = RTCSessionDescription.init(type: .answer, sdp: event.sdpAnswer)
-        containerList.first?.connection.setRemoteDescription(sessionDescription, completionHandler: {(error) in
-            
-            if error != nil {
-                //error
-            } else {
-                
-                //invoke rest call
-                var candidatesArray:[IceCandidate] = [IceCandidate]()
-                if let container = containerList.first {
-                    for item in container.iceCandidates {
-                        let obj = IceCandidate(candidate: item.sdp, sdpMLineIndex: item.sdpMLineIndex, sdpMid: item.sdpMid!)
-                        candidatesArray.append(obj)
-                    }
-                    
-                    let iceCandidatesRequest = CallIceCandidatesRequest(callId: event.callId, candidates: candidatesArray, userEndpointId: userEndpointId, userId: userId)
-                    API2.sharedInstance.addCallIceCandidates(iceCandidatesRequest, onSuccess: {(json) in
-                        
-                        if let _ = json {
-                            //success
-                        }
-                        
-                    }, onFailure: {(error) in
-                        os_log("addCallIceCandidates request error %@", log: Log.rtc, type: .error, error.localizedDescription)
-                    })
-                }
-            }
-        })
-    }
-    
-    internal func addCallIceCandidates(event: IceCandidatesFoundEvent) {
-        let containerList = peerConnections.filter{$0.callId == event.callId!}
-        guard containerList.first != nil else {
-            os_log("error no connection for call id %@", log: Log.rtc, type: .error, event.callId!)
-            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: event.callId))
-            return
-        }
-        
-        for candidate in event.iceCandidates {
-            let c = RTCIceCandidate(sdp: candidate.candidate, sdpMLineIndex: candidate.sdpMLineIndex, sdpMid: candidate.sdpMid)
-            containerList.first?.connection.add(c)
-        }
-    }
-    
-    private func invokeCall(sdpDescription: RTCSessionDescription, streamId: String, target: String) {
-        delegate?.rtcClient(call: streamId, sdpOffer: sdpDescription.sdp, target: target)
     }
     
     private func invokePublishStream(sdpDescription: RTCSessionDescription, streamType: StreamType, streamId: String){
@@ -813,6 +590,35 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         }
         obj.connection?.close()
         peerConnections.removeAll { $0.streamId == streamId }
+        return true
+    }
+
+    /**
+     Publishes our camera or microphone stream again over a new connection, under a new stream ID, after its
+     connection was lost. The capture and tracks keep running, so the local preview doesn't change.
+     Returns false when there is no such stream.
+     */
+    internal func republishLocalStream(replacing oldStreamId: String, with newStreamId: String) -> Bool {
+        guard let old = peerConnections.first(where: { $0.streamId == oldStreamId && $0.isLocal }),
+              let type = old.streamType, let endpointId = old.endpointId, let userId = old.userId else {
+            return false
+        }
+        let tracks = sentTracks(old.connection, kind: "audio") + sentTracks(old.connection, kind: "video")
+        old.connection?.close()
+        peerConnections.removeAll { $0.streamId == oldStreamId }
+
+        initialisePeerConnection(streamId: newStreamId, endpointId: endpointId, userId: userId, type: type, isLocal: true)
+        guard let connection = getConnectionForStream(streamId: newStreamId) else {
+            delegate?.rtcClient(onError: AuviousSDKError.missingPeerConnection(streamId: newStreamId))
+            return false
+        }
+        for track in tracks where connection.add(track, streamIds: [newStreamId]) == nil {
+            os_log("Could not add %@ track to republished stream %@", log: Log.rtc, type: .error, track.kind, newStreamId)
+        }
+        if switchCamStreamId == oldStreamId {
+            switchCamStreamId = newStreamId
+        }
+        makeOfferPublishStream(type: type, streamId: newStreamId)
         return true
     }
 
@@ -1024,8 +830,23 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        guard let container = peerConnections.first(where: { $0.connection == peerConnection }),
-              container.streamType == .screen else { return }
+        //A connection we already dropped or replaced is no longer in the list
+        guard let container = peerConnections.first(where: { $0.connection == peerConnection }) else { return }
+
+        if !(container.streamType == .screen && container.isLocal), let streamId = container.streamId, let endpointId = container.endpointId {
+            let state: StreamIceState
+            switch newState {
+            case .connected, .completed: state = .connected
+            case .disconnected: state = .disconnected
+            case .failed: state = .failed
+            default: state = .other
+            }
+            os_log("ICE %{public}@ for %{public}@ stream %{public}@", log: Log.rtc, type: .default,
+                   String(describing: state), container.isLocal ? "published" : "subscribed", streamId)
+            delegate?.rtcClient(iceConnectionChanged: state, streamId: streamId, isLocal: container.isLocal, endpointId: endpointId)
+        }
+
+        guard container.streamType == .screen else { return }
         let stateName: String
         switch newState {
         case .new:          stateName = "new"
@@ -1070,38 +891,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
         //os_log("RTCPeerConnectionDelegate - ARTCClient - Candidate was removed", log: Log.rtc, type: .debug)
     }
-    
-    // MARK: Camera controls
-    internal func toggleFlash(on: Bool) -> CameraResponse {
-        let position = self.usingFrontCamera ? AVCaptureDevice.Position.front : AVCaptureDevice.Position.back
-        guard let device = self.findDeviceForPosition(position: position) else {
-            return CameraResponse(false, "Unable to access camera")
-        }
-        
-        guard device.hasTorch && device.isTorchAvailable else {
-            os_log("no torch available", log: Log.rtc, type: .debug)
-            return CameraResponse(false, "No torch available")
-        }
-        
-        do {
-            try device.lockForConfiguration()
-            
-            if on {
-                os_log("Torch set to on", log: Log.rtc, type: .debug)
-                device.torchMode = .on
-            } else {
-                os_log("Torch set to off", log: Log.rtc, type: .debug)
-                device.torchMode = .off
-            }
-            
-            device.unlockForConfiguration()
-        } catch {
-            return CameraResponse(false, "Unable to access torch")
-        }
-        
-        return CameraResponse(true, "")
-    }
-    
     
     // MARK: Capturer
     @discardableResult
@@ -1169,10 +958,6 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
         //os_log("Frame captured %@ x %@ pixels", log: Log.rtc, type: .debug, String(frame.width), String(frame.height))
         
         if let local = localVideoSource {
-            if !capturingScreenshot {
-                self.lastLocalFrame = frame
-            }
-            
             local.capturer(capturer, didCapture: frame)
         }
     }
@@ -1235,7 +1020,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
     }
 
     @discardableResult
-    internal func switchCamera(fromRemoteAgent: Bool = false) -> CameraResponse {
+    internal func switchCamera() -> CameraResponse {
         //#warning("Feature Idea: Change mic direction when user is switching camera (https://www.twilio.com/docs/video/ios-v2-configuring-audio-video-inputs-and-outputs)")
         self.usingFrontCamera = !self.usingFrontCamera
         
@@ -1245,42 +1030,7 @@ internal final class RTCModule: NSObject, RTCPeerConnectionDelegate, RTCVideoCap
             publishVideoResolution = .max
         }
         
-        //Inform the client about a successful camera switch, if triggered by a remote agent
-        let response = self.startCapture(type: switchCameStreamType, streamId: switchCamStreamId)
-        if fromRemoteAgent && response.0 == true {
-            delegate?.rtcClient(agentSwitchedCamera: self.usingFrontCamera)
-        }
-        
-        return response
-    }
-    
-    internal func getSnapshot() -> UIImage? {
-        if let frame = lastLocalFrame {
-            capturingScreenshot = true
-            
-            let buffer = frame.buffer as! RTCCVPixelBuffer
-            let pixBuffer = buffer.pixelBuffer
-            let ciImage = CIImage(cvImageBuffer: pixBuffer)
-            
-            let context = CIContext(options:nil)
-            let cgImage = context.createCGImage(ciImage, from: ciImage.extent)
-            
-            if let cgi = cgImage {
-                let imageRaw = UIImage(cgImage: cgi)
-                let image = imageRaw.fixedOrientation().imageRotatedByDegrees(degrees: 90.0)
-                
-                capturingScreenshot = false
-                return image
-            } else {
-                capturingScreenshot = false
-                return nil
-            }
-            
-        } else {
-            os_log("getSnapshot() error", log: Log.rtc, type: .error)
-            capturingScreenshot = false
-            return nil
-        }
+        return self.startCapture(type: switchCameStreamType, streamId: switchCamStreamId)
     }
     
     @discardableResult

@@ -66,7 +66,12 @@ internal final class PublishStreamRequest {
         } else {
             metaDataDictionary["participantName"] = NSNull()
         }
-        
+
+        //Tells the agent this screen is an in-call co-browse, not a regular screen share
+        if streamType == .screen && AuviousConferenceSDK.sharedInstance.screenStreamIsCobrowse {
+            metaDataDictionary["cobrowse"] = true
+        }
+
         dictionary["metadata"] = metaDataDictionary
         
         return dictionary

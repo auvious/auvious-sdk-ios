@@ -40,126 +40,40 @@ internal enum NotificationType {
     }
 }
 
-internal class DismissableNotificationView: UIView {
-
-    //UI components
-    internal var titleLabel: UILabel = UILabel(frame: .zero)
-    internal var subtitleLabel: UILabel = UILabel(frame: .zero)
+/// Top banner for short notices in the video call (e.g. recording started/stopped)
+internal class DismissableNotificationView: AuviousBannerView {
 
     init(title: String, subtitle: String?) {
         super.init(frame: .zero)
-        setupUI()
+        translatesAutoresizingMaskIntoConstraints = false
         updateUI(withTitle: title, subtitle: subtitle)
     }
 
     required init?(coder: NSCoder) {
-        super.init(frame: .zero)
-        setupUI()
-    }
-
-    private func setupUI() {
+        super.init(coder: coder)
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .clear
-        layer.cornerRadius = 14
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.12
-        layer.shadowOffset = CGSize(width: 0, height: 4)
-        layer.shadowRadius = 12
-
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
-        blurView.translatesAutoresizingMaskIntoConstraints = false
-        blurView.layer.cornerRadius = 14
-        blurView.layer.masksToBounds = true
-        addSubview(blurView)
-        blurView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        blurView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        blurView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        blurView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-
-        let content = blurView.contentView
-
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        content.addSubview(titleLabel)
-        titleLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 12).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
-        titleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        titleLabel.textColor = .label
-
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        content.addSubview(subtitleLabel)
-        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        subtitleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
-        subtitleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
-        subtitleLabel.font = UIFont.systemFont(ofSize: 13)
-        subtitleLabel.textColor = .secondaryLabel
     }
 
-    internal func updateUI(withTitle: String, subtitle: String?) {
-        titleLabel.text = withTitle
-        if let subtitle = subtitle {
-            subtitleLabel.text = subtitle
-        }
+    internal func updateUI(withTitle: String, subtitle: String?, symbol: String? = nil, image: UIImage? = nil, tint: UIColor? = nil) {
+        configure(symbol: symbol, image: image, tint: tint, title: withTitle, message: subtitle)
     }
 }
 
-internal class NetworkDetailsNotificationView: UIView {
-
-    //UI components
-    internal var titleLabel: UILabel = UILabel(frame: .zero)
-    internal var subtitleLabel: UILabel = UILabel(frame: .zero)
+/// Top banner with the network indicator details, also used for participant limit notices
+internal class NetworkDetailsNotificationView: AuviousBannerView {
 
     private var statistics: NetworkStatistics?
 
     init(with details: NetworkStatistics?) {
         super.init(frame: .zero)
-        self.statistics = details
-        setupUI()
+        translatesAutoresizingMaskIntoConstraints = false
+        updateUI(with: details)
     }
 
     required init?(coder: NSCoder) {
-        super.init(frame: .zero)
-        setupUI()
-    }
-
-    private func setupUI() {
+        super.init(coder: coder)
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .clear
-        layer.cornerRadius = 14
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.12
-        layer.shadowOffset = CGSize(width: 0, height: 4)
-        layer.shadowRadius = 12
-
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
-        blurView.translatesAutoresizingMaskIntoConstraints = false
-        blurView.layer.cornerRadius = 14
-        blurView.layer.masksToBounds = true
-        addSubview(blurView)
-        blurView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        blurView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        blurView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        blurView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-
-        let content = blurView.contentView
-
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        content.addSubview(titleLabel)
-        titleLabel.topAnchor.constraint(equalTo: content.topAnchor, constant: 12).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
-        titleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
-        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        titleLabel.textColor = .label
-
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        content.addSubview(subtitleLabel)
-        subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        subtitleLabel.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14).isActive = true
-        subtitleLabel.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14).isActive = true
-        subtitleLabel.font = UIFont.systemFont(ofSize: 13)
-        subtitleLabel.textColor = .secondaryLabel
-
-        updateUI(with: statistics)
+        updateUI(with: nil)
     }
 
     internal func updateUI(with data: NetworkStatistics?) {
@@ -175,13 +89,12 @@ internal class NetworkDetailsNotificationView: UIView {
             detailsMsg = String(format: detailsText, "n/a", "n/a", "n/a")
         }
 
-        titleLabel.text = NSLocalizedString("Network indicator (beta)", comment: "Notification")
-        subtitleLabel.text = detailsMsg
+        configure(symbol: "wifi", tint: .systemBlue, title: NSLocalizedString("Network indicator (beta)", comment: "Notification"), message: detailsMsg)
     }
 
+    /// A participant notice (e.g. limited visibility) shown in the same banner
     internal func updateUI(with title: String, subtitle: String) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
+        configure(symbol: "person.2.fill", tint: .systemBlue, title: title, message: subtitle)
     }
 }
 

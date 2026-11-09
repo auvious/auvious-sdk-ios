@@ -10,26 +10,11 @@ import UIKit
 import AuviousSDK
 import Sentry
 
-// Apps built with the iOS 27 SDK must use the scene life cycle (they don't launch
-// otherwise): Info.plist's scene manifest loads Main.storyboard into this scene's window.
-// With scenes UIKit no longer calls the UIApplicationDelegate foreground/background
-// methods, so the SDK's pause/resume hooks are called from here.
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    var window: UIWindow?
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        print("sceneDidEnterBackground")
-        AuviousConferenceSDK.sharedInstance.onApplicationPause()
-    }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        print("sceneDidBecomeActive")
-        AuviousConferenceSDK.sharedInstance.onApplicationResume()
-    }
-}
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    var window: UIWindow?
+
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -40,8 +25,58 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             options.dsn = "https://74765e10688d4f828efd5bc5320c607c@sentry.auvious.com/9"
             options.debug = false
             options.environment = "development"
+            #if DEBUG
+            // Xcode re-runs kill the app without a version change, which Sentry reports as a watchdog termination
+            options.enableWatchdogTerminationTracking = false
+            #endif
         }
 
         return true
     }
+
+    // MARK: Orientation
+
+    //Co-browse holds the app in portrait; otherwise the orientations in Info.plist
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        let appOrientations: UIInterfaceOrientationMask = UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown
+        return AuviousCobrowse.shared.supportedInterfaceOrientations(otherwise: appOrientations)
+    }
+
+    // MARK: UISceneSession Lifecycle
+
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    }
+
+    // With the scene life cycle the app-level callbacks below are not called;
+    // the SDK pause/resume calls live in SceneDelegate.
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        
+        print("applicationWillResignActive")
+    }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        print("applicationDidEnterBackground")
+    }
+
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        print("applicationDidBecomeActive")
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+
 }
+

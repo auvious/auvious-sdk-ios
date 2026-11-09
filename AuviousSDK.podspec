@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AuviousSDK'
-  s.version          = '1.5.0'
+  s.version          = '1.5.0-beta.3'
   s.summary          = 'AuviousSDK makes it easy to use Auvious services in your app.'
 
 # This description is used to generate tags and improve search results.
@@ -18,8 +18,8 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-AuviousSDK makes it easy to use Auvious services in your app. Add now video call,
-multiparty video conferencing, snapshot, and many more things are coming your way!
+AuviousSDK makes it easy to use Auvious services in your app. Add now multiparty
+video conferencing, co-browsing, and many more things are coming your way!
                        DESC
 
   s.homepage         = 'https://github.com/auvious/auvious-sdk-ios.git'
@@ -41,6 +41,9 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
     'AuviousSDKAssets' => ['Assets.xcassets']
   }
 
+  # The full version, pre-release included: CFBundleShortVersionString only keeps 1.5.0 of 1.5.0-beta.2
+  s.info_plist = { 'AuviousSDKVersion' => s.version.to_s }
+
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'SwiftyJSON', '~> 5.0'
@@ -50,7 +53,7 @@ multiparty video conferencing, snapshot, and many more things are coming your wa
   s.dependency 'Starscream_IOS13', '~> 4.0.4'
   s.dependency 'Sentry', '~> 8.0'
   
-  s.swift_versions = '4.2'
+  s.swift_versions = '5.0'
   s.pod_target_xcconfig = {
     'ENABLE_BITCODE' => 'NO',
     'GCC_PREPROCESSOR_DEFINITIONS' => 'AUVIOUSSDK',

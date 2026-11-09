@@ -17,15 +17,6 @@ enum Router: URLRequestConvertible2 {
     //IceSupport
     case getIceServers(Void)
     
-    // Calls
-    case call(object: CallRequest)
-    case answerCall(object: CallAnswerRequest)
-    case rejectCall(object: CallRejectRequest)
-    case callRinging(object: CallRingingRequest)
-    case callHangup(object: CallHangupRequest)
-    case callCancel(object: CallCancelRequest)
-    case addCallIceCandidates(object: CallIceCandidatesRequest)
-    
     //Conferences
     case getConferences(Void)
     case getConferenceDetails(id: String)
@@ -49,7 +40,15 @@ enum Router: URLRequestConvertible2 {
     case getEndpointDetails(id: String)
     case keepAlive(object: KeepAliveRequest)
     case unregisterEndpoint(object: UnregisterEndpointRequest)
-    
+    case sendEvent(object: SendEventRequest)
+
+    //Tickets
+    case getTicket(id: String)
+
+    //Sketch
+    case joinSketch(id: String, object: SketchMemberRequest)
+    case broadcastSketch(id: String, body: [String: Any])
+
     func encodeWithURLComponents(_ parameters: [String: Any]) -> String {
         var components = URLComponents()
         components.queryItems = parameters.map { key, value in
@@ -114,42 +113,6 @@ enum Router: URLRequestConvertible2 {
         //IceSupport
         case .getIceServers():
             query = "rtc-api/iceServers"
-            
-        //Calls
-        case .call(let object):
-            query = "rtc-api/calls/call"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-        
-        case .answerCall(let object):
-            query = "rtc-api/calls/answer"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-        
-        case .rejectCall(let object):
-            query = "rtc-api/calls/reject"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callRinging(let object):
-            query = "rtc-api/calls/ringing"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callHangup(let object):
-            query = "rtc-api/calls/hangup"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .callCancel(let object):
-            query = "rtc-api/calls/cancel"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
-            
-        case .addCallIceCandidates(let object):
-            query = "rtc-api/calls/addIceCandidates"
-            httpMethod = "POST"
-            bodyParams = object.toDictionary() as [String : AnyObject]
             
         //Conferences
         case .getConferences():
@@ -241,6 +204,27 @@ enum Router: URLRequestConvertible2 {
             query = "rtc-api/users/endpoints/unregister"
             httpMethod = "POST"
             bodyParams = object.toDictionary() as [String : AnyObject]
+
+        case .sendEvent(let object):
+            query = "rtc-api/users/endpoints/sendEvent"
+            httpMethod = "POST"
+            bodyParams = object.toDictionary()
+
+        //Tickets
+        case .getTicket(let id):
+            sendAuthenticationHeader = false
+            query = "security/ticket/" + id
+
+        //Sketch
+        case .joinSketch(let id, let object):
+            query = "api/sketch/" + id
+            httpMethod = "PUT"
+            bodyParams = object.toDictionary()
+
+        case .broadcastSketch(let id, let body):
+            query = "api/sketch/" + id
+            httpMethod = "POST"
+            bodyParams = body
         }
         
         var urlRequest = URLRequest(url: url.appendingPathComponent(query))

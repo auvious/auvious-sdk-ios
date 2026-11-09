@@ -56,6 +56,8 @@ internal class AuthenticationModule {
                         
                         //Obtain RTC server configuration
                         API2.sharedInstance.getIceServers(onSuccess: {json in
+                            //Replace the previous login's servers, or every rejoin adds another copy (more sockets per connection)
+                            ServerConfiguration.iceServers.removeAll()
                             for iceServer in json!["iceServers"].array! {
                                 let urlStrings = iceServer["urls"].array?.map({ (url) -> String in
                                     url.stringValue

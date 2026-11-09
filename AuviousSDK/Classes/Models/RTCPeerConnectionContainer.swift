@@ -17,7 +17,6 @@ internal final class RTCPeerConnectionContainer: CustomStringConvertible {
     var iceCandidates: [RTCIceCandidate] = [RTCIceCandidate]()
     var streamType: StreamType!
     var isLocal: Bool = false
-    var callId: String?
     /// True once setRemoteDescription has succeeded for this connection.
     var remoteDescriptionSet: Bool = false
     /// Number of candidates already sent to the server (for trickle-ICE).
@@ -28,7 +27,7 @@ internal final class RTCPeerConnectionContainer: CustomStringConvertible {
     var deliveredRemoteStreamIds: Set<String> = []
     
     var description: String {
-        return "Stream id \(String(describing: streamId)) - Call id \(String(describing: callId)) - isLocal \(isLocal)"
+        return "Stream id \(String(describing: streamId)) - isLocal \(isLocal)"
     }
     
     init(conn: RTCPeerConnection, streamId: String, endpointId: String, userId: String, type: StreamType, isLocal: Bool) {

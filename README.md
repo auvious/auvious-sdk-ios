@@ -337,10 +337,7 @@ Used when presenting `AuviousConferenceVCNew` for the built-in conference UI.
 
 ## Examples
 
-The following example applications are included in this repository. If unsure, begin with ExampleSimpleConference, which demonstrates how to use a ready-to-use ViewController we provide, for joining a video conference call.
-
-- [ExampleSimpleConference](Example/ExampleSimpleConference)
-- [ExampleCall](Example/ExampleCall), [ExampleSimpleCall](Example/ExampleSimpleCall) and [ExampleConference](Example/ExampleConference): not maintained, their targets are commented out in `Example/Podfile` and don't build as they are
+This repository includes one example application, [ExampleSimpleConference](Example/ExampleSimpleConference), which demonstrates how to use a ready-to-use ViewController we provide, for joining a video conference call.
 
 To try ExampleSimpleConference run `pod install` in `Example/`, then open `Example/AuviousSDK.xcworkspace` in Xcode. Apps built with Xcode 27 (iOS 27 SDK) must use the scene life cycle; ExampleSimpleConference shows how (`SceneDelegate` in its `AppDelegate.swift`).
 
@@ -365,47 +362,38 @@ both sides only use the loopback interface.
 
 ## Publish version
 
-Follow the steps below to publish a new version
+A version is published to two GitHub repos: its source as a git tag on
+github.com/auvious/auvious-sdk-ios (the podspec's `source`), and its podspec in the spec repo
+github.com/auvious/CocoaPodSpecs, where `pod install` finds it.
 
-### Publish to git
+### From CI
 
-Increase the version in `AuviousSDK.podspec`
+1. Set the version in `AuviousSDK.podspec` (e.g. `1.5.0`, `1.5.0-beta.1`, `1.5.0-rc.1`), add release notes
+   below, run `pod install` in `Example/` and commit `Podfile.lock`.
+2. Tag that commit on GitLab with the same version and push the tag.
+3. In the tag's pipeline, once build-example and test-sdk passed, start the manual job **publish**.
 
-Tag git with the version (ex `1.2.0`)
+It pushes the tag to GitHub, then adds the podspec to the spec repo (`ci/publish.sh`). It checks
+before pushing anything: the tag matches `s.version`, write access to both repos, and the version
+isn't in the spec repo already with other content (then tag a new version). Safe to retry.
 
-Push the version and the tag to github
+It needs the CI variable `GITHUB_TOKEN` (masked, protected): a GitHub token with Contents write
+access to both repos. Version tags have to be protected tags, or the job doesn't appear.
 
-### Publish Pod
+### By hand
 
-If this is the first time you do this process in your machine, you need to have cocoapods installed. Follow the instructions in http://cocoapods.org on how to install it in your machine.
-
-Once you have the pod command ready, add the auvious podspec repo to your pod repos by running this command. This will add a repo that requires SSH authentication so be sure that you have setup an SSH key with gitHub.
-
-```
-pod repo add <your-pod-name> git@github.com:auvious/CocoaPodSpecs.git
-```
-
-Example:
+Push the version's commit and tag to github.com/auvious/auvious-sdk-ios, then:
 
 ```
 pod repo add auvious-cocoa-pod git@github.com:auvious/CocoaPodSpecs.git
+pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings --skip-tests
 ```
 
-Next you need to push to that repo
-
-```
-pod repo push <your-pod-name> AuviousSDK.podspec --verbose --allow-warnings
-```
-
-Example:
-
-```
-pod repo push auvious-cocoa-pod AuviousSDK.podspec --verbose --allow-warnings
-```
-
-`pod repo push` first validates the pod, and that now includes the test spec: it builds the TestHost app
-and runs the [tests](#tests) on an iOS simulator, so it needs Xcode with a simulator runtime and takes a few
-minutes longer. When CI's test-sdk passed for the tagged commit, `--skip-tests` skips them.
+`pod repo push` first builds the pod. With Xcode 27 that build fails on the dependencies (Sentry,
+SwiftyJSON and the _IOS13 pods declare iOS 11–13, Xcode 27 accepts 15 and later), which the Example's
+Podfile fixes for apps but the lint can't. CI's publish job therefore lints with `--quick` and commits the
+podspec itself; build-example and test-sdk build and test the same commit. Without `--skip-tests`, the lint
+also builds the TestHost app and runs the [tests](#tests) on a simulator.
 
 ## Release notes
 

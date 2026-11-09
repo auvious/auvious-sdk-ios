@@ -19,7 +19,8 @@ extension AuviousConferenceVCNew {
 
         let corner: Corner
         if oldSize == UIScreen.main.bounds.size {
-            corner = .bottomRight
+            //While co-browsing the bottom belongs to the co-browse dock
+            corner = cobrowseSession != nil ? .topRight : .bottomRight
         } else {
             corner = closestCorner(for: pipView)
         }
@@ -92,7 +93,8 @@ extension AuviousConferenceVCNew {
     }
     
     func toggleSharingBorder(mode: Bool) {
-        if mode {
+        //Co-browse frames the whole screen instead of the PiP
+        if mode && cobrowseSession == nil {
             view.layer.borderWidth = 4
             view.layer.borderColor = UIColor.red.cgColor
             view.layer.masksToBounds = false
@@ -102,7 +104,9 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func keyboardWillShow(_ notification: Notification) {
-        guard let pipView = self.view,
+        //Only the floating PiP window moves out of the keyboard's way, never the full screen call
+        guard screenMode != .fullScreen,
+              let pipView = self.view,
               currentCorner == .bottomLeft || currentCorner == .bottomRight,
               let userInfo = notification.userInfo,
               let keyboardFrameScreen = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
@@ -122,38 +126,19 @@ extension AuviousConferenceVCNew {
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
-        guard let pipView = self.view,
+        //iOS also sends this when nothing moved the PiP, e.g. when the app comes back after a screenshot.
+        //Only a PiP that made way for the keyboard goes back to its corner.
+        guard currentKeyboardFrame != nil else { return }
+        currentKeyboardFrame = nil
+
+        guard screenMode != .fullScreen,
+              let pipView = self.view,
               let container = pipView.superview else { return }
 
-        currentKeyboardFrame = nil
-        let newOrigin = pipOrigin(for: currentCorner, viewSize: pipView.frame.size, in: container)
+        let center = pipAnchorPoint(for: currentCorner, viewSize: pipView.bounds.size, in: container)
 
         UIView.animate(withDuration: 0.3) {
-            pipView.frame.origin = newOrigin
-        }
-    }
-    
-    func pipOrigin(for corner: Corner, viewSize: CGSize, in container: UIView) -> CGPoint {
-        let margin: CGFloat = 20
-        let containerSize = container.bounds.size
-
-        var bottomSafeY = containerSize.height - viewSize.height - margin
-
-        // Adjust if keyboard is present and overlaps
-        if let keyboardFrame = currentKeyboardFrame {
-            let keyboardFrameInView = container.convert(keyboardFrame, from: nil)
-            bottomSafeY = min(bottomSafeY, keyboardFrameInView.minY - viewSize.height - margin)
-        }
-
-        switch corner {
-        case .topLeft:
-            return CGPoint(x: margin, y: margin)
-        case .topRight:
-            return CGPoint(x: containerSize.width - viewSize.width - margin, y: margin)
-        case .bottomLeft:
-            return CGPoint(x: margin, y: bottomSafeY)
-        case .bottomRight:
-            return CGPoint(x: containerSize.width - viewSize.width - margin, y: bottomSafeY)
+            pipView.center = center
         }
     }
 }
