@@ -49,7 +49,7 @@ internal class AuthenticationModule {
                     
                     self.isLoggedIn = true
                     
-                    os_log("Logged in as user id %@", log: Log.auth, type: .debug, userId)
+                    sdkLog("Logged in as user id %@", log: Log.auth, type: .debug, userId)
                     
                     //Create an endpoint
                     UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: {(newEndpointId) in
@@ -72,11 +72,11 @@ internal class AuthenticationModule {
                             }
                             onSuccess(newEndpointId, self.loginResponse?.conferenceId)
                         }, onFailure: {error in
-                            os_log("error getting ice servers %@", log: Log.auth, type: .error, error.localizedDescription)
+                            sdkLog("error getting ice servers %@", log: Log.auth, type: .error, error.localizedDescription)
                             onFailure(error)
                         })
                     }, onFailure: {(error) in
-                        os_log("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
+                        sdkLog("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
                         onFailure(error)
                     })
                 }

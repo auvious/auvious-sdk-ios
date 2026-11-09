@@ -74,7 +74,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
-        os_log("UI Conference component: initialised")
+        sdkLog("UI Conference component: initialised")
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -93,27 +93,27 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         if !performedInitialValidations {
             //Check for permissions
             if !validateVideoPermissions() {
-                os_log("UI Conference component: viewDidAppear - no video permission, returning error")
+                sdkLog("UI Conference component: viewDidAppear - no video permission, returning error")
                 handleError(AuviousSDKError.videoPermissionIsDisabled)
                 return
             }
             
             if !validateMicPermissions() {
-                os_log("UI Conference component: viewDidAppear - no audio permission, returning error")
+                sdkLog("UI Conference component: viewDidAppear - no audio permission, returning error")
                 handleError(AuviousSDKError.audioPermissionIsDisabled)
                 return
             }
             
             //Check credentials
             if username.isEmpty || password.isEmpty {
-                os_log("UI Conference component: viewDidAppear - username/password empty, returning error")
+                sdkLog("UI Conference component: viewDidAppear - username/password empty, returning error")
                 handleError(AuviousSDKError.missingSDKCredentials)
                 return
             }
             
             //Check call target
             if conference.isEmpty {
-                os_log("UI Conference component: viewDidAppear - conference is empty, returning error")
+                sdkLog("UI Conference component: viewDidAppear - conference is empty, returning error")
                 handleError(AuviousSDKError.missingCallTarget)
                 return
             }
@@ -124,10 +124,10 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
         if performedInitialValidations && !conferenceJoined {
             AuviousConferenceSDK.sharedInstance.delegate = self
             AuviousConferenceSDK.sharedInstance.configure(params: [:], username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
-            os_log("UI Conference component: Configured ConferenceSDK")
+            sdkLog("UI Conference component: Configured ConferenceSDK")
             
             AuviousConferenceSDK.sharedInstance.login(onLoginSuccess: {(userId, conferenceId) in
-                os_log("UI Conference component: Login success")
+                sdkLog("UI Conference component: Login success")
                 
                 self.conference = conferenceId!
                 AuviousConferenceSDK.sharedInstance.joinConference(conferenceId: self.conference, onSuccess: {(joinedConference) in
@@ -141,7 +141,7 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
                         self.handleExistingConferenceStreams()
                         self.startLocalStream()
                     } else {
-                        os_log("WARNING: Unable to join conference")
+                        sdkLog("WARNING: Unable to join conference")
                     }
                 }, onFailure: {(error) in
                     self.handleError(error)
@@ -256,28 +256,28 @@ public class AuviousConferenceVC: UIViewController, AuviousSDKConferenceDelegate
     public func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {
         switch newState {
         case .localStreamIsConnecting:
-            os_log("Local Stream Is Connecting")
+            sdkLog("Local Stream Is Connecting")
         case .localStreamConnected:
-            os_log("Local Stream Connected")
+            sdkLog("Local Stream Connected")
             didPublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsConnecting:
-            os_log("Remote Stream Is Connecting")
+            sdkLog("Remote Stream Is Connecting")
         case .remoteStreamConnected:
-            os_log("Remote Stream Connected")
+            sdkLog("Remote Stream Connected")
         case .localStreamIsDisconnecting:
-            os_log("Local Stream Is Disonnecting")
+            sdkLog("Local Stream Is Disonnecting")
         case .localStreamDisconnected:
-            os_log("Local Stream Disconnected")
+            sdkLog("Local Stream Disconnected")
             didUnpublishStream(streamId: streamId, streamType: streamType)
         case .remoteStreamIsDisconnecting:
-            os_log("Remote Stream Is Disonnecting")
+            sdkLog("Remote Stream Is Disonnecting")
         case .remoteStreamDisconnected:
-            os_log("Remote Stream Disconnected")
+            sdkLog("Remote Stream Disconnected")
             handleStreamDisconnection(streamId: streamId, streamType:streamType, endpointId: endpointId)
         case .localCaptureStarted:
-            os_log("Local Capture Started")
+            sdkLog("Local Capture Started")
         case .localCaptureStoped:
-            os_log("Local Capture Stoped")
+            sdkLog("Local Capture Stoped")
         }
     }
     

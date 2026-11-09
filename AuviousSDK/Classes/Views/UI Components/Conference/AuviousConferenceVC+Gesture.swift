@@ -5,6 +5,7 @@
 //  Created by Jason Kritikos on 19/11/25.
 //
 
+import os
 import Foundation
 
 extension AuviousConferenceVCNew {
@@ -159,7 +160,7 @@ extension AuviousConferenceVCNew {
             bottomY = min(bottomY, limits.maxY)
         }
         
-        print("safeTop: \(safeTop), topY: \(topY)")
+        sdkLog("%@", log: Log.conferenceUI, type: .debug, "safeTop: \(safeTop), topY: \(topY)")
         
         let leftX = margin + viewSize.width / 2
         let rightX = containerSize.width - margin - viewSize.width / 2

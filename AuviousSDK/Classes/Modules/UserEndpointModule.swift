@@ -58,7 +58,7 @@ internal class UserEndpointModule {
             }
             
         }, onFailure: {(error) in
-            os_log("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
+            sdkLog("CreateEndpoint failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -88,7 +88,7 @@ internal class UserEndpointModule {
     
     //Stops the keep alive timer
     internal func stopKeepAliveTimer() {
-        os_log("Stopped keep alive timer", log: Log.auth, type: .debug)
+        sdkLog("Stopped keep alive timer", log: Log.auth, type: .debug)
         keepAliveTimer?.invalidate()
     }
     
@@ -118,7 +118,7 @@ internal class UserEndpointModule {
                 //os_log("Keep Alive Success", log: Log.auth, type: .debug)
             }
         }, onFailure: {(error) in
-            os_log("Keep Alive failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
+            sdkLog("Keep Alive failed: Error %@", log: Log.auth, type: .error, error.localizedDescription)
             self.callDelegate?.userEndpoint(onError: AuviousSDKError.connectionError)
             self.conferenceDelegate?.userEndpoint(onError: AuviousSDKError.connectionError)
         })

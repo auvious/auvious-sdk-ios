@@ -64,7 +64,7 @@ internal final class ArPointerSession {
     /// Delivers one user event
     var send: (SendEventRequest) -> Void = { request in
         API2.sharedInstance.sendEvent(request, onSuccess: { _ in }, onFailure: { error in
-            os_log("AR pointer event failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("AR pointer event failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
         })
     }
 
@@ -124,7 +124,7 @@ internal final class ArPointerSession {
                                 color: color,
                                 index: json["index"].intValue,
                                 ttl: json["ttl"].double ?? ArPointerSession.pointTimeToLive)
-            os_log("AR pointer point on %@", log: Log.conferenceSDK, type: .debug, target.correlationId)
+            sdkLog("AR pointer point on %@", log: Log.conferenceSDK, type: .debug, target.correlationId)
 
         case .arPointerFreezeFrameChanged:
             guard target != nil, isAimedAtTarget(json) else { return }

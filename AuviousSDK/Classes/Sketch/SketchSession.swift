@@ -249,7 +249,7 @@ internal final class SketchSession {
                 return
             }
 
-            os_log("Sketch join failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("Sketch join failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             self.joiningSketchId = nil
         })
     }
@@ -260,7 +260,7 @@ internal final class SketchSession {
         joiningSketchId = nil
         sketchId = id
         self.version = version
-        os_log("Joined sketch %@", log: Log.conferenceSDK, type: .debug, id)
+        sdkLog("Joined sketch %@", log: Log.conferenceSDK, type: .debug, id)
 
         //Share anything the customer drew before the agent started the sketch
         if let me = identity() {
@@ -305,7 +305,7 @@ internal final class SketchSession {
             }
 
             guard retryable, attempt < 3, let self = self, self.sketchId == sketchId else {
-                os_log("Sketch broadcast failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+                sdkLog("Sketch broadcast failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
                 return
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(attempt)) {

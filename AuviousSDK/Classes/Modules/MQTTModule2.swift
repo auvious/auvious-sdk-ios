@@ -86,12 +86,12 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
         cancelRetry()
         startConnecting()
         
-        print("MQTT2 connect()")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 connect()")
     }
     
     /// Clean disconnect — will not auto-reconnect.
     func disconnect() {
-        os_log("MQTT2 disconnecting (permanent)", log: Log.mqtt, type: .debug)
+        sdkLog("MQTT2 disconnecting (permanent)", log: Log.mqtt, type: .debug)
         self.mqtt.autoReconnect = false
         cancelRetry()
         cancelConnectWatchdog()
@@ -100,7 +100,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
 
     /// Disconnect and reconnect with updated credentials (used by token refresh).
     func disconnectAndReconnect() {
-        os_log("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
+        sdkLog("MQTT2 disconnecting (will reconnect)", log: Log.mqtt, type: .debug)
         guard mqtt != nil else { return }
         needsOwnRetry = true
         refreshCredentials()
@@ -117,24 +117,24 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
 
     func reconnect() {
-        os_log("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
+        sdkLog("MQTT2 reconnect called", log: Log.mqtt, type: .debug)
         //Not after a disconnect of ours (e.g. logout)
         guard mqtt != nil, mqtt.autoReconnect else { return }
         guard !awaitingClose else {
-            os_log("MQTT2 refused connection still closing - retrying once it has", log: Log.mqtt, type: .debug)
+            sdkLog("MQTT2 refused connection still closing - retrying once it has", log: Log.mqtt, type: .debug)
             return
         }
         switch mqtt.connState {
         case .connected:
-            os_log("MQTT2 session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
+            sdkLog("MQTT2 session status CONNECTED - no need to reconnect", log: Log.mqtt, type: .debug)
         case .connecting:
-            os_log("MQTT2 session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
+            sdkLog("MQTT2 session status CONNECTING - no need to reconnect", log: Log.mqtt, type: .debug)
             //A connect CocoaMQTT started, or one whose watchdog already ran: still give it a deadline
             if connectWatchdog == nil {
                 armConnectWatchdog()
             }
         default:
-            os_log("MQTT2 reconnecting", log: Log.mqtt, type: .debug)
+            sdkLog("MQTT2 reconnecting", log: Log.mqtt, type: .debug)
             refreshCredentials()
             startConnecting()
         }
@@ -151,7 +151,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
             guard let self = self else { return }
             self.connectWatchdog = nil
             guard self.mqtt.autoReconnect, self.mqtt.connState == .connecting else { return }
-            os_log("MQTT2 still connecting after %.0fs, starting over", log: Log.mqtt, type: .error, self.connectTimeout)
+            sdkLog("MQTT2 still connecting after %.0fs, starting over", log: Log.mqtt, type: .error, self.connectTimeout)
             self.refreshCredentials()
             self.startConnecting()
         }
@@ -192,7 +192,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
 
     private func subscribeForUserEndpoint() {
         let topic = "user/\(ServerConfiguration.mqttUser)/\(self.endpointId ?? "unknown")"
-        print("MQTT2 subscribing to topic \(topic)")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 subscribing to topic \(topic)")
         self.mqtt.subscribe(topic, qos: CocoaMQTTQoS.qos1)
     }
  
@@ -203,7 +203,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck) {
-        print("MQTT2 didConnectAck \(ack)")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 didConnectAck \(ack)")
         if ack == .accept {
             needsOwnRetry = false
             cancelRetry()
@@ -227,10 +227,10 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16) {
-        os_log("MQTT received message:", log: Log.mqtt, type: .debug)
+        sdkLog("MQTT received message:", log: Log.mqtt, type: .debug)
         if let payload = message.string {
             let jsonObject = JSON(parseJSON: payload)
-            os_log("%@", log: Log.mqtt, type: .debug, jsonObject.debugDescription)
+            sdkLog("%@", log: Log.mqtt, type: .debug, jsonObject.debugDescription)
 
             //User events (co-browse, sketch, laser) are not conference versioned, route them directly
             if let userEventType = RtcUserEventType(rawValue: jsonObject["type"].stringValue) {
@@ -266,7 +266,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
                 conferenceDelegate?.conferenceMessageReceived(model)
                 
             } else {
-                os_log("MQTT message with unknown type %@", log: Log.mqtt, type: .debug, jsonObject["type"].stringValue)
+                sdkLog("MQTT message with unknown type %@", log: Log.mqtt, type: .debug, jsonObject["type"].stringValue)
                 let model: ConferenceEvent = ConferenceEvent(fromJson: jsonObject)
                 conferenceDelegate?.conferenceMessageReceived(model)
             }
@@ -274,7 +274,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopics success: NSDictionary, failed: [String]) {
-        print("MQTT2 didSubscribeTopics \(success)")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 didSubscribeTopics \(success)")
         
         if !success.allKeys.isEmpty {
             //Notify the SDK of the topic subcription
@@ -301,7 +301,7 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: (any Error)?) {
-        print("MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect), error=\(err.map { String(describing: $0) } ?? "none"))")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 mqttDidDisconnect (autoReconnect=\(mqtt.autoReconnect), error=\(err.map { String(describing: $0) } ?? "none"))")
         //The watchdog stays: a stale close can arrive before the connect it belongs to is marked connecting
         awaitingClose = false
         guard mqtt.autoReconnect else { return }
@@ -315,6 +315,6 @@ internal final class MQTTModule2: CocoaMQTTDelegate {
     }
     
     func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
-        print("MQTT2 didStateChangeTo \(state.description)")
+        sdkLog("%@", log: Log.mqtt, type: .debug, "MQTT2 didStateChangeTo \(state.description)")
     }
 }

@@ -49,7 +49,7 @@ internal final class LoginResponse {
             ServerConfiguration.mqttUser = userId
             ServerConfiguration.mqttPass = accessToken
             
-            os_log("mqtt user %@", log: Log.auth, type: .debug, accessToken)
+            sdkLog("mqtt user %@", log: Log.auth, type: .debug, accessToken)
         }
     }
 }

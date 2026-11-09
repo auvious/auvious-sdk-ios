@@ -160,7 +160,9 @@ public final class AuviousCobrowse {
     private var controller: CobrowseSessionController?
     private weak var delegate: AuviousCobrowseDelegate?
 
-    private init() {}
+    private init() {
+        AuviousDiagnostics.start()
+    }
 
     /**
      Redeems the ticket, joins the agent's room and asks the customer to share their screen.

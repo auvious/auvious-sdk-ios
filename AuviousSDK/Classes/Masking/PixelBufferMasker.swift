@@ -11,6 +11,7 @@ import CoreVideo
 import ImageIO
 import QuartzCore
 import ReplayKit
+import os
 
 /**
  Blacks out masked regions directly in the ReplayKit pixel buffers before they reach WebRTC.
@@ -278,11 +279,11 @@ internal final class CaptureLatencyMeter {
         if let max = sorted.last {
             let average = sorted.reduce(0, +) / Double(sorted.count)
             let p95 = sorted[min(sorted.count - 1, Int(Double(sorted.count) * 0.95))]
-            print(String(format: "[Auvious masking] frame delay over %d frames: avg %.1f ms, p95 %.1f ms, max %.1f ms (window %.0f ms back / %.0f ms ahead)",
+            sdkLog("%@", log: Log.conferenceSDK, type: .debug, String(format: "[Auvious masking] frame delay over %d frames: avg %.1f ms, p95 %.1f ms, max %.1f ms (window %.0f ms back / %.0f ms ahead)",
                          sorted.count, average * 1000, p95 * 1000, max * 1000, MaskHistory.lookBehind * 1000, MaskHistory.lookAhead * 1000))
         }
         if foreignClockFrames > 0 {
-            print("[Auvious masking] \(foreignClockFrames) frames had timestamps on another clock; they were matched to the current time")
+            sdkLog("%@", log: Log.conferenceSDK, type: .debug, "[Auvious masking] \(foreignClockFrames) frames had timestamps on another clock; they were matched to the current time")
         }
         samples.removeAll(keepingCapacity: true)
         foreignClockFrames = 0

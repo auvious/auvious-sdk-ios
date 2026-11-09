@@ -147,7 +147,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     /// The conference we were last known to have joined (used for automatic rejoining)
     private var lastConferenceJoined: String? {
         didSet {
-            os_log("lastConferenceJoined set to %@", log: Log.conferenceSDK, type: .debug, String(describing: lastConferenceJoined))
+            sdkLog("lastConferenceJoined set to %@", log: Log.conferenceSDK, type: .debug, String(describing: lastConferenceJoined))
         }
     }
     
@@ -207,6 +207,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     }
 
     private init() {
+        AuviousDiagnostics.start()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleScreenshotTaken),
@@ -220,7 +221,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     /// A fallback timer resets the flag after 15 seconds if the app never backgrounds.
     @objc private func handleScreenshotTaken() {
         wasBackgroundedDueToScreenshot = true
-        os_log("Screenshot detected — suppressing next app resume rejoin", log: Log.conferenceSDK, type: .debug)
+        sdkLog("Screenshot detected — suppressing next app resume rejoin", log: Log.conferenceSDK, type: .debug)
 
         screenshotResetWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
@@ -237,7 +238,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     
     /// Background task completion handler, invalidates the background task.
     private func endBackgroundTask(){
-        os_log("Background task ended", log: Log.conferenceSDK, type: .debug)
+        sdkLog("Background task ended", log: Log.conferenceSDK, type: .debug)
         UIApplication.shared.endBackgroundTask(backgroundTask)
         backgroundTask = UIBackgroundTaskIdentifier.invalid
     }
@@ -311,12 +312,12 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 }
             }
 
-            os_log("Background audio active — keeping peer connections alive", log: Log.conferenceSDK, type: .debug)
+            sdkLog("Background audio active — keeping peer connections alive", log: Log.conferenceSDK, type: .debug)
             return
         }
 
         if uiConfiguration.backgroundAudioEnabled && !hostAppSupportsBackgroundAudio {
-            os_log("backgroundAudioEnabled is true but UIBackgroundModes 'audio' is missing from Info.plist — falling back to full teardown", log: Log.conferenceSDK, type: .error)
+            sdkLog("backgroundAudioEnabled is true but UIBackgroundModes 'audio' is missing from Info.plist — falling back to full teardown", log: Log.conferenceSDK, type: .error)
         }
 
         // Existing full teardown path
@@ -373,7 +374,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
 
         //stopScreenSharing() already told the delegate (screenSharingStopped)
-        os_log("Screen share stopped, the app left the foreground", log: Log.conferenceSDK, type: .debug)
+        sdkLog("Screen share stopped, the app left the foreground", log: Log.conferenceSDK, type: .debug)
     }
 
     /**
@@ -386,7 +387,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         
         // Background audio path: connections are still alive, just resume video
         if isBackgroundAudioActive {
-            os_log("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
+            sdkLog("Resuming from background audio — restoring video", log: Log.conferenceSDK, type: .debug)
             isBackgroundAudioActive = false
             didPauseForBackground = false
             stopBackgroundKeepAliveTimer()
@@ -438,7 +439,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
 
         //Ensure we are not resuming due to ReplayKit permission dialog closure
         guard !sharingMyScreen && !wasBackgroundedDueToScreenshot && !isPendingScreenSharePermission else {
-            print("onApplicationResume() called but we are sharing our screen / resuming from screenshot / pending screen share permission so no rejoin")
+            sdkLog("%@", log: Log.conferenceSDK, type: .debug, "onApplicationResume() called but we are sharing our screen / resuming from screenshot / pending screen share permission so no rejoin")
             wasBackgroundedDueToScreenshot = false
             screenshotResetWorkItem?.cancel()
             screenshotResetWorkItem = nil
@@ -534,7 +535,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 self.delegate?.auviousSDK(didRejoinConference: conf)
             }
         }, onFailure: {(error) in
-            os_log("Unable to rejoin conference %@ - error %@", log: Log.conferenceSDK, type: .error, conferenceId, error.localizedDescription)
+            sdkLog("Unable to rejoin conference %@ - error %@", log: Log.conferenceSDK, type: .error, conferenceId, error.localizedDescription)
             // Notify the delegate so the UI can surface the error rather than leaving
             // the user with a frozen stream and no feedback.
             self.delegate?.auviousSDK(onError: AuviousSDKError.connectionError)
@@ -704,7 +705,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                             
                         }, onFailure: {(error) in
                             let streamId = String(describing: peerConnection.streamId)
-                            os_log("unpublishAllLocalStreams() error for stream %@ - error %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
+                            sdkLog("unpublishAllLocalStreams() error for stream %@ - error %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
                         })
                     }
                 }
@@ -793,7 +794,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                             //success
                         }, onFailure: {(error) in
                             let streamId = String(describing: peerConnection.streamId)
-                            os_log("stopAllRemoteStreams() error for stream %@ is %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
+                            sdkLog("stopAllRemoteStreams() error for stream %@ is %@", log: Log.conferenceSDK, type: .error, streamId, error.localizedDescription)
                         })
                     }
                 }
@@ -846,7 +847,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 onSuccess(conference)
             }
         }, onFailure: {(error) in
-            os_log("CreateConference failed: Error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("CreateConference failed: Error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -873,26 +874,26 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         API2.sharedInstance.joinConference(request, onSuccess: {(json) in
             if json != nil {
                 
-                os_log("Joined conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
+                sdkLog("Joined conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                 //Retrieve and store the current conference state
                 API2.sharedInstance.getConferenceSimpleView(conferenceId, onSuccess: {(json) in
                     if let data = json {
                         
                         self.isConferenceOnHold = false
                         self.currentConference = ConferenceSimpleView(fromJson: data)
-                        os_log("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
+                        sdkLog("Obtained simple view for conference %@", log: Log.conferenceSDK, type: .debug, conferenceId)
                         //Notify the user of successfully joining
                         onSuccess(self.currentConference)
                         
                         //Process any messages we might have received before joining was complete
                         if !self.mqttCachedMessages.isEmpty {
                             for m in self.mqttCachedMessages {
-                                os_log("Processing cached MQTT msg", log: Log.conferenceSDK, type: .debug)
+                                sdkLog("Processing cached MQTT msg", log: Log.conferenceSDK, type: .debug)
                                 #warning("TODO: Extra val here")
                                 self.delegateConferenceMessage(msg: m)
                             }
 
-                            os_log("Finished processing of %d cached messages", log: Log.conferenceSDK, type: .debug, self.mqttCachedMessages.count)
+                            sdkLog("Finished processing of %d cached messages", log: Log.conferenceSDK, type: .debug, self.mqttCachedMessages.count)
                             self.mqttCachedMessages.removeAll()
                         }
 
@@ -906,7 +907,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 })
             }
         }, onFailure: {(error) in
-            os_log("JoinConference failed: Error  %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("JoinConference failed: Error  %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -1157,28 +1158,28 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     internal func removeLocalVideoStream() {
         if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
             stream.removeVideoTrack(localVideo)
-            os_log("RTCClient removed local video track", log: Log.conferenceSDK, type: .debug)
+            sdkLog("RTCClient removed local video track", log: Log.conferenceSDK, type: .debug)
         }
     }
     
     internal func removeLocalAudioStream() {
         if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
             stream.removeAudioTrack(localAudio)
-            os_log("RTCClient removed local audio track", log: Log.conferenceSDK, type: .debug)
+            sdkLog("RTCClient removed local audio track", log: Log.conferenceSDK, type: .debug)
         } 
     }
     
     internal func addLocalVideoStream() {
         if let stream = self.rtcClient.localStream, let localVideo = self.rtcClient.localVideoTrack {
             stream.addVideoTrack(localVideo)
-            os_log("RTCClient added local video track", log: Log.conferenceSDK, type: .debug)
+            sdkLog("RTCClient added local video track", log: Log.conferenceSDK, type: .debug)
         }
     }
     
     internal func addLocalAudioStream() {
         if let stream = self.rtcClient.localStream, let localAudio = self.rtcClient.localAudioTrack {
             stream.addAudioTrack(localAudio)
-            os_log("RTCClient added local audio track", log: Log.conferenceSDK, type: .debug)
+            sdkLog("RTCClient added local audio track", log: Log.conferenceSDK, type: .debug)
         }
     }
     
@@ -1201,7 +1202,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         //Call the api
         API2.sharedInstance.updateConferenceMetadata(request, onSuccess: {json in
             if let _ = json {
-                os_log("toggleLocalStream() success API", log: Log.conferenceSDK, type: .debug)
+                sdkLog("toggleLocalStream() success API", log: Log.conferenceSDK, type: .debug)
                 
                 if operation == .set {
                     if type == .video {
@@ -1221,7 +1222,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
                 onSuccess()
             }
         }, onFailure: {error in
-            os_log("toggleLocalStream() error API: %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("toggleLocalStream() error API: %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             onFailure(error)
         })
     }
@@ -1288,7 +1289,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         guard let _ = currentConference else {
             mqttCachedMessages.append(object)
             
-            os_log("WARNING: Caching conference msg received because we're not in a conference", log: Log.conferenceSDK, type: .debug)
+            sdkLog("WARNING: Caching conference msg received because we're not in a conference", log: Log.conferenceSDK, type: .debug)
             return
         }
         
@@ -1296,7 +1297,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         if !isProcessingMessages {
             processMessages()
         } else {
-            os_log("Queued conference msg, it is processed after the current one", log: Log.conferenceSDK, type: .debug)
+            sdkLog("Queued conference msg, it is processed after the current one", log: Log.conferenceSDK, type: .debug)
         }
     }
     
@@ -1320,7 +1321,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion < conference.version {
                 let cVersion = String(describing: eventConferenceVersion)
                 let ourVersion = String(describing: conference.version)
-                os_log("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
+                sdkLog("Discarding message because its conference version %@ < our conference version %@", log: Log.conferenceSDK, type: .debug, cVersion, ourVersion)
                 continue
             }
 
@@ -1333,14 +1334,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             if let eventConferenceVersion = msg.conferenceVersion, eventConferenceVersion == currentConference?.version {
                 currentConference?.version += 1
                 resyncAttempts = 0
-                os_log("Local conference version incremented to %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
+                sdkLog("Local conference version incremented to %@", log: Log.conferenceSDK, type: .debug, String(describing: currentConference?.version))
             }
         }
 
         if mqttMessages.isEmpty {
             cancelResync()
         } else if resyncWorkItem == nil {
-            os_log("Delaying %d conference msgs until conference version %@ arrives", log: Log.conferenceSDK, type: .debug, mqttMessages.count, String(describing: currentConference?.version))
+            sdkLog("Delaying %d conference msgs until conference version %@ arrives", log: Log.conferenceSDK, type: .debug, mqttMessages.count, String(describing: currentConference?.version))
             let workItem = DispatchWorkItem { [weak self] in
                 self?.resyncWorkItem = nil
                 self?.resyncConference()
@@ -1364,13 +1365,13 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
         resyncAttempts += force ? 0 : 1
         guard resyncAttempts <= maxResyncAttempts else {
-            os_log("Dropping %d conference msgs still waiting after %d conference state fetches", log: Log.conferenceSDK, type: .error, mqttMessages.count, maxResyncAttempts)
+            sdkLog("Dropping %d conference msgs still waiting after %d conference state fetches", log: Log.conferenceSDK, type: .error, mqttMessages.count, maxResyncAttempts)
             mqttMessages.removeAll()
             resyncAttempts = 0
             return
         }
 
-        os_log("Conference version %@ is missing, fetching the conference state", log: Log.conferenceSDK, type: .debug, String(describing: conference.version))
+        sdkLog("Conference version %@ is missing, fetching the conference state", log: Log.conferenceSDK, type: .debug, String(describing: conference.version))
         API2.sharedInstance.getConferenceSimpleView(conference.id, onSuccess: {(json) in
             guard let data = json, let current = self.currentConference, current.id == conference.id else {
                 return
@@ -1378,14 +1379,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             let fresh = ConferenceSimpleView(fromJson: data)
             if fresh.version > current.version {
                 let missed = self.missedMessages(until: fresh)
-                os_log("Conference state is at version %@, delegating %d missed msgs", log: Log.conferenceSDK, type: .debug, String(describing: fresh.version), missed.count)
+                sdkLog("Conference state is at version %@, delegating %d missed msgs", log: Log.conferenceSDK, type: .debug, String(describing: fresh.version), missed.count)
                 self.currentConference = fresh
                 missed.forEach { self.delegateConferenceMessage(msg: $0) }
             }
             //Processes the messages after the fetched version, or waits again
             self.processMessages()
         }, onFailure: {(error) in
-            os_log("Unable to fetch the conference state - error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("Unable to fetch the conference state - error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             //No such conference any more: we missed that it ended
             if case AuviousSDKError.httpError(let code) = error, code == 404,
                let current = self.currentConference, current.id == conference.id {
@@ -1517,7 +1518,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
             delegate?.auviousSDK(agentPortraitMode: object.portraitMode, endpointId: object.userEndpointId)
             
         default:
-            os_log("WARNING: Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
+            sdkLog("WARNING: Processing unknown message of type %@", log: Log.conferenceSDK, type: .debug, String(describing: msg.typeDescription))
         }
     }
     
@@ -1725,14 +1726,14 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
               let streamType = container.streamType else {
             return nil
         }
-        os_log("Recovering %{public}@ stream %{public}@ (%{public}@)", log: Log.conferenceSDK, type: .default,
+        sdkLog("Recovering %{public}@ stream %{public}@ (%{public}@)", log: Log.conferenceSDK, type: .default,
                isLocal ? "published" : "subscribed", streamId, streamType.rawValue)
 
         if isLocal {
             //Tell the backend, which may still list the lost stream
             let request = UnpublishStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: endpointId, userId: userId)
             API2.sharedInstance.unpublishStream(request, onSuccess: { _ in }, onFailure: { error in
-                os_log("Unpublishing the lost stream %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+                sdkLog("Unpublishing the lost stream %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
             })
 
             let newStreamId = UUID().uuidString
@@ -1754,7 +1755,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
         }
         let request = StopViewStreamRequest(conferenceId: conference.id, streamId: streamId, userEndpointId: remoteEndpointId, userId: remoteUserId, viewerId: endpointId)
         API2.sharedInstance.stopViewStream(request, onSuccess: { _ in }, onFailure: { error in
-            os_log("Stopping the lost view of %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
+            sdkLog("Stopping the lost view of %{public}@ failed - error %{public}@", log: Log.conferenceSDK, type: .default, streamId, error.localizedDescription)
         })
         _ = rtcClient.removeRemoteStreams(streamId: streamId)
         rtcClient.configureRemoteStream(type: streamType, streamId: streamId, endpointId: remoteEndpointId, userId: remoteUserId)
@@ -1788,7 +1789,7 @@ public final class AuviousConferenceSDK: MQTTConferenceDelegate, MQTTUserEventDe
     /// MQTT is back after a drop: catch up with the conference messages we missed meanwhile
     private func catchUpAfterReconnect() {
         guard currentConference != nil else { return }
-        os_log("MQTT reconnected, fetching the conference state", log: Log.conferenceSDK, type: .default)
+        sdkLog("MQTT reconnected, fetching the conference state", log: Log.conferenceSDK, type: .default)
         resyncConference(force: true)
     }
 
@@ -1935,7 +1936,7 @@ extension AuviousConferenceSDK {
         API2.sharedInstance.unpublishStream(request, onSuccess: { _ in
             completion?()
         }, onFailure: { error in
-            os_log("Co-browse unpublish screen failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("Co-browse unpublish screen failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             completion?()
         })
     }
@@ -1957,7 +1958,7 @@ extension AuviousConferenceSDK {
             MQTTModule2.sharedInstance.reconnect()
             onSuccess()
         }, onFailure: { _ in
-            os_log("Co-browse endpoint expired while in background, re-registering", log: Log.conferenceSDK, type: .debug)
+            sdkLog("Co-browse endpoint expired while in background, re-registering", log: Log.conferenceSDK, type: .debug)
             
             UserEndpointModule.sharedInstance.createEndpoint(newEndpointId: UUID().uuidString, userId: userId, onSuccess: { newEndpointId in
                 MQTTModule2.sharedInstance.configure(endpointId: newEndpointId)

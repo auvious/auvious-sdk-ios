@@ -428,7 +428,7 @@ internal final class CobrowseSessionController: NSObject {
         do {
             _ = try sdk.startPublishLocalStreamFlow(type: .screen)
         } catch {
-            os_log("Co-browse publish failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("Co-browse publish failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
             shareFailed()
             return
         }
@@ -508,7 +508,7 @@ internal final class CobrowseSessionController: NSObject {
         let event: [String: Any] = ["type": eventType, "timestamp": CobrowseSessionController.timestampFormatter.string(from: Date())]
         API2.sharedInstance.sendEvent(SendEventRequest(userId: agent.userId, userEndpointId: agent.endpointId, event: event), onSuccess: { _ in
         }, onFailure: { error in
-            os_log("Co-browse event %@ failed %@", log: Log.conferenceSDK, type: .error, eventType, error.localizedDescription)
+            sdkLog("Co-browse event %@ failed %@", log: Log.conferenceSDK, type: .error, eventType, error.localizedDescription)
         })
     }
 
@@ -541,7 +541,7 @@ internal final class CobrowseSessionController: NSObject {
 
     private func fail(with error: Error) {
         guard !isEnding else { return }
-        os_log("Co-browse failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+        sdkLog("Co-browse failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
         onFailure?(genericError(for: error))
         end(reason: .failed)
     }
@@ -622,7 +622,7 @@ internal final class CobrowseSessionController: NSObject {
 
     private func logout() {
         sdk.logout(onSuccess: {}, onFailure: { error in
-            os_log("Co-browse logout failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+            sdkLog("Co-browse logout failed %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
         })
     }
 
@@ -781,7 +781,7 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
 
         case .conferenceLeft?:
             if event.userEndpointId == agent?.endpointId {
-                os_log("Co-browse agent endpoint left", log: Log.conferenceSDK, type: .debug)
+                sdkLog("Co-browse agent endpoint left", log: Log.conferenceSDK, type: .debug)
             }
 
         default:
@@ -796,7 +796,7 @@ extension CobrowseSessionController: AuviousSDKConferenceDelegate {
     }
 
     func auviousSDK(onError error: AuviousSDKError) {
-        os_log("Co-browse SDK error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
+        sdkLog("Co-browse SDK error %@", log: Log.conferenceSDK, type: .error, error.localizedDescription)
 
         DispatchQueue.main.async { [weak self] in
             self?.sdkError(error)

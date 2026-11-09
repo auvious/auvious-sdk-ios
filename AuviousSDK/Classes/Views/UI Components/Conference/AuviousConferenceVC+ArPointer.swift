@@ -95,7 +95,7 @@ extension AuviousConferenceVCNew {
         }
 
         if let target = target {
-            os_log("AR pointer on %@ %@ (%@): %@", log: Log.conferenceUI, type: .debug, target.endpointId, target.streamType, target.correlationId,
+            sdkLog("AR pointer on %@ %@ (%@): %@", log: Log.conferenceUI, type: .debug, target.endpointId, target.streamType, target.correlationId,
                    arPointerTile != nil ? "tile" : (screenAnnotationOverlay != nil ? "screen overlay" : "target not shown yet"))
         }
 

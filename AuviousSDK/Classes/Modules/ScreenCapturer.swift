@@ -5,6 +5,7 @@
 //  Created by Jason Kritikos on 21/10/25.
 //
 
+import os
 import WebRTC
 import ReplayKit
 import AVFoundation
@@ -57,15 +58,15 @@ class ScreenCapturer: NSObject {
         let crumb = Breadcrumb(level: .info, category: "screen_share")
         crumb.message = "ReplayKit startCapture called"
         crumb.data = ["isAvailable": RPScreenRecorder.shared().isAvailable]
-        SentrySDK.addBreadcrumb(crumb)
+        AuviousDiagnostics.addBreadcrumb(crumb)
 
         var firstFrameReceived = false
 
         recorder.startCapture(handler: { [weak self] (sampleBuffer, sampleType, error) in
             guard let self = self else { return }
             if let error = error {
-                print("❌ ReplayKit error: \(error)")
-                SentrySDK.capture(error: error)
+                sdkLog("%@", log: Log.rtc, type: .error, "❌ ReplayKit error: \(error)")
+                AuviousDiagnostics.capture(error: error)
                 return
             }
 
@@ -87,7 +88,7 @@ class ScreenCapturer: NSObject {
                     "height": height,
                     "pixelFormat": String(format: "0x%08X", pixelFormat)
                 ]
-                SentrySDK.addBreadcrumb(frameCrumb)
+                AuviousDiagnostics.addBreadcrumb(frameCrumb)
             }
 
             var outputBuffer = pixelBuffer
@@ -106,12 +107,12 @@ class ScreenCapturer: NSObject {
         }, completionHandler: { [weak self] error in
             guard let self = self else { return }
             if let error = error {
-                print("❌ Failed to start ReplayKit capture: \(error)")
+                sdkLog("%@", log: Log.rtc, type: .error, "❌ Failed to start ReplayKit capture: \(error)")
                 let failCrumb = Breadcrumb(level: .error, category: "screen_share")
                 failCrumb.message = "ReplayKit startCapture failed"
                 failCrumb.data = ["error": error.localizedDescription]
-                SentrySDK.addBreadcrumb(failCrumb)
-                SentrySDK.capture(error: error)
+                AuviousDiagnostics.addBreadcrumb(failCrumb)
+                AuviousDiagnostics.capture(error: error)
                 if let completion = self.permissionCompletion {
                     self.permissionCompletion = nil
                     completion(false)
@@ -119,10 +120,10 @@ class ScreenCapturer: NSObject {
                     self.delegate?.onScreenSharingFailed()
                 }
             } else {
-                print("✅ ReplayKit screen capture started")
+                sdkLog("%@", log: Log.rtc, type: .debug, "✅ ReplayKit screen capture started")
                 let successCrumb = Breadcrumb(level: .info, category: "screen_share")
                 successCrumb.message = "ReplayKit startCapture succeeded"
-                SentrySDK.addBreadcrumb(successCrumb)
+                AuviousDiagnostics.addBreadcrumb(successCrumb)
                 if let completion = self.permissionCompletion {
                     self.permissionCompletion = nil
                     completion(true)
@@ -136,21 +137,21 @@ class ScreenCapturer: NSObject {
     func stop() {
         let crumb = Breadcrumb(level: .info, category: "screen_share")
         crumb.message = "ReplayKit stopCapture called"
-        SentrySDK.addBreadcrumb(crumb)
+        AuviousDiagnostics.addBreadcrumb(crumb)
 
         RPScreenRecorder.shared().stopCapture { error in
             if let error = error {
-                print("❌ Failed to stop screen capture: \(error)")
+                sdkLog("%@", log: Log.rtc, type: .error, "❌ Failed to stop screen capture: \(error)")
                 let failCrumb = Breadcrumb(level: .warning, category: "screen_share")
                 failCrumb.message = "ReplayKit stopCapture failed"
                 failCrumb.data = ["error": error.localizedDescription]
-                SentrySDK.addBreadcrumb(failCrumb)
+                AuviousDiagnostics.addBreadcrumb(failCrumb)
             } else {
                 self.delegate?.onScreenSharingStop()
-                print("🛑 Screen capture stopped")
+                sdkLog("%@", log: Log.rtc, type: .debug, "🛑 Screen capture stopped")
                 let stopCrumb = Breadcrumb(level: .info, category: "screen_share")
                 stopCrumb.message = "ReplayKit stopCapture succeeded"
-                SentrySDK.addBreadcrumb(stopCrumb)
+                AuviousDiagnostics.addBreadcrumb(stopCrumb)
             }
         }
     }

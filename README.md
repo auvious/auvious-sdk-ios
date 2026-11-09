@@ -294,6 +294,31 @@ Used when presenting `AuviousConferenceVCNew` for the built-in conference UI.
 
 ---
 
+### AuviousDiagnostics — Error Reporting & Logging
+
+Set these before using the SDK, e.g. in `application(_:didFinishLaunchingWithOptions:)`. Same settings as the Android SDK.
+
+```swift
+AuviousDiagnostics.errorReporting = .custom(dsn: "https://<key>@<your-sentry>/<project>") // .auvious (default), .disabled
+AuviousDiagnostics.logLevel = .minimal                                                  // .minimal (default), .full
+AuviousDiagnostics.consoleLogLevel = .error
+```
+
+| Property          | Type                     | Default    | Description                                                                                                                         |
+| ----------------- | ------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `errorReporting`  | `AuviousErrorReporting`  | `.auvious` | Where Sentry reports go: `.auvious`, `.custom(dsn:)` (your own Sentry) or `.disabled`.                                               |
+| `logLevel`        | `AuviousLogLevel`        | `.minimal` | What goes to Sentry. `.minimal`: crashes in the SDK, with its error logs as breadcrumbs. `.full`: also the SDK's errors as events and all its logs as breadcrumbs. |
+| `consoleLogLevel` | `AuviousConsoleLogLevel` | `.warning` | SDK console logs at this level or above: `.none`, `.error`, `.warning`, `.info`, `.debug`.                                           |
+
+Only crashes with a frame in the SDK's code (AuviousSDK, WebRTC) are reported, not the rest of the app's crashes. Reporting
+starts when the SDK is first used; a crash is sent the next time the app uses the SDK.
+
+If your app uses Sentry, start it before using the SDK. The SDK then leaves your Sentry as it is, sends its reports through a
+client of its own and catches no crashes. Otherwise the SDK starts Sentry itself to catch crashes, with everything else of
+Sentry's (sessions, app hangs, network and UI tracking) off.
+
+---
+
 ### Enumerations
 
 #### AuviousCallMode
@@ -399,6 +424,8 @@ also builds the TestHost app and runs the [tests](#tests) on a simulator.
 
 ### 1.5.0
 
+- Feature / `AuviousDiagnostics`: Sentry reporting like the Android SDK (`errorReporting`, `logLevel`), only crashes in the SDK's code; `consoleLogLevel` for the SDK's console logs (default `.warning`)
+- Example / ExampleSimpleConference no longer starts Sentry itself
 - Update / WebRTC M155 (AuviousGoogleWebRTC 155.8059.3). Unified Plan: streams are published as tracks, remote streams arrive through the receivers
 - Update / iOS 15 minimum (Xcode 27 rejects lower deployment targets)
 - Update / video views are Metal (RTCMTLVideoView) only, also on simulators

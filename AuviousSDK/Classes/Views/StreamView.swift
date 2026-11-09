@@ -521,7 +521,7 @@ public class StreamView: UIView, RTCVideoViewDelegate, ZoomableUIView {
             self.layoutIfNeeded()
         //})
         
-        os_log("handleOverlay() for state %@", log: Log.conferenceUI, type: .debug, overlayState.description)
+        sdkLog("handleOverlay() for state %@", log: Log.conferenceUI, type: .debug, overlayState.description)
     }
     
     public func audioStreamAdded(){

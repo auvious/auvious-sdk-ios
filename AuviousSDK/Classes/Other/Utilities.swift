@@ -23,7 +23,7 @@ internal final class Utilities {
         }
     }
     
-    private static func getDeviceModel() -> String {
+    static func getDeviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
         return withUnsafePointer(to: &systemInfo.machine) {

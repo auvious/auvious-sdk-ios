@@ -109,7 +109,7 @@ internal final class StreamRecoveryManager {
             entry.gaveUp = false
             if entry.recovering {
                 entry.recovering = false
-                os_log("Stream %{public}@ recovered", log: Log.conferenceSDK, type: .default, streamId)
+                sdkLog("Stream %{public}@ recovered", log: Log.conferenceSDK, type: .default, streamId)
                 stateChanged(entry.endpointId, entry.isLocal, nil)
             }
         case .disconnected:
@@ -118,7 +118,7 @@ internal final class StreamRecoveryManager {
             let work = DispatchWorkItem { [weak self] in
                 guard let self = self, let entry = self.entries[streamId] else { return }
                 entry.graceWork = nil
-                os_log("Stream %{public}@ still disconnected after %.0fs", log: Log.conferenceSDK, type: .default, streamId, self.disconnectGrace)
+                sdkLog("Stream %{public}@ still disconnected after %.0fs", log: Log.conferenceSDK, type: .default, streamId, self.disconnectGrace)
                 self.startRecovery(streamId, entry)
             }
             entry.graceWork = work
@@ -142,7 +142,7 @@ internal final class StreamRecoveryManager {
         entry.cancelTimers()
         entry.failures += 1
         guard entry.failures < failureLimit else {
-            os_log("Gave up on stream %{public}@ after %d failures in a row", log: Log.conferenceSDK, type: .error, streamId, entry.failures)
+            sdkLog("Gave up on stream %{public}@ after %d failures in a row", log: Log.conferenceSDK, type: .error, streamId, entry.failures)
             entry.gaveUp = true
             stateChanged(entry.endpointId, entry.isLocal, .failed)
             return
@@ -161,7 +161,7 @@ internal final class StreamRecoveryManager {
         guard available else { return }
         for (streamId, entry) in entries where entry.waitingForNetwork || entry.gaveUp {
             if entry.gaveUp {
-                os_log("Network changed, trying stream %{public}@ again", log: Log.conferenceSDK, type: .default, streamId)
+                sdkLog("Network changed, trying stream %{public}@ again", log: Log.conferenceSDK, type: .default, streamId)
                 entry.gaveUp = false
                 entry.failures = 0
                 stateChanged(entry.endpointId, entry.isLocal, .reconnecting)
@@ -200,15 +200,15 @@ internal final class StreamRecoveryManager {
     private func attempt(_ streamId: String) {
         guard let entry = entries[streamId], entry.recovering, !entry.gaveUp else { return }
         guard networkAvailable else {
-            os_log("Waiting for the network to recover stream %{public}@", log: Log.conferenceSDK, type: .default, streamId)
+            sdkLog("Waiting for the network to recover stream %{public}@", log: Log.conferenceSDK, type: .default, streamId)
             entry.waitingForNetwork = true
             return
         }
 
-        os_log("Rebuilding the connection of %{public}@ stream %{public}@ (failures in a row: %d)", log: Log.conferenceSDK, type: .default,
+        sdkLog("Rebuilding the connection of %{public}@ stream %{public}@ (failures in a row: %d)", log: Log.conferenceSDK, type: .default,
                entry.isLocal ? "published" : "subscribed", streamId, entry.failures)
         guard let newStreamId = recover(streamId, entry.isLocal) else {
-            os_log("Stream %{public}@ no longer exists, nothing to recover", log: Log.conferenceSDK, type: .default, streamId)
+            sdkLog("Stream %{public}@ no longer exists, nothing to recover", log: Log.conferenceSDK, type: .default, streamId)
             forget(streamId)
             return
         }
@@ -221,7 +221,7 @@ internal final class StreamRecoveryManager {
 
         //The new connection reports its own ICE state; one that never gets anywhere is tried again
         let work = DispatchWorkItem { [weak self] in
-            os_log("Stream %{public}@ did not connect in time", log: Log.conferenceSDK, type: .default, newStreamId)
+            sdkLog("Stream %{public}@ did not connect in time", log: Log.conferenceSDK, type: .default, newStreamId)
             self?.attemptFailed(newStreamId)
         }
         entry.attemptWork = work

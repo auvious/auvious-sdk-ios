@@ -253,7 +253,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         }
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
-        os_log("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
+        sdkLog("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
     }
     
     //Public constructor
@@ -287,7 +287,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
-        os_log("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
+        sdkLog("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
     }
     
     //Public constructor
@@ -311,7 +311,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         
         super.init(nibName: nil, bundle: Bundle(for: AuviousConferenceVC.self))
         
-        os_log("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
+        sdkLog("UI Conference component: initialised", log: Log.conferenceUI, type: .debug)
     }
     
     required init?(coder: NSCoder) {
@@ -696,27 +696,27 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         if !performedInitialValidations {
             //Check for permissions
             if !validateVideoPermissions() {
-                os_log("No video permission, returning error", log: Log.conferenceUI, type: .debug)
+                sdkLog("No video permission, returning error", log: Log.conferenceUI, type: .debug)
                 handleError(AuviousSDKError.videoPermissionIsDisabled)
                 return
             }
             
             if !validateMicPermissions() {
-                os_log("No audio permission, returning error", log: Log.conferenceUI, type: .debug)
+                sdkLog("No audio permission, returning error", log: Log.conferenceUI, type: .debug)
                 handleError(AuviousSDKError.audioPermissionIsDisabled)
                 return
             }
             
             //Check credentials
             if username.isEmpty || clientId.isEmpty {
-                os_log("Username/password/clientId empty, returning error", log: Log.conferenceUI, type: .debug)
+                sdkLog("Username/password/clientId empty, returning error", log: Log.conferenceUI, type: .debug)
                 handleError(AuviousSDKError.missingSDKCredentials)
                 return
             }
             
             //Check call target
 //            if conference.isEmpty {
-//                os_log("Conference is empty, returning error", log: Log.conferenceUI, type: .debug)
+//                sdkLog("Conference is empty, returning error", log: Log.conferenceUI, type: .debug)
 //                handleError(AuviousSDKError.missingCallTarget)
 //                return
 //            }
@@ -730,10 +730,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             listenForArPointer()
             AuviousConferenceSDK.sharedInstance.configure(params: params, username: username, password: password, name: participantName, clientId: clientId, baseEndpoint: baseEndpoint, mqttEndpoint: mqttEndpoint)
             AuviousConferenceSDK.sharedInstance.setUIConfiguration(config: clientConfiguration)
-            os_log("Configured ConferenceSDK", log: Log.conferenceUI, type: .debug)
+            sdkLog("Configured ConferenceSDK", log: Log.conferenceUI, type: .debug)
             
             AuviousConferenceSDK.sharedInstance.login(onLoginSuccess: {(userId, conferenceId) in
-                os_log("Login success", log: Log.conferenceUI, type: .debug)
+                sdkLog("Login success", log: Log.conferenceUI, type: .debug)
                 
                 if let conference = conferenceId {
                     self.conference = conference
@@ -742,7 +742,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 AuviousConferenceSDK.sharedInstance.joinConference(conferenceId: self.conference, onSuccess: {(joinedConference) in
                     
                     if let jConference = joinedConference {
-                        os_log("Joined conference with id %@", log: Log.conferenceUI, type: .debug, String(describing: jConference.id))
+                        sdkLog("Joined conference with id %@", log: Log.conferenceUI, type: .debug, String(describing: jConference.id))
                         self.currentConference = jConference
                         self.conferenceJoined = true
                         self.arPointerConferenceJoined()
@@ -769,7 +769,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             self.auviousSDK(conferenceOnHold: true)
                         }
                     } else {
-                        os_log("Unable to join conference", log: Log.conferenceUI, type: .error)
+                        sdkLog("Unable to join conference", log: Log.conferenceUI, type: .error)
                     }
                 }, onFailure: {(error) in
                     self.handleError(error)
@@ -784,10 +784,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         guard isLeavingCall else {
-            os_log("viewDidDisappear while co-browsing, the call goes on", log: Log.conferenceUI, type: .debug)
+            sdkLog("viewDidDisappear while co-browsing, the call goes on", log: Log.conferenceUI, type: .debug)
             return
         }
-        os_log("viewDidDisappear, leaving the call", log: Log.conferenceUI, type: .debug)
+        sdkLog("viewDidDisappear, leaving the call", log: Log.conferenceUI, type: .debug)
         endCobrowseWithCall(.customerEnded)
 
         AuviousConferenceSDK.sharedInstance.logout(onSuccess: {
@@ -822,7 +822,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         do {
             localStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: configuredStreamType)
         } catch let error {
-            os_log("startPublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+            sdkLog("startPublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
         }
     }
@@ -832,7 +832,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
         do {
             try AuviousConferenceSDK.sharedInstance.startUnpublishLocalStreamFlow(streamId: streamId, streamType: localStreamType ?? configuredStreamType)
         } catch let error {
-            os_log("startUnpublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+            sdkLog("startUnpublishLocalStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         }
         configuredStreamType = .micAndCam
         startLocalStream()
@@ -859,7 +859,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                             }
                             try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: stream.id, endpointId: endpointStream.id, streamType: stream.type, remoteUserId: user.id)
                         } catch let error {
-                            os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                            sdkLog("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                             
                             if !initialStreamsConnected {
                                 serviceGroup.leave()
@@ -902,7 +902,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     private func handleError(_ error: Error) {
         let auviousError = error as! AuviousSDKError
-        os_log("Handle error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+        sdkLog("Handle error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
         
         switch auviousError {
         case .videoPermissionIsDisabled:
@@ -1235,10 +1235,10 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 portraitModeEndpoints.insert(endpointId)
             }
             do {
-                os_log("Starting remote stream flow for type %@", log: Log.conferenceUI, type: .debug, object.streamType.rawValue)
+                sdkLog("Starting remote stream flow for type %@", log: Log.conferenceUI, type: .debug, object.streamType.rawValue)
                 try AuviousConferenceSDK.sharedInstance.startRemoteStreamFlow(streamId: object.streamId, endpointId: object.userEndpointId, streamType: object.streamType, remoteUserId: object.userId)
             } catch let error {
-                os_log("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                sdkLog("startRemoteStreamFlow error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 handleError(error)
             }
         } else if event is ConferenceStreamUnpublishedEvent {
@@ -1247,7 +1247,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             do {
                 try AuviousConferenceSDK.sharedInstance.stopRemoteStream(streamId: object.streamId, remoteUserId: object.userId, remoteEndpointId: object.userEndpointId, streamType: object.streamType)
             } catch let error {
-                os_log("stopRemoteStream error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                sdkLog("stopRemoteStream error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                 handleError(error)
             }
         }
@@ -1330,7 +1330,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                         }
                     }
                     
-                    os_log("Remote stream added", log: Log.conferenceUI, type: .debug)
+                    sdkLog("Remote stream added", log: Log.conferenceUI, type: .debug)
                 
                 } else if stream.audioTracks.count > 0 {
                     remoteView.audioStreamAdded()
@@ -1431,27 +1431,27 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     public func auviousSDK(didChangeState newState: StreamEventState, streamId: String, streamType: StreamType, endpointId: String) {
         switch newState {
         case .localStreamIsConnecting:
-            os_log("Local Stream Is Connecting", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Stream Is Connecting", log: Log.conferenceUI, type: .debug)
         case .localStreamConnected:
-            os_log("Local Stream Connected", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Stream Connected", log: Log.conferenceUI, type: .debug)
         case .remoteStreamIsConnecting:
-            os_log("Remote Stream Is Connecting", log: Log.conferenceUI, type: .debug)
+            sdkLog("Remote Stream Is Connecting", log: Log.conferenceUI, type: .debug)
         case .remoteStreamConnected:
-            os_log("Remote Stream Connected", log: Log.conferenceUI, type: .debug)
+            sdkLog("Remote Stream Connected", log: Log.conferenceUI, type: .debug)
             let _ = AuviousConferenceSDK.sharedInstance.changeAudioRoot(toSpeaker: prefersSpeaker)
         case .localStreamIsDisconnecting:
-            os_log("Local Stream Is Disonnecting", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Stream Is Disonnecting", log: Log.conferenceUI, type: .debug)
         case .localStreamDisconnected:
-            os_log("Local Stream Disconnected", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Stream Disconnected", log: Log.conferenceUI, type: .debug)
         case .remoteStreamIsDisconnecting:
-            os_log("Remote Stream Is Disonnecting", log: Log.conferenceUI, type: .debug)
+            sdkLog("Remote Stream Is Disonnecting", log: Log.conferenceUI, type: .debug)
         case .remoteStreamDisconnected:
-            os_log("Remote Stream Disconnected", log: Log.conferenceUI, type: .debug)
+            sdkLog("Remote Stream Disconnected", log: Log.conferenceUI, type: .debug)
             handleStreamDisconnection(streamId: streamId, streamType:streamType, endpointId: endpointId)
         case .localCaptureStarted:
-            os_log("Local Capture Started", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Capture Started", log: Log.conferenceUI, type: .debug)
         case .localCaptureStoped:
-            os_log("Local Capture Stoped", log: Log.conferenceUI, type: .debug)
+            sdkLog("Local Capture Stoped", log: Log.conferenceUI, type: .debug)
         }
     }
     
@@ -1486,7 +1486,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
     
     public func auviousSDK(recorderStateChanged toActive: Bool) {
         // show a notification
-        os_log("recorder state changed", log: Log.conferenceUI, type: .debug )
+        sdkLog("recorder state changed", log: Log.conferenceUI, type: .debug )
         
         showNotification(
             with: NSLocalizedString("Recording", comment: "Notification"),
@@ -1813,7 +1813,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
 
         //PIP mode
         if screenMode == .pip {
-            os_log("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            sdkLog("PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(true)
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
@@ -1831,7 +1831,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
                 constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
             }
         } else if screenMode == .expandedPip {
-            os_log("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
+            sdkLog("Expanded PIP screen share mode entered", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(true)
             stopScreenSharingButton.alpha = 0
             buttonContainerView.alpha = 0
@@ -1864,7 +1864,7 @@ public class AuviousConferenceVCNew: UIViewController, AuviousSDKConferenceDeleg
             constraints.append(agentView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0))
             constraints.append(agentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0))
         } else {
-            os_log("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
+            sdkLog("PIP screen share mode exited", log: Log.conferenceUI, type: .info)
             blurredOverlayView?.configurePiP(false)
             pipMaximiseButton.alpha = 0
             pipBottomBar.alpha = 0
@@ -2054,7 +2054,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
             }
             
         } catch let error {
-            os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+            sdkLog("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
             handleError(error)
         }
     }
@@ -2085,7 +2085,7 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
                 do {
                     self.localScreenShareStreamId = try AuviousConferenceSDK.sharedInstance.startPublishLocalStreamFlow(type: .screen)
                 } catch let error {
-                    os_log("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
+                    sdkLog("startPublishLocalStreamFlow screen share error %@", log: Log.conferenceUI, type: .error, error.localizedDescription)
                     self.handleError(error)
                 }
             }
@@ -2150,13 +2150,13 @@ extension AuviousConferenceVCNew: ConferenceButtonBarDelegate {
     
     //Terminates the conference
     @objc internal func hangupButtonPressed(_ sender: Any) {
-        os_log("hangupButtonPressed", log: Log.conferenceUI, type: .debug)
+        sdkLog("hangupButtonPressed", log: Log.conferenceUI, type: .debug)
         selectionFeedbackGenerator.impactOccurred()
         endCobrowseWithCall(.customerEnded)
         tearDownArPointer()
         
         AuviousConferenceSDK.sharedInstance.leaveConference(conferenceId: currentConference.id, onSuccess: {
-            os_log("Left conference", log: Log.conferenceUI, type: .debug)
+            sdkLog("Left conference", log: Log.conferenceUI, type: .debug)
             self.delegate?.onConferenceSuccess()
 
         }, onFailure: {(error) in

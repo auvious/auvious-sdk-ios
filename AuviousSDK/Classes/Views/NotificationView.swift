@@ -182,7 +182,7 @@ internal class AuviousNotification {
     //Displays the given notification
     func show(_ type: NotificationType) {
         guard let presenter = presenter else {
-            os_log("WARNING, notification skipped", log: Log.conferenceUI, type: .debug)
+            sdkLog("WARNING, notification skipped", log: Log.conferenceUI, type: .debug)
             return
         }
         
@@ -220,7 +220,7 @@ internal class AuviousNotification {
     
     private func updateNotification(newType: NotificationType) {
         guard isPresenting else {
-            os_log("WARNING, AuviousNotification.updateNotification() skipped", log: Log.conferenceUI, type: .debug)
+            sdkLog("WARNING, AuviousNotification.updateNotification() skipped", log: Log.conferenceUI, type: .debug)
             return
         }
         

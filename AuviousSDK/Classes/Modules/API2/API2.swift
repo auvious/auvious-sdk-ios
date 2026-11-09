@@ -98,7 +98,7 @@ internal final class API2 {
         
         self.isRefreshing = true
         self.refreshAuthToken(refreshToken, onSuccess: { (json) -> () in
-            print("REFRESHED TOKEN!")
+            sdkLog("%@", log: Log.api, type: .debug, "REFRESHED TOKEN!")
             self.isRefreshing = false
             self.refreshTokenAttempts = 0
             
@@ -146,7 +146,7 @@ internal final class API2 {
         
         do {
             let request = try transaction.request.asURLRequest()
-            print("FIRING REQUEST \(request.debugDescription)")
+            sdkLog("%@", log: Log.api, type: .debug, "FIRING REQUEST \(request.debugDescription)")
             let task = session.dataTask(with: request) { (data, response, error) in
                 var responseCode = 0
                 if let httpResponse = response as? HTTPURLResponse {
@@ -189,7 +189,7 @@ internal final class API2 {
 //                }
                 
 //                if response.error != nil {
-//                    os_log("response error: %@", log: Log.api, type: .error, String(describing: response.error))
+//                    sdkLog("response error: %@", log: Log.api, type: .error, String(describing: response.error))
 //                }
                 
                 DispatchQueue.main.async {
@@ -202,7 +202,7 @@ internal final class API2 {
                         
                         do {
                             let jsonResponse = try JSON(data: responseData)
-                            print("RESPONSE SUCCESS \(jsonResponse)")
+                            sdkLog("%@", log: Log.api, type: .debug, "RESPONSE SUCCESS \(jsonResponse)")
                             
                             transaction.onSuccess(jsonResponse)
                             return
@@ -224,7 +224,7 @@ internal final class API2 {
             task.resume()
             
         } catch let error {
-            print("API2 INVALID URLREQUEST")
+            sdkLog("%@", log: Log.api, type: .error, "API2 INVALID URLREQUEST")
         }
     }
     
